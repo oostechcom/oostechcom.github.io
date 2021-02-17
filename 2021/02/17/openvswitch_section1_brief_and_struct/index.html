@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>openvswitch 系列第一篇 简介及基本数据结构 | oosTech.com</title>
+  <meta name="description" content="openvswitch 系列第一篇 简介及基本数据结构 1. openvswitch1.1 基本描述datapath为ovs内核模块，负责执行数据交换，也就是把从接收端口收到的数据包在流表中进行匹配，并执行匹配到的动作。内核中可以实现多个datapath(可以理解为桥,就是我们用ovs-vsctl看到的br0&#x2F;br1之类), 一个datapath类似一个物理交换机,它可以对应多个vport(vpo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openvswitch 系列第一篇 简介及基本数据结构">
+<meta property="og:url" content="http://www.oostech.com/2021/02/17/openvswitch_section1_brief_and_struct/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="openvswitch 系列第一篇 简介及基本数据结构 1. openvswitch1.1 基本描述datapath为ovs内核模块，负责执行数据交换，也就是把从接收端口收到的数据包在流表中进行匹配，并执行匹配到的动作。内核中可以实现多个datapath(可以理解为桥,就是我们用ovs-vsctl看到的br0&#x2F;br1之类), 一个datapath类似一个物理交换机,它可以对应多个vport(vpo">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-17T06:39:54.478Z">
+<meta property="article:modified_time" content="2021-02-17T06:39:54.499Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/17/openvswitch_section1_brief_and_struct/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ， 我是一个Linux 拥趸。 当前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3；  内核版本是 4.18.0-240.10.1.el8_3.x86_64</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">网络 OVS 系列 （原创）</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/oom%20out_of_memory%20implementatoin_CHN/" class="title">oom &#34;out_of_memory&#34; implementatoin 介绍.</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T07:06:22.705Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/audit_simple_rules/" class="title">Linux Audit 的使用规则 （可以把这些规则加入到audit.rules里面）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T07:01:31.545Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/ansible_playbook_related/" class="title">ansible的playbook 常用的模块例子</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:56:59.015Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/X86_MASN_instructions/" class="title">X86 汇编指令大全</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:43:20.094Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/simple-linux-code-to-show-the-file-metadata/" class="title">Linux 使用小代码，基于stat 来显示文件的metadata</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:43:04.675Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-openvswitch"><span class="toc-number">1.</span> <span class="toc-text">1. openvswitch</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%9F%BA%E6%9C%AC%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 基本描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-openvswitch-%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 openvswitch 内核模块示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E9%80%9A%E8%BF%87openvswitch%E5%AE%9E%E7%8E%B0%E7%9A%84bridge%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 通过openvswitch实现的bridge示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E9%80%9A%E8%BF%87openvswitch%E5%AE%9E%E7%8E%B0%E7%9A%84bridge%E9%87%8C%E9%9D%A2%E7%9A%84voprt%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 通过openvswitch实现的bridge里面的voprt示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-%E9%80%9A%E8%BF%87openvswitch%E5%AE%9E%E7%8E%B0%E7%9A%84bridge%E5%92%8Cvport%E7%9A%84%E6%95%B4%E4%BD%93%E6%A6%82%E8%A7%88"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 通过openvswitch实现的bridge和vport的整体概览.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-6-%E6%B5%81%E8%A1%A8%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.6.</span> <span class="toc-text">1.6 流表示例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E7%9B%B8%E5%AF%B9%E5%BA%94%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">2. 相对应的结构体示例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-datapath%E7%9A%84%E4%BB%A3%E7%A0%81%E6%8F%8F%E8%BF%B0-datapath-%E7%B1%BB%E4%BC%BC%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF-%E5%85%B6%E5%AE%9E%E6%98%AFbridge%E7%9A%84%E6%8A%BD%E8%B1%A1"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 datapath的代码描述 (datapath 类似数据通路,其实是bridge的抽象)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-vport%E7%9A%84%E4%BB%A3%E7%A0%81%E6%8F%8F%E8%BF%B0"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 vport的代码描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E6%B5%81%E8%A1%A8flow-table-%E6%9C%89%E4%BA%94%E9%83%A8%E5%88%86%E7%BB%84%E6%88%90-%E4%B8%80%E4%B8%AA%E6%98%AF%E6%B5%81%E8%A1%A8-%E5%8F%A6%E5%A4%96%E6%98%AF%E6%B5%81%E8%A1%A8%E7%9A%84%E5%AE%9E%E4%BE%8B-%E6%B5%81%E8%A1%A8%E7%9A%84%E5%86%85%E5%AE%B9-%E6%B5%81%E8%A1%A8%E7%9A%84key%E5%80%BC-%E6%B5%81%E8%A1%A8%E6%93%8D%E4%BD%9C%E9%9B%86%E5%92%8C"><span class="toc-number">2.3.</span> <span class="toc-text">2.3  流表flow_table (有五部分组成,一个是流表,另外是流表的实例,流表的内容,流表的key值,流表操作集和)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E6%B5%81%E8%A1%A8"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.3.1 流表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E6%B5%81%E8%A1%A8%E7%9A%84%E5%85%B7%E4%BD%93%E5%AE%9E%E4%BE%8B"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.3.2 流表的具体实例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E6%B5%81%E8%A1%A8%E9%87%8C%E9%9D%A2%E6%89%80%E5%85%B7%E4%BD%93%E4%BF%9D%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9"><span class="toc-number">2.3.3.</span> <span class="toc-text">2.3.3 流表里面所具体保存的内容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-4-%E6%B5%81%E8%A1%A8%E4%B8%AD%E7%9A%84key%E5%80%BC%EF%BC%8C%E4%B8%BB%E8%A6%81%E6%98%AF%E4%BF%9D%E5%AD%98%E6%95%B0%E6%8D%AE%E5%8C%85%E4%B8%AD%E5%8D%8F%E8%AE%AE%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%EF%BC%8C%E8%BF%99%E6%98%AF%E6%8A%A5%E6%96%87%E8%A6%81%E8%BF%9B%E8%A1%8C%E6%B5%81%E8%A1%A8%E5%8C%B9%E9%85%8D%E7%9A%84%E5%85%B3%E9%94%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.4.</span> <span class="toc-text">2.3.4 流表中的key值，主要是保存数据包中协议相关信息，这是报文要进行流表匹配的关键结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-5-%E6%B5%81%E8%A1%A8%E9%A1%B9%E6%93%8D%E4%BD%9C-%E4%B9%9F%E5%B0%B1%E6%98%AF%E8%83%BD%E5%AF%B9%E6%B5%81%E8%A1%A8%E5%81%9A%E4%BA%9B%E4%BB%80%E4%B9%88%E6%93%8D%E4%BD%9C"><span class="toc-number">2.3.5.</span> <span class="toc-text">2.3.5 流表项操作, 也就是能对流表做些什么操作.</span></a></li></ol></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-openvswitch_section1_brief_and_struct" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      openvswitch 系列第一篇 简介及基本数据结构
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/17/openvswitch_section1_brief_and_struct/" class="article-date">
+	  <time datetime="2021-02-17T06:39:54.478Z" itemprop="datePublished">2021-02-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">网络 OVS 系列 （原创）</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/17/openvswitch_section1_brief_and_struct/#comments" class="article-comment-link">评论</a></span>
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>openvswitch 系列第一篇 简介及基本数据结构</p>
+<h1 id="1-openvswitch"><a href="#1-openvswitch" class="headerlink" title="1. openvswitch"></a>1. openvswitch</h1><h2 id="1-1-基本描述"><a href="#1-1-基本描述" class="headerlink" title="1.1 基本描述"></a>1.1 基本描述</h2><p>datapath为ovs内核模块，负责执行数据交换，也就是把从接收端口收到的数据包在流表中进行匹配，并执行匹配到的动作。内核中可以实现多个datapath(可以理解为桥,就是我们用ovs-vsctl看到的br0/br1之类), 一个datapath类似一个物理交换机,它可以对应多个vport(vport类似物理交换机的端口概念)。一个datapth关联一个flow table，一个flow table包含多个条目，每个条目包括两个内容：一个是flow的 match/key; 另一个是对应的action. 最常见的action是在不同vport中进行转发。</p>
+<p>当一个数据报到达vport, 内核首先将它的flow key解析出来,之后在内核模块datapath的flow cache (大小为(sizeof(struct sw_flow)+ (nr_cpu_ids * sizeof(struct flow_stats <em>) = ( 1248 + 6</em>8 )=1296, 根据系统实际的CUP的数量多少会稍有不同)中的flow table中查找. 如果找到匹配的flow 规则,则去执行对应的action. 如果没有找到匹配的flow规则,则将数据报通过netlink的方式发送到用户空间的ovs-vswitchd处理,而用户空间的流表空间(65536)大的多,所以匹配到的几率也更高,通过在用户空间查找,并执行对应的action;如果找到,会通过netlink把用户空间的流表推送到datapath的flow cache中,后续的报文就可以直接在内核态处理.如果最后还是没有找到,那就使用默认的流表规则(丢掉这个包,或者其他).</p>
+<p>用户空间有两个进程组成：ovs-vswitchd和ovsdb-server。<br>ovsdb-server保存了ovs-vswitchd的配置信息，ovsdb通常是一个文件, 并且保存在文件系统中，通常来说是/etc/openvswitch/conf.db<br>ovs-vswitchd是一个daemon，北向与Controller通过OpenFlow协议通信.南向与openvswitch内核模块通过netlink通信.东西向过OVSDB协议与ovsdb-server通信.</p>
+<h2 id="1-2-openvswitch-内核模块示例"><a href="#1-2-openvswitch-内核模块示例" class="headerlink" title="1.2 openvswitch 内核模块示例"></a>1.2 openvswitch 内核模块示例</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># lsmod |grep openvswitch</span><br><span class="line">openvswitch           114793  3</span><br><span class="line">nf_nat_ipv6            14131  1 openvswitch</span><br><span class="line">nf_defrag_ipv6         35104  2 openvswitch,nf_conntrack_ipv6</span><br><span class="line">nf_nat_ipv4            14115  2 openvswitch,iptable_nat</span><br><span class="line">nf_nat                 26787  4 openvswitch,nf_nat_ipv4,nf_nat_ipv6,nf_nat_masquerade_ipv4</span><br><span class="line">nf_conntrack          133095  8 openvswitch,nf_nat,nf_nat_ipv4,nf_nat_ipv6,xt_conntrack,nf_nat_masquerade_ipv4,nf_conntrack_ipv4,nf_conntrack_ipv6</span><br><span class="line">libcrc32c              12644  4 xfs,openvswitch,nf_nat,nf_conntrack</span><br></pre></td></tr></table></figure>
+<h2 id="1-3-通过openvswitch实现的bridge示例"><a href="#1-3-通过openvswitch实现的bridge示例" class="headerlink" title="1.3 通过openvswitch实现的bridge示例"></a>1.3 通过openvswitch实现的bridge示例</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># ovs-vsctl list-br</span><br><span class="line">br0</span><br></pre></td></tr></table></figure>
+<h2 id="1-4-通过openvswitch实现的bridge里面的voprt示例"><a href="#1-4-通过openvswitch实现的bridge里面的voprt示例" class="headerlink" title="1.4 通过openvswitch实现的bridge里面的voprt示例"></a>1.4 通过openvswitch实现的bridge里面的voprt示例</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># ovs-vsctl list-ports br0</span><br><span class="line">vport1</span><br><span class="line">vport2</span><br></pre></td></tr></table></figure>
+<h2 id="1-5-通过openvswitch实现的bridge和vport的整体概览"><a href="#1-5-通过openvswitch实现的bridge和vport的整体概览" class="headerlink" title="1.5 通过openvswitch实现的bridge和vport的整体概览."></a>1.5 通过openvswitch实现的bridge和vport的整体概览.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># ovs-vsctl show</span><br><span class="line">173a48d6-dbd3-420d-9433-384c437451a8</span><br><span class="line">    Bridge &quot;br0&quot;</span><br><span class="line">        fail_mode: secure</span><br><span class="line">        Port &quot;br0&quot;</span><br><span class="line">            Interface &quot;br0&quot;</span><br><span class="line">                type: internal</span><br><span class="line">        Port &quot;vport1&quot;</span><br><span class="line">            Interface &quot;vport1&quot;</span><br><span class="line">                type: internal</span><br><span class="line">        Port &quot;vport2&quot;</span><br><span class="line">            Interface &quot;vport2&quot;</span><br><span class="line">                type: internal</span><br><span class="line">    ovs_version: &quot;2.0.0&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="1-6-流表示例"><a href="#1-6-流表示例" class="headerlink" title="1.6 流表示例"></a>1.6 流表示例</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># ovs-ofctl dump-flows br0</span><br><span class="line">NXST_FLOW reply (xid&#x3D;0x4):</span><br><span class="line"> cookie&#x3D;0x0, duration&#x3D;24.784s, table&#x3D;0, n_packets&#x3D;0, n_bytes&#x3D;0, idle_age&#x3D;24, ip,nw_src&#x3D;200.200.200.0 actions&#x3D;drop</span><br></pre></td></tr></table></figure>
+<h1 id="2-相对应的结构体示例"><a href="#2-相对应的结构体示例" class="headerlink" title="2. 相对应的结构体示例"></a>2. 相对应的结构体示例</h1><h2 id="2-1-datapath的代码描述-datapath-类似数据通路-其实是bridge的抽象"><a href="#2-1-datapath的代码描述-datapath-类似数据通路-其实是bridge的抽象" class="headerlink" title="2.1 datapath的代码描述 (datapath 类似数据通路,其实是bridge的抽象)"></a>2.1 datapath的代码描述 (datapath 类似数据通路,其实是bridge的抽象)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">struct datapath &#123;</span><br><span class="line">	struct rcu_head rcu; &#x2F;&#x2F; RCU回调, 用来负责推迟延迟销毁datapath</span><br><span class="line">	struct list_head list_node; &#x2F;&#x2F; datapath链表,主要用来把datapath连接起来.</span><br><span class="line">	struct flow_table table; &#x2F;&#x2F; datapath里面的流表</span><br><span class="line">	struct hlist_head *ports; &#x2F;&#x2F; datapath里面的Switch ports. 是以哈希表的形式表示.  %OVSP_LOCAL 这个端口一直在datapath建立的时候就存在. 用 ovs_mutex 和 RCU 来进行锁保护.</span><br><span class="line">	struct dp_stats_percpu __percpu *stats_percpu; &#x2F;&#x2F; Pre-CPU的datapath状态信息</span><br><span class="line">	possible_net_t net; &#x2F;&#x2F; datapat的网络命名空间的引用.</span><br><span class="line">	u32 user_features; &#x2F;&#x2F; datapath用户所具有的能力.</span><br><span class="line">	u32 max_headroom; &#x2F;&#x2F;留给datapath里面的所有vports使用的最大headroom.</span><br><span class="line">  struct hlist_head *meters; &#x2F;&#x2F; datapath的meters, 参数之类.</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="2-2-vport的代码描述"><a href="#2-2-vport的代码描述" class="headerlink" title="2.2 vport的代码描述"></a>2.2 vport的代码描述</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">struct vport &#123;</span><br><span class="line">	struct net_device *dev; &#x2F;&#x2F; 指向net_device的指针</span><br><span class="line">	struct datapath	*dp; &#x2F;&#x2F; 指向这个port所在datapath的指针,表示该端口是属于哪个datapath的</span><br><span class="line">	struct vport_portids __rcu *upcall_portids; &#x2F;&#x2F;通过RCU机制保护的结构 &#39;struct vport_portids&#39;</span><br><span class="line">	u16 port_no; &#x2F;&#x2F;在datapath里面所有端口数组的索引,唯一标识该端口.因为一个datapath上有多个端口，而这些端口都是用哈希链表来存储的，所以这是链表元素（里面没有数据，只有next和prev前驱后继指针，数据部分就是vport结构体中的其他成员）</span><br><span class="line">	struct hlist_node hash_node; &#x2F;&#x2F;在设备hash表里面的元素</span><br><span class="line">	struct hlist_node dp_hash_node; &#x2F;&#x2F;在datapath的hash表里面的元素</span><br><span class="line">	const struct vport_ops *ops; &#x2F;&#x2F; 指向操作函数的指针,结构体里面存放了很多操作函数的函数指针</span><br><span class="line">	struct list_head detach_list; &#x2F;&#x2F;用来在net-exit调用时撤销vport的链表</span><br><span class="line">	struct rcu_head rcu; &#x2F;&#x2F;撤销datapath的RCU 回调函数头</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="2-3-流表flow-table-有五部分组成-一个是流表-另外是流表的实例-流表的内容-流表的key值-流表操作集和"><a href="#2-3-流表flow-table-有五部分组成-一个是流表-另外是流表的实例-流表的内容-流表的key值-流表操作集和" class="headerlink" title="2.3  流表flow_table (有五部分组成,一个是流表,另外是流表的实例,流表的内容,流表的key值,流表操作集和)"></a>2.3  流表flow_table (有五部分组成,一个是流表,另外是流表的实例,流表的内容,流表的key值,流表操作集和)</h2><h3 id="2-3-1-流表"><a href="#2-3-1-流表" class="headerlink" title="2.3.1 流表"></a>2.3.1 流表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct flow_table &#123; &#x2F;&#x2F; 流表</span><br><span class="line">	struct table_instance __rcu *ti;  &#x2F;&#x2F; 具体流表实例</span><br><span class="line">	struct table_instance __rcu *ufid_ti; &#x2F;&#x2F;包含unique flow identifier的流实例,</span><br><span class="line">	struct list_head mask_list; &#x2F;&#x2F; 链表用来串联整个流表 (一般配合container_of使用来获取结构体的头指针)</span><br><span class="line">	unsigned long last_rehash; &#x2F;&#x2F; 会初始化为当前的jiffies. 用来计间用</span><br><span class="line">	unsigned int count; &#x2F;&#x2F; 具体流表的个数, ovs_flow_tbl_init流表初始化时,会置为0</span><br><span class="line">	unsigned int ufid_count; &#x2F;&#x2F; 具体unique flow identifier流表的个数,ovs_flow_tbl_init流表初始化时,会置为0</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-2-流表的具体实例"><a href="#2-3-2-流表的具体实例" class="headerlink" title="2.3.2 流表的具体实例"></a>2.3.2 流表的具体实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct table_instance &#123; &#x2F;&#x2F;流表的具体实例</span><br><span class="line">	struct flex_array *buckets; &#x2F;&#x2F;哈希桶地址指针. 具体的流表项, 主要是方便处理.(真实的流表应该在这里面)</span><br><span class="line">	unsigned int n_buckets; &#x2F;&#x2F; 哈希桶个数</span><br><span class="line">	struct rcu_head rcu;&#x2F;&#x2F; 操作(撤销?)流表的RCU 回调函数头</span><br><span class="line">	int node_ver;  &#x2F;&#x2F;node_ver的存在使得我们可以控制sw_flow的哪个hlist_node链入到bucket中</span><br><span class="line">	u32 hash_seed; &#x2F;&#x2F;哈希算法需要的种子</span><br><span class="line">	bool keep_flows;&#x2F;&#x2F;是否保留流表项</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-3-流表里面所具体保存的内容"><a href="#2-3-3-流表里面所具体保存的内容" class="headerlink" title="2.3.3 流表里面所具体保存的内容"></a>2.3.3 流表里面所具体保存的内容</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">struct sw_flow &#123; &#x2F;&#x2F; 流表里面所具体保存的内容.</span><br><span class="line">	struct rcu_head rcu; &#x2F;&#x2F; rcu保护机制 (撤销流表项的RCU 回调函数头)</span><br><span class="line">	struct &#123;</span><br><span class="line">		struct hlist_node node[2]; &#x2F;&#x2F; 两个节点指针，用来链接作用，前驱后继指针</span><br><span class="line">		u32 hash; &#x2F;&#x2F; hash值</span><br><span class="line">	&#125; flow_table, ufid_table; &#x2F;&#x2F; 为两种流表各定义对应的结构.</span><br><span class="line">	int stats_last_writer;	&#x2F;&#x2F; 最近一个CPU写操作的ID</span><br><span class="line">	struct sw_flow_key key; &#x2F;&#x2F; 流表中的key值, 这个是个关键东东了,关系到报文要匹配那些流表key</span><br><span class="line">	struct sw_flow_id id; &#x2F;&#x2F; 流表自身的ID</span><br><span class="line">	struct cpumask cpu_used_mask; &#x2F;&#x2F; 也是流表中的key</span><br><span class="line">	struct sw_flow_mask *mask; &#x2F;&#x2F; 要匹配的mask结构体</span><br><span class="line">	struct sw_flow_actions __rcu *sf_acts; &#x2F;&#x2F; 相应的action动作.  使用了rcu机制保护的.</span><br><span class="line">	struct flow_stats __rcu *stats[]; &#x2F;* 数据流的状态,每一个CPU上都有,第一个是流建立的时候, 其余的是在获取stats[0].lock锁之后,根据需求分配. 使用了rcu机制保护的.</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-4-流表中的key值，主要是保存数据包中协议相关信息，这是报文要进行流表匹配的关键结构"><a href="#2-3-4-流表中的key值，主要是保存数据包中协议相关信息，这是报文要进行流表匹配的关键结构" class="headerlink" title="2.3.4 流表中的key值，主要是保存数据包中协议相关信息，这是报文要进行流表匹配的关键结构"></a>2.3.4 流表中的key值，主要是保存数据包中协议相关信息，这是报文要进行流表匹配的关键结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">struct sw_flow_key &#123;</span><br><span class="line">	u8 tun_opts[IP_TUNNEL_OPTS_MAX];</span><br><span class="line">	u8 tun_opts_len;</span><br><span class="line">	struct ip_tunnel_key tun_key;	&#x2F;&#x2F; 隧道的封装key.</span><br><span class="line">	struct &#123;</span><br><span class="line">		u32	priority;	&#x2F;&#x2F; 包的Qos优先级</span><br><span class="line">		u32	skb_mark;	&#x2F;&#x2F; skb包的标记</span><br><span class="line">		u16	in_port;	&#x2F;&#x2F; 包进入的端口号或者DP_MAX_PORTS</span><br><span class="line">	&#125; __packed phy; &#x2F;&#x2F; Safe when right after &#39;tun_key&#39;.</span><br><span class="line">	u8 mac_proto;			&#x2F;&#x2F; 链路层协议, 比如 Ethernet, ATM 等等</span><br><span class="line">	u8 tun_proto;			&#x2F;&#x2F; 封装协议, 比如GRE, VXLAN 等等</span><br><span class="line">	u32 ovs_flow_hash;	&#x2F;&#x2F; Datapath 所计算出的 hash 值</span><br><span class="line">	u32 recirc_id;			&#x2F;&#x2F; 转发的ID Recirculation ID.</span><br><span class="line">	struct &#123;</span><br><span class="line">		u8     src[ETH_ALEN];	&#x2F;&#x2F; Ethernet源mac地址</span><br><span class="line">		u8     dst[ETH_ALEN];	&#x2F;&#x2F; Ethernet目的mac地址</span><br><span class="line">		struct vlan_head vlan; &#x2F;&#x2F; vlan 的信息, 802.1q or 802.1ad 类型 以及vlan id</span><br><span class="line">		struct vlan_head cvlan; &#x2F;&#x2F; vlan 的信息给Conntrack用的, 802.1q or 802.1ad 类型 以及vlan id</span><br><span class="line">		__be16 type;		&#x2F;&#x2F; 以太网帧类型</span><br><span class="line">	&#125; eth; &#x2F;&#x2F; 2 层的. 数据链路层的匹配信息.</span><br><span class="line">	u8 ct_state; &#x2F;&#x2F; Conntrack的状态,有或者没有</span><br><span class="line">	u8 ct_orig_proto;		&#x2F;&#x2F;Conntrack 的原始路径的ip协议. 其实用来表示有没有包含original direction key 内容.</span><br><span class="line">	union &#123;</span><br><span class="line">		struct &#123;</span><br><span class="line">			__be32 top_lse;	&#x2F;* top label stack entry *&#x2F;</span><br><span class="line">		&#125; mpls;</span><br><span class="line">		struct &#123;</span><br><span class="line">			u8     proto;	&#x2F;&#x2F; IP包协议类型 TCP：6；UDP：17；ARP操作码类型用低8位表示</span><br><span class="line">			u8     tos;	    &#x2F;&#x2F; IP包服务类型</span><br><span class="line">			u8     ttl;	    &#x2F;&#x2F; IP包生存时间，经过多少跳路由</span><br><span class="line">			u8     frag;	&#x2F;&#x2F; 网桥中的OVS_FRAG_TYPE_*标记</span><br><span class="line">		&#125; ip; &#x2F;&#x2F; 3 层的. ip 层的匹配信息.</span><br><span class="line">	&#125;;</span><br><span class="line">	u16 ct_zone;			&#x2F;&#x2F; 追踪连接状态区</span><br><span class="line">	struct &#123;</span><br><span class="line">		__be16 src;		&#x2F;&#x2F; TCP&#x2F;UDP&#x2F;SCTP的源端口，应用层发送数据的端口</span><br><span class="line">		__be16 dst;		&#x2F;&#x2F; TCP&#x2F;UDP&#x2F;SCTP的目的端口，也是指应用层传输数据端口</span><br><span class="line">		__be16 flags;		&#x2F;&#x2F; TCP 的标记</span><br><span class="line">	&#125; tp; &#x2F;&#x2F; 4 层的. 传输层的匹配信息</span><br><span class="line">	union &#123;</span><br><span class="line">		struct &#123;</span><br><span class="line">			struct &#123;</span><br><span class="line">				__be32 src;	&#x2F;&#x2F; IP源地址</span><br><span class="line">				__be32 dst;	&#x2F;&#x2F; IP目的地址</span><br><span class="line">			&#125; addr; &#x2F;&#x2F; IP 的信息</span><br><span class="line">			union &#123;</span><br><span class="line">				struct &#123;</span><br><span class="line">					__be32 src;  &#x2F;&#x2F; Conntrack IP源地址</span><br><span class="line">					__be32 dst; &#x2F;&#x2F; Conntrack IP目的地址</span><br><span class="line">				&#125; ct_orig;	&#x2F;&#x2F; 追踪连接的原始目的区域</span><br><span class="line">				struct &#123;</span><br><span class="line">					u8 sha[ETH_ALEN];	&#x2F;&#x2F; ARP的源Mac地址</span><br><span class="line">					u8 tha[ETH_ALEN];	&#x2F;&#x2F; ARP的目的Mac地址</span><br><span class="line">				&#125; arp; &#x2F;&#x2F; arp 的信息</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125; ipv4; &#x2F;&#x2F; IPv4 的信息</span><br><span class="line">		struct &#123;</span><br><span class="line">			struct &#123;</span><br><span class="line">				struct in6_addr src;	&#x2F;&#x2F; IPv6 源地址</span><br><span class="line">				struct in6_addr dst;	&#x2F;&#x2F; IPv6 目的地址</span><br><span class="line">			&#125; addr; &#x2F;&#x2F; IPv6 的IP层信息</span><br><span class="line">			__be32 label;			&#x2F;&#x2F; IPv6 流的标示</span><br><span class="line">			union &#123;</span><br><span class="line">				struct &#123;</span><br><span class="line">					struct in6_addr src; &#x2F;&#x2F; Conntrack IP源地址</span><br><span class="line">					struct in6_addr dst; &#x2F;&#x2F; Conntrack IP目的地址</span><br><span class="line">				&#125; ct_orig;	&#x2F;&#x2F; 追踪连接的原始目的区域</span><br><span class="line">				struct &#123;</span><br><span class="line">					struct in6_addr target;	&#x2F;&#x2F; Neighbor Discovery 目标地址</span><br><span class="line">					u8 sll[ETH_ALEN];	&#x2F;&#x2F; Neighbor Discovery 源链接层地址</span><br><span class="line">					u8 tll[ETH_ALEN];	&#x2F;&#x2F; Neighbor Discovery 目标接层地址</span><br><span class="line">				&#125; nd; &#x2F;&#x2F;Neighbor Discovery (ND) protocol 是一个IPV6 的协议. 主机或者路由使用ND协议去侦测邻居的链路层地址,在必要的时候,可以及时清除无效的cache</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125; ipv6; &#x2F;&#x2F; IPV6 信息.</span><br><span class="line">		struct ovs_key_nsh nsh;  &#x2F;&#x2F; 网络服务头</span><br><span class="line">	&#125;;</span><br><span class="line">	struct &#123;</span><br><span class="line">		&#x2F;&#x2F; Connection tracking fields 连接监测的信息, CT主要用来做网络连接状态的识别. OVS2.5版本开始支持. 涉及到有状态的防火墙和无状态的防火墙.Openstack则从M版开始，使用OVS的新特性，来实现“有状态防火墙”中的“Security Group”功能</span><br><span class="line">		struct &#123;</span><br><span class="line">			__be16 src;	&#x2F;* CT orig tuple tp src port. 连接监测源端口.用于“有状态防火墙”的流识别</span><br><span class="line">			__be16 dst;	&#x2F;* CT orig tuple tp dst port. 连接监测目的端口.用于“有状态防火墙”的流识别</span><br><span class="line">		&#125; orig_tp;</span><br><span class="line">		u32 mark;</span><br><span class="line">		struct ovs_key_ct_labels labels; &#x2F;&#x2F; 这个是个32bit联合体,作为一个labels</span><br><span class="line">	&#125; ct; &#x2F;&#x2F; Connection tracking, 报文进来可能会先进入这里,如果有的话, 然后匹配自身的流表之后再去匹配datapath的流表,再之后执行action.</span><br><span class="line"></span><br><span class="line">&#125; __aligned(BITS_PER_LONG&#x2F;8); &#x2F;&#x2F; 主要是用来做数据对齐用的. 考虑到存取的效率, 在64bit机器上,就是8字节对齐</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-5-流表项操作-也就是能对流表做些什么操作"><a href="#2-3-5-流表项操作-也就是能对流表做些什么操作" class="headerlink" title="2.3.5 流表项操作, 也就是能对流表做些什么操作."></a>2.3.5 流表项操作, 也就是能对流表做些什么操作.</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">struct sw_flow_actions &#123;</span><br><span class="line">	struct rcu_head rcu; &#x2F;&#x2F; 要操作流表,肯定要个rcu来加锁同步了.</span><br><span class="line">	size_t orig_len;	&#x2F;&#x2F; 来自 flow_cmd_new netlink actions 操作的长度</span><br><span class="line">	u32 actions_len;  &#x2F;&#x2F; 操作的长度.</span><br><span class="line">	struct nlattr actions[]; &#x2F;&#x2F;流表项的操作集合,这个是一个netlink的结构,一个就是数据包的长度,一个就是类型.</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>到此,第一部分就介绍完毕了. 后续会有网桥的操作,vport的操作,数据报的处理等等的介绍…</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/17/openvswitch_section1_brief_and_struct/" title="openvswitch 系列第一篇 简介及基本数据结构" target="_blank" rel="external">http://www.oostech.com/2021/02/17/openvswitch_section1_brief_and_struct/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/17/ovs-vsctl_usage-guide-CHN/" title="ovs-vsctl简明用户手册(基于版本openvswitch-2.11.0-4.el7.x86_64)"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/" target="_blank"> Sam Lee </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计 -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+
+
+
+
+</body>
+</html>

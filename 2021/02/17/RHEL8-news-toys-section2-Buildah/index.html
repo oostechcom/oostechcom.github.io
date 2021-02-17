@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah | oosTech.com</title>
+  <meta name="description" content="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildahbuildah顾名思义,buildah 是一个用来生成,操作OCI (Open Container Initiative) 容器的工具. 那它都有些什么过人之处,要在RHEL8中引入它?让我们来看一下:  可以从无到有生成一个容器镜像; 也可以通过一个镜像来生成一个新的容器镜像 如同">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah">
+<meta property="og:url" content="http://www.oostech.com/2021/02/17/RHEL8-news-toys-section2-Buildah/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildahbuildah顾名思义,buildah 是一个用来生成,操作OCI (Open Container Initiative) 容器的工具. 那它都有些什么过人之处,要在RHEL8中引入它?让我们来看一下:  可以从无到有生成一个容器镜像; 也可以通过一个镜像来生成一个新的容器镜像 如同">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-17T06:41:10.457Z">
+<meta property="article:modified_time" content="2021-02-17T06:41:10.477Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/17/RHEL8-news-toys-section2-Buildah/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ， 我是一个Linux 拥趸。 当前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3；  内核版本是 4.18.0-240.10.1.el8_3.x86_64</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">网络 OVS 系列 （原创）</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/oom%20out_of_memory%20implementatoin_CHN/" class="title">oom &#34;out_of_memory&#34; implementatoin 介绍.</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T07:06:22.705Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/audit_simple_rules/" class="title">Linux Audit 的使用规则 （可以把这些规则加入到audit.rules里面）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T07:01:31.545Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/ansible_playbook_related/" class="title">ansible的playbook 常用的模块例子</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:56:59.015Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/X86_MASN_instructions/" class="title">X86 汇编指令大全</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:43:20.094Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/simple-linux-code-to-show-the-file-metadata/" class="title">Linux 使用小代码，基于stat 来显示文件的metadata</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:43:04.675Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Red-Hat-Enterprise-Linux-8-RHEL8-%E7%9A%84%E6%96%B0%E7%8E%A9%E6%84%8F-%E7%AC%AC2%E7%AF%87-%E4%B9%8B%E5%AE%B9%E5%99%A8%E5%B7%A5%E5%85%B7-buildah"><span class="toc-number">1.</span> <span class="toc-text">Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#buildah"><span class="toc-number">1.1.</span> <span class="toc-text">buildah</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E7%94%9F%E6%88%90"><span class="toc-number">1.2.</span> <span class="toc-text">容器的生成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%80%9A%E8%BF%87-dockerfile-%E6%9D%A5%E7%94%9F%E6%88%90-%E4%B9%9F%E5%8F%AB-from-scratch"><span class="toc-number">1.2.1.</span> <span class="toc-text">1 通过 dockerfile 来生成 (也叫 from scratch ).</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%80%9A%E8%BF%87%E4%BF%AE%E6%94%B9%E8%BF%90%E8%A1%8C%E4%B8%AD%E7%9A%84%E5%AE%B9%E5%99%A8%E6%9D%A5%E7%94%9F%E6%88%90%E4%B8%80%E4%B8%AA%E6%96%B0%E7%9A%84%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">1.2.2.</span> <span class="toc-text">2 通过修改运行中的容器来生成一个新的容器镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%80%9A%E8%BF%87-buildah-run-%E7%94%9F%E6%88%90%E4%B8%80%E4%B8%AA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F-%E5%8F%AF%E4%BB%A5%E5%AE%9E%E6%97%B6%E5%AE%9A%E5%88%B6-%E6%AF%94%E5%A6%82%E6%AD%A4%E6%B7%BB%E5%8A%A0-%E5%88%A0%E9%99%A4%E5%8C%85-%E4%BD%9C%E7%89%B9%E6%AE%8A%E9%85%8D%E7%BD%AE%E7%AD%89"><span class="toc-number">1.2.3.</span> <span class="toc-text">3 通过 buildah run 生成一个容器镜像 (可以实时定制,比如此添加,删除包,作特殊配置等).</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E8%BF%90%E8%A1%8C%E4%B8%AD%E7%9A%84%E5%AE%B9%E5%99%A8-%E6%9F%A5%E7%9C%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">1.3.</span> <span class="toc-text">查看运行中的容器,查看容器镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E9%87%8D%E5%91%BD%E5%90%8D-%E5%88%A0%E9%99%A4%E5%AE%B9%E5%99%A8%E6%88%96%E8%80%85%E5%88%A0%E9%99%A4%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">1.4.</span> <span class="toc-text">容器的重命名, 删除容器或者删除容器镜像</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-RHEL8-news-toys-section2-Buildah" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/17/RHEL8-news-toys-section2-Buildah/" class="article-date">
+	  <time datetime="2021-02-17T06:41:10.457Z" itemprop="datePublished">2021-02-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/17/RHEL8-news-toys-section2-Buildah/#comments" class="article-comment-link">评论</a></span>
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Red-Hat-Enterprise-Linux-8-RHEL8-的新玩意-第2篇-之容器工具-buildah"><a href="#Red-Hat-Enterprise-Linux-8-RHEL8-的新玩意-第2篇-之容器工具-buildah" class="headerlink" title="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah"></a>Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah</h1><h2 id="buildah"><a href="#buildah" class="headerlink" title="buildah"></a><strong>buildah</strong></h2><p>顾名思义,buildah 是一个用来生成,操作OCI (Open Container Initiative) 容器的工具. 那它都有些什么过人之处,要在RHEL8中引入它?<br>让我们来看一下:</p>
+<ul>
+<li>可以从无到有生成一个容器镜像; 也可以通过一个镜像来生成一个新的容器镜像</li>
+<li>如同 podman 一样,不要daemon 的支持,轻量,快捷. 支持容器,容器镜像的查看</li>
+<li>更安全,灵活.生成容器镜像时,可以移除make, gcc, fnd 等编译,开发,生级的工具,使生成容器镜像更稳固</li>
+<li>直接挂载一个容器镜像,然后对其进行修改; 或者卸载容器的根文件系统</li>
+<li>通过更新一个容器的根文件系统,由它作为基础生成一个新的容器镜像</li>
+<li>对本地容器的重命名, 删除一个容器或者一个容器镜像</li>
+</ul>
+<p>下面我们来通过一些例子看具体看看buildah的特性</p>
+<h2 id="容器的生成"><a href="#容器的生成" class="headerlink" title="容器的生成"></a>容器的生成</h2><h3 id="1-通过-dockerfile-来生成-也叫-from-scratch"><a href="#1-通过-dockerfile-来生成-也叫-from-scratch" class="headerlink" title="1 通过 dockerfile 来生成 (也叫 from scratch )."></a>1 通过 dockerfile 来生成 (也叫 from scratch ).</h3><ul>
+<li><p>编写一个简单的Dockerfile, 生成一个镜像,然后输出 HELLO BUILDAH</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# cat Dockerfile</span><br><span class="line"># This is a test dockerfile</span><br><span class="line">FROM docker.io&#x2F;library&#x2F;fedora:29</span><br><span class="line">ENTRYPOINT [&quot;&#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh&quot;]</span><br><span class="line">RUN echo $&#39;#!&#x2F;bin&#x2F;sh \n echo &quot; *** HELLO BUILDAH *** &quot;&#39;&gt;&#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh &amp;&amp; chmod +x &#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh</span><br></pre></td></tr></table></figure></li>
+<li><p>执行命令生成一个容器镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah build-using-dockerfile -t hello_buildah --format oci .</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah build-using-dockerfile -t hello_buildah --format oci .</span><br><span class="line">STEP 1: FROM docker.io&#x2F;library&#x2F;fedora:29</span><br><span class="line">STEP 2: ENTRYPOINT [&quot;&#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh&quot;]</span><br><span class="line">STEP 3: RUN echo $&#39;#!&#x2F;bin&#x2F;sh \n echo &quot; *** HELLO BUILDAH *** &quot;&#39;&gt;&#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh &amp;&amp; chmod +x &#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh</span><br><span class="line">STEP 4: COMMIT containers-storage:[overlay@&#x2F;var&#x2F;lib&#x2F;containers&#x2F;storage+&#x2F;var&#x2F;run&#x2F;containers&#x2F;storage:overlay.override_kernel_check&#x3D;true]localhost&#x2F;hello_buildah:latest</span><br><span class="line">Getting image source signatures</span><br><span class="line">Skipping fetch of repeat blob sha256:b7ba3be6a0d6426356fc49f538f0f929ed00e51a0a90906e354a345d46e23a8b</span><br><span class="line">Copying blob sha256:01e6ea24a0ce0bbd37204075038d46fb8fc345c2c0bf7b18153d01c361f0b3c7</span><br><span class="line"> 243 B &#x2F; 243 B [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;] 0s</span><br><span class="line">Copying config sha256:33fdf51b925a6d02542c94fc3a4bf85a7375e2b039e5592985fdc1ba87498afa</span><br><span class="line"> 1.12 KiB &#x2F; 1.12 KiB [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;] 0s</span><br><span class="line">Writing manifest to image destination</span><br><span class="line">Storing signatures</span><br><span class="line">--&gt; 33fdf51b925a6d02542c94fc3a4bf85a7375e2b039e5592985fdc1ba87498afa</span><br></pre></td></tr></table></figure></li>
+<li><p>查看且运行测试我们刚刚生成的容器镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# podman image ls |grep buildah</span><br><span class="line">localhost&#x2F;hello_buildah   latest      33fdf51b925a   13 seconds ago   283 MB</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# podman run hello_buildah</span><br><span class="line"> *** HELLO BUILDAH ***</span><br></pre></td></tr></table></figure>
+<h3 id="2-通过修改运行中的容器来生成一个新的容器镜像"><a href="#2-通过修改运行中的容器来生成一个新的容器镜像" class="headerlink" title="2 通过修改运行中的容器来生成一个新的容器镜像"></a>2 通过修改运行中的容器来生成一个新的容器镜像</h3></li>
+<li><p>先找到我们想要作为基础的镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah images |grep hello_buildah</span><br><span class="line">localhost&#x2F;hello_buildah  latest  33fdf51b925a   May 17, 2019 23:03    283 MB</span><br></pre></td></tr></table></figure></li>
+<li><p>运行这个容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah from hello_buildah</span><br><span class="line">hello_buildah-working-container</span><br></pre></td></tr></table></figure></li>
+<li><p>我们基于这个运行中容器来进行修改.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah containers</span><br><span class="line">CONTAINER ID  BUILDER  IMAGE ID     IMAGE NAME  CONTAINER NAME</span><br><span class="line">6d075a79f753   *  33fdf51b925a localhost&#x2F;hello_buildah:latest  hello_buildah-working-container</span><br></pre></td></tr></table></figure></li>
+<li><p>挂载这个容器的根文件系统</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah mount 6d075a79f753</span><br><span class="line">&#x2F;var&#x2F;lib&#x2F;containers&#x2F;storage&#x2F;overlay&#x2F;72f5d68a6659af57a198d28733baf8f64d279e29d02095ae2ef3d5c8f2cb9a42&#x2F;merged</span><br></pre></td></tr></table></figure></li>
+<li><p>修改它的内容(使用vi 然后添加 AGAIN)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# vi &#x2F;var&#x2F;lib&#x2F;containers&#x2F;storage&#x2F;overlay&#x2F;72f5d68a6659af57a198d28733baf8f64d279e29d02095ae2ef3d5c8f2cb9a42&#x2F;merged&#x2F;usr&#x2F;bin&#x2F;hello_buildah.sh</span><br></pre></td></tr></table></figure></li>
+<li><p>卸载这个容器的根文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah unmount 6d075a79f753</span><br><span class="line">6d075a79f75303c4a8e58f38ebb2997bd11c8238dda43f1bbc4d3ead97e3db17</span><br></pre></td></tr></table></figure></li>
+<li><p>提交我们刚刚作出的修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah commit 6d075a79f753 hello_buildah:hello_buildah_again</span><br><span class="line">Getting image source signatures</span><br><span class="line">Skipping fetch of repeat blob sha256:b7ba3be6a0d6426356fc49f538f0f929ed00e51a0a90906e354a345d46e23a8b</span><br><span class="line">Skipping fetch of repeat blob sha256:f40cea9cee51b2055a9a2db587680e7ad77236c95af1466c8d61e6a5106f1d7d</span><br><span class="line">Copying blob sha256:31d09f99841c33a71ad2262826d65ca1e5a07cb153fd160519e6aa90a1dd727b</span><br><span class="line"> 219 B &#x2F; 219 B [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;] 0s</span><br><span class="line">Copying config sha256:098b5186345f406c24a02cb18aa4bc26a5ab4e677b7cbd75500ce51a781387a1</span><br><span class="line"> 1.23 KiB &#x2F; 1.23 KiB [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;] 0s</span><br><span class="line">Writing manifest to image destination</span><br><span class="line">Storing signatures</span><br><span class="line">098b5186345f406c24a02cb18aa4bc26a5ab4e677b7cbd75500ce51a781387a1</span><br></pre></td></tr></table></figure></li>
+<li><p>运行测试验证</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# podman run localhost&#x2F;hello_buildah:hello_buildah_again</span><br><span class="line"> *** HELLO BUILDAH AGAIN***</span><br></pre></td></tr></table></figure>
+<h3 id="3-通过-buildah-run-生成一个容器镜像-可以实时定制-比如此添加-删除包-作特殊配置等"><a href="#3-通过-buildah-run-生成一个容器镜像-可以实时定制-比如此添加-删除包-作特殊配置等" class="headerlink" title="3 通过 buildah run 生成一个容器镜像 (可以实时定制,比如此添加,删除包,作特殊配置等)."></a>3 通过 buildah run 生成一个容器镜像 (可以实时定制,比如此添加,删除包,作特殊配置等).</h3></li>
+<li><p>启动一个容器镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah from localhost&#x2F;fedora_29</span><br><span class="line">fedora_29-working-container</span><br></pre></td></tr></table></figure></li>
+<li><p>安装gcc开发包(删除包的操作也类似)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah  run fedora_29-working-container yum install gcc -y</span><br><span class="line">Fedora Modular 29 -x86_64                                 68 kB&#x2F;s | 1.5 MB     00:22</span><br><span class="line">Fedora Modular 29 - x86_64 - Updates                      246 kB&#x2F;s | 2.4 MB     00:10</span><br><span class="line">......</span><br><span class="line">Complete!</span><br></pre></td></tr></table></figure></li>
+<li><p>指定要执行的命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah config --cmd &quot;gcc -v&quot; fedora_29-working-container</span><br></pre></td></tr></table></figure></li>
+<li><p>提交修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah commit fedora_29-working-container fedora_29_with_gcc</span><br><span class="line">Getting image source signatures</span><br><span class="line">Skipping fetch of repeat blob sha256:b7ba3be6a0d6426356fc49f538f0f929ed00e51a0a90906e354a345d46e23a8b</span><br><span class="line">Copying blob sha256:bd3948f7d2c959300d42d56af86b97cdfedaf4c9b0268213905dbad7977d4dc1</span><br><span class="line"> 214.84 MiB &#x2F; 214.84 MiB [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;] 10s</span><br><span class="line">Copying config sha256:789cb4f453c30271211fbc0a77c0cb913ff16746be2914377e5cba39839d855d</span><br><span class="line"> 1.09 KiB &#x2F; 1.09 KiB [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;] 0s</span><br><span class="line">Writing manifest to image destination</span><br><span class="line">Storing signatures</span><br><span class="line">789cb4f453c30271211fbc0a77c0cb913ff16746be2914377e5cba39839d855d</span><br></pre></td></tr></table></figure></li>
+<li><p>运行测试验证</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# podman run fedora_29_with_gcc</span><br><span class="line">Using built-in specs.</span><br><span class="line">COLLECT_GCC&#x3D;gcc</span><br><span class="line">COLLECT_LTO_WRAPPER&#x3D;&#x2F;usr&#x2F;libexec&#x2F;gcc&#x2F;x86_64-redhat-linux&#x2F;8&#x2F;lto-wrapper</span><br><span class="line">OFFLOAD_TARGET_NAMES&#x3D;nvptx-none</span><br><span class="line">OFFLOAD_TARGET_DEFAULT&#x3D;1</span><br><span class="line">Target: x86_64-redhat-linux</span><br><span class="line">Configured with: ..&#x2F;configure --enable-bootstrap --enable-languages&#x3D;c,c++,fortran,objc,obj-c++,ada,go,lto --prefix&#x3D;&#x2F;usr --mandir&#x3D;&#x2F;usr&#x2F;share&#x2F;man --infodir&#x3D;&#x2F;usr&#x2F;share&#x2F;info --with-bugurl&#x3D;http:&#x2F;&#x2F;bugzilla.redhat.com&#x2F;bugzilla --enable-shared --enable-threads&#x3D;posix --enable-checking&#x3D;release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style&#x3D;gnu --enable-plugin --enable-initfini-array --with-isl --enable-libmpx --enable-offload-targets&#x3D;nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune&#x3D;generic --with-arch_32&#x3D;i686 --build&#x3D;x86_64-redhat-linux</span><br><span class="line">Thread model: posix</span><br><span class="line">gcc version 8.3.1 20190223 (Red Hat 8.3.1-2) (GCC)</span><br></pre></td></tr></table></figure>
+<h2 id="查看运行中的容器-查看容器镜像"><a href="#查看运行中的容器-查看容器镜像" class="headerlink" title="查看运行中的容器,查看容器镜像"></a>查看运行中的容器,查看容器镜像</h2></li>
+<li><p>查看运行中的容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah containers</span><br><span class="line">CONTAINER	ID	BUILDER		IMAGE	ID	IMAGE	NAME		CONTAINER	NAME</span><br><span class="line">3f71cb46good	*	a80dad1cgood registry.redhat.io&#x2F;rhel8-beta:latest rhel8-beta-working-container</span><br></pre></td></tr></table></figure></li>
+<li><p>查看容器镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah images</span><br><span class="line">IMAGE NAME           MAGE TAG       IMAGE ID       CREATED AT             SIZE</span><br><span class="line">registry.redhat.io&#x2F;rhel8-beta  latest      a80dad1c1953   Nov 14, 2018 02:11     210 MB</span><br><span class="line">docker.io&#x2F;library&#x2F;fedora  29              d09302f77cfc    Mar 12, 2019 08:20     283 MB</span><br><span class="line">localhost&#x2F;hello_buildah   latest     33fdf51b925a         May 17, 2019 23:03     283 MB</span><br></pre></td></tr></table></figure>
+<h2 id="容器的重命名-删除容器或者删除容器镜像"><a href="#容器的重命名-删除容器或者删除容器镜像" class="headerlink" title="容器的重命名, 删除容器或者删除容器镜像"></a>容器的重命名, 删除容器或者删除容器镜像</h2></li>
+<li><p>容器重新命名命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># buildah rename 6d075a79f753 localhost&#x2F;hello_buildah_again</span><br></pre></td></tr></table></figure></li>
+<li><p>查看容器,找出容器ID</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah containers</span><br><span class="line">CONTAINER ID  BUILDER  IMAGE ID     IMAGE NAME  CONTAINER NAME</span><br><span class="line">6d075a79f753  * 33fdf51b925a localhost&#x2F;hello_buildah:latest   localhost&#x2F;hello_buildah_again</span><br></pre></td></tr></table></figure></li>
+<li><p>容器重新命名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah rename 6d075a79f753 localhost&#x2F;hello_buildah_again</span><br></pre></td></tr></table></figure></li>
+<li><p>确认</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah containers</span><br><span class="line">CONTAINER ID  BUILDER  IMAGE ID    IMAGE NAME  CONTAINER NAME</span><br><span class="line">6d075a79f753 * 33fdf51b925a localhost&#x2F;hello_buildah:latest   localhost&#x2F;hello_buildah_again</span><br></pre></td></tr></table></figure></li>
+<li><p>容器删除命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># buildah rm 6d075a79f753</span><br></pre></td></tr></table></figure></li>
+<li><p>查看容器,找出容器ID</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah containers</span><br><span class="line">CONTAINER ID  BUILDER  IMAGE ID     IMAGE NAME  CONTAINER NAME</span><br><span class="line">6d075a79f753 * 33fdf51b925a localhost&#x2F;hello_buildah:latest   localhost&#x2F;hello_buildah_again</span><br></pre></td></tr></table></figure></li>
+<li><p>删除容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah rm 6d075a79f753</span><br><span class="line">6d075a79f75303c4a8e58f38ebb2997bd11c8238dda43f1bbc4d3ead97e3db17</span><br></pre></td></tr></table></figure></li>
+<li><p>确认</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah containers</span><br><span class="line">CONTAINER ID  BUILDER  IMAGE ID   IMAGE NAME  CONTAINER NAME</span><br></pre></td></tr></table></figure></li>
+<li><p>容器镜像删除命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># buildah rmi a292528dfb8c</span><br></pre></td></tr></table></figure></li>
+<li><p>查看镜像,找出镜像ID</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah images |grep -w hello_podman</span><br><span class="line">localhost&#x2F;rhel8-beta   hello_podman  a292528dfb8c  May 16, 2019 10:43     210 MB</span><br></pre></td></tr></table></figure></li>
+<li><p>删除镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah rmi a292528dfb8c</span><br><span class="line">e010d561555d180015d6c0d30a3f67fa602ea1ae54628d5666235db42f43433a</span><br></pre></td></tr></table></figure></li>
+<li><p>确认</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@rhel8 buildahbuild]# buildah images |grep -w hello_podman</span><br></pre></td></tr></table></figure>
+<p>好, Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah. 想要了解更多? 可以参考 man buildah 和 buildah -h<br>想要亲手玩一下新玩具? 请随时去 <a target="_blank" rel="noopener" href="https://www.redhat.com/">https://www.redhat.com</a> 下载最新的 REHL 8 咯</p>
+<p>也欢迎关注 <code>addos</code> 微信公众号获取更多的,有意思的新玩具 :-)</p>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/17/RHEL8-news-toys-section2-Buildah/" title="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第2篇 之容器工具 buildah" target="_blank" rel="external">http://www.oostech.com/2021/02/17/RHEL8-news-toys-section2-Buildah/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/17/RHEL8-news-toys-section3-skopeo_podman-docker/" title="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第3篇 之容器工具 skopeo, podman-docker"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/17/RHEL8-news-toys-section1-podman/" title="Red Hat Enterprise Linux 8 的新玩意 第1 篇之容器工具 podman"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/" target="_blank"> Sam Lee </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计 -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+
+
+
+
+</body>
+</html>

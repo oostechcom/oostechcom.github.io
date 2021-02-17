@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过`grub`配置Kernel启动参数 | oosTech.com</title>
+  <meta name="description" content="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过grub配置Kernel启动参数内核启动参数, 简单的说就是可以给内核传递参数，并且用于控制内核行为方式. 1 通常来说我们有3种方式可以给内核传递参数1.1 在编译内核时侯,添加我们要的参数1.2 内核启动时通过boootloader添加,比如通过gurb或者uboot (arm或者ppc平台)1.3 在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过&#96;grub&#96;配置Kernel启动参数">
+<meta property="og:url" content="http://www.oostech.com/2021/02/17/RHEL8-news-toys-section4_Kernel_cmdline/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过grub配置Kernel启动参数内核启动参数, 简单的说就是可以给内核传递参数，并且用于控制内核行为方式. 1 通常来说我们有3种方式可以给内核传递参数1.1 在编译内核时侯,添加我们要的参数1.2 内核启动时通过boootloader添加,比如通过gurb或者uboot (arm或者ppc平台)1.3 在">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-17T06:41:28.416Z">
+<meta property="article:modified_time" content="2021-02-17T06:41:28.426Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/17/RHEL8-news-toys-section4_Kernel_cmdline/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ， 我是一个Linux 拥趸。 当前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3；  内核版本是 4.18.0-240.10.1.el8_3.x86_64</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">网络 OVS 系列 （原创）</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/oom%20out_of_memory%20implementatoin_CHN/" class="title">oom &#34;out_of_memory&#34; implementatoin 介绍.</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T07:06:22.705Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/audit_simple_rules/" class="title">Linux Audit 的使用规则 （可以把这些规则加入到audit.rules里面）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T07:01:31.545Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/ansible_playbook_related/" class="title">ansible的playbook 常用的模块例子</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:56:59.015Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/X86_MASN_instructions/" class="title">X86 汇编指令大全</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:43:20.094Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/17/simple-linux-code-to-show-the-file-metadata/" class="title">Linux 使用小代码，基于stat 来显示文件的metadata</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-17T06:43:04.675Z" itemprop="datePublished">2021-02-17</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Red-Hat-Enterprise-Linux-8-RHEL8-%E7%9A%84%E6%96%B0%E7%8E%A9%E6%84%8F-%E7%AC%AC4%E7%AF%87-%E9%80%9A%E8%BF%87grub%E9%85%8D%E7%BD%AEKernel%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过grub配置Kernel启动参数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E9%80%9A%E5%B8%B8%E6%9D%A5%E8%AF%B4%E6%88%91%E4%BB%AC%E6%9C%893%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%8F%AF%E4%BB%A5%E7%BB%99%E5%86%85%E6%A0%B8%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.</span> <span class="toc-text">1 通常来说我们有3种方式可以给内核传递参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%9C%A8%E7%BC%96%E8%AF%91%E5%86%85%E6%A0%B8%E6%97%B6%E4%BE%AF-%E6%B7%BB%E5%8A%A0%E6%88%91%E4%BB%AC%E8%A6%81%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 在编译内核时侯,添加我们要的参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%97%B6%E9%80%9A%E8%BF%87boootloader%E6%B7%BB%E5%8A%A0-%E6%AF%94%E5%A6%82%E9%80%9A%E8%BF%87gurb%E6%88%96%E8%80%85uboot-arm%E6%88%96%E8%80%85ppc%E5%B9%B3%E5%8F%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 内核启动时通过boootloader添加,比如通过gurb或者uboot (arm或者ppc平台)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E5%9C%A8%E7%B3%BB%E7%BB%9F%E8%BF%90%E8%A1%8C%E7%9A%84%E6%97%B6%E5%80%99-%E9%80%9A%E8%BF%87%E4%BF%AE%E6%94%B9-proc%E5%92%8C-sys%E9%87%8C%E9%9D%A2%E5%AF%B9%E5%BA%94%E7%9A%84%E6%96%87%E4%BB%B6"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 在系统运行的时候,通过修改&#x2F;proc和&#x2F;sys里面对应的文件.</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%BF%99%E9%87%8C-%E6%88%91%E4%BB%AC%E8%AE%B2%E7%AC%AC%E4%BA%8C%E9%A1%B9-%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%97%B6%E9%80%9A%E8%BF%87boootloader%E6%B7%BB%E5%8A%A0-%E6%AF%94%E5%A6%82%E9%80%9A%E8%BF%87gurb%E6%88%96%E8%80%85uboot-%E9%80%9A%E5%B8%B8%E6%9D%A5%E8%AF%B4%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E9%80%9A%E8%BF%87%E7%9B%B4%E6%8E%A5%E4%BF%AE%E6%94%B9-boot-grub2-grub-cfg%E6%96%87%E4%BB%B6%E6%9D%A5%E7%8E%B0%E5%AE%9E-%E4%BD%86%E6%98%AF%E6%88%91%E4%BB%AC%E7%9C%8B%E5%88%B0-%E5%9C%A8RHEL8%E4%B8%8A%E9%9D%A2-boot-grub2-grub-cfg%E5%B1%85%E7%84%B6%E6%B2%A1%E6%9C%89%E6%88%91%E4%BB%AC%E7%86%9F%E6%82%89linux-boot-vmlinuz-xxx-x86-64-root-UUID-xxx%E7%9A%84%E6%9D%A1%E7%9B%AE-%E8%BF%99%E6%98%AF%E4%BB%80%E4%B9%88%E5%9B%9E%E4%BA%8B-%E6%AF%94%E5%A6%82%E6%88%91%E4%BB%AC%E8%A6%81%E9%87%8D%E5%AE%9A%E5%90%91%E4%B8%B2%E5%8F%A3%E8%BE%93%E5%87%BA-%E6%B7%BB%E5%8A%A0console-ttyS0-115200n8%E8%BF%99%E4%B8%AA%E5%8F%82%E6%95%B0%E8%A6%81%E5%8A%A0%E5%88%B0%E4%BB%80%E4%B9%88%E5%9C%B0%E6%96%B9-%E4%B8%8D%E8%A6%81%E7%B4%A7-%E8%AE%A9%E6%88%91%E4%BB%AC%E5%85%88%E6%9D%A5%E7%9C%8B%E7%9C%8B-boot%E4%B8%8B%E9%9D%A2%E9%83%BD%E6%9C%89%E4%BA%9B%E4%BB%80%E4%B9%88%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.</span> <span class="toc-text">2 这里, 我们讲第二项(内核启动时通过boootloader添加,比如通过gurb或者uboot); 通常来说我们可以通过直接修改&#x2F;boot&#x2F;grub2&#x2F;grub.cfg文件来现实.但是我们看到,在RHEL8上面,&#x2F;boot&#x2F;grub2&#x2F;grub.cfg居然没有我们熟悉linux &#x2F;boot&#x2F;vmlinuz-xxx.x86_64 root&#x3D;UUID&#x3D;xxx的条目. 这是什么回事,比如我们要重定向串口输出,添加console&#x3D;ttyS0,115200n8这个参数要加到什么地方?不要紧,让我们先来看看\boot下面都有些什么文件.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9F%A5%E7%9C%8B%E5%90%AF%E5%8A%A8%E7%9B%AE%E5%BD%95-boot-%E7%9A%84%E5%86%85%E5%AE%B9-%E6%88%91%E4%BB%AC%E7%9F%A5%E9%81%93%E7%B3%BB%E7%BB%9F%E6%98%AF%E5%90%AF%E5%8A%A8%E8%BF%99%E4%B8%AA%E5%86%85%E6%A0%B8vmlinuz-4-18-0-80-el8-x86-64"><span class="toc-number">1.3.</span> <span class="toc-text">3 查看启动目录&#x2F;boot&#x2F;的内容, 我们知道系统是启动这个内核vmlinuz-4.18.0-80.el8.x86_64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%9F%A5%E9%81%93%E4%BA%86%E7%B3%BB%E7%BB%9F%E5%86%85%E6%A0%B8vmlinuz-4-18-0-80-el8-x86-64%E7%9A%84%E5%90%8D%E5%AD%97-%E6%88%91%E4%BB%AC%E6%9D%A5%E6%89%BE%E6%89%BE%E6%9C%89%E9%85%8D%E7%BD%AE%E5%AE%83%E7%9A%84%E5%9C%B0%E6%96%B9-%E6%9D%A5grub%E4%B8%80%E4%B8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">4 知道了系统内核vmlinuz-4.18.0-80.el8.x86_64的名字,我们来找找有配置它的地方,来grub一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A5%BD%E4%BA%86-%E6%88%91%E4%BB%AC%E6%89%BE%E5%88%B0%E4%BA%86%E7%9B%B8%E5%85%B3%E7%9A%84%E6%96%87%E4%BB%B6-loader-entries-54d1217dfdda4592a9e30059e470cf24-4-18-0-80-el8-x86-64-conf-%E9%82%A3%E5%B0%B1%E6%9D%A5%E7%9C%8B%E7%9C%8B%E9%87%8C%E9%9D%A2%E9%83%BD%E6%9C%89%E4%BA%9B%E4%BB%80%E4%B9%88cat%E4%B8%80%E4%B8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">5 好了, 我们找到了相关的文件.&#x2F;loader&#x2F;entries&#x2F;54d1217dfdda4592a9e30059e470cf24-4.18.0-80.el8.x86_64.conf, 那就来看看里面都有些什么cat一下.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%9C%89%E7%86%9F%E6%82%89%E7%9A%84%E9%9D%A2%E5%AD%94%E5%90%A7-%E7%9C%8B%E8%B5%B7%E6%9D%A5%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E5%9C%A8%E8%BF%99%E9%85%8D%E7%BD%AE%E5%86%85%E6%A0%B8%E7%9A%84%E5%8F%82%E6%95%B0-%E8%80%8C%E4%B8%94%E5%8F%98%E9%87%8Fkernelopts%E4%BC%BC%E4%B9%8E%E6%98%AF%E5%AF%B9%E5%BA%94%E7%9A%84%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0"><span class="toc-number">1.6.</span> <span class="toc-text">6 有熟悉的面孔吧,看起来我们可以在这配置内核的参数,而且变量kernelopts似乎是对应的启动参数.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%AE%83%E5%9C%A8%E8%BF%99%E9%87%8C%E5%AE%9A%E4%B9%89-%E9%82%A3%E6%88%91%E4%BB%AC%E5%B0%B1%E7%9B%B4%E6%8E%A5%E7%BC%96%E8%BE%91%E6%B7%BB%E5%8A%A0%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81%E7%9A%84%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E5%B0%B1%E5%A5%BD%E4%BA%86-%E6%94%B9%E4%B8%80%E4%B8%8B-%E5%8F%98%E6%88%90%E8%BF%99%E6%A0%B7"><span class="toc-number">1.7.</span> <span class="toc-text">7 它在这里定义,那我们就直接编辑添加我们需要的内核参数就好了.改一下,变成这样.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E6%B7%B1%E5%85%A5%E4%B8%80%E4%BA%9B-%E9%82%A3%E8%BF%99%E4%B8%AAoptions-kernelopts-%E5%8F%88%E6%98%AF%E6%80%8E%E4%B9%88%E5%B0%B1%E8%83%BD%E4%BC%A0%E9%80%92%E5%88%B0%E5%86%85%E6%A0%B8%E5%8E%BB%E7%9A%84%E5%91%A2"><span class="toc-number">1.8.</span> <span class="toc-text">8 深入一些,那这个options $kernelopts 又是怎么就能传递到内核去的呢?</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E5%B0%8FTips-%E5%85%88%E6%9D%A5%E6%89%93%E5%BC%80%E4%B8%AAdebug%E5%BC%80%E5%85%B3-%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E6%B7%BB%E5%8A%A0set-debug-blscfg-grub%E4%BC%9A%E9%80%9A%E8%BF%87%E5%87%BD%E6%95%B0grub-dprintf%E8%BE%93%E5%87%BA%E5%AF%B9%E5%BA%94%E7%9A%84debug%E6%B6%88%E6%81%AF-%E5%88%B0%E6%96%87%E4%BB%B6-boot-grub2-grub-cfg-%E7%84%B6%E5%90%8E%E6%B3%A8%E6%84%8F%E6%8A%8A%E5%90%AF%E5%8A%A8%E8%AE%BE%E7%BD%AE%E5%88%B0%E4%B8%80%E4%B8%AA%E4%B8%8D%E5%AD%98%E5%9C%A8menu-%E6%AF%94%E5%A6%82set-pager-1-%E8%BF%99%E6%A0%B7%E7%9A%84%E8%AF%9D-gurb%E5%B0%B1%E4%BC%9A%E5%9B%A0%E4%B8%BA%E6%89%BE%E4%B8%8D%E5%88%B0%E5%90%AF%E5%8A%A8%E9%A1%B9%E8%80%8C%E5%81%9C%E4%BD%8F-%E9%82%A3%E6%88%91%E4%BB%AC%E5%B0%B1%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%E8%BE%93%E5%87%BA%E5%91%A2-%E5%8F%A6%E5%A4%96%E5%A4%9A%E8%AF%B4%E4%B8%80%E5%8F%A5-%E8%BF%98%E6%9C%89%E8%BF%99%E4%BA%9B%E6%A8%A1%E5%9D%97%E5%8F%AF%E4%BB%A5%E7%94%A8%E6%9D%A5%E8%B0%83%E8%AF%95-%E6%9C%89%E5%85%B4%E8%B6%A3%E5%8F%AF%E4%BB%A5%E8%AF%95%E8%AF%95%E7%9C%8B"><span class="toc-number">1.8.1.</span> <span class="toc-text">8.1 小Tips,先来打开个debug开关. 我们可以添加set debug&#x3D;blscfg(grub会通过函数grub_dprintf输出对应的debug消息)到文件&#x2F;boot&#x2F;grub2&#x2F;grub.cfg; 然后注意把启动设置到一个不存在menu(比如set pager&#x3D;1). 这样的话,gurb就会因为找不到启动项而停住,那我们就可以看到输出呢. 另外多说一句,还有这些模块可以用来调试(有兴趣可以试试看).</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E9%80%9A%E8%BF%87%E6%9F%A5%E7%9C%8Bgrub%E7%9A%84debug%E8%BE%93%E5%87%BA-%E7%9C%8B%E5%88%B0%E4%BA%86options-kernelopts%E5%9C%A8grub%E5%90%AF%E5%8A%A8%E6%97%B6%E8%A2%AB%E8%B0%83%E7%94%A8%E4%BA%86-%E6%89%80%E4%BB%A5%E5%AF%B9%E5%BA%94%E7%9A%84%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E4%B9%9F%E8%A2%AB%E5%AF%BC%E5%85%A5%E4%BA%86"><span class="toc-number">1.8.2.</span> <span class="toc-text">8.2 通过查看grub的debug输出. 看到了options $kernelopts在grub启动时被调用了,所以对应的内核参数也被导入了.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-%E5%86%8D%E6%B7%B1%E5%85%A5%E4%B8%80%E4%BA%9B-%E9%82%A3options-kernelopts%E5%85%B7%E4%BD%93%E5%8F%88%E6%98%AF%E6%80%8E%E4%B9%88%E8%B0%83%E8%BF%9B%E5%8E%BB%E7%9A%84%E5%91%A2-%E5%A5%BD%E5%8A%9E-%E5%BF%AB%E9%80%9F%E7%9E%84%E4%B8%AA%E4%BB%A3%E7%A0%81-%E5%91%B5%E5%91%B5-%E8%BF%99%E5%B0%B1%E6%98%AF%E5%BC%80%E6%BA%90%E7%9A%84%E4%BC%98%E5%8A%BF%E4%B9%8B%E4%B8%80-%E6%83%B3%E7%9F%A5%E9%81%93%E5%86%85%E5%B9%95-%E4%B8%8B%E4%B8%AA%E4%BB%A3%E7%A0%81%E7%9E%84%E7%9E%84-%E9%80%9A%E8%BF%87%E6%9F%A5%E9%98%85%E4%BB%A3%E7%A0%81-grub%E9%87%8C%E9%9D%A2%E7%9A%84%E4%B8%8E%E4%B9%8B%E5%AF%B9%E5%BA%94%E7%9A%84%E5%87%BD%E6%95%B0%E5%A4%A7%E6%A6%82%E6%B5%81%E7%A8%8B%E5%A6%82%E4%B8%8B-%E9%83%BD%E7%AE%80%E6%98%8E%E6%98%93%E6%87%82-%E5%B0%B1%E4%B8%8D%E5%A4%9A%E8%A7%A3%E6%9E%90%E5%92%AF"><span class="toc-number">1.8.3.</span> <span class="toc-text">8.3 再深入一些,那options $kernelopts具体又是怎么调进去的呢?好办,快速瞄个代码(呵呵,这就是开源的优势之一; 想知道内幕,下个代码瞄瞄). 通过查阅代码,grub里面的与之对应的函数大概流程如下,都简明易懂,就不多解析咯.</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E5%88%B0%E6%AD%A4-%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%97%B6%E9%80%9A%E8%BF%87boootloader%E6%B7%BB%E5%8A%A0%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0%E5%B0%B1%E7%BB%93%E6%9D%9F%E4%BA%86-%E5%A4%9A%E8%AF%B4%E4%B8%80%E5%8F%A5-grub2-mkconfig%E5%91%BD%E4%BB%A4%E4%B9%9F%E5%8F%AF%E4%BB%A5%E6%9C%89%E7%B1%BB%E4%BC%BC%E5%8A%9F%E8%83%BD"><span class="toc-number">1.9.</span> <span class="toc-text">9 到此,内核启动时通过boootloader添加启动参数就结束了. 多说一句,grub2-mkconfig命令也可以有类似功能.</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-RHEL8-news-toys-section4_Kernel_cmdline" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过`grub`配置Kernel启动参数
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/17/RHEL8-news-toys-section4_Kernel_cmdline/" class="article-date">
+	  <time datetime="2021-02-17T06:41:28.416Z" itemprop="datePublished">2021-02-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/17/RHEL8-news-toys-section4_Kernel_cmdline/#comments" class="article-comment-link">评论</a></span>
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Red-Hat-Enterprise-Linux-8-RHEL8-的新玩意-第4篇-通过grub配置Kernel启动参数"><a href="#Red-Hat-Enterprise-Linux-8-RHEL8-的新玩意-第4篇-通过grub配置Kernel启动参数" class="headerlink" title="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过grub配置Kernel启动参数"></a>Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过<code>grub</code>配置Kernel启动参数</h1><p><strong>内核启动参数</strong>, 简单的说就是可以给内核传递参数，并且用于控制内核行为方式.</p>
+<h2 id="1-通常来说我们有3种方式可以给内核传递参数"><a href="#1-通常来说我们有3种方式可以给内核传递参数" class="headerlink" title="1 通常来说我们有3种方式可以给内核传递参数"></a>1 通常来说我们有3种方式可以给内核传递参数</h2><h3 id="1-1-在编译内核时侯-添加我们要的参数"><a href="#1-1-在编译内核时侯-添加我们要的参数" class="headerlink" title="1.1 在编译内核时侯,添加我们要的参数"></a>1.1 在编译内核时侯,添加我们要的参数</h3><h3 id="1-2-内核启动时通过boootloader添加-比如通过gurb或者uboot-arm或者ppc平台"><a href="#1-2-内核启动时通过boootloader添加-比如通过gurb或者uboot-arm或者ppc平台" class="headerlink" title="1.2 内核启动时通过boootloader添加,比如通过gurb或者uboot (arm或者ppc平台)"></a>1.2 内核启动时通过boootloader添加,比如通过<code>gurb</code>或者<code>uboot</code> (arm或者ppc平台)</h3><h3 id="1-3-在系统运行的时候-通过修改-proc和-sys里面对应的文件"><a href="#1-3-在系统运行的时候-通过修改-proc和-sys里面对应的文件" class="headerlink" title="1.3 在系统运行的时候,通过修改/proc和/sys里面对应的文件."></a>1.3 在系统运行的时候,通过修改<code>/proc</code>和<code>/sys</code>里面对应的文件.</h3><h2 id="2-这里-我们讲第二项-内核启动时通过boootloader添加-比如通过gurb或者uboot-通常来说我们可以通过直接修改-boot-grub2-grub-cfg文件来现实-但是我们看到-在RHEL8上面-boot-grub2-grub-cfg居然没有我们熟悉linux-boot-vmlinuz-xxx-x86-64-root-UUID-xxx的条目-这是什么回事-比如我们要重定向串口输出-添加console-ttyS0-115200n8这个参数要加到什么地方-不要紧-让我们先来看看-boot下面都有些什么文件"><a href="#2-这里-我们讲第二项-内核启动时通过boootloader添加-比如通过gurb或者uboot-通常来说我们可以通过直接修改-boot-grub2-grub-cfg文件来现实-但是我们看到-在RHEL8上面-boot-grub2-grub-cfg居然没有我们熟悉linux-boot-vmlinuz-xxx-x86-64-root-UUID-xxx的条目-这是什么回事-比如我们要重定向串口输出-添加console-ttyS0-115200n8这个参数要加到什么地方-不要紧-让我们先来看看-boot下面都有些什么文件" class="headerlink" title="2 这里, 我们讲第二项(内核启动时通过boootloader添加,比如通过gurb或者uboot); 通常来说我们可以通过直接修改/boot/grub2/grub.cfg文件来现实.但是我们看到,在RHEL8上面,/boot/grub2/grub.cfg居然没有我们熟悉linux /boot/vmlinuz-xxx.x86_64 root=UUID=xxx的条目. 这是什么回事,比如我们要重定向串口输出,添加console=ttyS0,115200n8这个参数要加到什么地方?不要紧,让我们先来看看\boot下面都有些什么文件."></a>2 这里, 我们讲第二项(内核启动时通过boootloader添加,比如通过<code>gurb</code>或者<code>uboot</code>); 通常来说我们可以通过直接修改<code>/boot/grub2/grub.cfg</code>文件来现实.但是我们看到,在RHEL8上面,<code>/boot/grub2/grub.cfg</code>居然没有我们熟悉<code>linux /boot/vmlinuz-xxx.x86_64 root=UUID=xxx</code>的条目. 这是什么回事,比如我们要重定向串口输出,添加<code>console=ttyS0,115200n8</code>这个参数要加到什么地方?不要紧,让我们先来看看<code>\boot</code>下面都有些什么文件.</h2><h2 id="3-查看启动目录-boot-的内容-我们知道系统是启动这个内核vmlinuz-4-18-0-80-el8-x86-64"><a href="#3-查看启动目录-boot-的内容-我们知道系统是启动这个内核vmlinuz-4-18-0-80-el8-x86-64" class="headerlink" title="3 查看启动目录/boot/的内容, 我们知道系统是启动这个内核vmlinuz-4.18.0-80.el8.x86_64"></a>3 查看启动目录<code>/boot/</code>的内容, 我们知道系统是启动这个内核<code>vmlinuz-4.18.0-80.el8.x86_64</code></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@vm3_rhel8 ~]# cd &#x2F;boot&#x2F; &amp;&amp; ls</span><br><span class="line">config-4.18.0-80.el8.x86_64                              initramfs-4.18.0-80.el8.x86_64kdump.img</span><br><span class="line">efi                                                      loader</span><br><span class="line">grub2                                                    System.map-4.18.0-80.el8.x86_64</span><br><span class="line">initramfs-0-rescue-54d1217dfdda4592a9e30059e470cf24.img  vmlinuz-0-rescue-54d1217dfdda4592a9e30059e470cf24</span><br><span class="line">initramfs-4.18.0-80.el8.x86_64.img                       vmlinuz-4.18.0-80.el8.x86_64</span><br></pre></td></tr></table></figure>
+<h2 id="4-知道了系统内核vmlinuz-4-18-0-80-el8-x86-64的名字-我们来找找有配置它的地方-来grub一下"><a href="#4-知道了系统内核vmlinuz-4-18-0-80-el8-x86-64的名字-我们来找找有配置它的地方-来grub一下" class="headerlink" title="4 知道了系统内核vmlinuz-4.18.0-80.el8.x86_64的名字,我们来找找有配置它的地方,来grub一下"></a>4 知道了系统内核<code>vmlinuz-4.18.0-80.el8.x86_64</code>的名字,我们来找找有配置它的地方,来<code>grub</code>一下</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@vm3_rhel8 boot]# grep -n &quot;vmlinuz-4.18.0-80.el8.x86_64&quot; -r .&#x2F;</span><br><span class="line">.&#x2F;loader&#x2F;entries&#x2F;54d1217dfdda4592a9e30059e470cf24-4.18.0-80.el8.x86_64.conf:3:linux &#x2F;boot&#x2F;vmlinuz-4.18.0-80.el8.x86_64</span><br><span class="line">.&#x2F;.vmlinuz-4.18.0-80.el8.x86_64.hmac:1:54d1217dfdda4592a9e30059e470cf24  &#x2F;boot&#x2F;vmlinuz-4.18.0-80.el8.x86_64</span><br></pre></td></tr></table></figure>
+<h2 id="5-好了-我们找到了相关的文件-loader-entries-54d1217dfdda4592a9e30059e470cf24-4-18-0-80-el8-x86-64-conf-那就来看看里面都有些什么cat一下"><a href="#5-好了-我们找到了相关的文件-loader-entries-54d1217dfdda4592a9e30059e470cf24-4-18-0-80-el8-x86-64-conf-那就来看看里面都有些什么cat一下" class="headerlink" title="5 好了, 我们找到了相关的文件./loader/entries/54d1217dfdda4592a9e30059e470cf24-4.18.0-80.el8.x86_64.conf, 那就来看看里面都有些什么cat一下."></a>5 好了, 我们找到了相关的文件<code>./loader/entries/54d1217dfdda4592a9e30059e470cf24-4.18.0-80.el8.x86_64.conf</code>, 那就来看看里面都有些什么<code>cat</code>一下.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">title Red Hat Enterprise Linux (4.18.0-80.el8.x86_64) 8.0 (Ootpa)</span><br><span class="line">version 4.18.0-80.el8.x86_64</span><br><span class="line">linux &#x2F;boot&#x2F;vmlinuz-4.18.0-80.el8.x86_64</span><br><span class="line">initrd &#x2F;boot&#x2F;initramfs-4.18.0-80.el8.x86_64.img $tuned_initrd</span><br><span class="line">options $kernelopts $tuned_params</span><br><span class="line">id rhel-20190313123447-4.18.0-80.el8.x86_64</span><br><span class="line">grub_users $grub_users</span><br><span class="line">grub_arg --unrestricted</span><br><span class="line">grub_class kernel.&#x2F;loader&#x2F;entries&#x2F;54d1217dfdda4592a9e30059e470cf24-4.18.0-80.el8.x86_64.conf</span><br></pre></td></tr></table></figure>
+<h2 id="6-有熟悉的面孔吧-看起来我们可以在这配置内核的参数-而且变量kernelopts似乎是对应的启动参数"><a href="#6-有熟悉的面孔吧-看起来我们可以在这配置内核的参数-而且变量kernelopts似乎是对应的启动参数" class="headerlink" title="6 有熟悉的面孔吧,看起来我们可以在这配置内核的参数,而且变量kernelopts似乎是对应的启动参数."></a>6 有熟悉的面孔吧,看起来我们可以在这配置内核的参数,而且变量<code>kernelopts</code>似乎是对应的启动参数.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@vm3_rhel8 boot]# grep -n &quot;kernelopts&quot; -r .&#x2F;</span><br><span class="line">.&#x2F;grub2&#x2F;grubenv:3:kernelopts&#x3D;root&#x3D;UUID&#x3D;06246343-6949-4824-a96f-6ce27ff92cd5 ro crashkernel&#x3D;auto</span><br><span class="line">.&#x2F;loader&#x2F;entries&#x2F;54d1217dfdda4592a9e30059e470cf24-0-rescue.conf:5:options $kernelopts</span><br></pre></td></tr></table></figure>
+<h2 id="7-它在这里定义-那我们就直接编辑添加我们需要的内核参数就好了-改一下-变成这样"><a href="#7-它在这里定义-那我们就直接编辑添加我们需要的内核参数就好了-改一下-变成这样" class="headerlink" title="7 它在这里定义,那我们就直接编辑添加我们需要的内核参数就好了.改一下,变成这样."></a>7 它在这里定义,那我们就直接编辑添加我们需要的内核参数就好了.改一下,变成这样.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;grub2&#x2F;grubenv:3:kernelopts&#x3D;root&#x3D;UUID&#x3D;06246343-6949-4824-a96f-6ce27ff92cd5 ro crashkernel&#x3D;auto console&#x3D;ttyS0,115200n8 console&#x3D;tty0</span><br></pre></td></tr></table></figure>
+<h2 id="8-深入一些-那这个options-kernelopts-又是怎么就能传递到内核去的呢"><a href="#8-深入一些-那这个options-kernelopts-又是怎么就能传递到内核去的呢" class="headerlink" title="8 深入一些,那这个options $kernelopts 又是怎么就能传递到内核去的呢?"></a>8 深入一些,那这个<code>options $kernelopts</code> 又是怎么就能传递到内核去的呢?</h2><h3 id="8-1-小Tips-先来打开个debug开关-我们可以添加set-debug-blscfg-grub会通过函数grub-dprintf输出对应的debug消息-到文件-boot-grub2-grub-cfg-然后注意把启动设置到一个不存在menu-比如set-pager-1-这样的话-gurb就会因为找不到启动项而停住-那我们就可以看到输出呢-另外多说一句-还有这些模块可以用来调试-有兴趣可以试试看"><a href="#8-1-小Tips-先来打开个debug开关-我们可以添加set-debug-blscfg-grub会通过函数grub-dprintf输出对应的debug消息-到文件-boot-grub2-grub-cfg-然后注意把启动设置到一个不存在menu-比如set-pager-1-这样的话-gurb就会因为找不到启动项而停住-那我们就可以看到输出呢-另外多说一句-还有这些模块可以用来调试-有兴趣可以试试看" class="headerlink" title="8.1 小Tips,先来打开个debug开关. 我们可以添加set debug=blscfg(grub会通过函数grub_dprintf输出对应的debug消息)到文件/boot/grub2/grub.cfg; 然后注意把启动设置到一个不存在menu(比如set pager=1). 这样的话,gurb就会因为找不到启动项而停住,那我们就可以看到输出呢. 另外多说一句,还有这些模块可以用来调试(有兴趣可以试试看)."></a>8.1 <strong>小Tips</strong>,先来打开个debug开关. 我们可以添加<code>set debug=blscfg</code>(grub会通过函数<code>grub_dprintf</code>输出对应的debug消息)到文件<code>/boot/grub2/grub.cfg</code>; 然后注意把启动设置到一个不存在menu(比如<code>set pager=1</code>). 这样的话,<code>gurb</code>就会因为找不到启动项而停住,那我们就可以看到输出呢. 另外多说一句,还有这些模块可以用来调试(有兴趣可以试试看).</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&quot;acpi&quot;,&quot;ahci&quot;,&quot;arcdisk&quot;,&quot;archelp&quot;,&quot;ata&quot;,&quot;atkeyb&quot;,&quot;badram&quot;,&quot;blscfg&quot;,&quot;bootp&quot;,&quot;bsd&quot;,&quot;btrfs&quot;,&quot;chain&quot;,&quot;cros&quot;,&quot;crypt&quot;,&quot;cryptodisk&quot;,&quot;devalias&quot;,&quot;disk&quot;,</span><br><span class="line">&quot;diskfilter&quot;,&quot;dl&quot;,&quot;dns&quot;,&quot;drivemap&quot;,&quot;efi&quot;,&quot;efidisk&quot;,&quot;efiemu&quot;,&quot;efiemu&quot;,&quot;system_table,&quot;efinet&quot;,&quot;efinetfs&quot;,&quot;ehci&quot;,&quot;elf&quot;,&quot;exfat&quot;,&quot;expand&quot;,&quot;fb&quot;,&quot;fdtbus&quot;,&quot;fixvideo&quot;,&quot;font&quot;,&quot;fs&quot;,&quot;fw_path&quot;,&quot;geli&quot;,&quot;gpt&quot;,&quot;hostdisk&quot;,&quot;init&quot;,&quot;keystatus&quot;,&quot;linux&quot;,&quot;loader&quot;,&quot;luks&quot;,&quot;memdisk&quot;,&quot;menu&quot;,&quot;mmap&quot;,&quot;modules&quot;,&quot;multiboot_loader&quot;,&quot;nativedisk&quot;,&quot;net&quot;,&quot;ohci&quot;,&quot;partition&quot;,&quot;pata&quot;,&quot;play&quot;,&quot;tempo&quot;pmtimer&quot;,&quot;reiserfs&quot;,&quot;reiserfs_blocktype&quot;,&quot;reiserfs_tree&quot;,&quot;relocator&quot;,&quot;scripting&quot;,&quot;scsi&quot;,&quot;secureboot&quot;,&quot;serial&quot;,&quot;syslinux&quot;,&quot;tftp&quot;,&quot;ubootdisk&quot;,&quot;uhci&quot;,&quot;usb&quot;,&quot;usb_keyboard&quot;,&quot;usbms&quot;,&quot;video&quot;,&quot;xen&quot;,&quot;xen_loader&quot;,&quot;xnu&quot;,&quot;zfs&quot;,</span><br></pre></td></tr></table></figure>
+<h3 id="8-2-通过查看grub的debug输出-看到了options-kernelopts在grub启动时被调用了-所以对应的内核参数也被导入了"><a href="#8-2-通过查看grub的debug输出-看到了options-kernelopts在grub启动时被调用了-所以对应的内核参数也被导入了" class="headerlink" title="8.2 通过查看grub的debug输出. 看到了options $kernelopts在grub启动时被调用了,所以对应的内核参数也被导入了."></a>8.2 通过查看<code>grub</code>的debug输出. 看到了<code>options $kernelopts</code>在<code>grub</code>启动时被调用了,所以对应的内核参数也被导入了.</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">commands&#x2F;blscfg.c:135: new keyval at 0xbfe42aa0:options:$kernelopts $tuned_params</span><br></pre></td></tr></table></figure>
+<h3 id="8-3-再深入一些-那options-kernelopts具体又是怎么调进去的呢-好办-快速瞄个代码-呵呵-这就是开源的优势之一-想知道内幕-下个代码瞄瞄-通过查阅代码-grub里面的与之对应的函数大概流程如下-都简明易懂-就不多解析咯"><a href="#8-3-再深入一些-那options-kernelopts具体又是怎么调进去的呢-好办-快速瞄个代码-呵呵-这就是开源的优势之一-想知道内幕-下个代码瞄瞄-通过查阅代码-grub里面的与之对应的函数大概流程如下-都简明易懂-就不多解析咯" class="headerlink" title="8.3 再深入一些,那options $kernelopts具体又是怎么调进去的呢?好办,快速瞄个代码(呵呵,这就是开源的优势之一; 想知道内幕,下个代码瞄瞄). 通过查阅代码,grub里面的与之对应的函数大概流程如下,都简明易懂,就不多解析咯."></a>8.3 再深入一些,那<code>options $kernelopts</code>具体又是怎么调进去的呢?好办,快速瞄个代码(呵呵,这就是开源的优势之一; 想知道内幕,下个代码瞄瞄). 通过查阅代码,<code>grub</code>里面的与之对应的函数大概流程如下,都简明易懂,就不多解析咯.</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. GRUB_MOD_INIT(blscfg) &#x2F;&#x2F; gurb在启动时,初始化&#39;blscfg&#39;</span><br><span class="line">2. grub_cmd_blscfg (grub_extcmd_context_t ctxt UNUSED,int argc UNUSED,char **args UNUSED) &#x2F;&#x2F; 命令的实现</span><br><span class="line">3. find_entry (struct find_entry_info *info)  &#x2F;&#x2F; 查找启动列表</span><br><span class="line">4. read_entry (const char *filename,const struct grub_dirhook_info *dirhook_info UNUSED,void *data) &#x2F;&#x2F; 找到就将列表读出来</span><br><span class="line">5. bls_add_keyval(struct bls_entry *entry, char *key, char *val) &#x2F;&#x2F; 把列表里面参数解析并添加</span><br></pre></td></tr></table></figure>
+<h2 id="9-到此-内核启动时通过boootloader添加启动参数就结束了-多说一句-grub2-mkconfig命令也可以有类似功能"><a href="#9-到此-内核启动时通过boootloader添加启动参数就结束了-多说一句-grub2-mkconfig命令也可以有类似功能" class="headerlink" title="9 到此,内核启动时通过boootloader添加启动参数就结束了. 多说一句,grub2-mkconfig命令也可以有类似功能."></a>9 到此,内核启动时通过boootloader添加启动参数就结束了. 多说一句,<code>grub2-mkconfig</code>命令也可以有类似功能.</h2><p>好, Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过<code>grub</code>配置Kernel启动参数就介绍完了. 想要了解更多? 可以参考 GRUB Manual 或者源代码.<br>想要亲手玩一下新玩具? 请随时去 <a target="_blank" rel="noopener" href="https://www.redhat.com/">https://www.redhat.com</a> 下载最新的 REHL 8</p>
+<p>也欢迎关注 <code>addos</code> 微信公众号获取更多的,有意思的新玩具 :-)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/17/RHEL8-news-toys-section4_Kernel_cmdline/" title="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第4篇 通过`grub`配置Kernel启动参数" target="_blank" rel="external">http://www.oostech.com/2021/02/17/RHEL8-news-toys-section4_Kernel_cmdline/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/17/rpm-relationship/" title="查阅rpm的依赖关系"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/17/RHEL8-news-toys-section3-skopeo_podman-docker/" title="Red Hat Enterprise Linux 8 (RHEL8) 的新玩意 第3篇 之容器工具 skopeo, podman-docker"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/" target="_blank"> Sam Lee </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计 -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+
+
+
+
+</body>
+</html>
