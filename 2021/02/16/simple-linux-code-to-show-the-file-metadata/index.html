@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Linux 使用小代码，基于stat 来显示文件的metadata | oosTech.com</title>
+  <meta name="description" content="Simple Linux code based on stat to display file metadataIf you want to know the metadata of a file in Linux system, you can check the detail below. 如果你想了解关于Linux 文件的元数据信息,欢迎继续阅读此文. 1 There is a system">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 使用小代码，基于stat 来显示文件的metadata">
+<meta property="og:url" content="http://www.oostech.com/2021/02/16/simple-linux-code-to-show-the-file-metadata/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Simple Linux code based on stat to display file metadataIf you want to know the metadata of a file in Linux system, you can check the detail below. 如果你想了解关于Linux 文件的元数据信息,欢迎继续阅读此文. 1 There is a system">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-16T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-19T06:28:55.960Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/16/simple-linux-code-to-show-the-file-metadata/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">扫描二维码关注公众号</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">网络 OVS 系列 （原创）</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 技巧系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/16/oom%20out_of_memory%20implementatoin_CHN/" class="title">oom &#34;out_of_memory&#34; implementatoin 介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/16/RHEL8-news-toys-section2-Buildah/" class="title">Red Hat Enterprise Linux 8 的新玩意 第2篇 之容器工具 buildah</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/16/RHEL8-news-toys-section3-skopeo_podman-docker/" class="title">Red Hat Enterprise Linux 8 的新玩意 第3篇 之容器工具 skopeo, podman-docker</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RHEL8-%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">RHEL8 系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/16/RHEL8-news-toys-section4_Kernel_cmdline/" class="title">Red Hat Enterprise Linux 8 的新玩意 第4篇 通过`grub`配置Kernel启动参数</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/16/X86_MASN_instructions/" class="title">X86 汇编指令大全</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Simple-Linux-code-based-on-stat-to-display-file-metadata"><span class="toc-number">1.</span> <span class="toc-text">Simple Linux code based on stat to display file metadata</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-There-is-a-system-call-named-stat-which-can-retrive-the-metadata-of-a-file-so-we-can-write-a-simple-code-to-use-it-to-get-the-file-metatda-%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E9%80%9A%E8%BF%87%E5%86%99%E4%B8%80%E6%AE%B5%E7%AE%80%E5%8D%95%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9D%A5%E4%BD%BF%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8-stat-%E7%84%B6%E5%90%8E%E6%89%A7%E8%A1%8C%E5%AE%83%E6%9D%A5%E8%8E%B7%E5%8F%96%E5%88%B0%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.1.</span> <span class="toc-text">1 There is a system call named stat which can retrive the metadata of a file; so we can write a simple code to use it to get the file metatda. 我们可以通过写一段简单的代码来使用系统调用 stat, 然后执行它来获取到文件的元数据信息.</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-let%E2%80%99-check-the-struct-stat-first-so-that-we-can-know-what-info-we-can-retrive-by-this-system-call-%E9%A6%96%E5%85%88%E7%9C%8B%E4%B8%80%E4%B8%8B%E7%94%A8%E5%88%B0%E7%BB%93%E6%9E%84%E4%BD%93-%E8%BF%99%E6%A0%B7%E5%B0%B1%E5%8F%AF%E4%BB%A5%E7%9F%A5%E9%81%93%E5%8F%AF%E4%BB%A5%E4%BB%8E%E4%B8%AD%E5%BE%97%E5%88%B0%E4%B8%80%E4%BA%9B%E4%BB%80%E4%B9%88%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 let’ check the struct stat first; so that we can know what info we can retrive by this system call. 首先看一下用到结构体,这样就可以知道可以从中得到一些什么元数据信息.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-The-file-type-and-mode-st-mode-total-16-bit-the-lowest-12bit-represent-file-priviledge-and-the-highest-4-bit-represent-file-type-%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%9D%83%E9%99%90%E5%AD%98%E5%82%A8%E5%9C%A8-st-mode-%E5%AD%97%E6%AE%B5%E4%B8%AD-%E5%85%B6%E4%B8%AD%E7%9A%84%E4%BD%8E12%E4%BD%8D%E5%82%A8%E5%AD%98%E4%BA%86%E5%AF%B9%E5%BA%94%E7%9A%84%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90-%E8%80%8C%E9%AB%984%E4%BD%8D%E5%88%99%E5%82%A8%E5%AD%98%E4%BA%86%E5%AF%B9%E5%BA%94%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 The file type and mode (st_mode); total 16 bit, the lowest 12bit represent file priviledge and the highest 4 bit represent file type. 文件类型和权限存储在 st_mode 字段中, 其中的低12位储存了对应的文件权限,而高4位则储存了对应文件类型.</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-st-mode-file-type-%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">1.2.1 st_mode file type  文件类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-st-mode-file-mode-%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">1.2.1 st_mode file mode  文件权限</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Let%E2%80%99s-have-a-quick-check-against-file-metadata-which-displayed-by-demo-app-%E5%BF%AB%E9%80%9F%E7%9A%84%E9%80%9A%E8%BF%87%E6%88%91%E4%BB%AC%E5%86%99%E7%9A%84%E4%BE%8B%E5%AD%90%E5%BA%94%E7%94%A8%E6%9D%A5%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE"><span class="toc-number">2.</span> <span class="toc-text">2 Let’s have a quick check against file metadata which displayed by demo app, 快速的通过我们写的例子应用来看一下文件的元数据.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-display-the-character-device-file-%E8%8E%B7%E5%8F%96%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 display the character device file 获取字符设备文件的信息.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-display-block-device-file-%E8%8E%B7%E5%8F%96%E5%9D%97%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 display block device file; 获取块设备文件的信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-display-regular-file-%E8%8E%B7%E5%8F%96%E5%B8%B8%E8%A7%84%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 display regular file; 获取常规文件的信息</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Source-code-of-filemetadata-%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E9%80%9A%E8%BF%87%E6%BA%90%E4%BB%A3%E7%A0%81%E7%9C%8B%E5%AE%83%E7%9A%84%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">3 Source code of filemetadata 我们可以通过源代码看它的具体实现.</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-simple-linux-code-to-show-the-file-metadata" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux 使用小代码，基于stat 来显示文件的metadata
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/16/simple-linux-code-to-show-the-file-metadata/" class="article-date">
+	  <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81%E7%B3%BB%E5%88%97-%EF%BC%88%E5%8E%9F%E5%88%9B%EF%BC%89/">Linux 代码系列 （原创）</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv"></span>
+		</span>
+	</span>
+
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/16/simple-linux-code-to-show-the-file-metadata/#comments" class="article-comment-link">评论</a></span>
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Simple-Linux-code-based-on-stat-to-display-file-metadata"><a href="#Simple-Linux-code-based-on-stat-to-display-file-metadata" class="headerlink" title="Simple Linux code based on stat to display file metadata"></a>Simple Linux code based on <code>stat</code> to display file metadata</h1><p>If you want to know the metadata of a file in Linux system, you can check the detail below. 如果你想了解关于Linux 文件的元数据信息,欢迎继续阅读此文.</p>
+<h2 id="1-There-is-a-system-call-named-stat-which-can-retrive-the-metadata-of-a-file-so-we-can-write-a-simple-code-to-use-it-to-get-the-file-metatda-我们可以通过写一段简单的代码来使用系统调用-stat-然后执行它来获取到文件的元数据信息"><a href="#1-There-is-a-system-call-named-stat-which-can-retrive-the-metadata-of-a-file-so-we-can-write-a-simple-code-to-use-it-to-get-the-file-metatda-我们可以通过写一段简单的代码来使用系统调用-stat-然后执行它来获取到文件的元数据信息" class="headerlink" title="1 There is a system call named stat which can retrive the metadata of a file; so we can write a simple code to use it to get the file metatda. 我们可以通过写一段简单的代码来使用系统调用 stat, 然后执行它来获取到文件的元数据信息."></a>1 There is a system call named <code>stat</code> which can retrive the metadata of a file; so we can write a simple code to use it to get the file metatda. 我们可以通过写一段简单的代码来使用系统调用 <code>stat</code>, 然后执行它来获取到文件的元数据信息.</h2><h3 id="1-1-let’-check-the-struct-stat-first-so-that-we-can-know-what-info-we-can-retrive-by-this-system-call-首先看一下用到结构体-这样就可以知道可以从中得到一些什么元数据信息"><a href="#1-1-let’-check-the-struct-stat-first-so-that-we-can-know-what-info-we-can-retrive-by-this-system-call-首先看一下用到结构体-这样就可以知道可以从中得到一些什么元数据信息" class="headerlink" title="1.1 let’ check the struct stat first; so that we can know what info we can retrive by this system call. 首先看一下用到结构体,这样就可以知道可以从中得到一些什么元数据信息."></a>1.1 let’ check the <code>struct stat</code> first; so that we can know what info we can retrive by this system call. 首先看一下用到结构体,这样就可以知道可以从中得到一些什么元数据信息.</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">struct stat &#123;</span><br><span class="line">    dev_t     st_dev;         &#x2F;* ID of device containing file   - 存储此文件的设备ID, 随后可以通过major,minor 解析*&#x2F;</span><br><span class="line">    ino_t     st_ino;         &#x2F;* inode number                   - inode 号码, 可以理解为索引节点*&#x2F;</span><br><span class="line">    mode_t    st_mode;        &#x2F;* file type and mode(detail below) - 文件的类型以及读,写,执行权限(下面st_mode有详细的描述)*&#x2F;</span><br><span class="line">    nlink_t   st_nlink;       &#x2F;* number of hard links           - 文件对应的硬链接数 *&#x2F;</span><br><span class="line">    uid_t     st_uid;         &#x2F;* user ID of owner               - 文件的用户ID*&#x2F;</span><br><span class="line">    gid_t     st_gid;         &#x2F;* group ID of owner              - 文件的组ID *&#x2F;</span><br><span class="line">    dev_t     st_rdev;        &#x2F;* device ID (if special file)    - 文件的设备ID, 针对一些特殊的文件(设备文件),比如块,字符等设备*&#x2F;</span><br><span class="line">    off_t     st_size;        &#x2F;* total size, in bytes           - 文件的大小,以byte为单位*&#x2F;</span><br><span class="line">    blksize_t st_blksize;     &#x2F;* blocksize for filesystem I&#x2F;O   - 文件在文件系统所占块大小*&#x2F;</span><br><span class="line">    blkcnt_t  st_blocks;      &#x2F;* number of 512B blocks allocated - 分配的磁盘块,已一个block为512Bytes*&#x2F;</span><br><span class="line">    struct timespec st_atim;  &#x2F;* time of last access             - 文件最近的访问时间 *&#x2F;</span><br><span class="line">    struct timespec st_mtim;  &#x2F;* time of last modification       - 文件最近的修改时间*&#x2F;</span><br><span class="line">    struct timespec st_ctim;  &#x2F;* time of last status change      - 文件最近的状态变化时间*&#x2F;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="1-2-The-file-type-and-mode-st-mode-total-16-bit-the-lowest-12bit-represent-file-priviledge-and-the-highest-4-bit-represent-file-type-文件类型和权限存储在-st-mode-字段中-其中的低12位储存了对应的文件权限-而高4位则储存了对应文件类型"><a href="#1-2-The-file-type-and-mode-st-mode-total-16-bit-the-lowest-12bit-represent-file-priviledge-and-the-highest-4-bit-represent-file-type-文件类型和权限存储在-st-mode-字段中-其中的低12位储存了对应的文件权限-而高4位则储存了对应文件类型" class="headerlink" title="1.2 The file type and mode (st_mode); total 16 bit, the lowest 12bit represent file priviledge and the highest 4 bit represent file type. 文件类型和权限存储在 st_mode 字段中, 其中的低12位储存了对应的文件权限,而高4位则储存了对应文件类型."></a>1.2 The file type and mode (st_mode); total 16 bit, the lowest 12bit represent file priviledge and the highest 4 bit represent file type. 文件类型和权限存储在 <code>st_mode</code> 字段中, 其中的低12位储存了对应的文件权限,而高4位则储存了对应文件类型.</h3><h4 id="1-2-1-st-mode-file-type-文件类型"><a href="#1-2-1-st-mode-file-type-文件类型" class="headerlink" title="1.2.1 st_mode file type  文件类型"></a>1.2.1 <code>st_mode</code> file type  文件类型</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">S_IFSOCK      socket                               套接字文件</span><br><span class="line">S_IFLNK       symbolic link                        字符链接文件</span><br><span class="line">S_IFREG       regular file                         常规文件</span><br><span class="line">S_IFBLK       block device                         块设备文件</span><br><span class="line">S_IFDIR       directory                            文件夹</span><br><span class="line">S_IFCHR       character device                     字符文件</span><br><span class="line">S_IFIFO       FIFO                                 FIFO文件</span><br></pre></td></tr></table></figure>
+<h4 id="1-2-1-st-mode-file-mode-文件权限"><a href="#1-2-1-st-mode-file-mode-文件权限" class="headerlink" title="1.2.1 st_mode file mode  文件权限"></a>1.2.1 <code>st_mode</code> file mode  文件权限</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Owner (also known as user): The permissions granted to the owner of the file. 这个文件的用户的对应权限.</span><br><span class="line"></span><br><span class="line">Group: The permissions granted to users who are members of the file’s group. 这个文件的用户组的对应权限</span><br><span class="line"></span><br><span class="line">Other: The permissions granted to everyone else. 这个文件的其他用户的对应权限</span><br><span class="line"></span><br><span class="line">Read: The contents of the file may be read. 读权限, 表明文件可以被对应的用户读取.</span><br><span class="line"></span><br><span class="line">Write: The contents of the file may be changed.写权限,表明文件可以被对应的用户写入.</span><br><span class="line"></span><br><span class="line">Execute: The file may be executed. In order to execute a script file, both read and execute permissions are required. 执行权限, 表明文件可以被对应的用户执行.如果对于要执行脚本文件来说,读和执行权限是必须的.</span><br></pre></td></tr></table></figure>
+<h1 id="2-Let’s-have-a-quick-check-against-file-metadata-which-displayed-by-demo-app-快速的通过我们写的例子应用来看一下文件的元数据"><a href="#2-Let’s-have-a-quick-check-against-file-metadata-which-displayed-by-demo-app-快速的通过我们写的例子应用来看一下文件的元数据" class="headerlink" title="2 Let’s have a quick check against file metadata which displayed by demo app, 快速的通过我们写的例子应用来看一下文件的元数据."></a>2 Let’s have a quick check against file metadata which displayed by demo app, 快速的通过我们写的例子应用来看一下文件的元数据.</h1><h2 id="2-1-display-the-character-device-file-获取字符设备文件的信息"><a href="#2-1-display-the-character-device-file-获取字符设备文件的信息" class="headerlink" title="2.1 display the character device file 获取字符设备文件的信息."></a>2.1 display the character device file 获取字符设备文件的信息.</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@sam samapplications]# filemetadata &#x2F;dev&#x2F;ttyS0</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; File Metadata &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Directory:				&#x2F;dev&#x2F;ttyS0</span><br><span class="line">File type:				Character device</span><br><span class="line">Device containing:			major&#x3D;0   minor&#x3D;5</span><br><span class="line">inode number:				1146</span><br><span class="line">Mode:					rw-rw----</span><br><span class="line">Device number (st_rdev):		major&#x3D;4; minor&#x3D;64</span><br><span class="line">Number of (hard) links:			1</span><br><span class="line">Ownership:				UID&#x3D;0   GID&#x3D;18</span><br><span class="line">File size:				0 bytes : 0 KB</span><br><span class="line">I&#x2F;O block size:				4096 bytes</span><br><span class="line">Number of (512B) blocks allocated:	0</span><br><span class="line">Last file access:			Sat Jun 15 19:45:34 2019</span><br><span class="line">Last file modification:			Sat Jun 15 19:45:34 2019</span><br><span class="line">Last status change:			Sat Jun 15 19:45:34 2019</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<h2 id="2-2-display-block-device-file-获取块设备文件的信息"><a href="#2-2-display-block-device-file-获取块设备文件的信息" class="headerlink" title="2.2 display block device file; 获取块设备文件的信息"></a>2.2 display block device file; 获取块设备文件的信息</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@sam samapplications]# filemetadata &#x2F;dev&#x2F;nvme0n1p2</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; File Metadata &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Directory:				&#x2F;dev&#x2F;nvme0n1p2</span><br><span class="line">File type:				Block device</span><br><span class="line">Device containing:			major&#x3D;0   minor&#x3D;5</span><br><span class="line">inode number:				15059</span><br><span class="line">Mode:					rw-rw----</span><br><span class="line">Device number (st_rdev):		major&#x3D;259; minor&#x3D;2</span><br><span class="line">Number of (hard) links:			1</span><br><span class="line">Ownership:				UID&#x3D;0   GID&#x3D;6</span><br><span class="line">File size:				0 bytes : 0 KB</span><br><span class="line">I&#x2F;O block size:				4096 bytes</span><br><span class="line">Number of (512B) blocks allocated:	0</span><br><span class="line">Last file access:			Sat Jun 15 19:45:34 2019</span><br><span class="line">Last file modification:			Sat Jun 15 19:45:34 2019</span><br><span class="line">Last status change:			Sat Jun 15 19:45:34 2019</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<h2 id="2-3-display-regular-file-获取常规文件的信息"><a href="#2-3-display-regular-file-获取常规文件的信息" class="headerlink" title="2.3 display regular file; 获取常规文件的信息"></a>2.3 display regular file; 获取常规文件的信息</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">[root@sam samapplications]# filemetadata &#x2F;tmp&#x2F;rhel-server-7.3-x86_64-dvd.iso</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; File Metadata &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Directory:				&#x2F;tmp&#x2F;rhel-server-7.3-x86_64-dvd.iso</span><br><span class="line">File type:				Regular file</span><br><span class="line">Device containing:			major&#x3D;259   minor&#x3D;2</span><br><span class="line">inode number:				1137863993</span><br><span class="line">Mode:					rw-r--r--</span><br><span class="line">Number of (hard) links:			1</span><br><span class="line">Ownership:				UID&#x3D;107   GID&#x3D;107</span><br><span class="line">File size:				3793747968 bytes : 3704832 KB</span><br><span class="line">I&#x2F;O block size:				4096 bytes</span><br><span class="line">Number of (512B) blocks allocated:	7409672</span><br><span class="line">Last file access:			Sat Jun 15 19:45:50 2019</span><br><span class="line">Last file modification:			Sun Apr 28 09:11:51 2019</span><br><span class="line">Last status change:			Sat Jun  1 21:35:50 2019</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">[root@sam samapplications]# filemetadata &#x2F;tmp&#x2F;metadata-link</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; File Metadata &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Directory:				&#x2F;tmp&#x2F;metadata-link</span><br><span class="line">File type:				Symbolic (soft) link</span><br><span class="line">Device containing:			major&#x3D;0   minor&#x3D;40</span><br><span class="line">inode number:				287970</span><br><span class="line">Mode:					rwxrwxrwx</span><br><span class="line">Number of (hard) links:			1</span><br><span class="line">Ownership:				UID&#x3D;0   GID&#x3D;0</span><br><span class="line">File size:				8 bytes : 0 KB</span><br><span class="line">I&#x2F;O block size:				4096 bytes</span><br><span class="line">Number of (512B) blocks allocated:	0</span><br><span class="line">Last file access:			Sat Jun 15 21:58:29 2019</span><br><span class="line">Last file modification:			Sat Jun 15 21:58:24 2019</span><br><span class="line">Last status change:			Sat Jun 15 21:58:24 2019</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<h1 id="3-Source-code-of-filemetadata-我们可以通过源代码看它的具体实现"><a href="#3-Source-code-of-filemetadata-我们可以通过源代码看它的具体实现" class="headerlink" title="3 Source code of filemetadata 我们可以通过源代码看它的具体实现."></a>3 Source code of <code>filemetadata</code> 我们可以通过源代码看它的具体实现.</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;*</span><br><span class="line"> * Draft by Sam at 06-16-2019</span><br><span class="line"> * show the metadata of a file</span><br><span class="line"> * *&#x2F;</span><br><span class="line">#include &lt;sys&#x2F;stat.h&gt;</span><br><span class="line">#include &lt;time.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;* display the file permision</span><br><span class="line"> * mode_t(file type and mode) of statBuffer as a parameter</span><br><span class="line"> * *&#x2F;</span><br><span class="line">void disFilePerm(mode_t filePerm)&#123;</span><br><span class="line">	char userR &#x3D; 0, userW &#x3D; 0, userX &#x3D; 0;</span><br><span class="line">	char groupR &#x3D; 0, groupW &#x3D; 0, groupX &#x3D; 0;</span><br><span class="line">	char otherR &#x3D; 0, otherW &#x3D; 0, otherX &#x3D; 0;</span><br><span class="line"></span><br><span class="line">	userR &#x3D; (filePerm &amp; S_IRUSR) ? &#39;r&#39; : &#39;-&#39;;</span><br><span class="line">	userW &#x3D; (filePerm &amp; S_IWUSR) ? &#39;w&#39; : &#39;-&#39;;</span><br><span class="line">	userX &#x3D; (filePerm &amp; S_IXUSR) ? &#39;x&#39; : &#39;-&#39;;</span><br><span class="line"></span><br><span class="line">	groupR &#x3D; (filePerm &amp; S_IRGRP) ? &#39;r&#39; : &#39;-&#39;;</span><br><span class="line">	groupW &#x3D; (filePerm &amp; S_IWGRP) ? &#39;w&#39; : &#39;-&#39;;</span><br><span class="line">	groupX &#x3D; (filePerm &amp; S_IXGRP) ? &#39;x&#39; : &#39;-&#39;;</span><br><span class="line"></span><br><span class="line">	otherR &#x3D; (filePerm &amp; S_IROTH) ? &#39;r&#39; : &#39;-&#39;;</span><br><span class="line">	otherW &#x3D; (filePerm &amp; S_IWOTH) ? &#39;w&#39; : &#39;-&#39;;</span><br><span class="line">	otherX &#x3D; (filePerm &amp; S_IXOTH) ? &#39;x&#39; : &#39;-&#39;;</span><br><span class="line"></span><br><span class="line">	printf(&quot;Mode:\t\t\t\t\t%c%c%c%c%c%c%c%c%c\n&quot;,userR,userW,userX,groupR,groupW,groupX,otherR,otherW,otherX);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"> * display the stat buffer</span><br><span class="line"> * the pointer of statBuffer as parameter</span><br><span class="line"> * *&#x2F;</span><br><span class="line">void displayStatInfo(struct stat *statBuffer, const char *filepath)&#123;</span><br><span class="line">	printf(&quot;\n&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; File Metadata &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;\n\n&quot;);</span><br><span class="line">	&#x2F;* print the file type *&#x2F;</span><br><span class="line">	printf(&quot;Directory:\t\t\t\t%s\n&quot;,filepath);</span><br><span class="line">    printf(&quot;File type:\t\t\t\t&quot;);</span><br><span class="line">    switch (statBuffer-&gt;st_mode &amp; S_IFMT) &#123;</span><br><span class="line">    case S_IFREG:  printf(&quot;Regular file\n&quot;);            break;</span><br><span class="line">    case S_IFDIR:  printf(&quot;Directory\n&quot;);               break;</span><br><span class="line">    case S_IFCHR:  printf(&quot;Character device\n&quot;);        break;</span><br><span class="line">    case S_IFBLK:  printf(&quot;Block device\n&quot;);            break;</span><br><span class="line">    case S_IFLNK:  printf(&quot;Symbolic (soft) link\n&quot;);    break;</span><br><span class="line">    case S_IFIFO:  printf(&quot;FIFO or pipe\n&quot;);            break;</span><br><span class="line">    case S_IFSOCK: printf(&quot;Socket\n&quot;);                  break;</span><br><span class="line">    default:       printf(&quot;Unknown file type\n&quot;);       break;</span><br><span class="line">    &#125;</span><br><span class="line">    printf(&quot;Device containing:\t\t\tmajor&#x3D;%ld   minor&#x3D;%ld\n&quot;,(long) major(statBuffer-&gt;st_dev), (long) minor(statBuffer-&gt;st_dev));</span><br><span class="line">    printf(&quot;inode number:\t\t\t\t%ld\n&quot;, (long) statBuffer-&gt;st_ino);</span><br><span class="line">    disFilePerm(statBuffer-&gt;st_mode);</span><br><span class="line">    if (S_ISCHR(statBuffer-&gt;st_mode) || S_ISBLK(statBuffer-&gt;st_mode))&#123;</span><br><span class="line">		printf(&quot;Device number (st_rdev):\t\tmajor&#x3D;%ld; minor&#x3D;%ld\n&quot;,(long) major(statBuffer-&gt;st_rdev), (long) minor(statBuffer-&gt;st_rdev));</span><br><span class="line">	&#125;</span><br><span class="line">    printf(&quot;Number of (hard) links:\t\t\t%ld\n&quot;, (long) statBuffer-&gt;st_nlink);</span><br><span class="line">    printf(&quot;Ownership:\t\t\t\tUID&#x3D;%ld   GID&#x3D;%ld\n&quot;, (long) statBuffer-&gt;st_uid, (long) statBuffer-&gt;st_gid);</span><br><span class="line">    printf(&quot;File size:\t\t\t\t%lld bytes : %lld KB\n&quot;, (long long) statBuffer-&gt;st_size, statBuffer-&gt;st_size&#x2F;1024);</span><br><span class="line">    printf(&quot;I&#x2F;O block size:\t\t\t\t%ld bytes\n&quot;, (long) statBuffer-&gt;st_blksize);</span><br><span class="line">    printf(&quot;Number of (512B) blocks allocated:\t%lld\n&quot;, (long long) statBuffer-&gt;st_blocks);</span><br><span class="line">    printf(&quot;Last file access:\t\t\t%s&quot;, ctime(&amp;statBuffer-&gt;st_atime));</span><br><span class="line">    printf(&quot;Last file modification:\t\t\t%s&quot;, ctime(&amp;statBuffer-&gt;st_mtime));</span><br><span class="line">    printf(&quot;Last status change:\t\t\t%s&quot;, ctime(&amp;statBuffer-&gt;st_ctime));</span><br><span class="line">    printf(&quot;\n&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;\n\n&quot;);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> &#x2F;*</span><br><span class="line">  * return data</span><br><span class="line">  * 1 for Invalid patameters</span><br><span class="line">  * 2 for lstat error</span><br><span class="line">  * 0 for sucess</span><br><span class="line">  * *&#x2F;</span><br><span class="line">int main(int argc, char *argv[])&#123;</span><br><span class="line">    struct stat statBuffer;</span><br><span class="line">	if (argc !&#x3D; 2 || argv[1] &#x3D;&#x3D; NULL)&#123;</span><br><span class="line">			printf(&quot;Usage:  filemetadata &lt;FILENAME&gt; \n&quot;);</span><br><span class="line">			return 1;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	&#x2F;* just use lstat to show the info; because lstat() is identical to stat(), except that if pathname is a symbolic link, then it returns information about the  link</span><br><span class="line">     * itself, not the file that it refers to.</span><br><span class="line">	 *&#x2F;</span><br><span class="line">    if (lstat(argv[1], &amp;statBuffer) &#x3D;&#x3D; -1)&#123;</span><br><span class="line">		perror(&quot;filemetadata&quot;);</span><br><span class="line">        return 2;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	displayStatInfo(&amp;statBuffer, argv[1]);</span><br><span class="line">    return 0;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>Ok, we know the Metadata of a file via <code>stat</code> system call as discripted above; you can please try the code and modify to study more about that.<br>到此为止,我们初步了解了Linux 文件的元数据大概有些什么信息,以及如何通过<code>stat</code>系统调用来获取它们. 如果向要深入了解,可以尝试修改上面的代码并编译看能否取更有意思的输出.</p>
+<p>To know more? you can follow my wechat public account <code>ADVANZONE</code>.<br>想要了解更多? 欢迎关注 Addos 微信公众号获取更多的,有意思的玩意咯 :-)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/16/simple-linux-code-to-show-the-file-metadata/" title="Linux 使用小代码，基于stat 来显示文件的metadata" target="_blank" rel="external">http://www.oostech.com/2021/02/16/simple-linux-code-to-show-the-file-metadata/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x">扫描二维码关注公众号</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/16/ovs-vsctl_usage-guide-CHN/" title="ovs-vsctl简明用户手册(基于版本openvswitch-2.11.0-4.el7.x86_64)"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/16/sysrq-trigger-operation/" title="当执行 echo &#34;X&#34; &gt; /proc/sysrq-trigger 的时候, 这个X究竟有些什么值可以输入?"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/" target="_blank"> Sam Lee </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计 -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+
+
+
+
+
+
+</body>
+</html>
