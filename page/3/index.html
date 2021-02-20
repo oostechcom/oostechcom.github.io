@@ -17,20 +17,16 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>Linux 实用小代码，基于stat 来显示文件的metadata | oosTech.com</title>
-  <meta name="description" content="Simple Linux code based on stat to display file metadataIf you want to know the metadata of a file in Linux system, you can check the detail below. 如果你想了解关于Linux 文件的元数据信息,欢迎继续阅读此文. 1 There is a system">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Linux 实用小代码，基于stat 来显示文件的metadata">
-<meta property="og:url" content="http://www.oostech.com/2021/02/15/simple-linux-code-to-show-the-file-metadata/index.html">
+  <title>oosTech.com</title>
+  <meta property="og:type" content="website">
+<meta property="og:title" content="oosTech">
+<meta property="og:url" content="http://www.oostech.com/page/3/index.html">
 <meta property="og:site_name" content="oosTech">
-<meta property="og:description" content="Simple Linux code based on stat to display file metadataIf you want to know the metadata of a file in Linux system, you can check the detail below. 如果你想了解关于Linux 文件的元数据信息,欢迎继续阅读此文. 1 There is a system">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-02-15T13:00:00.000Z">
-<meta property="article:modified_time" content="2021-02-16T16:00:00.000Z">
 <meta property="article:author" content="Sam Lee">
 <meta name="twitter:card" content="summary">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://www.oostech.com/2021/02/15/simple-linux-code-to-show-the-file-metadata/index.html">
+  <link rel="canonical" href="http://www.oostech.com/page/3/index.html">
   
     <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
   
@@ -283,26 +279,18 @@
 </aside>
 
   
+  <main class="main" role="main">
   
-<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
-  <div class="slimContent">
-    <nav id="toc" class="article-toc">
-      <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Simple-Linux-code-based-on-stat-to-display-file-metadata"><span class="toc-number">1.</span> <span class="toc-text">Simple Linux code based on stat to display file metadata</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-There-is-a-system-call-named-stat-which-can-retrive-the-metadata-of-a-file-so-we-can-write-a-simple-code-to-use-it-to-get-the-file-metatda-%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E9%80%9A%E8%BF%87%E5%86%99%E4%B8%80%E6%AE%B5%E7%AE%80%E5%8D%95%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9D%A5%E4%BD%BF%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8-stat-%E7%84%B6%E5%90%8E%E6%89%A7%E8%A1%8C%E5%AE%83%E6%9D%A5%E8%8E%B7%E5%8F%96%E5%88%B0%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.1.</span> <span class="toc-text">1 There is a system call named stat which can retrive the metadata of a file; so we can write a simple code to use it to get the file metatda. 我们可以通过写一段简单的代码来使用系统调用 stat, 然后执行它来获取到文件的元数据信息.</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-let%E2%80%99-check-the-struct-stat-first-so-that-we-can-know-what-info-we-can-retrive-by-this-system-call-%E9%A6%96%E5%85%88%E7%9C%8B%E4%B8%80%E4%B8%8B%E7%94%A8%E5%88%B0%E7%BB%93%E6%9E%84%E4%BD%93-%E8%BF%99%E6%A0%B7%E5%B0%B1%E5%8F%AF%E4%BB%A5%E7%9F%A5%E9%81%93%E5%8F%AF%E4%BB%A5%E4%BB%8E%E4%B8%AD%E5%BE%97%E5%88%B0%E4%B8%80%E4%BA%9B%E4%BB%80%E4%B9%88%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 let’ check the struct stat first; so that we can know what info we can retrive by this system call. 首先看一下用到结构体,这样就可以知道可以从中得到一些什么元数据信息.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-The-file-type-and-mode-st-mode-total-16-bit-the-lowest-12bit-represent-file-priviledge-and-the-highest-4-bit-represent-file-type-%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%9D%83%E9%99%90%E5%AD%98%E5%82%A8%E5%9C%A8-st-mode-%E5%AD%97%E6%AE%B5%E4%B8%AD-%E5%85%B6%E4%B8%AD%E7%9A%84%E4%BD%8E12%E4%BD%8D%E5%82%A8%E5%AD%98%E4%BA%86%E5%AF%B9%E5%BA%94%E7%9A%84%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90-%E8%80%8C%E9%AB%984%E4%BD%8D%E5%88%99%E5%82%A8%E5%AD%98%E4%BA%86%E5%AF%B9%E5%BA%94%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 The file type and mode (st_mode); total 16 bit, the lowest 12bit represent file priviledge and the highest 4 bit represent file type. 文件类型和权限存储在 st_mode 字段中, 其中的低12位储存了对应的文件权限,而高4位则储存了对应文件类型.</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-st-mode-file-type-%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">1.2.1 st_mode file type  文件类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-st-mode-file-mode-%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">1.2.1 st_mode file mode  文件权限</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Let%E2%80%99s-have-a-quick-check-against-file-metadata-which-displayed-by-demo-app-%E5%BF%AB%E9%80%9F%E7%9A%84%E9%80%9A%E8%BF%87%E6%88%91%E4%BB%AC%E5%86%99%E7%9A%84%E4%BE%8B%E5%AD%90%E5%BA%94%E7%94%A8%E6%9D%A5%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE"><span class="toc-number">2.</span> <span class="toc-text">2 Let’s have a quick check against file metadata which displayed by demo app, 快速的通过我们写的例子应用来看一下文件的元数据.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-display-the-character-device-file-%E8%8E%B7%E5%8F%96%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 display the character device file 获取字符设备文件的信息.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-display-block-device-file-%E8%8E%B7%E5%8F%96%E5%9D%97%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 display block device file; 获取块设备文件的信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-display-regular-file-%E8%8E%B7%E5%8F%96%E5%B8%B8%E8%A7%84%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 display regular file; 获取常规文件的信息</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Source-code-of-filemetadata-%E6%88%91%E4%BB%AC%E5%8F%AF%E4%BB%A5%E9%80%9A%E8%BF%87%E6%BA%90%E4%BB%A3%E7%A0%81%E7%9C%8B%E5%AE%83%E7%9A%84%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">3 Source code of filemetadata 我们可以通过源代码看它的具体实现.</span></a></li></ol>
-    </nav>
-  </div>
-</aside>
-
-<main class="main" role="main">
-  <div class="content">
+  
+    <div class="content">
   <article id="post-simple-linux-code-to-show-the-file-metadata" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
-    <h1 class="article-title" itemprop="name">
-      Linux 实用小代码，基于stat 来显示文件的metadata
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/02/15/simple-linux-code-to-show-the-file-metadata/">Linux 实用小代码，基于stat 来显示文件的metadata</a>
     </h1>
   
 
@@ -397,94 +385,38 @@
     </div>
   </article>
   
-    
-
-  
 </div>
 
-  <nav class="bar bar-footer clearfix" data-stick-bottom>
-  <div class="bar-inner">
+
   
-  <ul class="pager pull-left">
-    
-    <li class="prev">
-      <a href="/2021/02/16/sysrq-trigger-operation/" title="当执行 echo &#34;X&#34; &gt; /proc/sysrq-trigger 的时候, 这个X究竟有些什么值可以输入?"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
-    
-    
-    <li class="toggle-toc">
-      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
-        <span>[&nbsp;</span><span>文章目录</span>
-        <i class="text-collapsed icon icon-anchor"></i>
-        <i class="text-in icon icon-close"></i>
-        <span>]</span>
-      </a>
-    </li>
-    
-  </ul>
+
   
-  
-  <!-- Button trigger modal -->
-  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
-  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
-    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
-  </div> -->
-  
-  
-  <div class="bar-right">
     
-    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
-    
-  </div>
-  </div>
-</nav>
-  
-<!-- Modal -->
-<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content donate">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <div class="modal-body">
-        <div class="donate-box">
-          <div class="donate-head">
-            <p>感谢您的支持，我会继续努力的!</p>
-          </div>
-          <div class="tab-content">
-            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
-              <div class="donate-payimg">
-                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
-              </div>
-              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
-              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
-            </div>
-            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
-              <div class="donate-payimg">
-                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
-              </div>
-              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
-              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
-            </div>
-          </div>
-          <div class="donate-footer">
-            <ul class="nav nav-tabs nav-justified" role="tablist">
-              <li role="presentation" class="active">
-                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
-              </li>
-              <li role="presentation" class="">
-                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
-              </li>
-            </ul>
-          </div>
+    <nav class="bar bar-footer clearfix" data-stick-bottom>
+        <div class="bar-inner">
+        <ul class="pager pull-left">
+            
+            <li class="prev">
+                <a href="/page/2/">
+                    <i class="icon icon-angle-left"></i>
+                    上一页
+                </a>
+            </li>
+            
+            
+            <li class="next disabled">
+                <a href="javascript:;">
+                    下一页
+                    <i class="icon icon-angle-right"></i>                    
+                </a>
+            </li>
+            
+        </ul>
+        <div class="total-article bar-right">Page 3 of 3</div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
+    </nav>
+    
+ 
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
