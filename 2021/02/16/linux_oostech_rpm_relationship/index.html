@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>查阅rpm的依赖关系 | oosTech.com</title>
+  <meta name="description" content="查阅rpm的依赖关系1 使用RPM命令可以列出目标包所依赖的所有包，如下123456789101112131415161718192021222324252627282930[root@sam Packages]# rpm -qR vim-enhanced&#x2F;bin&#x2F;shconfig(vim-enhanced) &#x3D; 2:8.0.1763-15.el8libacl.so.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="查阅rpm的依赖关系">
+<meta property="og:url" content="http://www.oostech.com/2021/02/16/linux_oostech_rpm_relationship/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="查阅rpm的依赖关系1 使用RPM命令可以列出目标包所依赖的所有包，如下123456789101112131415161718192021222324252627282930[root@sam Packages]# rpm -qR vim-enhanced&#x2F;bin&#x2F;shconfig(vim-enhanced) &#x3D; 2:8.0.1763-15.el8libacl.so.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-16T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-16T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/16/linux_oostech_rpm_relationship/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/IPMI-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">IPMI 技巧(原创)</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">Linux 技巧(原创)</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F-%E5%AE%B9%E5%99%A8-%E5%8E%9F%E5%88%9B/">云原生 容器(原创)</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E5%8E%9F%E5%88%9B/">网络 OVS(原创)</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/01/kernel_oostech_classify_5121/" class="title">Linux 内核源码的分布 内核版本 5.12.1 发布时间 2021-03-1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-28T16:00:00.000Z" itemprop="datePublished">2021-03-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">Linux 技巧(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/linux_oostech_gnome_software_service/" class="title">Linux小玩意之 gnome桌面显示的 &#34;Software Updates Available&#34; 来自那里?</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F-%E5%AE%B9%E5%99%A8-%E5%8E%9F%E5%88%9B/">云原生 容器(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/cloud_oostech_setup_k8s_test_env/" class="title">如何通过 kubeadm手工搭建一个 kubernetes 测试学习的集群</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/code_oostech_reset_os_via_cf9/" class="title">Linux 实用小代码，操作 CF9 寄存器来重启系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/code_oostech_parted_cannot_create_xfs_filesystem/" class="title">Linux 代码分析，为什么parted不能建立 ext3，ext4，xfs文件系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E9%98%85rpm%E7%9A%84%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">查阅rpm的依赖关系</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BD%BF%E7%94%A8RPM%E5%91%BD%E4%BB%A4%E5%8F%AF%E4%BB%A5%E5%88%97%E5%87%BA%E7%9B%AE%E6%A0%87%E5%8C%85%E6%89%80%E4%BE%9D%E8%B5%96%E7%9A%84%E6%89%80%E6%9C%89%E5%8C%85%EF%BC%8C%E5%A6%82%E4%B8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1 使用RPM命令可以列出目标包所依赖的所有包，如下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%9F%A5%E8%BF%98%E6%B2%A1%E6%9C%89%E5%AE%89%E8%A3%85%E7%9A%84"><span class="toc-number">1.2.</span> <span class="toc-text">2 查还没有安装的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%A6%81%E4%B8%8B%E8%BD%BD%E4%B8%80%E4%B8%AA-RPM-%E5%8C%85%E8%80%8C%E4%B8%8D%E5%AE%89%E8%A3%85%EF%BC%8C%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8%E5%8F%AB%E5%81%9A%E2%80%99yumdownloader%E2%80%99%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%88%91%E4%BB%AC%E5%85%88%E5%AE%89%E8%A3%85yumdownloader%EF%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">3 要下载一个 RPM 包而不安装，可以使用叫做’yumdownloader’的工具，下面我们先安装yumdownloader：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%98%BE%E7%A4%BA%E7%9B%AE%E6%A0%87%E5%8C%85%E6%89%80%E4%BE%9D%E8%B5%96%E7%9A%84%E5%8C%85%EF%BC%9A-%E4%B8%BA%E8%AE%A9repoquery%E6%AD%A3%E5%B8%B8%E7%9A%84%E5%B7%A5%E4%BD%9C%EF%BC%8C%E9%9C%80%E8%A6%81%E4%BF%9D%E6%8C%81%E7%BD%91%E7%BB%9C%E7%9A%84%E7%95%85%E9%80%9A%EF%BC%8C%E5%BA%94%E4%B8%BArepoquery%E9%9C%80%E8%A6%81%E5%9C%A8Yum%E5%BA%93%E4%B8%AD%E6%9F%A5%E6%89%BE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.4.</span> <span class="toc-text">4 显示目标包所依赖的包：(为让repoquery正常的工作，需要保持网络的畅通，应为repoquery需要在Yum库中查找信息)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%8F%AA%E9%9C%80%E8%BF%90%E8%A1%8Crpmreaper%E5%B0%B1%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0RPM%E5%8C%85%E7%9A%84%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%EF%BC%9A"><span class="toc-number">1.5.</span> <span class="toc-text">5 只需运行rpmreaper就可以看到RPM包的依赖关系：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E8%BF%98%E6%9C%89%E4%B8%80%E4%B8%AA%E5%8A%9E%E6%B3%95%E6%98%AF%E4%BD%BF%E7%94%A8rpmdep%E5%B7%A5%E5%85%B7"><span class="toc-number">1.6.</span> <span class="toc-text">6 还有一个办法是使用rpmdep工具</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-linux_oostech_rpm_relationship" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      查阅rpm的依赖关系
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/16/linux_oostech_rpm_relationship/" class="article-date">
+	 published: <time datetime="2021-02-16T13:00:00.000Z" itemprop="datePublished">2021-02-16</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/16/linux_oostech_rpm_relationship/" class="article-date">
+	   updated: <time datetime="2021-02-16T16:00:00.000Z" itemprop="dateUpdated">2021-02-17</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">Linux 技巧(原创)</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/16/linux_oostech_rpm_relationship/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="查阅rpm的依赖关系"><a href="#查阅rpm的依赖关系" class="headerlink" title="查阅rpm的依赖关系"></a>查阅rpm的依赖关系</h1><h2 id="1-使用RPM命令可以列出目标包所依赖的所有包，如下"><a href="#1-使用RPM命令可以列出目标包所依赖的所有包，如下" class="headerlink" title="1 使用RPM命令可以列出目标包所依赖的所有包，如下"></a>1 使用RPM命令可以列出目标包所依赖的所有包，如下</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@sam Packages]# rpm -qR vim-enhanced</span><br><span class="line">&#x2F;bin&#x2F;sh</span><br><span class="line">config(vim-enhanced) &#x3D; 2:8.0.1763-15.el8</span><br><span class="line">libacl.so.1()(64bit)</span><br><span class="line">libacl.so.1(ACL_1.0)(64bit)</span><br><span class="line">libc.so.6()(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.11)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.14)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.15)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.2.5)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.28)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.3)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.3.4)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.4)(64bit)</span><br><span class="line">libdl.so.2()(64bit)</span><br><span class="line">libdl.so.2(GLIBC_2.2.5)(64bit)</span><br><span class="line">libgpm.so.2()(64bit)</span><br><span class="line">libm.so.6()(64bit)</span><br><span class="line">libm.so.6(GLIBC_2.2.5)(64bit)</span><br><span class="line">libpthread.so.0()(64bit)</span><br><span class="line">libpthread.so.0(GLIBC_2.2.5)(64bit)</span><br><span class="line">libselinux.so.1()(64bit)</span><br><span class="line">libtinfo.so.6()(64bit)</span><br><span class="line">rpmlib(CompressedFileNames) &lt;&#x3D; 3.0.4-1</span><br><span class="line">rpmlib(FileDigests) &lt;&#x3D; 4.6.0-1</span><br><span class="line">rpmlib(PayloadFilesHavePrefix) &lt;&#x3D; 4.0-1</span><br><span class="line">rpmlib(PayloadIsXz) &lt;&#x3D; 5.2-1</span><br><span class="line">rtld(GNU_HASH)</span><br><span class="line">vim-common &#x3D; 2:8.0.1763-15.el8</span><br><span class="line">which</span><br></pre></td></tr></table></figure>
+<h2 id="2-查还没有安装的"><a href="#2-查还没有安装的" class="headerlink" title="2 查还没有安装的"></a>2 查还没有安装的</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@sam Packages]# rpm -qpR &#x2F;tmp&#x2F;iso2&#x2F;Packages&#x2F;vim-common-7.4.160-5.el7.x86_64.rpm</span><br><span class="line">&#x2F;bin&#x2F;sh</span><br><span class="line">config(vim-common) &#x3D; 2:7.4.160-5.el7</span><br><span class="line">libc.so.6()(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.2.5)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.3)(64bit)</span><br><span class="line">libc.so.6(GLIBC_2.3.4)(64bit)</span><br><span class="line">rpmlib(CompressedFileNames) &lt;&#x3D; 3.0.4-1</span><br><span class="line">rpmlib(FileDigests) &lt;&#x3D; 4.6.0-1</span><br><span class="line">rpmlib(PayloadFilesHavePrefix) &lt;&#x3D; 4.0-1</span><br><span class="line">rtld(GNU_HASH)</span><br><span class="line">vim-filesystem</span><br><span class="line">rpmlib(PayloadIsXz) &lt;&#x3D; 5.2-1</span><br></pre></td></tr></table></figure>
+<h2 id="3-要下载一个-RPM-包而不安装，可以使用叫做’yumdownloader’的工具，下面我们先安装yumdownloader："><a href="#3-要下载一个-RPM-包而不安装，可以使用叫做’yumdownloader’的工具，下面我们先安装yumdownloader：" class="headerlink" title="3 要下载一个 RPM 包而不安装，可以使用叫做’yumdownloader’的工具，下面我们先安装yumdownloader："></a>3 要下载一个 RPM 包而不安装，可以使用叫做’yumdownloader’的工具，下面我们先安装yumdownloader：</h2><p>现在我们来检查一个未安装的RPM包的依赖关系(本例使用 tcpdump)。首先，我们使用yumdownloader把tcpdump的RPM包下载下来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@sam Packages]# yumdownloader --destdir&#x3D;. tcpdump</span><br></pre></td></tr></table></figure>
+<h2 id="4-显示目标包所依赖的包：-为让repoquery正常的工作，需要保持网络的畅通，应为repoquery需要在Yum库中查找信息"><a href="#4-显示目标包所依赖的包：-为让repoquery正常的工作，需要保持网络的畅通，应为repoquery需要在Yum库中查找信息" class="headerlink" title="4 显示目标包所依赖的包：(为让repoquery正常的工作，需要保持网络的畅通，应为repoquery需要在Yum库中查找信息)"></a>4 显示目标包所依赖的包：(为让repoquery正常的工作，需要保持网络的畅通，应为repoquery需要在Yum库中查找信息)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@sam Packages]# repoquery --requires --resolve &lt;package-name&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="5-只需运行rpmreaper就可以看到RPM包的依赖关系："><a href="#5-只需运行rpmreaper就可以看到RPM包的依赖关系：" class="headerlink" title="5 只需运行rpmreaper就可以看到RPM包的依赖关系："></a>5 只需运行rpmreaper就可以看到RPM包的依赖关系：</h2><p>rpmrepater会向用户显示已安装包的列表，你可以使用上/下箭头来滚动屏幕。</p>
+<p>你可以在指定包上使用”r”键来显示其依赖关系，循环在指定包上按下”r”键可以展示出余下的信息。</p>
+<p>“L”标志的意思是说这个包是一片“孤叶”，意思说说没有任何包依赖它。</p>
+<p>“o”标志是说这个包是整个依赖链的中间部分。</p>
+<p>按下”b”键会显示其他依赖于该包的其他包。</p>
+<h2 id="6-还有一个办法是使用rpmdep工具"><a href="#6-还有一个办法是使用rpmdep工具" class="headerlink" title="6 还有一个办法是使用rpmdep工具"></a>6 还有一个办法是使用rpmdep工具</h2><ul>
+<li>rpmdep是一个命令行工具，可以显示已安装包的完整包依赖关系图。该工具会分析RPM包的依赖性，从完整的排完序的拓扑图中摘取部分包的信息，形成列表展示给用户。该工具的输出结果可以直接使用到Dotty（可视化展示工具）中去。</li>
+</ul>
+<p>在Fedora中安装rpmdep和dotty：<br>rpmdep.pl -dot gzip.dot gzip<br>$ dot -Tpng -o output.png gzip.dot</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"># yes &quot;N&quot; | yum remove pciutils</span><br><span class="line">&lt;&lt;truncated..&gt;&gt;</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line"> Package                          Arch              Version                         Repository                               Size</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Removing:</span><br><span class="line"> pciutils                         x86_64            3.5.1-3.el7                     @anaconda&#x2F;7.6                           196 k</span><br><span class="line">Removing for dependencies:</span><br><span class="line"> gnome-boxes                      x86_64            3.28.5-2.el7                    @anaconda&#x2F;7.6                           5.5 M</span><br><span class="line"> libguestfs                       x86_64            1:1.38.2-12.el7_6.2             @rhel-7-server-rpms                     4.3 M</span><br><span class="line"> libguestfs-tools-c               x86_64            1:1.38.2-12.el7_6.2             @rhel-7-server-rpms                      19 M</span><br><span class="line"> libguestfs-winsupport            x86_64            7.2-2.el7                       @rhel-7-server-rpms                     2.2 M</span><br><span class="line"> libibverbs                       x86_64            17.2-3.el7                      @anaconda&#x2F;7.6                           677 k</span><br><span class="line"> librdmacm                        x86_64            17.2-3.el7                      @anaconda&#x2F;7.6                           122 k</span><br><span class="line"> libvirt-daemon-kvm               x86_64            4.5.0-10.el7                    @anaconda&#x2F;7.6                           0.0</span><br><span class="line"> open-vm-tools                    x86_64            10.2.5-3.el7                    @anaconda&#x2F;7.6                           2.1 M</span><br><span class="line"> open-vm-tools-desktop            x86_64            10.2.5-3.el7                    @anaconda&#x2F;7.6                           431 k</span><br><span class="line"> pciutils-devel                   x86_64            3.5.1-3.el7                     @rhel-7-server-optional-rpms             77 k</span><br><span class="line"> qemu-kvm                         x86_64            10:1.5.3-160.el7                @anaconda&#x2F;7.6                           5.8 M</span><br><span class="line"> rdma-core                        x86_64            17.2-3.el7                      @anaconda&#x2F;7.6                           105 k</span><br><span class="line"> virt-p2v-maker                   x86_64            1:1.38.2-12.el7_6.2             @rhel-7-server-rpms                     226 k</span><br><span class="line"> virt-v2v                         x86_64            1:1.38.2-12.el7_6.2             @rhel-7-server-rpms                      18 M</span><br><span class="line"></span><br><span class="line">Transaction Summary</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Remove  1 Package (+14 Dependent packages)</span><br><span class="line"></span><br><span class="line">&lt;&lt;truncated..&gt;&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line">[root@vm2rhel76 (i_am_vm2_rhel76) ~]# rpm -q --whatrequires  pciutils</span><br><span class="line">rdma-core-17.2-3.el7.x86_64</span><br><span class="line">open-vm-tools-10.2.5-3.el7.x86_64</span><br><span class="line">pciutils-devel-3.5.1-3.el7.x86_64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">L      5.5M ┌*&lt; gnome-boxes               3.28.5-2.el7.x86_64</span><br><span class="line">        4.3M ├*&lt; libguestfs                1.38.2-12.el7_6.2.x86_64</span><br><span class="line">       19.1M ├*&lt; libguestfs-tools-c        1.38.2-12.el7_6.2.x86_64</span><br><span class="line">        2.2M ├*&lt; libguestfs-winsupport     7.2-2.el7.x86_64</span><br><span class="line">        678K ├*&lt; libibverbs                17.2-3.el7.x86_64</span><br><span class="line">        122K ├*&lt; librdmacm                 17.2-3.el7.x86_64</span><br><span class="line">          0K ├*&lt; libvirt-daemon-kvm        4.5.0-10.el7.x86_64</span><br><span class="line">        2.1M ├*&lt; open-vm-tools             10.2.5-3.el7.x86_64</span><br><span class="line"> L      432K ├*&lt; open-vm-tools-desktop     10.2.5-3.el7.x86_64</span><br><span class="line"> L       77K ├*&lt; pciutils-devel            3.5.1-3.el7.x86_64</span><br><span class="line">        5.8M ├*&lt; qemu-kvm                  1.5.3-160.el7.x86_64</span><br><span class="line">        106K ├*&lt; rdma-core                 17.2-3.el7.x86_64</span><br><span class="line"> L      227K ├*&lt; virt-p2v-maker            1.38.2-12.el7_6.2.x86_64</span><br><span class="line"> L     17.5M ├*&lt; virt-v2v                  1.38.2-12.el7_6.2.x86_64</span><br><span class="line">        196K pciutils                  3.5.1-3.el7.x86_64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        2.1M ┌─&lt; open-vm-tools             10.2.5-3.el7.x86_64</span><br><span class="line">  L       77K ├─&lt; pciutils-devel            3.5.1-3.el7.x86_64</span><br><span class="line">         106K ├─&lt; rdma-core                 17.2-3.el7.x86_64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@vm2rhel76 (i_am_vm2_rhel76) ~]# rpmdep.pl -depending pciutils</span><br><span class="line">         pciutils is needed by gnome-boxes,libguestfs,libguestfs-tools-c,libguestfs-winsupport,libibverbs,librdmacm,libvirt-daemon-kvm,open-vm-tools,open-vm-tools-desktop,pciutils-devel,qemu-kvm,rdma-core,virt-p2v-maker,virt-v2v</span><br><span class="line">[root@vm2rhel76 (i_am_vm2_rhel76) ~]#</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # rpmdep.pl -depending -dot pciutils.dot pciutils &amp;&amp; dot -Tpng pciutils.dot -o pciutils.png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@vm2rhel76 (i_am_vm2_rhel76) ~]# repoquery --alldeps --whatrequires pciutils</span><br><span class="line">dpdk-tools-0:2.0.0-8.el7.x86_64</span><br><span class="line">dpdk-tools-0:2.2.0-2.el7.x86_64</span><br><span class="line">dpdk-tools-0:2.2.0-3.el7.x86_64</span><br><span class="line">dpdk-tools-0:16.11.2-4.el7.x86_64</span><br><span class="line">dpdk-tools-0:17.11-7.el7.x86_64</span><br><span class="line">dpdk-tools-0:17.11-11.el7.x86_64</span><br><span class="line">dpdk-tools-0:17.11-13.el7.x86_64</span><br><span class="line">dpdk-tools-0:17.11-15.el7.x86_64</span><br><span class="line">dpdk-tools-0:18.11-2.el7_6.x86_64</span><br><span class="line">dpdk-tools-0:18.11-3.el7_6.x86_64</span><br><span class="line">dpdk-tools-0:18.11-4.el7_6.x86_64</span><br><span class="line">dpdk-tools-0:18.11.2-1.el7.x86_64</span><br><span class="line">facter-0:2.4.1-1.el7.x86_64</span><br><span class="line">hw-probe-0:1.4-12.el7.noarch</span><br><span class="line">insights-client-0:3.0.3-8.el7.noarch</span><br><span class="line">insights-client-0:3.0.3-9.el7_5.noarch</span><br><span class="line">insights-client-0:3.0.6-2.el7_6.noarch</span><br><span class="line">inxi-0:3.0.35-1.el7.noarch</span><br><span class="line">leapp-repository-deps-0:0.7.0-5.el7_6.noarch</span><br><span class="line">leapp-repository-deps-0:0.8.1-2.el7_6.noarch</span><br><span class="line">libguestfs-1:1.32.7-3.el7_3.2.x86_64</span><br><span class="line">libguestfs-1:1.32.7-3.el7_3.3.x86_64</span><br><span class="line">libguestfs-rescue-1:1.36.3-6.el7.x86_64</span><br><span class="line">libguestfs-rescue-1:1.36.3-6.el7_4.2.x86_64</span><br><span class="line">libguestfs-rescue-1:1.36.3-6.el7_4.3.x86_64</span><br><span class="line">libguestfs-rescue-1:1.36.10-6.el7.x86_64</span><br><span class="line">libguestfs-rescue-1:1.36.10-6.el7_5.2.x86_64</span><br><span class="line">libguestfs-rescue-1:1.38.2-12.el7.x86_64</span><br><span class="line">libguestfs-rescue-1:1.38.2-12.el7_6.1.x86_64</span><br><span class="line">libguestfs-rescue-1:1.38.2-12.el7_6.2.x86_64</span><br><span class="line">libguestfs-rescue-1:1.40.2-5.el7.x86_64</span><br><span class="line">libguestfs-rescue-1:1.40.2-5.el7_7.1.x86_64</span><br><span class="line">open-vm-tools-0:10.1.5-3.el7.x86_64</span><br><span class="line">open-vm-tools-0:10.1.10-3.el7.x86_64</span><br><span class="line">open-vm-tools-0:10.1.10-3.el7_5.1.x86_64</span><br><span class="line">open-vm-tools-0:10.2.5-3.el7.x86_64</span><br><span class="line">open-vm-tools-0:10.3.0-2.el7.x86_64</span><br><span class="line">pciutils-devel-0:3.2.1-4.el7.i686</span><br><span class="line">pciutils-devel-0:3.2.1-4.el7.x86_64</span><br><span class="line">pciutils-devel-0:3.5.1-1.el7.i686</span><br><span class="line">pciutils-devel-0:3.5.1-1.el7.x86_64</span><br><span class="line">pciutils-devel-0:3.5.1-2.el7.i686</span><br><span class="line">pciutils-devel-0:3.5.1-2.el7.x86_64</span><br><span class="line">pciutils-devel-0:3.5.1-3.el7.i686</span><br><span class="line">pciutils-devel-0:3.5.1-3.el7.x86_64</span><br><span class="line">qt-settings-0:19-23.4.el7.noarch</span><br><span class="line">qt-settings-0:19-23.5.el7.noarch</span><br><span class="line">qt-settings-0:19-23.7.el7.noarch</span><br><span class="line">qt-settings-0:19-23.8.el7.noarch</span><br><span class="line">qt-settings-0:19-23.9.el7.noarch</span><br><span class="line">rdma-0:7.3_4.7_rc2-5.el7.noarch</span><br><span class="line">rdma-0:7.3_4.7_rc2-6.el7_3.noarch</span><br><span class="line">rdma-core-0:13-7.el7.i686</span><br><span class="line">rdma-core-0:13-7.el7.x86_64</span><br><span class="line">rdma-core-0:15-6.el7.i686</span><br><span class="line">rdma-core-0:15-6.el7.x86_64</span><br><span class="line">rdma-core-0:15-7.el7_5.i686</span><br><span class="line">rdma-core-0:15-7.el7_5.x86_64</span><br><span class="line">rdma-core-0:17.2-3.el7.i686</span><br><span class="line">rdma-core-0:17.2-3.el7.x86_64</span><br><span class="line">rdma-core-0:22.1-3.el7.i686</span><br><span class="line">rdma-core-0:22.1-3.el7.x86_64</span><br><span class="line">redhat-access-insights-0:1.0.4-0.el7_1.noarch</span><br><span class="line">redhat-access-insights-0:1.0.6-0.el7.noarch</span><br><span class="line">redhat-access-insights-0:1.0.11-0.el7.noarch</span><br><span class="line">redhat-access-insights-0:1.0.13-2.el7.noarch</span><br><span class="line">salt-0:2015.5.10-2.el7.noarch</span><br><span class="line">tlp-0:1.1-1.el7.noarch</span><br><span class="line">[root@vm2rhel76 (i_am_vm2_rhel76) ~]#</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/16/linux_oostech_rpm_relationship/" title="查阅rpm的依赖关系" target="_blank" rel="external">http://www.oostech.com/2021/02/16/linux_oostech_rpm_relationship/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/16/linux_oostech_oom_implementatoin/" title="oom &#34;out_of_memory&#34; implementatoin 介绍"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/16/linux_oostech_RHEL8_skopeo_podman_docker/" title="Red Hat Enterprise Linux 8 的新玩意 第3篇 之容器工具 skopeo, podman-docker"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        <a href="https://beian.miit.gov.cn/" target="_blank" >备案号：浙B2-2008010X 备案审核中，完毕之后需要修改</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

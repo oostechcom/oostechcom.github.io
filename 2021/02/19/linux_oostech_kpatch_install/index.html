@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>手动安装 kpatch 编译环境 | oosTech.com</title>
+  <meta name="description" content="手动安装 kpatch 编译环境 1. 环境 Red Hat Enterprise Linux 7.6 3.10.0-957.el7.x86_64 ccache-3.3.4-1.el7.x86_64.rpm2. 安装编译依赖的rpm 包1# yum install gcc kernel-devel-$(uname -r) elfutils elfutils-devel pesign yum-uti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="手动安装 kpatch 编译环境">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/linux_oostech_kpatch_install/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="手动安装 kpatch 编译环境 1. 环境 Red Hat Enterprise Linux 7.6 3.10.0-957.el7.x86_64 ccache-3.3.4-1.el7.x86_64.rpm2. 安装编译依赖的rpm 包1# yum install gcc kernel-devel-$(uname -r) elfutils elfutils-devel pesign yum-uti">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/linux_oostech_kpatch_install/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/IPMI-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">IPMI 技巧(原创)</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">Linux 技巧(原创)</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F-%E5%AE%B9%E5%99%A8-%E5%8E%9F%E5%88%9B/">云原生 容器(原创)</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C-OVS-%E5%8E%9F%E5%88%9B/">网络 OVS(原创)</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/01/kernel_oostech_classify_5121/" class="title">Linux 内核源码的分布 内核版本 5.12.1 发布时间 2021-03-1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-28T16:00:00.000Z" itemprop="datePublished">2021-03-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">Linux 技巧(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/linux_oostech_gnome_software_service/" class="title">Linux小玩意之 gnome桌面显示的 &#34;Software Updates Available&#34; 来自那里?</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F-%E5%AE%B9%E5%99%A8-%E5%8E%9F%E5%88%9B/">云原生 容器(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/cloud_oostech_setup_k8s_test_env/" class="title">如何通过 kubeadm手工搭建一个 kubernetes 测试学习的集群</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/code_oostech_reset_os_via_cf9/" class="title">Linux 实用小代码，操作 CF9 寄存器来重启系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Linux-%E4%BB%A3%E7%A0%81-%E5%8E%9F%E5%88%9B/">Linux 代码(原创)</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/28/code_oostech_parted_cannot_create_xfs_filesystem/" class="title">Linux 代码分析，为什么parted不能建立 ext3，ext4，xfs文件系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-27T16:00:00.000Z" itemprop="datePublished">2021-02-28</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85-kpatch-%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">手动安装 kpatch 编译环境</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">1. 环境</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85%E7%BC%96%E8%AF%91%E4%BE%9D%E8%B5%96%E7%9A%84rpm-%E5%8C%85"><span class="toc-number">3.</span> <span class="toc-text">2. 安装编译依赖的rpm 包</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%88%9B%E5%BB%BA-ccache%EF%BC%8C-%E5%8F%AF%E4%BB%A5%E4%BC%98%E5%8C%96%E7%BC%96%E8%AF%91%E7%9A%84%E9%80%9F%E5%BA%A6-%EF%BC%88%E5%8F%AF%E9%80%89%E6%AD%A5%E9%AA%A4%EF%BC%8C%E4%BD%86%E6%98%AF%E5%BB%BA%E8%AE%AE%E5%AE%89%E8%A3%85%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">3. 创建 ccache， 可以优化编译的速度 （可选步骤，但是建议安装）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%AE%89%E8%A3%85ccache-rpm-%E5%8C%85"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 安装ccache rpm 包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E8%AE%BE%E7%BD%AE%E6%9C%80%E5%A4%A7%E5%8F%AF%E7%94%A8%E7%9A%84cache-%E5%A4%A7%E5%B0%8F"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 设置最大可用的cache 大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E4%BF%AE%E6%94%B9-gcc-%E5%88%AB%E5%90%8D%EF%BC%8C%E8%BF%99%E6%A0%B7%E5%9C%A8%E8%B0%83%E7%94%A8gcc%E7%9A%84%E6%97%B6%E5%80%99%E5%B0%B1%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8ccache%E4%BA%86"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 修改 gcc 别名，这样在调用gcc的时候就可以使用ccache了</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E4%B8%8B%E8%BD%BDkpatch-%E6%BA%90%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">4. 下载kpatch 源代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85kpatch%E6%BA%90%E4%BB%A3%E7%A0%81"><span class="toc-number">6.</span> <span class="toc-text">5. 编译安装kpatch源代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E6%A3%80%E6%9F%A5ccache%E6%98%AF%E5%90%A6%E6%AD%A3%E5%B8%B8%E5%B7%A5%E4%BD%9C"><span class="toc-number">7.</span> <span class="toc-text">6. 检查ccache是否正常工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-%E7%BC%96%E8%AF%91%E7%94%9F%E6%88%90kpatch%E6%A8%A1%E5%9D%97"><span class="toc-number">8.</span> <span class="toc-text">7. 编译生成kpatch模块</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%AE%89%E8%A3%85%E6%B5%8B%E8%AF%95%E7%94%9F%E6%88%90%E7%9A%84kpatch%E6%A8%A1%E5%9D%97"><span class="toc-number">9.</span> <span class="toc-text">8. 安装测试生成的kpatch模块</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#8-1-%E7%A1%AE%E8%AE%A4%E5%B7%B2%E7%BB%8F%E7%94%9F%E6%88%90"><span class="toc-number">9.1.</span> <span class="toc-text">8.1 确认已经生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-2-%E5%AE%89%E8%A3%85kpatch%E6%A8%A1%E5%9D%97"><span class="toc-number">9.2.</span> <span class="toc-text">8.2 安装kpatch模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-3-%E7%A1%AE%E8%AE%A4%E6%A8%A1%E5%9D%97%E5%B7%B2%E7%BB%8F%E5%AE%89%E8%A3%85%E5%AE%8C%E6%AF%95"><span class="toc-number">9.3.</span> <span class="toc-text">8.3 确认模块已经安装完毕</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-4-%E5%8D%B8%E8%BD%BDkpatch%E6%A8%A1%E5%9D%97"><span class="toc-number">9.4.</span> <span class="toc-text">8.4 卸载kpatch模块</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-linux_oostech_kpatch_install" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      手动安装 kpatch 编译环境
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/linux_oostech_kpatch_install/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/linux_oostech_kpatch_install/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Linux-%E6%8A%80%E5%B7%A7-%E5%8E%9F%E5%88%9B/">Linux 技巧(原创)</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/linux_oostech_kpatch_install/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="手动安装-kpatch-编译环境"><a href="#手动安装-kpatch-编译环境" class="headerlink" title="手动安装 kpatch 编译环境"></a>手动安装 kpatch 编译环境</h1><p><br></br></p>
+<h1 id="1-环境"><a href="#1-环境" class="headerlink" title="1. 环境"></a>1. 环境</h1><ul>
+<li>Red Hat Enterprise Linux 7.6</li>
+<li>3.10.0-957.el7.x86_64</li>
+<li>ccache-3.3.4-1.el7.x86_64.rpm<br><br></br><h1 id="2-安装编译依赖的rpm-包"><a href="#2-安装编译依赖的rpm-包" class="headerlink" title="2. 安装编译依赖的rpm 包"></a>2. 安装编译依赖的rpm 包</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># yum install gcc kernel-devel-$(uname -r) elfutils elfutils-devel pesign yum-utils zlib-devel binutils-devel newt-devel python-devel perl-ExtUtils-Embed audit-libs-devel numactl-devel pciutils-devel bison ncurses-devel gcc-plugin-devel kernel-debuginfo kernel-debuginfo-common gcc-plugin-devel patchutils</span><br></pre></td></tr></table></figure>
+<br></br><h1 id="3-创建-ccache，-可以优化编译的速度-（可选步骤，但是建议安装）"><a href="#3-创建-ccache，-可以优化编译的速度-（可选步骤，但是建议安装）" class="headerlink" title="3. 创建 ccache， 可以优化编译的速度 （可选步骤，但是建议安装）"></a>3. 创建 ccache， 可以优化编译的速度 （可选步骤，但是建议安装）</h1></li>
+<li>(ccache represents “compiler cache” which is a tool for the gcc compiler used to compile the same program over and over again with little downtime, While it may take a few seconds longer to compile a program the first time with ccache, subsequent compiles will be much, much faster.)<h2 id="3-1-安装ccache-rpm-包"><a href="#3-1-安装ccache-rpm-包" class="headerlink" title="3.1 安装ccache rpm 包"></a>3.1 安装ccache rpm 包</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># yum install https:&#x2F;&#x2F;dl.fedoraproject.org&#x2F;pub&#x2F;epel&#x2F;7&#x2F;x86_64&#x2F;Packages&#x2F;c&#x2F;ccache-3.3.4-1.el7.x86_64.rpm</span><br></pre></td></tr></table></figure>
+<h2 id="3-2-设置最大可用的cache-大小"><a href="#3-2-设置最大可用的cache-大小" class="headerlink" title="3.2 设置最大可用的cache 大小"></a>3.2 设置最大可用的cache 大小</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># ccache --max-size&#x3D;8G</span><br></pre></td></tr></table></figure>
+<h2 id="3-3-修改-gcc-别名，这样在调用gcc的时候就可以使用ccache了"><a href="#3-3-修改-gcc-别名，这样在调用gcc的时候就可以使用ccache了" class="headerlink" title="3.3 修改 gcc 别名，这样在调用gcc的时候就可以使用ccache了"></a>3.3 修改 gcc 别名，这样在调用gcc的时候就可以使用ccache了</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># vi &#x2F;etc&#x2F;profile.d&#x2F;gcc.sh</span><br><span class="line">alias gcc&#x3D;&quot;ccache gcc&quot;</span><br><span class="line"># source &#x2F;etc&#x2F;profile.d&#x2F;gcc.sh</span><br></pre></td></tr></table></figure>
+<br></br><h1 id="4-下载kpatch-源代码"><a href="#4-下载kpatch-源代码" class="headerlink" title="4. 下载kpatch 源代码"></a>4. 下载kpatch 源代码</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># git clone https:&#x2F;&#x2F;github.com&#x2F;dynup&#x2F;kpatch.git</span><br></pre></td></tr></table></figure>
+<br></br><h1 id="5-编译安装kpatch源代码"><a href="#5-编译安装kpatch源代码" class="headerlink" title="5. 编译安装kpatch源代码"></a>5. 编译安装kpatch源代码</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"># make -j2 &amp;&amp; make install</span><br><span class="line">make -C kpatch-build</span><br><span class="line">make -C kpatch</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch&#39;</span><br><span class="line">make[1]: Nothing to be done for &#96;all&#39;.</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch&#39;</span><br><span class="line">make -C kmod</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch-build&#39;</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o create-diff-object.o create-diff-object.c</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#39;</span><br><span class="line">make -C core clean</span><br><span class="line">make[2]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#39;</span><br><span class="line">rm -f -Rf .*.o.cmd .*.ko.cmd .tmp_versions *.o *.ko *.mod.c \</span><br><span class="line">Module.symvers</span><br><span class="line">make[2]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#39;</span><br><span class="line">make -C core</span><br><span class="line">make[2]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#39;</span><br><span class="line">make -C &#x2F;lib&#x2F;modules&#x2F;3.10.0-957.el7.x86_64&#x2F;build M&#x3D;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core kpatch.ko</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o kpatch-elf.o kpatch-elf.c</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o lookup.o lookup.c</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o insn&#x2F;insn.o insn&#x2F;insn.c</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o insn&#x2F;inat.o insn&#x2F;inat.c</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o create-klp-module.o create-klp-module.c</span><br><span class="line">make[3]: Entering directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">make[3]: warning: jobserver unavailable: using -j1.  Add &#96;+&#39; to parent make rule.</span><br><span class="line">gcc -MMD -MP -I..&#x2F;kmod&#x2F;patch -Iinsn -Wall -Wsign-compare -g -Werror   -c -o create-kpatch-module.o create-kpatch-module.c</span><br><span class="line">  CC [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#x2F;core.o</span><br><span class="line">gcc   create-diff-object.o kpatch-elf.o lookup.o insn&#x2F;insn.o insn&#x2F;inat.o  -lelf -o create-diff-object</span><br><span class="line">gcc   create-klp-module.o kpatch-elf.o  -lelf -o create-klp-module</span><br><span class="line">gcc   create-kpatch-module.o kpatch-elf.o  -lelf -o create-kpatch-module</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch-build&#39;</span><br><span class="line">make -C man</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;man&#39;</span><br><span class="line">gzip -c -9 kpatch.1 &gt; kpatch.1.gz</span><br><span class="line">gzip -c -9 kpatch-build.1 &gt; kpatch-build.1.gz</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;man&#39;</span><br><span class="line">make -C contrib</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;contrib&#39;</span><br><span class="line">make[1]: Nothing to be done for &#96;all&#39;.</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;contrib&#39;</span><br><span class="line">  CC [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#x2F;shadow.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#x2F;kpatch.o</span><br><span class="line">  MODPOST 1 modules</span><br><span class="line">  CC      &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#x2F;kpatch.mod.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#x2F;kpatch.ko</span><br><span class="line">make[3]: Leaving directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">make[2]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#x2F;core&#39;</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#39;</span><br><span class="line">make -C kpatch-build install</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch-build&#39;</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;libexec&#x2F;kpatch</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install create-diff-object create-klp-module create-kpatch-module kpatch-gcc &#x2F;usr&#x2F;local&#x2F;libexec&#x2F;kpatch</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;bin</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install kpatch-build &#x2F;usr&#x2F;local&#x2F;bin</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch-build&#39;</span><br><span class="line">make -C kpatch install</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch&#39;</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;sbin</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install kpatch &#x2F;usr&#x2F;local&#x2F;sbin</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kpatch&#39;</span><br><span class="line">make -C kmod install</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#39;</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;lib&#x2F;kpatch&#x2F;3.10.0-957.el7.x86_64</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 644 core&#x2F;kpatch.ko &#x2F;usr&#x2F;local&#x2F;lib&#x2F;kpatch&#x2F;3.10.0-957.el7.x86_64</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 644 core&#x2F;Module.symvers &#x2F;usr&#x2F;local&#x2F;lib&#x2F;kpatch&#x2F;3.10.0-957.el7.x86_64</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;share&#x2F;kpatch&#x2F;patch</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 644 patch&#x2F;* &#x2F;usr&#x2F;local&#x2F;share&#x2F;kpatch&#x2F;patch</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;kmod&#39;</span><br><span class="line">make -C man install</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;man&#39;</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;share&#x2F;man&#x2F;man1</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 644 kpatch.1.gz &#x2F;usr&#x2F;local&#x2F;share&#x2F;man&#x2F;man1</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 644 kpatch-build.1.gz &#x2F;usr&#x2F;local&#x2F;share&#x2F;man&#x2F;man1</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;man&#39;</span><br><span class="line">make -C contrib install</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;contrib&#39;</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;usr&#x2F;local&#x2F;lib&#x2F;systemd&#x2F;system</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 0644 kpatch.service &#x2F;usr&#x2F;local&#x2F;lib&#x2F;systemd&#x2F;system</span><br><span class="line">sed -i &#39;s~PREFIX~&#x2F;usr&#x2F;local~&#39; &#x2F;usr&#x2F;local&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;kpatch.service</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -d &#x2F;etc&#x2F;init</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;install -m 0644 kpatch.conf &#x2F;etc&#x2F;init</span><br><span class="line">sed -i &#39;s~PREFIX~&#x2F;usr&#x2F;local~&#39; &#x2F;etc&#x2F;init&#x2F;kpatch.conf</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;contrib&#39;</span><br></pre></td></tr></table></figure>
+<br></br><h1 id="6-检查ccache是否正常工作"><a href="#6-检查ccache是否正常工作" class="headerlink" title="6. 检查ccache是否正常工作"></a>6. 检查ccache是否正常工作</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># ccache -s</span><br><span class="line">cache directory                     &#x2F;root&#x2F;.ccache</span><br><span class="line">primary config                      &#x2F;root&#x2F;.ccache&#x2F;ccache.conf</span><br><span class="line">secondary config      (readonly)    &#x2F;etc&#x2F;ccache.conf</span><br><span class="line">cache hit (direct)                     0</span><br><span class="line">cache hit (preprocessed)               0</span><br><span class="line">cache miss                             2</span><br><span class="line">cache hit rate                      0.00 %</span><br><span class="line">called for link                        2</span><br><span class="line">called for preprocessing              16</span><br><span class="line">no input file                         75</span><br><span class="line">cleanups performed                     0</span><br><span class="line">files in cache                         4</span><br><span class="line">cache size                         733.2 kB</span><br><span class="line">max cache size                       5.0 GB</span><br></pre></td></tr></table></figure>
+<br></br><h1 id="7-编译生成kpatch模块"><a href="#7-编译生成kpatch模块" class="headerlink" title="7. 编译生成kpatch模块"></a>7. 编译生成kpatch模块</h1></li>
+<li>我已经提前修改了内核代码，所以就可以直接生成kpatch了<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"># ccache make -j2</span><br><span class="line">patch &lt; patch</span><br><span class="line">patching file testmod_drv.c</span><br><span class="line">KCFLAGS&#x3D;&quot;-ffunction-sections -fdata-sections&quot; &#x2F;usr&#x2F;bin&#x2F;make -C &#x2F;lib&#x2F;modules&#x2F;3.10.0-957.el7.x86_64&#x2F;build M&#x3D;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod testmod.ko</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">  CC [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod_drv.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.o</span><br><span class="line">  MODPOST 1 modules</span><br><span class="line">  CC      &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.mod.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.ko</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">strip --keep-file-symbols -d testmod_drv.o</span><br><span class="line">cp testmod_drv.o testmod_drv.o.patched</span><br><span class="line">patch -R &lt; patch</span><br><span class="line">patching file testmod_drv.c</span><br><span class="line">KCFLAGS&#x3D;&quot;-ffunction-sections -fdata-sections&quot; &#x2F;usr&#x2F;bin&#x2F;make -C &#x2F;lib&#x2F;modules&#x2F;3.10.0-957.el7.x86_64&#x2F;build M&#x3D;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod testmod.ko</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">  CC [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod_drv.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.o</span><br><span class="line">  MODPOST 1 modules</span><br><span class="line">  CC      &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.mod.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.ko</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">strip --keep-file-symbols -d testmod_drv.o</span><br><span class="line">cp testmod_drv.o testmod_drv.o.orig</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;make -C &#x2F;lib&#x2F;modules&#x2F;3.10.0-957.el7.x86_64&#x2F;build M&#x3D;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod clean</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">  CLEAN   &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;.tmp_versions</span><br><span class="line">  CLEAN   &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;Module.symvers</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;make -C &#x2F;lib&#x2F;modules&#x2F;3.10.0-957.el7.x86_64&#x2F;build M&#x3D;&#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod testmod.ko</span><br><span class="line">make[1]: Entering directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br><span class="line">  CC [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod_drv.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.o</span><br><span class="line">  MODPOST 1 modules</span><br><span class="line">  CC      &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.mod.o</span><br><span class="line">  LD [M]  &#x2F;mnt&#x2F;kpatchDemoSam&#x2F;kpatch&#x2F;test&#x2F;testmod&#x2F;testmod.ko</span><br><span class="line">make[1]: Leaving directory &#96;&#x2F;usr&#x2F;src&#x2F;kernels&#x2F;3.10.0-957.el7.x86_64&#39;</span><br></pre></td></tr></table></figure>
+<br></br><h1 id="8-安装测试生成的kpatch模块"><a href="#8-安装测试生成的kpatch模块" class="headerlink" title="8. 安装测试生成的kpatch模块"></a>8. 安装测试生成的kpatch模块</h1><h2 id="8-1-确认已经生成"><a href="#8-1-确认已经生成" class="headerlink" title="8.1 确认已经生成"></a>8.1 确认已经生成</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># ls *.ko</span><br><span class="line">testmod.ko</span><br></pre></td></tr></table></figure>
+<h2 id="8-2-安装kpatch模块"><a href="#8-2-安装kpatch模块" class="headerlink" title="8.2 安装kpatch模块"></a>8.2 安装kpatch模块</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># kpatch install testmod.ko</span><br><span class="line">installing testmod.ko (3.10.0-957.el7.x86_64)</span><br><span class="line">Created symlink from &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;multi-user.target.wants&#x2F;kpatch.service to &#x2F;usr&#x2F;local&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;kpatch.service.</span><br></pre></td></tr></table></figure>
+<h2 id="8-3-确认模块已经安装完毕"><a href="#8-3-确认模块已经安装完毕" class="headerlink" title="8.3 确认模块已经安装完毕"></a>8.3 确认模块已经安装完毕</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@vm2rhel76 (i_am_vm2_rhel76) testmod]# kpatch list</span><br><span class="line">Loaded patch modules:</span><br><span class="line"></span><br><span class="line">Installed patch modules:</span><br><span class="line">testmod (3.10.0-957.el7.x86_64)</span><br></pre></td></tr></table></figure>
+<h2 id="8-4-卸载kpatch模块"><a href="#8-4-卸载kpatch模块" class="headerlink" title="8.4 卸载kpatch模块"></a>8.4 卸载kpatch模块</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># kpatch uninstall testmod.ko</span><br><span class="line">uninstalling testmod.ko (3.10.0-957.el7.x86_64)</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/linux_oostech_kpatch_install/" title="手动安装 kpatch 编译环境" target="_blank" rel="external">http://www.oostech.com/2021/02/19/linux_oostech_kpatch_install/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/cloud_oostech_kubectl_cheatsheet/" title="K8S 的 kubectl 常用命令"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/cloud_oostech_container_etherpad/" title="基于 UBI 容器化 Etherpad 并且运行在RHEL8上"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        <a href="https://beian.miit.gov.cn/" target="_blank" >备案号：浙B2-2008010X 备案审核中，完毕之后需要修改</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
