@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_seq_file | oosTech.com</title>
+  <meta name="description" content="The seq_file interface Copyright 2003 Jonathan Corbet &lt;corbet@lwn.net&gt; This file is originally from the LWN.net Driver Porting series at http:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;driver-porting&#x2F;  There are numero">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_seq_file">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The seq_file interface Copyright 2003 Jonathan Corbet &lt;corbet@lwn.net&gt; This file is originally from the LWN.net Driver Porting series at http:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;driver-porting&#x2F;  There are numero">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_seq_file" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_seq_file
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>The seq_file interface</p>
+<pre><code>Copyright 2003 Jonathan Corbet &lt;corbet@lwn.net&gt;
+This file is originally from the LWN.net Driver Porting series at
+http://lwn.net/Articles/driver-porting/
+</code></pre>
+<p>There are numerous ways for a device driver (or other kernel component) to<br>provide information to the user or system administrator.  One useful<br>technique is the creation of virtual files, in debugfs, /proc or elsewhere.<br>Virtual files can provide human-readable output that is easy to get at<br>without any special utility programs; they can also make life easier for<br>script writers. It is not surprising that the use of virtual files has<br>grown over the years.</p>
+<p>Creating those files correctly has always been a bit of a challenge,<br>however. It is not that hard to make a virtual file which returns a<br>string. But life gets trickier if the output is long - anything greater<br>than an application is likely to read in a single operation.  Handling<br>multiple reads (and seeks) requires careful attention to the reader’s<br>position within the virtual file - that position is, likely as not, in the<br>middle of a line of output. The kernel has traditionally had a number of<br>implementations that got this wrong.</p>
+<p>The 2.6 kernel contains a set of functions (implemented by Alexander Viro)<br>which are designed to make it easy for virtual file creators to get it<br>right.</p>
+<p>The seq_file interface is available via &lt;linux/seq_file.h&gt;. There are<br>three aspects to seq_file:</p>
+<pre><code> * An iterator interface which lets a virtual file implementation
+   step through the objects it is presenting.
+
+ * Some utility functions for formatting objects for output without
+   needing to worry about things like output buffers.
+
+ * A set of canned file_operations which implement most operations on
+   the virtual file.
+</code></pre>
+<p>We’ll look at the seq_file interface via an extremely simple example: a<br>loadable module which creates a file called /proc/sequence. The file, when<br>read, simply produces a set of increasing integer values, one per line. The<br>sequence will continue until the user loses patience and finds something<br>better to do. The file is seekable, in that one can do something like the<br>following:</p>
+<pre><code>dd if=/proc/sequence of=out1 count=1
+dd if=/proc/sequence skip=1 of=out2 count=1
+</code></pre>
+<p>Then concatenate the output files out1 and out2 and get the right<br>result. Yes, it is a thoroughly useless module, but the point is to show<br>how the mechanism works without getting lost in other details.  (Those<br>wanting to see the full source for this module can find it at<br><a target="_blank" rel="noopener" href="http://lwn.net/Articles/22359/">http://lwn.net/Articles/22359/</a>).</p>
+<p>The iterator interface</p>
+<p>Modules implementing a virtual file with seq_file must implement a simple<br>iterator object that allows stepping through the data of interest.<br>Iterators must be able to move to a specific position - like the file they<br>implement - but the interpretation of that position is up to the iterator<br>itself. A seq_file implementation that is formatting firewall rules, for<br>example, could interpret position N as the Nth rule in the chain.<br>Positioning can thus be done in whatever way makes the most sense for the<br>generator of the data, which need not be aware of how a position translates<br>to an offset in the virtual file. The one obvious exception is that a<br>position of zero should indicate the beginning of the file.</p>
+<p>The /proc/sequence iterator just uses the count of the next number it<br>will output as its position.</p>
+<p>Four functions must be implemented to make the iterator work. The first,<br>called start() takes a position as an argument and returns an iterator<br>which will start reading at that position. For our simple sequence example,<br>the start() function looks like:</p>
+<pre><code>static void *ct_seq_start(struct seq_file *s, loff_t *pos)
+&#123;
+        loff_t *spos = kmalloc(sizeof(loff_t), GFP_KERNEL);
+        if (! spos)
+                return NULL;
+        *spos = *pos;
+        return spos;
+&#125;
+</code></pre>
+<p>The entire data structure for this iterator is a single loff_t value<br>holding the current position. There is no upper bound for the sequence<br>iterator, but that will not be the case for most other seq_file<br>implementations; in most cases the start() function should check for a<br>“past end of file” condition and return NULL if need be.</p>
+<p>For more complicated applications, the private field of the seq_file<br>structure can be used. There is also a special value which can be returned<br>by the start() function called SEQ_START_TOKEN; it can be used if you wish<br>to instruct your show() function (described below) to print a header at the<br>top of the output. SEQ_START_TOKEN should only be used if the offset is<br>zero, however.</p>
+<p>The next function to implement is called, amazingly, next(); its job is to<br>move the iterator forward to the next position in the sequence.  The<br>example module can simply increment the position by one; more useful<br>modules will do what is needed to step through some data structure. The<br>next() function returns a new iterator, or NULL if the sequence is<br>complete. Here’s the example version:</p>
+<pre><code>static void *ct_seq_next(struct seq_file *s, void *v, loff_t *pos)
+&#123;
+        loff_t *spos = v;
+        *pos = ++*spos;
+        return spos;
+&#125;
+</code></pre>
+<p>The stop() function is called when iteration is complete; its job, of<br>course, is to clean up. If dynamic memory is allocated for the iterator,<br>stop() is the place to free it.</p>
+<pre><code>static void ct_seq_stop(struct seq_file *s, void *v)
+&#123;
+        kfree(v);
+&#125;
+</code></pre>
+<p>Finally, the show() function should format the object currently pointed to<br>by the iterator for output.  The example module’s show() function is:</p>
+<pre><code>static int ct_seq_show(struct seq_file *s, void *v)
+&#123;
+        loff_t *spos = v;
+        seq_printf(s, &quot;%lld\n&quot;, (long long)*spos);
+        return 0;
+&#125;
+</code></pre>
+<p>If all is well, the show() function should return zero.  A negative error<br>code in the usual manner indicates that something went wrong; it will be<br>passed back to user space.  This function can also return SEQ_SKIP, which<br>causes the current item to be skipped; if the show() function has already<br>generated output before returning SEQ_SKIP, that output will be dropped.</p>
+<p>We will look at seq_printf() in a moment. But first, the definition of the<br>seq_file iterator is finished by creating a seq_operations structure with<br>the four functions we have just defined:</p>
+<pre><code>static const struct seq_operations ct_seq_ops = &#123;
+        .start = ct_seq_start,
+        .next  = ct_seq_next,
+        .stop  = ct_seq_stop,
+        .show  = ct_seq_show
+&#125;;
+</code></pre>
+<p>This structure will be needed to tie our iterator to the /proc file in<br>a little bit.</p>
+<p>It’s worth noting that the iterator value returned by start() and<br>manipulated by the other functions is considered to be completely opaque by<br>the seq_file code. It can thus be anything that is useful in stepping<br>through the data to be output. Counters can be useful, but it could also be<br>a direct pointer into an array or linked list. Anything goes, as long as<br>the programmer is aware that things can happen between calls to the<br>iterator function. However, the seq_file code (by design) will not sleep<br>between the calls to start() and stop(), so holding a lock during that time<br>is a reasonable thing to do. The seq_file code will also avoid taking any<br>other locks while the iterator is active.</p>
+<p>Formatted output</p>
+<p>The seq_file code manages positioning within the output created by the<br>iterator and getting it into the user’s buffer. But, for that to work, that<br>output must be passed to the seq_file code. Some utility functions have<br>been defined which make this task easy.</p>
+<p>Most code will simply use seq_printf(), which works pretty much like<br>printk(), but which requires the seq_file pointer as an argument. It is<br>common to ignore the return value from seq_printf(), but a function<br>producing complicated output may want to check that value and quit if<br>something non-zero is returned; an error return means that the seq_file<br>buffer has been filled and further output will be discarded.</p>
+<p>For straight character output, the following functions may be used:</p>
+<pre><code>int seq_putc(struct seq_file *m, char c);
+int seq_puts(struct seq_file *m, const char *s);
+int seq_escape(struct seq_file *m, const char *s, const char *esc);
+</code></pre>
+<p>The first two output a single character and a string, just like one would<br>expect. seq_escape() is like seq_puts(), except that any character in s<br>which is in the string esc will be represented in octal form in the output.</p>
+<p>There is also a pair of functions for printing filenames:</p>
+<pre><code>int seq_path(struct seq_file *m, struct path *path, char *esc);
+int seq_path_root(struct seq_file *m, struct path *path,
+          struct path *root, char *esc)
+</code></pre>
+<p>Here, path indicates the file of interest, and esc is a set of characters<br>which should be escaped in the output.  A call to seq_path() will output<br>the path relative to the current process’s filesystem root.  If a different<br>root is desired, it can be used with seq_path_root().  Note that, if it<br>turns out that path cannot be reached from root, the value of root will be<br>changed in seq_file_root() to a root which <em>does</em> work.</p>
+<p>Making it all work</p>
+<p>So far, we have a nice set of functions which can produce output within the<br>seq_file system, but we have not yet turned them into a file that a user<br>can see. Creating a file within the kernel requires, of course, the<br>creation of a set of file_operations which implement the operations on that<br>file. The seq_file interface provides a set of canned operations which do<br>most of the work. The virtual file author still must implement the open()<br>method, however, to hook everything up. The open function is often a single<br>line, as in the example module:</p>
+<pre><code>static int ct_open(struct inode *inode, struct file *file)
+&#123;
+    return seq_open(file, &amp;ct_seq_ops);
+&#125;
+</code></pre>
+<p>Here, the call to seq_open() takes the seq_operations structure we created<br>before, and gets set up to iterate through the virtual file.</p>
+<p>On a successful open, seq_open() stores the struct seq_file pointer in<br>file-&gt;private_data. If you have an application where the same iterator can<br>be used for more than one file, you can store an arbitrary pointer in the<br>private field of the seq_file structure; that value can then be retrieved<br>by the iterator functions.</p>
+<p>The other operations of interest - read(), llseek(), and release() - are<br>all implemented by the seq_file code itself. So a virtual file’s<br>file_operations structure will look like:</p>
+<pre><code>static const struct file_operations ct_file_ops = &#123;
+        .owner   = THIS_MODULE,
+        .open    = ct_open,
+        .read    = seq_read,
+        .llseek  = seq_lseek,
+        .release = seq_release
+&#125;;
+</code></pre>
+<p>There is also a seq_release_private() which passes the contents of the<br>seq_file private field to kfree() before releasing the structure.</p>
+<p>The final step is the creation of the /proc file itself. In the example<br>code, that is done in the initialization code in the usual way:</p>
+<pre><code>static int ct_init(void)
+&#123;
+        struct proc_dir_entry *entry;
+
+        entry = create_proc_entry(&quot;sequence&quot;, 0, NULL);
+        if (entry)
+                entry-&gt;proc_fops = &amp;ct_file_ops;
+        return 0;
+&#125;
+
+module_init(ct_init);
+</code></pre>
+<p>And that is pretty much it.</p>
+<p>seq_list</p>
+<p>If your file will be iterating through a linked list, you may find these<br>routines useful:</p>
+<pre><code>struct list_head *seq_list_start(struct list_head *head,
+                         loff_t pos);
+struct list_head *seq_list_start_head(struct list_head *head,
+                       loff_t pos);
+struct list_head *seq_list_next(void *v, struct list_head *head,
+                loff_t *ppos);
+</code></pre>
+<p>These helpers will interpret pos as a position within the list and iterate<br>accordingly.  Your start() and next() functions need only invoke the<br>seq_list_* helpers with a pointer to the appropriate list_head structure.</p>
+<p>The extra-simple version</p>
+<p>For extremely simple virtual files, there is an even easier interface.  A<br>module can define only the show() function, which should create all the<br>output that the virtual file will contain. The file’s open() method then<br>calls:</p>
+<pre><code>int single_open(struct file *file,
+                int (*show)(struct seq_file *m, void *p),
+                void *data);
+</code></pre>
+<p>When output time comes, the show() function will be called once. The data<br>value given to single_open() can be found in the private field of the<br>seq_file structure. When using single_open(), the programmer should use<br>single_release() instead of seq_release() in the file_operations structure<br>to avoid a memory leak.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/" title="Kernel-2.6.32-573.12.1.el6_seq_file" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_seq_file/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_serial-console/" title="Kernel-2.6.32-573.12.1.el6_serial-console"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_secid/" title="Kernel-2.6.32-573.12.1.el6_seci"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

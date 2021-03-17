@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO | oosTech.com</title>
+  <meta name="description" content="User Mode Linux HOWTO  User Mode Linux Core Team  Mon Nov 18 14:16:16 EST 2002   This document describes the use and abuse of Jeff Dike’s User Mode  Linux: a port of the Linux kernel as a normal Int">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="User Mode Linux HOWTO  User Mode Linux Core Team  Mon Nov 18 14:16:16 EST 2002   This document describes the use and abuse of Jeff Dike’s User Mode  Linux: a port of the Linux kernel as a normal Int">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>  User Mode Linux HOWTO<br>  User Mode Linux Core Team<br>  Mon Nov 18 14:16:16 EST 2002</p>
+<p>  This document describes the use and abuse of Jeff Dike’s User Mode<br>  Linux: a port of the Linux kernel as a normal Intel Linux process.</p>
+<hr>
+<p>  Table of Contents</p>
+<ol>
+<li><p>Introduction</p>
+<p>1.1 How is User Mode Linux Different?<br>1.2 Why Would I Want User Mode Linux?</p>
+</li>
+<li><p>Compiling the kernel and modules</p>
+<p>2.1 Compiling the kernel<br>2.2 Compiling and installing kernel modules<br>2.3 Compiling and installing uml_utilities</p>
+</li>
+<li><p>Running UML and logging in</p>
+<p>3.1 Running UML<br>3.2 Logging in<br>3.3 Examples</p>
+</li>
+<li><p>UML on 2G/2G hosts</p>
+<p>4.1 Introduction<br>4.2 The problem<br>4.3 The solution</p>
+</li>
+<li><p>Setting up serial lines and consoles</p>
+<p>5.1 Specifying the device<br>5.2 Specifying the channel<br>5.3 Examples</p>
+</li>
+<li><p>Setting up the network</p>
+<p>6.1 General setup<br>6.2 Userspace daemons<br>6.3 Specifying ethernet addresses<br>6.4 UML interface setup<br>6.5 Multicast<br>6.6 TUN/TAP with the uml_net helper<br>6.7 TUN/TAP with a preconfigured tap device<br>6.8 Ethertap<br>6.9 The switch daemon<br>6.10 Slip<br>6.11 Slirp<br>6.12 pcap<br>6.13 Setting up the host yourself</p>
+</li>
+<li><p>Sharing Filesystems between Virtual Machines</p>
+<p>7.1 A warning<br>7.2 Using layered block devices<br>7.3 Note!<br>7.4 Another warning<br>7.5 uml_moo : Merging a COW file with its backing file</p>
+</li>
+<li><p>Creating filesystems</p>
+<p>8.1 Create the filesystem file<br>8.2 Assign the file to a UML device<br>8.3 Creating and mounting the filesystem</p>
+</li>
+<li><p>Host file access</p>
+<p>9.1 Using hostfs<br>9.2 hostfs as the root filesystem<br>9.3 Building hostfs</p>
+</li>
+<li><p>The Management Console<br>10.1 version<br>10.2 halt and reboot<br>10.3 config<br>10.4 remove<br>10.5 sysrq<br>10.6 help<br>10.7 cad<br>10.8 stop<br>10.9 go</p>
+</li>
+<li><p>Kernel debugging</p>
+<p>11.1 Starting the kernel under gdb<br>11.2 Examining sleeping processes<br>11.3 Running ddd on UML<br>11.4 Debugging modules<br>11.5 Attaching gdb to the kernel<br>11.6 Using alternate debuggers</p>
+</li>
+<li><p>Kernel debugging examples</p>
+<p>12.1 The case of the hung fsck<br>12.2 Episode 2: The case of the hung fsck</p>
+</li>
+<li><p>What to do when UML doesn’t work</p>
+<p>13.1 Strange compilation errors when you build from source<br>13.2 (obsolete)<br>13.3 A variety of panics and hangs with /tmp on a reiserfs  filesystem<br>13.4 The compile fails with errors about conflicting types for ‘open’, ‘dup’, and ‘waitpid’<br>13.5 UML doesn’t work when /tmp is an NFS filesystem<br>13.6 UML hangs on boot when compiled with gprof support<br>13.7 syslogd dies with a SIGTERM on startup<br>13.8 TUN/TAP networking doesn’t work on a 2.4 host<br>13.9 You can network to the host but not to other machines on the net<br>13.10 I have no root and I want to scream<br>13.11 UML build conflict between ptrace.h and ucontext.h<br>13.12 The UML BogoMips is exactly half the host’s BogoMips<br>13.13 When you run UML, it immediately segfaults<br>13.14 xterms appear, then immediately disappear<br>13.15 Any other panic, hang, or strange behavior</p>
+</li>
+<li><p>Diagnosing Problems</p>
+<p>14.1 Case 1 : Normal kernel panics<br>14.2 Case 2 : Tracing thread panics<br>14.3 Case 3 : Tracing thread panics caused by other threads<br>14.4 Case 4 : Hangs</p>
+</li>
+<li><p>Thanks</p>
+<p>15.1 Code and Documentation<br>15.2 Flushing out bugs<br>15.3 Buglets and clean-ups<br>15.4 Case Studies<br>15.5 Other contributions</p>
+</li>
+</ol>
+<hr>
+<p>  11..  IInnttrroodduuccttiioonn</p>
+<p>  Welcome to User Mode Linux.  It’s going to be fun.</p>
+<p>  11..11..  HHooww iiss UUsseerr MMooddee LLiinnuuxx DDiiffffeerreenntt??</p>
+<p>  Normally, the Linux Kernel talks straight to your hardware (video<br>  card, keyboard, hard drives, etc), and any programs which run ask the<br>  kernel to operate the hardware, like so:</p>
+<pre><code>     +-----------+-----------+----+
+     | Process 1 | Process 2 | ...|
+     +-----------+-----------+----+
+     |       Linux Kernel         |
+     +----------------------------+
+     |         Hardware           |
+     +----------------------------+
+</code></pre>
+<p>  The User Mode Linux Kernel is different; instead of talking to the<br>  hardware, it talks to a <code>real&#39; Linux kernel (called the </code>host kernel’<br>  from now on), like any other program.  Programs can then run inside<br>  User-Mode Linux as if they were running under a normal kernel, like<br>  so:</p>
+<pre><code>                 +----------------+
+                 | Process 2 | ...|
+     +-----------+----------------+
+     | Process 1 | User-Mode Linux|
+     +----------------------------+
+     |       Linux Kernel         |
+     +----------------------------+
+     |         Hardware           |
+     +----------------------------+
+</code></pre>
+<p>  11..22..  WWhhyy WWoouulldd II WWaanntt UUsseerr MMooddee LLiinnuuxx??</p>
+<ol>
+<li><p>If User Mode Linux crashes, your host kernel is still fine.</p>
+</li>
+<li><p>You can run a usermode kernel as a non-root user.</p>
+</li>
+<li><p>You can debug the User Mode Linux like any normal process.</p>
+</li>
+<li><p>You can run gprof (profiling) and gcov (coverage testing).</p>
+</li>
+<li><p>You can play with your kernel without breaking things.</p>
+</li>
+<li><p>You can use it as a sandbox for testing new apps.</p>
+</li>
+<li><p>You can try new development kernels safely.</p>
+</li>
+<li><p>You can run different distributions simultaneously.</p>
+</li>
+<li><p>It’s extremely fun.</p>
+</li>
+</ol>
+<p>  22..  CCoommppiilliinngg tthhee kkeerrnneell aanndd mmoodduulleess</p>
+<p>  22..11..  CCoommppiilliinngg tthhee kkeerrnneell</p>
+<p>  Compiling the user mode kernel is just like compiling any other<br>  kernel.  Let’s go through the steps, using 2.4.0-prerelease (current<br>  as of this writing) as an example:</p>
+<ol>
+<li><p>Download the latest UML patch from</p>
+<p>the download page &lt;<a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/dl-">http://user-mode-linux.sourceforge.net/dl-</a><br>sf.html&gt;</p>
+<p>In this example, the file is uml-patch-2.4.0-prerelease.bz2.</p>
+</li>
+</ol>
+<ol start="2">
+<li><p>Download the matching kernel from your favourite kernel mirror,<br>such as:</p>
+<p><a href="ftp://ftp.ca.kernel.org/pub/kernel/v2.4/linux-2.4.0-prerelease.tar.bz2">ftp://ftp.ca.kernel.org/pub/kernel/v2.4/linux-2.4.0-prerelease.tar.bz2</a><br><a href="ftp://ftp.ca.kernel.org/pub/kernel/v2.4/linux-2.4.0-prerelease.tar.bz2">ftp://ftp.ca.kernel.org/pub/kernel/v2.4/linux-2.4.0-prerelease.tar.bz2</a><br>.</p>
+</li>
+</ol>
+<ol start="3">
+<li>Make a directory and unpack the kernel into it.</li>
+</ol>
+<pre><code>   host%
+   mkdir ~/uml
+
+
+
+
+
+
+   host%
+   cd ~/uml
+
+
+
+
+
+
+   host%
+   tar -xzvf linux-2.4.0-prerelease.tar.bz2
+</code></pre>
+<ol start="4">
+<li>Apply the patch using</li>
+</ol>
+<pre><code>   host%
+   cd ~/uml/linux
+
+
+
+   host%
+   bzcat uml-patch-2.4.0-prerelease.bz2 | patch -p1
+</code></pre>
+<ol start="5">
+<li>Run your favorite config; <code>make xconfig ARCH=um&#39; is the most convenient.  </code>make config ARCH=um’ and ‘make menuconfig ARCH=um’<br>will work as well.  The defaults will give you a useful kernel.  If<br>you want to change something, go ahead, it probably won’t hurt<br>anything.</li>
+</ol>
+<pre><code> Note:  If the host is configured with a 2G/2G address space split
+ rather than the usual 3G/1G split, then the packaged UML binaries
+ will not run.  They will immediately segfault.  See ``UML on 2G/2G
+ hosts&#39;&#39;  for the scoop on running UML on your system.
+</code></pre>
+<ol start="6">
+<li><p>Finish with <code>make linux ARCH=um&#39;: the result is a file called </code>linux’ in the top directory of your source tree.</p>
+<p>Make sure that you don’t build this kernel in /usr/src/linux.  On some<br>distributions, /usr/include/asm is a link into this pool.  The user-<br>mode build changes the other end of that link, and things that include<br>&lt;asm/anything.h&gt; stop compiling.</p>
+<p>The sources are also available from cvs at the project’s cvs page,<br>which has directions on getting the sources. You can also browse the<br>CVS pool from there.</p>
+<p>If you get the CVS sources, you will have to check them out into an<br>empty directory. You will then have to copy each file into the<br>corresponding directory in the appropriate kernel pool.</p>
+<p>If you don’t have the latest kernel pool, you can get the<br>corresponding user-mode sources with</p>
+</li>
+</ol>
+<pre><code>   host% cvs co -r v_2_3_x linux
+</code></pre>
+<p>  where ‘x’ is the version in your pool. Note that you will not get the<br>  bug fixes and enhancements that have gone into subsequent releases.</p>
+<p>  22..22..  CCoommppiilliinngg aanndd iinnssttaalllliinngg kkeerrnneell mmoodduulleess</p>
+<p>  UML modules are built in the same way as the native kernel (with the<br>  exception of the ‘ARCH=um’ that you always need for UML):</p>
+<pre><code>   host% make modules ARCH=um
+</code></pre>
+<p>  Any modules that you want to load into this kernel need to be built in<br>  the user-mode pool.  Modules from the native kernel won’t work.</p>
+<p>  You can install them by using ftp or something to copy them into the<br>  virtual machine and dropping them into /lib/modules/<code>uname -r</code>.</p>
+<p>  You can also get the kernel build process to install them as follows:</p>
+<ol>
+<li>with the kernel not booted, mount the root filesystem in the top<br>level of the kernel pool:</li>
+</ol>
+<pre><code>   host% mount root_fs mnt -o loop
+</code></pre>
+<ol start="2">
+<li>run</li>
+</ol>
+<pre><code>   host%
+   make modules_install INSTALL_MOD_PATH=`pwd`/mnt ARCH=um
+</code></pre>
+<ol start="3">
+<li>unmount the filesystem</li>
+</ol>
+<pre><code>   host% umount mnt
+</code></pre>
+<ol start="4">
+<li>boot the kernel on it</li>
+</ol>
+<p>  When the system is booted, you can use insmod as usual to get the<br>  modules into the kernel.  A number of things have been loaded into UML<br>  as modules, especially filesystems and network protocols and filters,<br>  so most symbols which need to be exported probably already are.<br>  However, if you do find symbols that need exporting, let  us<br>  <a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/contacts.html">http://user-mode-linux.sourceforge.net/contacts.html</a>  know, and<br>  they’ll be “taken care of”.</p>
+<p>  22..33..  CCoommppiilliinngg aanndd iinnssttaalllliinngg uummll__uuttiilliittiieess</p>
+<p>  Many features of the UML kernel require a user-space helper program,<br>  so a uml_utilities package is distributed separately from the kernel<br>  patch which provides these helpers. Included within this is:</p>
+<p>  +o  port-helper - Used by consoles which connect to xterms or ports</p>
+<p>  +o  tunctl - Configuration tool to create and delete tap devices</p>
+<p>  +o  uml_net - Setuid binary for automatic tap device configuration</p>
+<p>  +o  uml_switch - User-space virtual switch required for daemon<br>     transport</p>
+<pre><code> The uml_utilities tree is compiled with:
+
+
+   host#
+   make &amp;&amp; make install
+</code></pre>
+<p>  Note that UML kernel patches may require a specific version of the<br>  uml_utilities distribution. If you don’t keep up with the mailing<br>  lists, ensure that you have the latest release of uml_utilities if you<br>  are experiencing problems with your UML kernel, particularly when<br>  dealing with consoles or command-line switches to the helper programs</p>
+<p>  33..  RRuunnnniinngg UUMMLL aanndd llooggggiinngg iinn</p>
+<p>  33..11..  RRuunnnniinngg UUMMLL</p>
+<p>  It runs on 2.2.15 or later, and all 2.4 kernels.</p>
+<p>  Booting UML is straightforward.  Simply run ‘linux’: it will try to<br>  mount the file <code>root_fs&#39; in the current directory.  You do not need to   run it as root.  If your root filesystem is not named </code>root_fs’, then<br>  you need to put a `ubd0=root_fs_whatever’ switch on the linux command<br>  line.</p>
+<p>  You will need a filesystem to boot UML from.  There are a number<br>  available for download from  here  &lt;<a target="_blank" rel="noopener" href="http://user-mode-/">http://user-mode-</a><br>  linux.sourceforge.net/dl-sf.html&gt; .  There are also  several tools<br>  <a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/fs_making.html">http://user-mode-linux.sourceforge.net/fs_making.html</a>  which can be<br>  used to generate UML-compatible filesystem images from media.<br>  The kernel will boot up and present you with a login prompt.</p>
+<p>  Note:  If the host is configured with a 2G/2G address space split<br>  rather than the usual 3G/1G split, then the packaged UML binaries will<br>  not run.  They will immediately segfault.  See ``UML on 2G/2G hosts’’<br>  for the scoop on running UML on your system.</p>
+<p>  33..22..  LLooggggiinngg iinn</p>
+<p>  The prepackaged filesystems have a root account with password ‘root’<br>  and a user account with password ‘user’.  The login banner will<br>  generally tell you how to log in.  So, you log in and you will find<br>  yourself inside a little virtual machine. Our filesystems have a<br>  variety of commands and utilities installed (and it is fairly easy to<br>  add more), so you will have a lot of tools with which to poke around<br>  the system.</p>
+<p>  There are a couple of other ways to log in:</p>
+<p>  +o  On a virtual console</p>
+<pre><code> Each virtual console that is configured (i.e. the device exists in
+ /dev and /etc/inittab runs a getty on it) will come up in its own
+ xterm.  If you get tired of the xterms, read ``Setting up serial
+ lines and consoles&#39;&#39;  to see how to attach the consoles to
+ something else, like host ptys.
+</code></pre>
+<p>  +o  Over the serial line</p>
+<pre><code> In the boot output, find a line that looks like:
+
+
+
+   serial line 0 assigned pty /dev/ptyp1
+</code></pre>
+<p>  Attach your favorite terminal program to the corresponding tty.  I.e.<br>  for minicom, the command would be</p>
+<pre><code>   host% minicom -o -p /dev/ttyp1
+</code></pre>
+<p>  +o  Over the net</p>
+<pre><code> If the network is running, then you can telnet to the virtual
+ machine and log in to it.  See ``Setting up the network&#39;&#39;  to learn
+ about setting up a virtual network.
+</code></pre>
+<p>  When you’re done using it, run halt, and the kernel will bring itself<br>  down and the process will exit.</p>
+<p>  33..33..  EExxaammpplleess</p>
+<p>  Here are some examples of UML in action:</p>
+<p>  +o  A login session <a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/login.html">http://user-mode-linux.sourceforge.net/login.html</a></p>
+<p>  +o  A virtual network <a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/net.html">http://user-mode-linux.sourceforge.net/net.html</a></p>
+<p>  44..  UUMMLL oonn 22GG//22GG hhoossttss</p>
+<p>  44..11..  IInnttrroodduuccttiioonn</p>
+<p>  Most Linux machines are configured so that the kernel occupies the<br>  upper 1G (0xc0000000 - 0xffffffff) of the 4G address space and<br>  processes use the lower 3G (0x00000000 - 0xbfffffff).  However, some<br>  machine are configured with a 2G/2G split, with the kernel occupying<br>  the upper 2G (0x80000000 - 0xffffffff) and processes using the lower<br>  2G (0x00000000 - 0x7fffffff).</p>
+<p>  44..22..  TThhee pprroobblleemm</p>
+<p>  The prebuilt UML binaries on this site will not run on 2G/2G hosts<br>  because UML occupies the upper .5G of the 3G process address space<br>  (0xa0000000 - 0xbfffffff).  Obviously, on 2G/2G hosts, this is right<br>  in the middle of the kernel address space, so UML won’t even load - it<br>  will immediately segfault.</p>
+<p>  44..33..  TThhee ssoolluuttiioonn</p>
+<p>  The fix for this is to rebuild UML from source after enabling<br>  CONFIG_HOST_2G_2G (under ‘General Setup’).  This will cause UML to<br>  load itself in the top .5G of that smaller process address space,<br>  where it will run fine.  See ``Compiling the kernel and modules’’  if<br>  you need help building UML from source.</p>
+<p>  55..  SSeettttiinngg uupp sseerriiaall lliinneess aanndd ccoonnssoolleess</p>
+<p>  It is possible to attach UML serial lines and consoles to many types<br>  of host I/O channels by specifying them on the command line.</p>
+<p>  You can attach them to host ptys, ttys, file descriptors, and ports.<br>  This allows you to do things like</p>
+<p>  +o  have a UML console appear on an unused host console,</p>
+<p>  +o  hook two virtual machines together by having one attach to a pty<br>     and having the other attach to the corresponding tty</p>
+<p>  +o  make a virtual machine accessible from the net by attaching a<br>     console to a port on the host.</p>
+<p>  The general format of the command line option is device=channel.</p>
+<p>  55..11..  SSppeecciiffyyiinngg tthhee ddeevviiccee</p>
+<p>  Devices are specified with “con” or “ssl” (console or serial line,<br>  respectively), optionally with a device number if you are talking<br>  about a specific device.</p>
+<p>  Using just “con” or “ssl” describes all of the consoles or serial<br>  lines.  If you want to talk about console #3 or serial line #10, they<br>  would be “con3” and “ssl10”, respectively.</p>
+<p>  A specific device name will override a less general “con=” or “ssl=”.<br>  So, for example, you can assign a pty to each of the serial lines<br>  except for the first two like this:</p>
+<pre><code>    ssl=pty ssl0=tty:/dev/tty0 ssl1=tty:/dev/tty1
+</code></pre>
+<p>  The specificity of the device name is all that matters; order on the<br>  command line is irrelevant.</p>
+<p>  55..22..  SSppeecciiffyyiinngg tthhee cchhaannnneell</p>
+<p>  There are a number of different types of channels to attach a UML<br>  device to, each with a different way of specifying exactly what to<br>  attach to.</p>
+<p>  +o  pseudo-terminals - device=pty pts terminals - device=pts</p>
+<pre><code> This will cause UML to allocate a free host pseudo-terminal for the
+ device.  The terminal that it got will be announced in the boot
+ log.  You access it by attaching a terminal program to the
+ corresponding tty:
+</code></pre>
+<p>  +o  screen /dev/pts/n</p>
+<p>  +o  screen /dev/ttyxx</p>
+<p>  +o  minicom -o -p /dev/ttyxx - minicom seems not able to handle pts<br>     devices</p>
+<p>  +o  kermit - start it up, ‘open’ the device, then ‘connect’</p>
+<p>  +o  terminals - device=tty:tty device file</p>
+<pre><code> This will make UML attach the device to the specified tty (i.e
+
+
+    con1=tty:/dev/tty3
+</code></pre>
+<p>  will attach UML’s console 1 to the host’s /dev/tty3).  If the tty that<br>  you specify is the slave end of a tty/pty pair, something else must<br>  have already opened the corresponding pty in order for this to work.</p>
+<p>  +o  xterms - device=xterm</p>
+<pre><code> UML will run an xterm and the device will be attached to it.
+</code></pre>
+<p>  +o  Port - device=port:port number</p>
+<pre><code> This will attach the UML devices to the specified host port.
+ Attaching console 1 to the host&#39;s port 9000 would be done like
+ this:
+
+
+    con1=port:9000
+</code></pre>
+<p>  Attaching all the serial lines to that port would be done similarly:</p>
+<pre><code>    ssl=port:9000
+</code></pre>
+<p>  You access these devices by telnetting to that port.  Each active tel-<br>  net session gets a different device.  If there are more telnets to a<br>  port than UML devices attached to it, then the extra telnet sessions<br>  will block until an existing telnet detaches, or until another device<br>  becomes active (i.e. by being activated in /etc/inittab).</p>
+<p>  This channel has the advantage that you can both attach multiple UML<br>  devices to it and know how to access them without reading the UML boot<br>  log.  It is also unique in allowing access to a UML from remote<br>  machines without requiring that the UML be networked.  This could be<br>  useful in allowing public access to UMLs because they would be<br>  accessible from the net, but wouldn’t need any kind of network<br>  filtering or access control because they would have no network access.</p>
+<p>  If you attach the main console to a portal, then the UML boot will<br>  appear to hang.  In reality, it’s waiting for a telnet to connect, at<br>  which point the boot will proceed.</p>
+<p>  +o  already-existing file descriptors - device=file descriptor</p>
+<pre><code> If you set up a file descriptor on the UML command line, you can
+ attach a UML device to it.  This is most commonly used to put the
+ main console back on stdin and stdout after assigning all the other
+ consoles to something else:
+
+
+    con0=fd:0,fd:1 con=pts
+</code></pre>
+<p>  +o  Nothing - device=null</p>
+<pre><code> This allows the device to be opened, in contrast to &#39;none&#39;, but
+ reads will block, and writes will succeed and the data will be
+ thrown out.
+</code></pre>
+<p>  +o  None - device=none</p>
+<pre><code> This causes the device to disappear.
+</code></pre>
+<p>  You can also specify different input and output channels for a device<br>  by putting a comma between them:</p>
+<pre><code>    ssl3=tty:/dev/tty2,xterm
+</code></pre>
+<p>  will cause serial line 3 to accept input on the host’s /dev/tty3 and<br>  display output on an xterm.  That’s a silly example - the most common<br>  use of this syntax is to reattach the main console to stdin and stdout<br>  as shown above.</p>
+<p>  If you decide to move the main console away from stdin/stdout, the<br>  initial boot output will appear in the terminal that you’re running<br>  UML in.  However, once the console driver has been officially<br>  initialized, then the boot output will start appearing wherever you<br>  specified that console 0 should be.  That device will receive all<br>  subsequent output.</p>
+<p>  55..33..  EExxaammpplleess</p>
+<p>  There are a number of interesting things you can do with this<br>  capability.</p>
+<p>  First, this is how you get rid of those bleeding console xterms by<br>  attaching them to host ptys:</p>
+<pre><code>    con=pty con0=fd:0,fd:1
+</code></pre>
+<p>  This will make a UML console take over an unused host virtual console,<br>  so that when you switch to it, you will see the UML login prompt<br>  rather than the host login prompt:</p>
+<pre><code>    con1=tty:/dev/tty6
+</code></pre>
+<p>  You can attach two virtual machines together with what amounts to a<br>  serial line as follows:</p>
+<p>  Run one UML with a serial line attached to a pty -</p>
+<pre><code>    ssl1=pty
+</code></pre>
+<p>  Look at the boot log to see what pty it got (this example will assume<br>  that it got /dev/ptyp1).</p>
+<p>  Boot the other UML with a serial line attached to the corresponding<br>  tty -</p>
+<pre><code>    ssl1=tty:/dev/ttyp1
+</code></pre>
+<p>  Log in, make sure that it has no getty on that serial line, attach a<br>  terminal program like minicom to it, and you should see the login<br>  prompt of the other virtual machine.</p>
+<p>  66..  SSeettttiinngg uupp tthhee nneettwwoorrkk</p>
+<p>  This page describes how to set up the various transports and to<br>  provide a UML instance with network access to the host, other machines<br>  on the local net, and the rest of the net.</p>
+<p>  As of 2.4.5, UML networking has been completely redone to make it much<br>  easier to set up, fix bugs, and add new features.</p>
+<p>  There is a new helper, uml_net, which does the host setup that<br>  requires root privileges.</p>
+<p>  There are currently five transport types available for a UML virtual<br>  machine to exchange packets with other hosts:</p>
+<p>  +o  ethertap</p>
+<p>  +o  TUN/TAP</p>
+<p>  +o  Multicast</p>
+<p>  +o  a switch daemon</p>
+<p>  +o  slip</p>
+<p>  +o  slirp</p>
+<p>  +o  pcap</p>
+<pre><code> The TUN/TAP, ethertap, slip, and slirp transports allow a UML
+ instance to exchange packets with the host.  They may be directed
+ to the host or the host may just act as a router to provide access
+ to other physical or virtual machines.
+</code></pre>
+<p>  The pcap transport is a synthetic read-only interface, using the<br>  libpcap binary to collect packets from interfaces on the host and<br>  filter them.  This is useful for building preconfigured traffic<br>  monitors or sniffers.</p>
+<p>  The daemon and multicast transports provide a completely virtual<br>  network to other virtual machines.  This network is completely<br>  disconnected from the physical network unless one of the virtual<br>  machines on it is acting as a gateway.</p>
+<p>  With so many host transports, which one should you use?  Here’s when<br>  you should use each one:</p>
+<p>  +o  ethertap - if you want access to the host networking and it is<br>     running 2.2</p>
+<p>  +o  TUN/TAP - if you want access to the host networking and it is<br>     running 2.4.  Also, the TUN/TAP transport is able to use a<br>     preconfigured device, allowing it to avoid using the setuid uml_net<br>     helper, which is a security advantage.</p>
+<p>  +o  Multicast - if you want a purely virtual network and you don’t want<br>     to set up anything but the UML</p>
+<p>  +o  a switch daemon - if you want a purely virtual network and you<br>     don’t mind running the daemon in order to get somewhat better<br>     performance</p>
+<p>  +o  slip - there is no particular reason to run the slip backend unless<br>     ethertap and TUN/TAP are just not available for some reason</p>
+<p>  +o  slirp - if you don’t have root access on the host to setup<br>     networking, or if you don’t want to allocate an IP to your UML</p>
+<p>  +o  pcap - not much use for actual network connectivity, but great for<br>     monitoring traffic on the host</p>
+<pre><code> Ethertap is available on 2.4 and works fine.  TUN/TAP is preferred
+ to it because it has better performance and ethertap is officially
+ considered obsolete in 2.4.  Also, the root helper only needs to
+ run occasionally for TUN/TAP, rather than handling every packet, as
+ it does with ethertap.  This is a slight security advantage since
+ it provides fewer opportunities for a nasty UML user to somehow
+ exploit the helper&#39;s root privileges.
+</code></pre>
+<p>  66..11..  GGeenneerraall sseettuupp</p>
+<p>  First, you must have the virtual network enabled in your UML.  If are<br>  running a prebuilt kernel from this site, everything is already<br>  enabled.  If you build the kernel yourself, under the “Network device<br>  support” menu, enable “Network device support”, and then the three<br>  transports.</p>
+<p>  The next step is to provide a network device to the virtual machine.<br>  This is done by describing it on the kernel command line.</p>
+<p>  The general format is</p>
+<pre><code>   eth &lt;n&gt; = &lt;transport&gt; , &lt;transport args&gt;
+</code></pre>
+<p>  For example, a virtual ethernet device may be attached to a host<br>  ethertap device as follows:</p>
+<pre><code>   eth0=ethertap,tap0,fe:fd:0:0:0:1,192.168.0.254
+</code></pre>
+<p>  This sets up eth0 inside the virtual machine to attach itself to the<br>  host /dev/tap0, assigns it an ethernet address, and assigns the host<br>  tap0 interface an IP address.</p>
+<p>  Note that the IP address you assign to the host end of the tap device<br>  must be different than the IP you assign to the eth device inside UML.<br>  If you are short on IPs and don’t want to consume two per UML, then<br>  you can reuse the host’s eth IP address for the host ends of the tap<br>  devices.  Internally, the UMLs must still get unique IPs for their eth<br>  devices.  You can also give the UMLs non-routable IPs (192.168.x.x or<br>  10.x.x.x) and have the host masquerade them.  This will let outgoing<br>  connections work, but incoming connections won’t without more work,<br>  such as port forwarding from the host.<br>  Also note that when you configure the host side of an interface, it is<br>  only acting as a gateway.  It will respond to pings sent to it<br>  locally, but is not useful to do that since it’s a host interface.<br>  You are not talking to the UML when you ping that interface and get a<br>  response.</p>
+<p>  You can also add devices to a UML and remove them at runtime.  See the<br>  ``The Management Console’’  page for details.</p>
+<p>  The sections below describe this in more detail.</p>
+<p>  Once you’ve decided how you’re going to set up the devices, you boot<br>  UML, log in, configure the UML side of the devices, and set up routes<br>  to the outside world.  At that point, you will be able to talk to any<br>  other machines, physical or virtual, on the net.</p>
+<p>  If ifconfig inside UML fails and the network refuses to come up, run<br>  tell you what went wrong.</p>
+<p>  66..22..  UUsseerrssppaaccee ddaaeemmoonnss</p>
+<p>  You will likely need the setuid helper, or the switch daemon, or both.<br>  They are both installed with the RPM and deb, so if you’ve installed<br>  either, you can skip the rest of this section.</p>
+<p>  If not, then you need to check them out of CVS, build them, and<br>  install them.  The helper is uml_net, in CVS /tools/uml_net, and the<br>  daemon is uml_switch, in CVS /tools/uml_router.  They are both built<br>  with a plain ‘make’.  Both need to be installed in a directory that’s<br>  in your path - /usr/bin is recommend.  On top of that, uml_net needs<br>  to be setuid root.</p>
+<p>  66..33..  SSppeecciiffyyiinngg eetthheerrnneett aaddddrreesssseess</p>
+<p>  Below, you will see that the TUN/TAP, ethertap, and daemon interfaces<br>  allow you to specify hardware addresses for the virtual ethernet<br>  devices.  This is generally not necessary.  If you don’t have a<br>  specific reason to do it, you probably shouldn’t.  If one is not<br>  specified on the command line, the driver will assign one based on the<br>  device IP address.  It will provide the address fe:fd:nn:nn:nn:nn<br>  where nn.nn.nn.nn is the device IP address.  This is nearly always<br>  sufficient to guarantee a unique hardware address for the device.  A<br>  couple of exceptions are:</p>
+<p>  +o  Another set of virtual ethernet devices are on the same network and<br>     they are assigned hardware addresses using a different scheme which<br>     may conflict with the UML IP address-based scheme</p>
+<p>  +o  You aren’t going to use the device for IP networking, so you don’t<br>     assign the device an IP address</p>
+<pre><code> If you let the driver provide the hardware address, you should make
+ sure that the device IP address is known before the interface is
+ brought up.  So, inside UML, this will guarantee that:
+</code></pre>
+<p>  UML#<br>  ifconfig eth0 192.168.0.250 up</p>
+<p>  If you decide to assign the hardware address yourself, make sure that<br>  the first byte of the address is even.  Addresses with an odd first<br>  byte are broadcast addresses, which you don’t want assigned to a<br>  device.</p>
+<p>  66..44..  UUMMLL iinntteerrffaaccee sseettuupp</p>
+<p>  Once the network devices have been described on the command line, you<br>  should boot UML and log in.</p>
+<p>  The first thing to do is bring the interface up:</p>
+<pre><code>   UML# ifconfig ethn ip-address up
+</code></pre>
+<p>  You should be able to ping the host at this point.</p>
+<p>  To reach the rest of the world, you should set a default route to the<br>  host:</p>
+<pre><code>   UML# route add default gw host ip
+</code></pre>
+<p>  Again, with host ip of 192.168.0.4:</p>
+<pre><code>   UML# route add default gw 192.168.0.4
+</code></pre>
+<p>  This page used to recommend setting a network route to your local net.<br>  This is wrong, because it will cause UML to try to figure out hardware<br>  addresses of the local machines by arping on the interface to the<br>  host.  Since that interface is basically a single strand of ethernet<br>  with two nodes on it (UML and the host) and arp requests don’t cross<br>  networks, they will fail to elicit any responses.  So, what you want<br>  is for UML to just blindly throw all packets at the host and let it<br>  figure out what to do with them, which is what leaving out the network<br>  route and adding the default route does.</p>
+<p>  Note: If you can’t communicate with other hosts on your physical<br>  ethernet, it’s probably because of a network route that’s<br>  automatically set up.  If you run ‘route -n’ and see a route that<br>  looks like this:</p>
+<p>  Destination     Gateway         Genmask         Flags Metric Ref    Use Iface<br>  192.168.0.0     0.0.0.0         255.255.255.0   U     0      0      0   eth0</p>
+<p>  with a mask that’s not 255.255.255.255, then replace it with a route<br>  to your host:</p>
+<pre><code>   UML#
+   route del -net 192.168.0.0 dev eth0 netmask 255.255.255.0
+
+
+
+
+
+
+   UML#
+   route add -host 192.168.0.4 dev eth0
+</code></pre>
+<p>  This, plus the default route to the host, will allow UML to exchange<br>  packets with any machine on your ethernet.</p>
+<p>  66..55..  MMuullttiiccaasstt</p>
+<p>  The simplest way to set up a virtual network between multiple UMLs is<br>  to use the mcast transport.  This was written by Harald Welte and is<br>  present in UML version 2.4.5-5um and later.  Your system must have<br>  multicast enabled in the kernel and there must be a multicast-capable<br>  network device on the host.  Normally, this is eth0, but if there is<br>  no ethernet card on the host, then you will likely get strange error<br>  messages when you bring the device up inside UML.</p>
+<p>  To use it, run two UMLs with</p>
+<pre><code>    eth0=mcast
+</code></pre>
+<p>  on their command lines.  Log in, configure the ethernet device in each<br>  machine with different IP addresses:</p>
+<pre><code>   UML1# ifconfig eth0 192.168.0.254
+
+
+
+
+
+
+   UML2# ifconfig eth0 192.168.0.253
+</code></pre>
+<p>  and they should be able to talk to each other.</p>
+<p>  The full set of command line options for this transport are</p>
+<pre><code>   ethn=mcast,ethernet address,multicast
+   address,multicast port,ttl
+</code></pre>
+<p>  Harald’s original README is here &lt;<a target="_blank" rel="noopener" href="http://user-mode-linux.source-/">http://user-mode-linux.source-</a><br>  forge.net/text/mcast.txt&gt;  and explains these in detail, as well as<br>  some other issues.</p>
+<p>  66..66..  TTUUNN//TTAAPP wwiitthh tthhee uummll__nneett hheellppeerr</p>
+<p>  TUN/TAP is the preferred mechanism on 2.4 to exchange packets with the<br>  host.  The TUN/TAP backend has been in UML since 2.4.9-3um.</p>
+<p>  The easiest way to get up and running is to let the setuid uml_net<br>  helper do the host setup for you.  This involves insmod-ing the tun.o<br>  module if necessary, configuring the device, and setting up IP<br>  forwarding, routing, and proxy arp.  If you are new to UML networking,<br>  do this first.  If you’re concerned about the security implications of<br>  the setuid helper, use it to get up and running, then read the next<br>  section to see how to have UML use a preconfigured tap device, which<br>  avoids the use of uml_net.</p>
+<p>  If you specify an IP address for the host side of the device, the<br>  uml_net helper will do all necessary setup on the host - the only<br>  requirement is that TUN/TAP be available, either built in to the host<br>  kernel or as the tun.o module.</p>
+<p>  The format of the command line switch to attach a device to a TUN/TAP<br>  device is</p>
+<pre><code>   eth &lt;n&gt; =tuntap,,, &lt;IP address&gt;
+</code></pre>
+<p>  For example, this argument will attach the UML’s eth0 to the next<br>  available tap device and assign an ethernet address to it based on its<br>  IP address</p>
+<pre><code>   eth0=tuntap,,,192.168.0.254
+</code></pre>
+<p>  Note that the IP address that must be used for the eth device inside<br>  UML is fixed by the routing and proxy arp that is set up on the<br>  TUN/TAP device on the host.  You can use a different one, but it won’t<br>  work because reply packets won’t reach the UML.  This is a feature.<br>  It prevents a nasty UML user from doing things like setting the UML IP<br>  to the same as the network’s nameserver or mail server.</p>
+<p>  There are a couple potential problems with running the TUN/TAP<br>  transport on a 2.4 host kernel</p>
+<p>  +o  TUN/TAP seems not to work on 2.4.3 and earlier.  Upgrade the host<br>     kernel or use the ethertap transport.</p>
+<p>  +o  With an upgraded kernel, TUN/TAP may fail with</p>
+<pre><code>   File descriptor in bad state
+</code></pre>
+<p>  This is due to a header mismatch between the upgraded kernel and the<br>  kernel that was originally installed on the machine.  The fix is to<br>  make sure that /usr/src/linux points to the headers for the running<br>  kernel.</p>
+<p>  These were pointed out by Tim Robinson <timro at trkr dot net> in<br>  <a target="_blank" rel="noopener" href="http://www.geocrawler.com/lists/3/SourceForge/597/0/">http://www.geocrawler.com/lists/3/SourceForge/597/0/</a> name=”this uml-<br>  user post”&gt; .</p>
+<p>  66..77..  TTUUNN//TTAAPP wwiitthh aa pprreeccoonnffiigguurreedd ttaapp ddeevviiccee</p>
+<p>  If you prefer not to have UML use uml_net (which is somewhat<br>  insecure), with UML 2.4.17-11, you can set up a TUN/TAP device<br>  beforehand.  The setup needs to be done as root, but once that’s done,<br>  there is no need for root assistance.  Setting up the device is done<br>  as follows:</p>
+<p>  +o  Create the device with tunctl (available from the UML utilities<br>     tarball)</p>
+<pre><code>   host#  tunctl -u uid
+</code></pre>
+<p>  where uid is the user id or username that UML will be run as.  This<br>  will tell you what device was created.</p>
+<p>  +o  Configure the device IP (change IP addresses and device name to<br>     suit)</p>
+<pre><code>   host#  ifconfig tap0 192.168.0.254 up
+</code></pre>
+<p>  +o  Set up routing and arping if desired - this is my recipe, there are<br>     other ways of doing the same thing</p>
+<pre><code>   host#
+   bash -c &#39;echo 1 &gt; /proc/sys/net/ipv4/ip_forward&#39;
+
+   host#
+   route add -host 192.168.0.253 dev tap0
+
+
+
+
+
+
+   host#
+   bash -c &#39;echo 1 &gt; /proc/sys/net/ipv4/conf/tap0/proxy_arp&#39;
+
+
+
+
+
+
+   host#
+   arp -Ds 192.168.0.253 eth0 pub
+</code></pre>
+<p>  Note that this must be done every time the host boots - this configu-<br>  ration is not stored across host reboots.  So, it’s probably a good<br>  idea to stick it in an rc file.  An even better idea would be a little<br>  utility which reads the information from a config file and sets up<br>  devices at boot time.</p>
+<p>  +o  Rather than using up two IPs and ARPing for one of them, you can<br>     also provide direct access to your LAN by the UML by using a<br>     bridge.</p>
+<pre><code>   host#
+   brctl addbr br0
+
+
+
+
+
+
+   host#
+   ifconfig eth0 0.0.0.0 promisc up
+
+
+
+
+
+
+   host#
+   ifconfig tap0 0.0.0.0 promisc up
+
+
+
+
+
+
+   host#
+   ifconfig br0 192.168.0.1 netmask 255.255.255.0 up
+</code></pre>
+<p>  host#<br>  brctl stp br0 off</p>
+<pre><code>   host#
+   brctl setfd br0 1
+
+
+
+
+
+
+   host#
+   brctl sethello br0 1
+
+
+
+
+
+
+   host#
+   brctl addif br0 eth0
+
+
+
+
+
+
+   host#
+   brctl addif br0 tap0
+</code></pre>
+<p>  Note that ‘br0’ should be setup using ifconfig with the existing IP<br>  address of eth0, as eth0 no longer has its own IP.</p>
+<p>  +o</p>
+<pre><code> Also, the /dev/net/tun device must be writable by the user running
+ UML in order for the UML to use the device that&#39;s been configured
+ for it.  The simplest thing to do is
+
+
+   host#  chmod 666 /dev/net/tun
+</code></pre>
+<p>  Making it world-writable looks bad, but it seems not to be<br>  exploitable as a security hole.  However, it does allow anyone to cre-<br>  ate useless tap devices (useless because they can’t configure them),<br>  which is a DOS attack.  A somewhat more secure alternative would to be<br>  to create a group containing all the users who have preconfigured tap<br>  devices and chgrp /dev/net/tun to that group with mode 664 or 660.</p>
+<p>  +o  Once the device is set up, run UML with ‘eth0=tuntap,device name’<br>     (i.e. ‘eth0=tuntap,tap0’) on the command line (or do it with the<br>     mconsole config command).</p>
+<p>  +o  Bring the eth device up in UML and you’re in business.</p>
+<pre><code> If you don&#39;t want that tap device any more, you can make it non-
+ persistent with
+
+
+   host#  tunctl -d tap device
+</code></pre>
+<p>  Finally, tunctl has a -b (for brief mode) switch which causes it to<br>  output only the name of the tap device it created.  This makes it<br>  suitable for capture by a script:</p>
+<pre><code>   host#  TAP=`tunctl -u 1000 -b`
+</code></pre>
+<p>  66..88..  EEtthheerrttaapp</p>
+<p>  Ethertap is the general mechanism on 2.2 for userspace processes to<br>  exchange packets with the kernel.</p>
+<p>  To use this transport, you need to describe the virtual network device<br>  on the UML command line.  The general format for this is</p>
+<pre><code>   eth &lt;n&gt; =ethertap, &lt;device&gt; , &lt;ethernet address&gt; , &lt;tap IP address&gt;
+</code></pre>
+<p>  So, the previous example</p>
+<pre><code>   eth0=ethertap,tap0,fe:fd:0:0:0:1,192.168.0.254
+</code></pre>
+<p>  attaches the UML eth0 device to the host /dev/tap0, assigns it the<br>  ethernet address fe:fd:0:0:0:1, and assigns the IP address<br>  192.168.0.254 to the tap device.</p>
+<p>  The tap device is mandatory, but the others are optional.  If the<br>  ethernet address is omitted, one will be assigned to it.</p>
+<p>  The presence of the tap IP address will cause the helper to run and do<br>  whatever host setup is needed to allow the virtual machine to<br>  communicate with the outside world.  If you’re not sure you know what<br>  you’re doing, this is the way to go.</p>
+<p>  If it is absent, then you must configure the tap device and whatever<br>  arping and routing you will need on the host.  However, even in this<br>  case, the uml_net helper still needs to be in your path and it must be<br>  setuid root if you’re not running UML as root.  This is because the<br>  tap device doesn’t support SIGIO, which UML needs in order to use<br>  something as a source of input.  So, the helper is used as a<br>  convenient asynchronous IO thread.</p>
+<p>  If you’re using the uml_net helper, you can ignore the following host<br>  setup - uml_net will do it for you.  You just need to make sure you<br>  have ethertap available, either built in to the host kernel or<br>  available as a module.</p>
+<p>  If you want to set things up yourself, you need to make sure that the<br>  appropriate /dev entry exists.  If it doesn’t, become root and create<br>  it as follows:</p>
+<pre><code>   mknod /dev/tap &lt;minor&gt;  c 36  &lt;minor&gt;  + 16
+</code></pre>
+<p>  For example, this is how to create /dev/tap0:</p>
+<pre><code>   mknod /dev/tap0 c 36 0 + 16
+</code></pre>
+<p>  You also need to make sure that the host kernel has ethertap support.<br>  If ethertap is enabled as a module, you apparently need to insmod<br>  ethertap once for each ethertap device you want to enable.  So,</p>
+<pre><code>   host#
+   insmod ethertap
+</code></pre>
+<p>  will give you the tap0 interface.  To get the tap1 interface, you need<br>  to run</p>
+<pre><code>   host#
+   insmod ethertap unit=1 -o ethertap1
+</code></pre>
+<p>  66..99..  TThhee sswwiittcchh ddaaeemmoonn</p>
+<p>  NNoottee: This is the daemon formerly known as uml_router, but which was<br>  renamed so the network weenies of the world would stop growling at me.</p>
+<p>  The switch daemon, uml_switch, provides a mechanism for creating a<br>  totally virtual network.  By default, it provides no connection to the<br>  host network (but see -tap, below).</p>
+<p>  The first thing you need to do is run the daemon.  Running it with no<br>  arguments will make it listen on a default pair of unix domain<br>  sockets.</p>
+<p>  If you want it to listen on a different pair of sockets, use</p>
+<pre><code>    -unix control socket data socket
+</code></pre>
+<p>  If you want it to act as a hub rather than a switch, use</p>
+<pre><code>    -hub
+</code></pre>
+<p>  If you want the switch to be connected to host networking (allowing<br>  the umls to get access to the outside world through the host), use</p>
+<pre><code>    -tap tap0
+</code></pre>
+<p>  Note that the tap device must be preconfigured (see “TUN/TAP with a<br>  preconfigured tap device”, above).  If you’re using a different tap<br>  device than tap0, specify that instead of tap0.</p>
+<p>  uml_switch can be backgrounded as follows</p>
+<pre><code>   host%
+   uml_switch [ options ] &lt; /dev/null &gt; /dev/null
+</code></pre>
+<p>  The reason it doesn’t background by default is that it listens to<br>  stdin for EOF.  When it sees that, it exits.</p>
+<p>  The general format of the kernel command line switch is</p>
+<pre><code>   ethn=daemon,ethernet address,socket
+   type,control socket,data socket
+</code></pre>
+<p>  You can leave off everything except the ‘daemon’.  You only need to<br>  specify the ethernet address if the one that will be assigned to it<br>  isn’t acceptable for some reason.  The rest of the arguments describe<br>  how to communicate with the daemon.  You should only specify them if<br>  you told the daemon to use different sockets than the default.  So, if<br>  you ran the daemon with no arguments, running the UML on the same<br>  machine with<br>       eth0=daemon</p>
+<p>  will cause the eth0 driver to attach itself to the daemon correctly.</p>
+<p>  66..1100..  SSlliipp</p>
+<p>  Slip is another, less general, mechanism for a process to communicate<br>  with the host networking.  In contrast to the ethertap interface,<br>  which exchanges ethernet frames with the host and can be used to<br>  transport any higher-level protocol, it can only be used to transport<br>  IP.</p>
+<p>  The general format of the command line switch is</p>
+<pre><code>   ethn=slip,slip IP
+</code></pre>
+<p>  The slip IP argument is the IP address that will be assigned to the<br>  host end of the slip device.  If it is specified, the helper will run<br>  and will set up the host so that the virtual machine can reach it and<br>  the rest of the network.</p>
+<p>  There are some oddities with this interface that you should be aware<br>  of.  You should only specify one slip device on a given virtual<br>  machine, and its name inside UML will be ‘umn’, not ‘eth0’ or whatever<br>  you specified on the command line.  These problems will be fixed at<br>  some point.</p>
+<p>  66..1111..  SSlliirrpp</p>
+<p>  slirp uses an external program, usually /usr/bin/slirp, to provide IP<br>  only networking connectivity through the host. This is similar to IP<br>  masquerading with a firewall, although the translation is performed in<br>  user-space, rather than by the kernel.  As slirp does not set up any<br>  interfaces on the host, or changes routing, slirp does not require<br>  root access or setuid binaries on the host.</p>
+<p>  The general format of the command line switch for slirp is:</p>
+<pre><code>   ethn=slirp,ethernet address,slirp path
+</code></pre>
+<p>  The ethernet address is optional, as UML will set up the interface<br>  with an ethernet address based upon the initial IP address of the<br>  interface.  The slirp path is generally /usr/bin/slirp, although it<br>  will depend on distribution.</p>
+<p>  The slirp program can have a number of options passed to the command<br>  line and we can’t add them to the UML command line, as they will be<br>  parsed incorrectly.  Instead, a wrapper shell script can be written or<br>  the options inserted into the  /.slirprc file.  More information on<br>  all of the slirp options can be found in its man pages.</p>
+<p>  The eth0 interface on UML should be set up with the IP 10.2.0.15,<br>  although you can use anything as long as it is not used by a network<br>  you will be connecting to. The default route on UML should be set to<br>  use</p>
+<pre><code>   UML#
+   route add default dev eth0
+</code></pre>
+<p>  slirp provides a number of useful IP addresses which can be used by<br>  UML, such as 10.0.2.3 which is an alias for the DNS server specified<br>  in /etc/resolv.conf on the host or the IP given in the ‘dns’ option<br>  for slirp.</p>
+<p>  Even with a baudrate setting higher than 115200, the slirp connection<br>  is limited to 115200. If you need it to go faster, the slirp binary<br>  needs to be compiled with FULL_BOLT defined in config.h.</p>
+<p>  66..1122..  ppccaapp</p>
+<p>  The pcap transport is attached to a UML ethernet device on the command<br>  line or with uml_mconsole with the following syntax:</p>
+<pre><code>   ethn=pcap,host interface,filter
+   expression,option1,option2
+</code></pre>
+<p>  The expression and options are optional.</p>
+<p>  The interface is whatever network device on the host you want to<br>  sniff.  The expression is a pcap filter expression, which is also what<br>  tcpdump uses, so if you know how to specify tcpdump filters, you will<br>  use the same expressions here.  The options are up to two of<br>  ‘promisc’, control whether pcap puts the host interface into<br>  promiscuous mode. ‘optimize’ and ‘nooptimize’ control whether the pcap<br>  expression optimizer is used.</p>
+<p>  Example:</p>
+<pre><code>   eth0=pcap,eth0,tcp
+
+   eth1=pcap,eth0,!tcp
+</code></pre>
+<p>  will cause the UML eth0 to emit all tcp packets on the host eth0 and<br>  the UML eth1 to emit all non-tcp packets on the host eth0.</p>
+<p>  66..1133..  SSeettttiinngg uupp tthhee hhoosstt yyoouurrsseellff</p>
+<p>  If you don’t specify an address for the host side of the ethertap or<br>  slip device, UML won’t do any setup on the host.  So this is what is<br>  needed to get things working (the examples use a host-side IP of<br>  192.168.0.251 and a UML-side IP of 192.168.0.250 - adjust to suit your<br>  own network):</p>
+<p>  +o  The device needs to be configured with its IP address.  Tap devices<br>     are also configured with an mtu of 1484.  Slip devices are<br>     configured with a point-to-point address pointing at the UML ip<br>     address.</p>
+<pre><code>   host#  ifconfig tap0 arp mtu 1484 192.168.0.251 up
+
+
+
+
+
+
+   host#
+   ifconfig sl0 192.168.0.251 pointopoint 192.168.0.250 up
+</code></pre>
+<p>  +o  If a tap device is being set up, a route is set to the UML IP.</p>
+<pre><code>   UML# route add -host 192.168.0.250 gw 192.168.0.251
+</code></pre>
+<p>  +o  To allow other hosts on your network to see the virtual machine,<br>     proxy arp is set up for it.</p>
+<pre><code>   host#  arp -Ds 192.168.0.250 eth0 pub
+</code></pre>
+<p>  +o  Finally, the host is set up to route packets.</p>
+<pre><code>   host#  echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+<p>  77..  SShhaarriinngg FFiilleessyysstteemmss bbeettwweeeenn VViirrttuuaall MMaacchhiinneess</p>
+<p>  77..11..  AA wwaarrnniinngg</p>
+<p>  Don’t attempt to share filesystems simply by booting two UMLs from the<br>  same file.  That’s the same thing as booting two physical machines<br>  from a shared disk.  It will result in filesystem corruption.</p>
+<p>  77..22..  UUssiinngg llaayyeerreedd bblloocckk ddeevviicceess</p>
+<p>  The way to share a filesystem between two virtual machines is to use<br>  the copy-on-write (COW) layering capability of the ubd block driver.<br>  As of 2.4.6-2um, the driver supports layering a read-write private<br>  device over a read-only shared device.  A machine’s writes are stored<br>  in the private device, while reads come from either device - the<br>  private one if the requested block is valid in it, the shared one if<br>  not.  Using this scheme, the majority of data which is unchanged is<br>  shared between an arbitrary number of virtual machines, each of which<br>  has a much smaller file containing the changes that it has made.  With<br>  a large number of UMLs booting from a large root filesystem, this<br>  leads to a huge disk space saving.  It will also help performance,<br>  since the host will be able to cache the shared data using a much<br>  smaller amount of memory, so UML disk requests will be served from the<br>  host’s memory rather than its disks.</p>
+<p>  To add a copy-on-write layer to an existing block device file, simply<br>  add the name of the COW file to the appropriate ubd switch:</p>
+<pre><code>    ubd0=root_fs_cow,root_fs_debian_22
+</code></pre>
+<p>  where ‘root_fs_cow’ is the private COW file and ‘root_fs_debian_22’ is<br>  the existing shared filesystem.  The COW file need not exist.  If it<br>  doesn’t, the driver will create and initialize it.  Once the COW file<br>  has been initialized, it can be used on its own on the command line:</p>
+<pre><code>    ubd0=root_fs_cow
+</code></pre>
+<p>  The name of the backing file is stored in the COW file header, so it<br>  would be redundant to continue specifying it on the command line.</p>
+<p>  77..33..  NNoottee!!</p>
+<p>  When checking the size of the COW file in order to see the gobs of<br>  space that you’re saving, make sure you use ‘ls -ls’ to see the actual<br>  disk consumption rather than the length of the file.  The COW file is<br>  sparse, so the length will be very different from the disk usage.<br>  Here is a ‘ls -l’ of a COW file and backing file from one boot and<br>  shutdown:<br>       host% ls -l cow.debian debian2.2<br>       -rw-r–r–    1 jdike    jdike    492504064 Aug  6 21:16 cow.debian<br>       -rwxrw-rw-    1 jdike    jdike    537919488 Aug  6 20:42 debian2.2</p>
+<p>  Doesn’t look like much saved space, does it?  Well, here’s ‘ls -ls’:</p>
+<pre><code>   host% ls -ls cow.debian debian2.2
+      880 -rw-r--r--    1 jdike    jdike    492504064 Aug  6 21:16 cow.debian
+   525832 -rwxrw-rw-    1 jdike    jdike    537919488 Aug  6 20:42 debian2.2
+</code></pre>
+<p>  Now, you can see that the COW file has less than a meg of disk, rather<br>  than 492 meg.</p>
+<p>  77..44..  AAnnootthheerr wwaarrnniinngg</p>
+<p>  Once a filesystem is being used as a readonly backing file for a COW<br>  file, do not boot directly from it or modify it in any way.  Doing so<br>  will invalidate any COW files that are using it.  The mtime and size<br>  of the backing file are stored in the COW file header at its creation,<br>  and they must continue to match.  If they don’t, the driver will<br>  refuse to use the COW file.</p>
+<p>  If you attempt to evade this restriction by changing either the<br>  backing file or the COW header by hand, you will get a corrupted<br>  filesystem.</p>
+<p>  Among other things, this means that upgrading the distribution in a<br>  backing file and expecting that all of the COW files using it will see<br>  the upgrade will not work.</p>
+<p>  77..55..  uummll__mmoooo :: MMeerrggiinngg aa CCOOWW ffiillee wwiitthh iittss bbaacckkiinngg ffiillee</p>
+<p>  Depending on how you use UML and COW devices, it may be advisable to<br>  merge the changes in the COW file into the backing file every once in<br>  a while.</p>
+<p>  The utility that does this is uml_moo.  Its usage is</p>
+<pre><code>   host% uml_moo COW file new backing file
+</code></pre>
+<p>  There’s no need to specify the backing file since that information is<br>  already in the COW file header.  If you’re paranoid, boot the new<br>  merged file, and if you’re happy with it, move it over the old backing<br>  file.</p>
+<p>  uml_moo creates a new backing file by default as a safety measure.  It<br>  also has a destructive merge option which will merge the COW file<br>  directly into its current backing file.  This is really only usable<br>  when the backing file only has one COW file associated with it.  If<br>  there are multiple COWs associated with a backing file, a -d merge of<br>  one of them will invalidate all of the others.  However, it is<br>  convenient if you’re short of disk space, and it should also be<br>  noticeably faster than a non-destructive merge.</p>
+<p>  uml_moo is installed with the UML deb and RPM.  If you didn’t install<br>  UML from one of those packages, you can also get it from the UML<br>  utilities &lt;<a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/dl-sf.html#UML">http://user-mode-linux.sourceforge.net/dl-sf.html#UML</a><br>  utilities&gt;  tar file in tools/moo.</p>
+<p>  88..  CCrreeaattiinngg ffiilleessyysstteemmss</p>
+<p>  You may want to create and mount new UML filesystems, either because<br>  your root filesystem isn’t large enough or because you want to use a<br>  filesystem other than ext2.</p>
+<p>  This was written on the occasion of reiserfs being included in the<br>  2.4.1 kernel pool, and therefore the 2.4.1 UML, so the examples will<br>  talk about reiserfs.  This information is generic, and the examples<br>  should be easy to translate to the filesystem of your choice.</p>
+<p>  88..11..  CCrreeaattee tthhee ffiilleessyysstteemm ffiillee</p>
+<p>  dd is your friend.  All you need to do is tell dd to create an empty<br>  file of the appropriate size.  I usually make it sparse to save time<br>  and to avoid allocating disk space until it’s actually used.  For<br>  example, the following command will create a sparse 100 meg file full<br>  of zeroes.</p>
+<pre><code>   host%
+   dd if=/dev/zero of=new_filesystem seek=100 count=1 bs=1M
+</code></pre>
+<p>  88..22..  AAssssiiggnn tthhee ffiillee ttoo aa UUMMLL ddeevviiccee</p>
+<p>  Add an argument like the following to the UML command line:</p>
+<p>  ubd4=new_filesystem</p>
+<p>  making sure that you use an unassigned ubd device number.</p>
+<p>  88..33..  CCrreeaattiinngg aanndd mmoouunnttiinngg tthhee ffiilleessyysstteemm</p>
+<p>  Make sure that the filesystem is available, either by being built into<br>  the kernel, or available as a module, then boot up UML and log in.  If<br>  the root filesystem doesn’t have the filesystem utilities (mkfs, fsck,<br>  etc), then get them into UML by way of the net or hostfs.</p>
+<p>  Make the new filesystem on the device assigned to the new file:</p>
+<pre><code>   host#  mkreiserfs /dev/ubd/4
+
+
+   &lt;----------- MKREISERFSv2 -----------&gt;
+
+   ReiserFS version 3.6.25
+   Block size 4096 bytes
+   Block count 25856
+   Used blocks 8212
+           Journal - 8192 blocks (18-8209), journal header is in block 8210
+           Bitmaps: 17
+           Root block 8211
+   Hash function &quot;r5&quot;
+   ATTENTION: ALL DATA WILL BE LOST ON &#39;/dev/ubd/4&#39;! (y/n)y
+   journal size 8192 (from 18)
+   Initializing journal - 0%....20%....40%....60%....80%....100%
+   Syncing..done.
+</code></pre>
+<p>  Now, mount it:</p>
+<pre><code>   UML#
+   mount /dev/ubd/4 /mnt
+</code></pre>
+<p>  and you’re in business.</p>
+<p>  99..  HHoosstt ffiillee aacccceessss</p>
+<p>  If you want to access files on the host machine from inside UML, you<br>  can treat it as a separate machine and either nfs mount directories<br>  from the host or copy files into the virtual machine with scp or rcp.<br>  However, since UML is running on the host, it can access those<br>  files just like any other process and make them available inside the<br>  virtual machine without needing to use the network.</p>
+<p>  This is now possible with the hostfs virtual filesystem.  With it, you<br>  can mount a host directory into the UML filesystem and access the<br>  files contained in it just as you would on the host.</p>
+<p>  99..11..  UUssiinngg hhoossttffss</p>
+<p>  To begin with, make sure that hostfs is available inside the virtual<br>  machine with</p>
+<pre><code>   UML# cat /proc/filesystems
+</code></pre>
+<p>  .  hostfs should be listed.  If it’s not, either rebuild the kernel<br>  with hostfs configured into it or make sure that hostfs is built as a<br>  module and available inside the virtual machine, and insmod it.</p>
+<p>  Now all you need to do is run mount:</p>
+<pre><code>   UML# mount none /mnt/host -t hostfs
+</code></pre>
+<p>  will mount the host’s / on the virtual machine’s /mnt/host.</p>
+<p>  If you don’t want to mount the host root directory, then you can<br>  specify a subdirectory to mount with the -o switch to mount:</p>
+<pre><code>   UML# mount none /mnt/home -t hostfs -o /home
+</code></pre>
+<p>  will mount the hosts’s /home on the virtual machine’s /mnt/home.</p>
+<p>  99..22..  hhoossttffss aass tthhee rroooott ffiilleessyysstteemm</p>
+<p>  It’s possible to boot from a directory hierarchy on the host using<br>  hostfs rather than using the standard filesystem in a file.</p>
+<p>  To start, you need that hierarchy.  The easiest way is to loop mount<br>  an existing root_fs file:</p>
+<pre><code>   host#  mount root_fs uml_root_dir -o loop
+</code></pre>
+<p>  You need to change the filesystem type of / in etc/fstab to be<br>  ‘hostfs’, so that line looks like this:</p>
+<p>  /dev/ubd/0       /        hostfs      defaults          1   1</p>
+<p>  Then you need to chown to yourself all the files in that directory<br>  that are owned by root.  This worked for me:</p>
+<pre><code>   host#  find . -uid 0 -exec chown jdike &#123;&#125; \;
+</code></pre>
+<p>  Next, make sure that your UML kernel has hostfs compiled in, not as a<br>  module.  Then run UML with the boot device pointing at that directory:</p>
+<pre><code>    ubd0=/path/to/uml/root/directory
+</code></pre>
+<p>  UML should then boot as it does normally.</p>
+<p>  99..33..  BBuuiillddiinngg hhoossttffss</p>
+<p>  If you need to build hostfs because it’s not in your kernel, you have<br>  two choices:</p>
+<p>  +o  Compiling hostfs into the kernel:</p>
+<pre><code> Reconfigure the kernel and set the &#39;Host filesystem&#39; option under
+</code></pre>
+<p>  +o  Compiling hostfs as a module:</p>
+<pre><code> Reconfigure the kernel and set the &#39;Host filesystem&#39; option under
+ be in arch/um/fs/hostfs/hostfs.o.  Install that in
+ /lib/modules/`uname -r`/fs in the virtual machine, boot it up, and
+
+
+   UML# insmod hostfs
+</code></pre>
+<p>  1100..  TThhee MMaannaaggeemmeenntt CCoonnssoollee</p>
+<p>  The UML management console is a low-level interface to the kernel,<br>  somewhat like the i386 SysRq interface.  Since there is a full-blown<br>  operating system under UML, there is much greater flexibility possible<br>  than with the SysRq mechanism.</p>
+<p>  There are a number of things you can do with the mconsole interface:</p>
+<p>  +o  get the kernel version</p>
+<p>  +o  add and remove devices</p>
+<p>  +o  halt or reboot the machine</p>
+<p>  +o  Send SysRq commands</p>
+<p>  +o  Pause and resume the UML</p>
+<p>  You need the mconsole client (uml_mconsole) which is present in CVS<br>  (/tools/mconsole) in 2.4.5-9um and later, and will be in the RPM in<br>  2.4.6.</p>
+<p>  You also need CONFIG_MCONSOLE (under ‘General Setup’) enabled in UML.<br>  When you boot UML, you’ll see a line like:</p>
+<pre><code>   mconsole initialized on /home/jdike/.uml/umlNJ32yL/mconsole
+</code></pre>
+<p>  If you specify a unique machine id one the UML command line, i.e.</p>
+<pre><code>    umid=debian
+</code></pre>
+<p>  you’ll see this</p>
+<pre><code>   mconsole initialized on /home/jdike/.uml/debian/mconsole
+</code></pre>
+<p>  That file is the socket that uml_mconsole will use to communicate with<br>  UML.  Run it with either the umid or the full path as its argument:</p>
+<pre><code>   host% uml_mconsole debian
+</code></pre>
+<p>  or</p>
+<pre><code>   host% uml_mconsole /home/jdike/.uml/debian/mconsole
+</code></pre>
+<p>  You’ll get a prompt, at which you can run one of these commands:</p>
+<p>  +o  version</p>
+<p>  +o  halt</p>
+<p>  +o  reboot</p>
+<p>  +o  config</p>
+<p>  +o  remove</p>
+<p>  +o  sysrq</p>
+<p>  +o  help</p>
+<p>  +o  cad</p>
+<p>  +o  stop</p>
+<p>  +o  go</p>
+<p>  1100..11..  vveerrssiioonn</p>
+<p>  This takes no arguments.  It prints the UML version.</p>
+<pre><code>   (mconsole)  version
+   OK Linux usermode 2.4.5-9um #1 Wed Jun 20 22:47:08 EDT 2001 i686
+</code></pre>
+<p>  There are a couple actual uses for this.  It’s a simple no-op which<br>  can be used to check that a UML is running.  It’s also a way of<br>  sending an interrupt to the UML.  This is sometimes useful on SMP<br>  hosts, where there’s a bug which causes signals to UML to be lost,<br>  often causing it to appear to hang.  Sending such a UML the mconsole<br>  version command is a good way to ‘wake it up’ before networking has<br>  been enabled, as it does not do anything to the function of the UML.</p>
+<p>  1100..22..  hhaalltt aanndd rreebboooott</p>
+<p>  These take no arguments.  They shut the machine down immediately, with<br>  no syncing of disks and no clean shutdown of userspace.  So, they are<br>  pretty close to crashing the machine.</p>
+<pre><code>   (mconsole)  halt
+   OK
+</code></pre>
+<p>  1100..33..  ccoonnffiigg</p>
+<p>  “config” adds a new device to the virtual machine.  Currently the ubd<br>  and network drivers support this.  It takes one argument, which is the<br>  device to add, with the same syntax as the kernel command line.</p>
+<p>  (mconsole)<br>  config ubd3=/home/jdike/incoming/roots/root_fs_debian22</p>
+<p>  OK<br>  (mconsole)  config eth1=mcast<br>  OK</p>
+<p>  1100..44..  rreemmoovvee</p>
+<p>  “remove” deletes a device from the system.  Its argument is just the<br>  name of the device to be removed. The device must be idle in whatever<br>  sense the driver considers necessary.  In the case of the ubd driver,<br>  the removed block device must not be mounted, swapped on, or otherwise<br>  open, and in the case of the network driver, the device must be down.</p>
+<pre><code>   (mconsole)  remove ubd3
+   OK
+   (mconsole)  remove eth1
+   OK
+</code></pre>
+<p>  1100..55..  ssyyssrrqq</p>
+<p>  This takes one argument, which is a single letter.  It calls the<br>  generic kernel’s SysRq driver, which does whatever is called for by<br>  that argument.  See the SysRq documentation in Documentation/sysrq.txt<br>  in your favorite kernel tree to see what letters are valid and what<br>  they do.</p>
+<p>  1100..66..  hheellpp</p>
+<p>  “help” returns a string listing the valid commands and what each one<br>  does.</p>
+<p>  1100..77..  ccaadd</p>
+<p>  This invokes the Ctl-Alt-Del action on init.  What exactly this ends<br>  up doing is up to /etc/inittab.  Normally, it reboots the machine.<br>  With UML, this is usually not desired, so if a halt would be better,<br>  then find the section of inittab that looks like this</p>
+<pre><code>   # What to do when CTRL-ALT-DEL is pressed.
+   ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
+</code></pre>
+<p>  and change the command to halt.</p>
+<p>  1100..88..  ssttoopp</p>
+<p>  This puts the UML in a loop reading mconsole requests until a ‘go’<br>  mconsole command is received. This is very useful for making backups<br>  of UML filesystems, as the UML can be stopped, then synced via ‘sysrq<br>  s’, so that everything is written to the filesystem. You can then copy<br>  the filesystem and then send the UML ‘go’ via mconsole.</p>
+<p>  Note that a UML running with more than one CPU will have problems<br>  after you send the ‘stop’ command, as only one CPU will be held in a<br>  mconsole loop and all others will continue as normal.  This is a bug,<br>  and will be fixed.</p>
+<p>  1100..99..  ggoo</p>
+<p>  This resumes a UML after being paused by a ‘stop’ command. Note that<br>  when the UML has resumed, TCP connections may have timed out and if<br>  the UML is paused for a long period of time, crond might go a little<br>  crazy, running all the jobs it didn’t do earlier.</p>
+<p>  1111..  KKeerrnneell ddeebbuuggggiinngg</p>
+<p>  NNoottee:: The interface that makes debugging, as described here, possible<br>  is present in 2.4.0-test6 kernels and later.</p>
+<p>  Since the user-mode kernel runs as a normal Linux process, it is<br>  possible to debug it with gdb almost like any other process.  It is<br>  slightly different because the kernel’s threads are already being<br>  ptraced for system call interception, so gdb can’t ptrace them.<br>  However, a mechanism has been added to work around that problem.</p>
+<p>  In order to debug the kernel, you need build it from source.  See<br>  ``Compiling the kernel and modules’’  for information on doing that.<br>  Make sure that you enable CONFIG_DEBUGSYM and CONFIG_PT_PROXY during<br>  the config.  These will compile the kernel with -g, and enable the<br>  ptrace proxy so that gdb works with UML, respectively.</p>
+<p>  1111..11..  SSttaarrttiinngg tthhee kkeerrnneell uunnddeerr ggddbb</p>
+<p>  You can have the kernel running under the control of gdb from the<br>  beginning by putting ‘debug’ on the command line.  You will get an<br>  xterm with gdb running inside it.  The kernel will send some commands<br>  to gdb which will leave it stopped at the beginning of start_kernel.<br>  At this point, you can get things going with ‘next’, ‘step’, or<br>  ‘cont’.</p>
+<p>  There is a transcript of a debugging session  here <debug-
+  session.html> , with breakpoints being set in the scheduler and in an<br>  interrupt handler.<br>  1111..22..  EExxaammiinniinngg sslleeeeppiinngg pprroocceesssseess</p>
+<p>  Not every bug is evident in the currently running process.  Sometimes,<br>  processes hang in the kernel when they shouldn’t because they’ve<br>  deadlocked on a semaphore or something similar.  In this case, when<br>  you ^C gdb and get a backtrace, you will see the idle thread, which<br>  isn’t very relevant.</p>
+<p>  What you want is the stack of whatever process is sleeping when it<br>  shouldn’t be.  You need to figure out which process that is, which is<br>  generally fairly easy.  Then you need to get its host process id,<br>  which you can do either by looking at ps on the host or at<br>  task.thread.extern_pid in gdb.</p>
+<p>  Now what you do is this:</p>
+<p>  +o  detach from the current thread</p>
+<pre><code>   (UML gdb)  det
+</code></pre>
+<p>  +o  attach to the thread you are interested in</p>
+<pre><code>   (UML gdb)  att &lt;host pid&gt;
+</code></pre>
+<p>  +o  look at its stack and anything else of interest</p>
+<pre><code>   (UML gdb)  bt
+</code></pre>
+<p>  Note that you can’t do anything at this point that requires that a<br>  process execute, e.g. calling a function</p>
+<p>  +o  when you’re done looking at that process, reattach to the current<br>     thread and continue it</p>
+<pre><code>   (UML gdb)
+   att 1
+
+
+
+
+
+
+   (UML gdb)
+   c
+</code></pre>
+<p>  Here, specifying any pid which is not the process id of a UML thread<br>  will cause gdb to reattach to the current thread.  I commonly use 1,<br>  but any other invalid pid would work.</p>
+<p>  1111..33..  RRuunnnniinngg dddddd oonn UUMMLL</p>
+<p>  ddd works on UML, but requires a special kludge.  The process goes<br>  like this:</p>
+<p>  +o  Start ddd</p>
+<pre><code>   host% ddd linux
+</code></pre>
+<p>  +o  With ps, get the pid of the gdb that ddd started.  You can ask the<br>     gdb to tell you, but for some reason that confuses things and<br>     causes a hang.</p>
+<p>  +o  run UML with ‘debug=parent gdb-pid=<pid>‘ added to the command line<br>     - it will just sit there after you hit return</p>
+<p>  +o  type ‘att 1’ to the ddd gdb and you will see something like</p>
+<pre><code>   0xa013dc51 in __kill ()
+
+
+   (gdb)
+</code></pre>
+<p>  +o  At this point, type ‘c’, UML will boot up, and you can use ddd just<br>     as you do on any other process.</p>
+<p>  1111..44..  DDeebbuuggggiinngg mmoodduulleess</p>
+<p>  gdb has support for debugging code which is dynamically loaded into<br>  the process.  This support is what is needed to debug kernel modules<br>  under UML.</p>
+<p>  Using that support is somewhat complicated.  You have to tell gdb what<br>  object file you just loaded into UML and where in memory it is.  Then,<br>  it can read the symbol table, and figure out where all the symbols are<br>  from the load address that you provided.  It gets more interesting<br>  when you load the module again (i.e. after an rmmod).  You have to<br>  tell gdb to forget about all its symbols, including the main UML ones<br>  for some reason, then load then all back in again.</p>
+<p>  There’s an easy way and a hard way to do this.  The easy way is to use<br>  the umlgdb expect script written by Chandan Kudige.  It basically<br>  automates the process for you.</p>
+<p>  First, you must tell it where your modules are.  There is a list in<br>  the script that looks like this:<br>       set MODULE_PATHS {<br>       “fat” “/usr/src/uml/linux-2.4.18/fs/fat/fat.o”<br>       “isofs” “/usr/src/uml/linux-2.4.18/fs/isofs/isofs.o”<br>       “minix” “/usr/src/uml/linux-2.4.18/fs/minix/minix.o”<br>       }</p>
+<p>  You change that to list the names and paths of the modules that you<br>  are going to debug.  Then you run it from the toplevel directory of<br>  your UML pool and it basically tells you what to do:</p>
+<pre><code>               ******** GDB pid is 21903 ********
+   Start UML as: ./linux &lt;kernel switches&gt; debug gdb-pid=21903
+
+
+
+   GNU gdb 5.0rh-5 Red Hat Linux 7.1
+   Copyright 2001 Free Software Foundation, Inc.
+   GDB is free software, covered by the GNU General Public License, and you are
+   welcome to change it and/or distribute copies of it under certain conditions.
+   Type &quot;show copying&quot; to see the conditions.
+   There is absolutely no warranty for GDB.  Type &quot;show warranty&quot; for details.
+   This GDB was configured as &quot;i386-redhat-linux&quot;...
+   (gdb) b sys_init_module
+   Breakpoint 1 at 0xa0011923: file module.c, line 349.
+   (gdb) att 1
+</code></pre>
+<p>  After you run UML and it sits there doing nothing, you hit return at<br>  the ‘att 1’ and continue it:</p>
+<pre><code>   Attaching to program: /home/jdike/linux/2.4/um/./linux, process 1
+   0xa00f4221 in __kill ()
+   (UML gdb)  c
+   Continuing.
+</code></pre>
+<p>  At this point, you debug normally.  When you insmod something, the<br>  expect magic will kick in and you’ll see something like:</p>
+<p>   <strong>* Module hostfs loaded *</strong><br>  Breakpoint 1, sys_init_module (name_user=0x805abb0 “hostfs”,<br>      mod_user=0x8070e00) at module.c:349<br>  349             char *name, *n_name, *name_tmp = NULL;<br>  (UML gdb)  finish<br>  Run till exit from #0  sys_init_module (name_user=0x805abb0 “hostfs”,<br>      mod_user=0x8070e00) at module.c:349<br>  0xa00e2e23 in execute_syscall (r=0xa8140284) at syscall_kern.c:411<br>  411             else res = EXECUTE_SYSCALL(syscall, regs);<br>  Value returned is $1 = 0<br>  (UML gdb)<br>  p/x (int)module_list + module_list-&gt;size_of_struct</p>
+<p>  $2 = 0xa9021054<br>  (UML gdb)  symbol-file ./linux<br>  Load new symbol table from “./linux”? (y or n) y<br>  Reading symbols from ./linux…<br>  done.<br>  (UML gdb)<br>  add-symbol-file /home/jdike/linux/2.4/um/arch/um/fs/hostfs/hostfs.o 0xa9021054</p>
+<p>  add symbol table from file “/home/jdike/linux/2.4/um/arch/um/fs/hostfs/hostfs.o” at<br>          .text_addr = 0xa9021054<br>   (y or n) y</p>
+<p>  Reading symbols from /home/jdike/linux/2.4/um/arch/um/fs/hostfs/hostfs.o…<br>  done.<br>  (UML gdb)  p *module_list<br>  $1 = {size_of_struct = 84, next = 0xa0178720, name = 0xa9022de0 “hostfs”,<br>    size = 9016, uc = {usecount = {counter = 0}, pad = 0}, flags = 1,<br>    nsyms = 57, ndeps = 0, syms = 0xa9023170, deps = 0x0, refs = 0x0,<br>    init = 0xa90221f0 <init_hostfs>, cleanup = 0xa902222c <exit_hostfs>,<br>    ex_table_start = 0x0, ex_table_end = 0x0, persist_start = 0x0,<br>    persist_end = 0x0, can_unload = 0, runsize = 0, kallsyms_start = 0x0,<br>    kallsyms_end = 0x0,<br>    archdata_start = 0x1b855 &lt;Address 0x1b855 out of bounds&gt;,<br>    archdata_end = 0xe5890000 &lt;Address 0xe5890000 out of bounds&gt;,<br>    kernel_data = 0xf689c35d &lt;Address 0xf689c35d out of bounds&gt;}</p>
+<blockquote>
+<blockquote>
+<p>Finished loading symbols for hostfs …</p>
+</blockquote>
+</blockquote>
+<p>  That’s the easy way.  It’s highly recommended.  The hard way is<br>  described below in case you’re interested in what’s going on.</p>
+<p>  Boot the kernel under the debugger and load the module with insmod or<br>  modprobe.  With gdb, do:</p>
+<pre><code>   (UML gdb)  p module_list
+</code></pre>
+<p>  This is a list of modules that have been loaded into the kernel, with<br>  the most recently loaded module first.  Normally, the module you want<br>  is at module_list.  If it’s not, walk down the next links, looking at<br>  the name fields until find the module you want to debug.  Take the<br>  address of that structure, and add module.size_of_struct (which in<br>  2.4.10 kernels is 96 (0x60)) to it.  Gdb can make this hard addition<br>  for you :-):</p>
+<p>  (UML gdb)<br>  printf “%#x\n”, (int)module_list module_list-&gt;size_of_struct</p>
+<p>  The offset from the module start occasionally changes (before 2.4.0,<br>  it was module.size_of_struct + 4), so it’s a good idea to check the<br>  init and cleanup addresses once in a while, as describe below.  Now<br>  do:</p>
+<pre><code>   (UML gdb)
+   add-symbol-file /path/to/module/on/host that_address
+</code></pre>
+<p>  Tell gdb you really want to do it, and you’re in business.</p>
+<p>  If there’s any doubt that you got the offset right, like breakpoints<br>  appear not to work, or they’re appearing in the wrong place, you can<br>  check it by looking at the module structure.  The init and cleanup<br>  fields should look like:</p>
+<pre><code>   init = 0x588066b0 &lt;init_hostfs&gt;, cleanup = 0x588066c0 &lt;exit_hostfs&gt;
+</code></pre>
+<p>  with no offsets on the symbol names.  If the names are right, but they<br>  are offset, then the offset tells you how much you need to add to the<br>  address you gave to add-symbol-file.</p>
+<p>  When you want to load in a new version of the module, you need to get<br>  gdb to forget about the old one.  The only way I’ve found to do that<br>  is to tell gdb to forget about all symbols that it knows about:</p>
+<pre><code>   (UML gdb)  symbol-file
+</code></pre>
+<p>  Then reload the symbols from the kernel binary:</p>
+<pre><code>   (UML gdb)  symbol-file /path/to/kernel
+</code></pre>
+<p>  and repeat the process above.  You’ll also need to re-enable break-<br>  points.  They were disabled when you dumped all the symbols because<br>  gdb couldn’t figure out where they should go.</p>
+<p>  1111..55..  AAttttaacchhiinngg ggddbb ttoo tthhee kkeerrnneell</p>
+<p>  If you don’t have the kernel running under gdb, you can attach gdb to<br>  it later by sending the tracing thread a SIGUSR1.  The first line of<br>  the console output identifies its pid:<br>       tracing thread pid = 20093</p>
+<p>  When you send it the signal:</p>
+<pre><code>   host% kill -USR1 20093
+</code></pre>
+<p>  you will get an xterm with gdb running in it.</p>
+<p>  If you have the mconsole compiled into UML, then the mconsole client<br>  can be used to start gdb:</p>
+<pre><code>   (mconsole)  (mconsole) config gdb=xterm
+</code></pre>
+<p>  will fire up an xterm with gdb running in it.</p>
+<p>  1111..66..  UUssiinngg aalltteerrnnaattee ddeebbuuggggeerrss</p>
+<p>  UML has support for attaching to an already running debugger rather<br>  than starting gdb itself.  This is present in CVS as of 17 Apr 2001.<br>  I sent it to Alan for inclusion in the ac tree, and it will be in my<br>  2.4.4 release.</p>
+<p>  This is useful when gdb is a subprocess of some UI, such as emacs or<br>  ddd.  It can also be used to run debuggers other than gdb on UML.<br>  Below is an example of using strace as an alternate debugger.</p>
+<p>  To do this, you need to get the pid of the debugger and pass it in<br>  with the</p>
+<p>  If you are using gdb under some UI, then tell it to ‘att 1’, and<br>  you’ll find yourself attached to UML.</p>
+<p>  If you are using something other than gdb as your debugger, then<br>  you’ll need to get it to do the equivalent of ‘att 1’ if it doesn’t do<br>  it automatically.</p>
+<p>  An example of an alternate debugger is strace.  You can strace the<br>  actual kernel as follows:</p>
+<p>  +o  Run the following in a shell</p>
+<pre><code>   host%
+   sh -c &#39;echo pid=$$; echo -n hit return; read x; exec strace -p 1 -o strace.out&#39;
+</code></pre>
+<p>  +o  Run UML with ‘debug’ and ‘gdb-pid=<pid>‘ with the pid printed out<br>     by the previous command</p>
+<p>  +o  Hit return in the shell, and UML will start running, and strace<br>     output will start accumulating in the output file.</p>
+<pre><code> Note that this is different from running
+
+
+   host% strace ./linux
+</code></pre>
+<p>  That will strace only the main UML thread, the tracing thread, which<br>  doesn’t do any of the actual kernel work.  It just oversees the vir-<br>  tual machine.  In contrast, using strace as described above will show<br>  you the low-level activity of the virtual machine.</p>
+<p>  1122..  KKeerrnneell ddeebbuuggggiinngg eexxaammpplleess</p>
+<p>  1122..11..  TThhee ccaassee ooff tthhee hhuunngg ffsscckk</p>
+<p>  When booting up the kernel, fsck failed, and dropped me into a shell<br>  to fix things up.  I ran fsck -y, which hung:</p>
+<p>  Setting hostname uml                    [ OK ]<br>  Checking root filesystem<br>  /dev/fhd0 was not cleanly unmounted, check forced.<br>  Error reading block 86894 (Attempt to read block from filesystem resulted in short read) while reading indirect blocks of inode 19780.</p>
+<p>  /dev/fhd0: UNEXPECTED INCONSISTENCY; RUN fsck MANUALLY.<br>          (i.e., without -a or -p options)<br>  [ FAILED ]</p>
+<p>  <strong>* An error occurred during the file system check.<br>  *</strong> Dropping you to a shell; the system will reboot<br>  *** when you leave the shell.<br>  Give root password for maintenance<br>  (or type Control-D for normal startup):</p>
+<p>  [root@uml /root]# fsck -y /dev/fhd0<br>  fsck -y /dev/fhd0<br>  Parallelizing fsck version 1.14 (9-Jan-1999)<br>  e2fsck 1.14, 9-Jan-1999 for EXT2 FS 0.5b, 95/08/09<br>  /dev/fhd0 contains a file system with errors, check forced.<br>  Pass 1: Checking inodes, blocks, and sizes<br>  Error reading block 86894 (Attempt to read block from filesystem resulted in short read) while reading indirect blocks of inode 19780.  Ignore error? yes</p>
+<p>  Inode 19780, i_blocks is 1548, should be 540.  Fix? yes</p>
+<p>  Pass 2: Checking directory structure<br>  Error reading block 49405 (Attempt to read block from filesystem resulted in short read).  Ignore error? yes</p>
+<p>  Directory inode 11858, block 0, offset 0: directory corrupted<br>  Salvage? yes</p>
+<p>  Missing ‘.’ in directory inode 11858.<br>  Fix? yes</p>
+<p>  Missing ‘..’ in directory inode 11858.<br>  Fix? yes</p>
+<p>  The standard drill in this sort of situation is to fire up gdb on the<br>  signal thread, which, in this case, was pid 1935.  In another window,<br>  I run gdb and attach pid 1935.</p>
+<pre><code>   ~/linux/2.3.26/um 1016: gdb linux
+   GNU gdb 4.17.0.11 with Linux support
+   Copyright 1998 Free Software Foundation, Inc.
+   GDB is free software, covered by the GNU General Public License, and you are
+   welcome to change it and/or distribute copies of it under certain conditions.
+   Type &quot;show copying&quot; to see the conditions.
+   There is absolutely no warranty for GDB.  Type &quot;show warranty&quot; for details.
+   This GDB was configured as &quot;i386-redhat-linux&quot;...
+
+   (gdb) att 1935
+   Attaching to program `/home/dike/linux/2.3.26/um/linux&#39;, Pid 1935
+   0x100756d9 in __wait4 ()
+</code></pre>
+<p>  Let’s see what’s currently running:</p>
+<pre><code>   (gdb) p current_task.pid
+   $1 = 0
+</code></pre>
+<p>  It’s the idle thread, which means that fsck went to sleep for some<br>  reason and never woke up.</p>
+<p>  Let’s guess that the last process in the process list is fsck:</p>
+<pre><code>   (gdb) p current_task.prev_task.comm
+   $13 = &quot;fsck.ext2\000\000\000\000\000\000&quot;
+</code></pre>
+<p>  It is, so let’s see what it thinks it’s up to:</p>
+<pre><code>   (gdb) p current_task.prev_task.thread
+   $14 = &#123;extern_pid = 1980, tracing = 0, want_tracing = 0, forking = 0,
+     kernel_stack_page = 0, signal_stack = 1342627840, syscall = &#123;id = 4, args = &#123;
+         3, 134973440, 1024, 0, 1024&#125;, have_result = 0, result = 50590720&#125;,
+     request = &#123;op = 2, u = &#123;exec = &#123;ip = 1350467584, sp = 2952789424&#125;, fork = &#123;
+           regs = &#123;1350467584, 2952789424, 0 &lt;repeats 15 times&gt;&#125;, sigstack = 0,
+           pid = 0&#125;, switch_to = 0x507e8000, thread = &#123;proc = 0x507e8000,
+           arg = 0xaffffdb0, flags = 0, new_pid = 0&#125;, input_request = &#123;
+           op = 1350467584, fd = -1342177872, proc = 0, pid = 0&#125;&#125;&#125;&#125;
+</code></pre>
+<p>  The interesting things here are the fact that its .thread.syscall.id<br>  is __NR_write (see the big switch in arch/um/kernel/syscall_kern.c or<br>  the defines in include/asm-um/arch/unistd.h), and that it never<br>  returned.  Also, its .request.op is OP_SWITCH (see<br>  arch/um/include/user_util.h).  These mean that it went into a write,<br>  and, for some reason, called schedule().</p>
+<p>  The fact that it never returned from write means that its stack should<br>  be fairly interesting.  Its pid is 1980 (.thread.extern_pid).  That<br>  process is being ptraced by the signal thread, so it must be detached<br>  before gdb can attach it:</p>
+<p>  (gdb) call detach(1980)</p>
+<p>  Program received signal SIGSEGV, Segmentation fault.<br>  <function called from gdb><br>  The program being debugged stopped while in a function called from GDB.<br>  When the function (detach) is done executing, GDB will silently<br>  stop (instead of continuing to evaluate the expression containing<br>  the function call).<br>  (gdb) call detach(1980)<br>  $15 = 0</p>
+<p>  The first detach segfaults for some reason, and the second one<br>  succeeds.</p>
+<p>  Now I detach from the signal thread, attach to the fsck thread, and<br>  look at its stack:</p>
+<pre><code>   (gdb) det
+   Detaching from program: /home/dike/linux/2.3.26/um/linux Pid 1935
+   (gdb) att 1980
+   Attaching to program `/home/dike/linux/2.3.26/um/linux&#39;, Pid 1980
+   0x10070451 in __kill ()
+   (gdb) bt
+   #0  0x10070451 in __kill ()
+   #1  0x10068ccd in usr1_pid (pid=1980) at process.c:30
+   #2  0x1006a03f in _switch_to (prev=0x50072000, next=0x507e8000)
+       at process_kern.c:156
+   #3  0x1006a052 in switch_to (prev=0x50072000, next=0x507e8000, last=0x50072000)
+       at process_kern.c:161
+   #4  0x10001d12 in schedule () at sched.c:777
+   #5  0x1006a744 in __down (sem=0x507d241c) at semaphore.c:71
+   #6  0x1006aa10 in __down_failed () at semaphore.c:157
+   #7  0x1006c5d8 in segv_handler (sc=0x5006e940) at trap_user.c:174
+   #8  0x1006c5ec in kern_segv_handler (sig=11) at trap_user.c:182
+   #9  &lt;signal handler called&gt;
+   #10 0x10155404 in errno ()
+   #11 0x1006c0aa in segv (address=1342179328, is_write=2) at trap_kern.c:50
+   #12 0x1006c5d8 in segv_handler (sc=0x5006eaf8) at trap_user.c:174
+   #13 0x1006c5ec in kern_segv_handler (sig=11) at trap_user.c:182
+   #14 &lt;signal handler called&gt;
+   #15 0xc0fd in ?? ()
+   #16 0x10016647 in sys_write (fd=3,
+       buf=0x80b8800 &lt;Address 0x80b8800 out of bounds&gt;, count=1024)
+       at read_write.c:159
+   #17 0x1006d5b3 in execute_syscall (syscall=4, args=0x5006ef08)
+       at syscall_kern.c:254
+   #18 0x1006af87 in really_do_syscall (sig=12) at syscall_user.c:35
+   #19 &lt;signal handler called&gt;
+   #20 0x400dc8b0 in ?? ()
+</code></pre>
+<p>  The interesting things here are :</p>
+<p>  +o  There are two segfaults on this stack (frames 9 and 14)</p>
+<p>  +o  The first faulting address (frame 11) is 0x50000800</p>
+<p>  (gdb) p (void *)1342179328<br>  $16 = (void *) 0x50000800</p>
+<p>  The initial faulting address is interesting because it is on the idle<br>  thread’s stack.  I had been seeing the idle thread segfault for no<br>  apparent reason, and the cause looked like stack corruption.  In hopes<br>  of catching the culprit in the act, I had turned off all protections<br>  to that stack while the idle thread wasn’t running.  This apparently<br>  tripped that trap.</p>
+<p>  However, the more immediate problem is that second segfault and I’m<br>  going to concentrate on that.  First, I want to see where the fault<br>  happened, so I have to go look at the sigcontent struct in frame 8:</p>
+<pre><code>   (gdb) up
+   #1  0x10068ccd in usr1_pid (pid=1980) at process.c:30
+   30        kill(pid, SIGUSR1);
+   (gdb)
+   #2  0x1006a03f in _switch_to (prev=0x50072000, next=0x507e8000)
+       at process_kern.c:156
+   156       usr1_pid(getpid());
+   (gdb)
+   #3  0x1006a052 in switch_to (prev=0x50072000, next=0x507e8000, last=0x50072000)
+       at process_kern.c:161
+   161       _switch_to(prev, next);
+   (gdb)
+   #4  0x10001d12 in schedule () at sched.c:777
+   777             switch_to(prev, next, prev);
+   (gdb)
+   #5  0x1006a744 in __down (sem=0x507d241c) at semaphore.c:71
+   71                      schedule();
+   (gdb)
+   #6  0x1006aa10 in __down_failed () at semaphore.c:157
+   157     &#125;
+   (gdb)
+   #7  0x1006c5d8 in segv_handler (sc=0x5006e940) at trap_user.c:174
+   174       segv(sc-&gt;cr2, sc-&gt;err &amp; 2);
+   (gdb)
+   #8  0x1006c5ec in kern_segv_handler (sig=11) at trap_user.c:182
+   182       segv_handler(sc);
+   (gdb) p *sc
+   Cannot access memory at address 0x0.
+</code></pre>
+<p>  That’s not very useful, so I’ll try a more manual method:</p>
+<pre><code>   (gdb) p *((struct sigcontext *) (&amp;sig + 1))
+   $19 = &#123;gs = 0, __gsh = 0, fs = 0, __fsh = 0, es = 43, __esh = 0, ds = 43,
+     __dsh = 0, edi = 1342179328, esi = 1350378548, ebp = 1342630440,
+     esp = 1342630420, ebx = 1348150624, edx = 1280, ecx = 0, eax = 0,
+     trapno = 14, err = 4, eip = 268480945, cs = 35, __csh = 0, eflags = 66118,
+     esp_at_signal = 1342630420, ss = 43, __ssh = 0, fpstate = 0x0, oldmask = 0,
+     cr2 = 1280&#125;
+</code></pre>
+<p>  The ip is in handle_mm_fault:</p>
+<pre><code>   (gdb) p (void *)268480945
+   $20 = (void *) 0x1000b1b1
+   (gdb) i sym $20
+   handle_mm_fault + 57 in section .text
+</code></pre>
+<p>  Specifically, it’s in pte_alloc:</p>
+<pre><code>   (gdb) i line *$20
+   Line 124 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b1b1 &lt;handle_mm_fault+57&gt;
+      and ends at 0x1000b1b7 &lt;handle_mm_fault+63&gt;.
+</code></pre>
+<p>  To find where in handle_mm_fault this is, I’ll jump forward in the<br>  code until I see an address in that procedure:</p>
+<pre><code>   (gdb) i line *0x1000b1c0
+   Line 126 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b1b7 &lt;handle_mm_fault+63&gt;
+      and ends at 0x1000b1c3 &lt;handle_mm_fault+75&gt;.
+   (gdb) i line *0x1000b1d0
+   Line 131 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b1d0 &lt;handle_mm_fault+88&gt;
+      and ends at 0x1000b1da &lt;handle_mm_fault+98&gt;.
+   (gdb) i line *0x1000b1e0
+   Line 61 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b1da &lt;handle_mm_fault+98&gt;
+      and ends at 0x1000b1e1 &lt;handle_mm_fault+105&gt;.
+   (gdb) i line *0x1000b1f0
+   Line 134 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b1f0 &lt;handle_mm_fault+120&gt;
+      and ends at 0x1000b200 &lt;handle_mm_fault+136&gt;.
+   (gdb) i line *0x1000b200
+   Line 135 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b200 &lt;handle_mm_fault+136&gt;
+      and ends at 0x1000b208 &lt;handle_mm_fault+144&gt;.
+   (gdb) i line *0x1000b210
+   Line 139 of &quot;/home/dike/linux/2.3.26/um/include/asm/pgalloc.h&quot;
+      starts at address 0x1000b210 &lt;handle_mm_fault+152&gt;
+      and ends at 0x1000b219 &lt;handle_mm_fault+161&gt;.
+   (gdb) i line *0x1000b220
+   Line 1168 of &quot;memory.c&quot; starts at address 0x1000b21e &lt;handle_mm_fault+166&gt;
+      and ends at 0x1000b222 &lt;handle_mm_fault+170&gt;.
+</code></pre>
+<p>  Something is apparently wrong with the page tables or vma_structs, so<br>  lets go back to frame 11 and have a look at them:</p>
+<p>  #11 0x1006c0aa in segv (address=1342179328, is_write=2) at trap_kern.c:50<br>  50        handle_mm_fault(current, vma, address, is_write);<br>  (gdb) call pgd_offset_proc(vma-&gt;vm_mm, address)<br>  $22 = (pgd_t *) 0x80a548c</p>
+<p>  That’s pretty bogus.  Page tables aren’t supposed to be in process<br>  text or data areas.  Let’s see what’s in the vma:</p>
+<pre><code>   (gdb) p *vma
+   $23 = &#123;vm_mm = 0x507d2434, vm_start = 0, vm_end = 134512640,
+     vm_next = 0x80a4f8c, vm_page_prot = &#123;pgprot = 0&#125;, vm_flags = 31200,
+     vm_avl_height = 2058, vm_avl_left = 0x80a8c94, vm_avl_right = 0x80d1000,
+     vm_next_share = 0xaffffdb0, vm_pprev_share = 0xaffffe63,
+     vm_ops = 0xaffffe7a, vm_pgoff = 2952789626, vm_file = 0xafffffec,
+     vm_private_data = 0x62&#125;
+   (gdb) p *vma.vm_mm
+   $24 = &#123;mmap = 0x507d2434, mmap_avl = 0x0, mmap_cache = 0x8048000,
+     pgd = 0x80a4f8c, mm_users = &#123;counter = 0&#125;, mm_count = &#123;counter = 134904288&#125;,
+     map_count = 134909076, mmap_sem = &#123;count = &#123;counter = 135073792&#125;,
+       sleepers = -1342177872, wait = &#123;lock = &lt;optimized out or zero length&gt;,
+         task_list = &#123;next = 0xaffffe63, prev = 0xaffffe7a&#125;,
+         __magic = -1342177670, __creator = -1342177300&#125;, __magic = 98&#125;,
+     page_table_lock = &#123;&#125;, context = 138, start_code = 0, end_code = 0,
+     start_data = 0, end_data = 0, start_brk = 0, brk = 0, start_stack = 0,
+     arg_start = 0, arg_end = 0, env_start = 0, env_end = 0, rss = 1350381536,
+     total_vm = 0, locked_vm = 0, def_flags = 0, cpu_vm_mask = 0, swap_cnt = 0,
+     swap_address = 0, segments = 0x0&#125;
+</code></pre>
+<p>  This also pretty bogus.  With all of the 0x80xxxxx and 0xaffffxxx<br>  addresses, this is looking like a stack was plonked down on top of<br>  these structures.  Maybe it’s a stack overflow from the next page:</p>
+<pre><code>   (gdb) p vma
+   $25 = (struct vm_area_struct *) 0x507d2434
+</code></pre>
+<p>  That’s towards the lower quarter of the page, so that would have to<br>  have been pretty heavy stack overflow:</p>
+<p>  (gdb) x/100x $25<br>  0x507d2434:     0x507d2434      0x00000000      0x08048000      0x080a4f8c<br>  0x507d2444:     0x00000000      0x080a79e0      0x080a8c94      0x080d1000<br>  0x507d2454:     0xaffffdb0      0xaffffe63      0xaffffe7a      0xaffffe7a<br>  0x507d2464:     0xafffffec      0x00000062      0x0000008a      0x00000000<br>  0x507d2474:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2484:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2494:     0x00000000      0x00000000      0x507d2fe0      0x00000000<br>  0x507d24a4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d24b4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d24c4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d24d4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d24e4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d24f4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2504:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2514:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2524:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2534:     0x00000000      0x00000000      0x507d25dc      0x00000000<br>  0x507d2544:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2554:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2564:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2574:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2584:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d2594:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d25a4:     0x00000000      0x00000000      0x00000000      0x00000000<br>  0x507d25b4:     0x00000000      0x00000000      0x00000000      0x00000000</p>
+<p>  It’s not stack overflow.  The only “stack-like” piece of this data is<br>  the vma_struct itself.</p>
+<p>  At this point, I don’t see any avenues to pursue, so I just have to<br>  admit that I have no idea what’s going on.  What I will do, though, is<br>  stick a trap on the segfault handler which will stop if it sees any<br>  writes to the idle thread’s stack.  That was the thing that happened<br>  first, and it may be that if I can catch it immediately, what’s going<br>  on will be somewhat clearer.</p>
+<p>  1122..22..  EEppiissooddee 22:: TThhee ccaassee ooff tthhee hhuunngg ffsscckk</p>
+<p>  After setting a trap in the SEGV handler for accesses to the signal<br>  thread’s stack, I reran the kernel.</p>
+<p>  fsck hung again, this time by hitting the trap:</p>
+<p>  Setting hostname uml                            [ OK ]<br>  Checking root filesystem<br>  /dev/fhd0 contains a file system with errors, check forced.<br>  Error reading block 86894 (Attempt to read block from filesystem resulted in short read) while reading indirect blocks of inode 19780.</p>
+<p>  /dev/fhd0: UNEXPECTED INCONSISTENCY; RUN fsck MANUALLY.<br>          (i.e., without -a or -p options)<br>  [ FAILED ]</p>
+<p>  <strong>* An error occurred during the file system check.<br>  *</strong> Dropping you to a shell; the system will reboot<br>  *** when you leave the shell.<br>  Give root password for maintenance<br>  (or type Control-D for normal startup):</p>
+<p>  [root@uml /root]# fsck -y /dev/fhd0<br>  fsck -y /dev/fhd0<br>  Parallelizing fsck version 1.14 (9-Jan-1999)<br>  e2fsck 1.14, 9-Jan-1999 for EXT2 FS 0.5b, 95/08/09<br>  /dev/fhd0 contains a file system with errors, check forced.<br>  Pass 1: Checking inodes, blocks, and sizes<br>  Error reading block 86894 (Attempt to read block from filesystem resulted in short read) while reading indirect blocks of inode 19780.  Ignore error? yes</p>
+<p>  Pass 2: Checking directory structure<br>  Error reading block 49405 (Attempt to read block from filesystem resulted in short read).  Ignore error? yes</p>
+<p>  Directory inode 11858, block 0, offset 0: directory corrupted<br>  Salvage? yes</p>
+<p>  Missing ‘.’ in directory inode 11858.<br>  Fix? yes</p>
+<p>  Missing ‘..’ in directory inode 11858.<br>  Fix? yes</p>
+<p>  Untested (4127) [100fe44c]: trap_kern.c line 31</p>
+<p>  I need to get the signal thread to detach from pid 4127 so that I can<br>  attach to it with gdb.  This is done by sending it a SIGUSR1, which is<br>  caught by the signal thread, which detaches the process:</p>
+<pre><code>   kill -USR1 4127
+</code></pre>
+<p>  Now I can run gdb on it:</p>
+<p>  ~/linux/2.3.26/um 1034: gdb linux<br>  GNU gdb 4.17.0.11 with Linux support<br>  Copyright 1998 Free Software Foundation, Inc.<br>  GDB is free software, covered by the GNU General Public License, and you are<br>  welcome to change it and/or distribute copies of it under certain conditions.<br>  Type “show copying” to see the conditions.<br>  There is absolutely no warranty for GDB.  Type “show warranty” for details.<br>  This GDB was configured as “i386-redhat-linux”…<br>  (gdb) att 4127<br>  Attaching to program `/home/dike/linux/2.3.26/um/linux’, Pid 4127<br>  0x10075891 in __libc_nanosleep ()</p>
+<p>  The backtrace shows that it was in a write and that the fault address<br>  (address in frame 3) is 0x50000800, which is right in the middle of<br>  the signal thread’s stack page:</p>
+<pre><code>   (gdb) bt
+   #0  0x10075891 in __libc_nanosleep ()
+   #1  0x1007584d in __sleep (seconds=1000000)
+       at ../sysdeps/unix/sysv/linux/sleep.c:78
+   #2  0x1006ce9a in stop () at user_util.c:191
+   #3  0x1006bf88 in segv (address=1342179328, is_write=2) at trap_kern.c:31
+   #4  0x1006c628 in segv_handler (sc=0x5006eaf8) at trap_user.c:174
+   #5  0x1006c63c in kern_segv_handler (sig=11) at trap_user.c:182
+   #6  &lt;signal handler called&gt;
+   #7  0xc0fd in ?? ()
+   #8  0x10016647 in sys_write (fd=3, buf=0x80b8800 &quot;R.&quot;, count=1024)
+       at read_write.c:159
+   #9  0x1006d603 in execute_syscall (syscall=4, args=0x5006ef08)
+       at syscall_kern.c:254
+   #10 0x1006af87 in really_do_syscall (sig=12) at syscall_user.c:35
+   #11 &lt;signal handler called&gt;
+   #12 0x400dc8b0 in ?? ()
+   #13 &lt;signal handler called&gt;
+   #14 0x400dc8b0 in ?? ()
+   #15 0x80545fd in ?? ()
+   #16 0x804daae in ?? ()
+   #17 0x8054334 in ?? ()
+   #18 0x804d23e in ?? ()
+   #19 0x8049632 in ?? ()
+   #20 0x80491d2 in ?? ()
+   #21 0x80596b5 in ?? ()
+   (gdb) p (void *)1342179328
+   $3 = (void *) 0x50000800
+</code></pre>
+<p>  Going up the stack to the segv_handler frame and looking at where in<br>  the code the access happened shows that it happened near line 110 of<br>  block_dev.c:</p>
+<p>  (gdb) up<br>  #1  0x1007584d in __sleep (seconds=1000000)<br>      at ../sysdeps/unix/sysv/linux/sleep.c:78<br>  ../sysdeps/unix/sysv/linux/sleep.c:78: No such file or directory.<br>  (gdb)<br>  #2  0x1006ce9a in stop () at user_util.c:191<br>  191       while(1) sleep(1000000);<br>  (gdb)<br>  #3  0x1006bf88 in segv (address=1342179328, is_write=2) at trap_kern.c:31<br>  31          KERN_UNTESTED();<br>  (gdb)<br>  #4  0x1006c628 in segv_handler (sc=0x5006eaf8) at trap_user.c:174<br>  174       segv(sc-&gt;cr2, sc-&gt;err &amp; 2);<br>  (gdb) p *sc<br>  $1 = {gs = 0, __gsh = 0, fs = 0, __fsh = 0, es = 43, __esh = 0, ds = 43,<br>    __dsh = 0, edi = 1342179328, esi = 134973440, ebp = 1342631484,<br>    esp = 1342630864, ebx = 256, edx = 0, ecx = 256, eax = 1024, trapno = 14,<br>    err = 6, eip = 268550834, cs = 35, __csh = 0, eflags = 66070,<br>    esp_at_signal = 1342630864, ss = 43, __ssh = 0, fpstate = 0x0, oldmask = 0,<br>    cr2 = 1342179328}<br>  (gdb) p (void *)268550834<br>  $2 = (void *) 0x1001c2b2<br>  (gdb) i sym $2<br>  block_write + 1090 in section .text<br>  (gdb) i line *$2<br>  Line 209 of “/home/dike/linux/2.3.26/um/include/asm/arch/string.h”<br>     starts at address 0x1001c2a1 &lt;block_write+1073&gt;<br>     and ends at 0x1001c2bf &lt;block_write+1103&gt;.<br>  (gdb) i line *0x1001c2c0<br>  Line 110 of “block_dev.c” starts at address 0x1001c2bf &lt;block_write+1103&gt;<br>     and ends at 0x1001c2e3 &lt;block_write+1139&gt;.</p>
+<p>  Looking at the source shows that the fault happened during a call to<br>  copy_to_user to copy the data into the kernel:</p>
+<pre><code>   107             count -= chars;
+   108             copy_from_user(p,buf,chars);
+   109             p += chars;
+   110             buf += chars;
+</code></pre>
+<p>  p is the pointer which must contain 0x50000800, since buf contains<br>  0x80b8800 (frame 8 above).  It is defined as:</p>
+<pre><code>                   p = offset + bh-&gt;b_data;
+</code></pre>
+<p>  I need to figure out what bh is, and it just so happens that bh is<br>  passed as an argument to mark_buffer_uptodate and mark_buffer_dirty a<br>  few lines later, so I do a little disassembly:</p>
+<p>  (gdb) disas 0x1001c2bf 0x1001c2e0<br>  Dump of assembler code from 0x1001c2bf to 0x1001c2d0:<br>  0x1001c2bf &lt;block_write+1103&gt;:  addl   %eax,0xc(%ebp)<br>  0x1001c2c2 &lt;block_write+1106&gt;:  movl   0xfffffdd4(%ebp),%edx<br>  0x1001c2c8 &lt;block_write+1112&gt;:  btsl   $0x0,0x18(%edx)<br>  0x1001c2cd &lt;block_write+1117&gt;:  btsl   $0x1,0x18(%edx)<br>  0x1001c2d2 &lt;block_write+1122&gt;:  sbbl   %ecx,%ecx<br>  0x1001c2d4 &lt;block_write+1124&gt;:  testl  %ecx,%ecx<br>  0x1001c2d6 &lt;block_write+1126&gt;:  jne    0x1001c2e3 &lt;block_write+1139&gt;<br>  0x1001c2d8 &lt;block_write+1128&gt;:  pushl  $0x0<br>  0x1001c2da &lt;block_write+1130&gt;:  pushl  %edx<br>  0x1001c2db &lt;block_write+1131&gt;:  call   0x1001819c &lt;__mark_buffer_dirty&gt;<br>  End of assembler dump.</p>
+<p>  At that point, bh is in %edx (address 0x1001c2da), which is calculated<br>  at 0x1001c2c2 as %ebp + 0xfffffdd4, so I figure exactly what that is,<br>  taking %ebp from the sigcontext_struct above:</p>
+<pre><code>   (gdb) p (void *)1342631484
+   $5 = (void *) 0x5006ee3c
+   (gdb) p 0x5006ee3c+0xfffffdd4
+   $6 = 1342630928
+   (gdb) p (void *)$6
+   $7 = (void *) 0x5006ec10
+   (gdb) p *((void **)$7)
+   $8 = (void *) 0x50100200
+</code></pre>
+<p>  Now, I look at the structure to see what’s in it, and particularly,<br>  what its b_data field contains:</p>
+<pre><code>   (gdb) p *((struct buffer_head *)0x50100200)
+   $13 = &#123;b_next = 0x50289380, b_blocknr = 49405, b_size = 1024, b_list = 0,
+     b_dev = 15872, b_count = &#123;counter = 1&#125;, b_rdev = 15872, b_state = 24,
+     b_flushtime = 0, b_next_free = 0x501001a0, b_prev_free = 0x50100260,
+     b_this_page = 0x501001a0, b_reqnext = 0x0, b_pprev = 0x507fcf58,
+     b_data = 0x50000800 &quot;&quot;, b_page = 0x50004000,
+     b_end_io = 0x10017f60 &lt;end_buffer_io_sync&gt;, b_dev_id = 0x0,
+     b_rsector = 98810, b_wait = &#123;lock = &lt;optimized out or zero length&gt;,
+       task_list = &#123;next = 0x50100248, prev = 0x50100248&#125;, __magic = 1343226448,
+       __creator = 0&#125;, b_kiobuf = 0x0&#125;
+</code></pre>
+<p>  The b_data field is indeed 0x50000800, so the question becomes how<br>  that happened.  The rest of the structure looks fine, so this probably<br>  is not a case of data corruption.  It happened on purpose somehow.</p>
+<p>  The b_page field is a pointer to the page_struct representing the<br>  0x50000000 page.  Looking at it shows the kernel’s idea of the state<br>  of that page:</p>
+<p>  (gdb) p *$13.b_page<br>  $17 = {list = {next = 0x50004a5c, prev = 0x100c5174}, mapping = 0x0,<br>    index = 0, next_hash = 0x0, count = {counter = 1}, flags = 132, lru = {<br>      next = 0x50008460, prev = 0x50019350}, wait = {<br>      lock = <optimized out or zero length>, task_list = {next = 0x50004024,<br>        prev = 0x50004024}, __magic = 1342193708, __creator = 0},<br>    pprev_hash = 0x0, buffers = 0x501002c0, virtual = 1342177280,<br>    zone = 0x100c5160}</p>
+<p>  Some sanity-checking: the virtual field shows the “virtual” address of<br>  this page, which in this kernel is the same as its “physical” address,<br>  and the page_struct itself should be mem_map[0], since it represents<br>  the first page of memory:</p>
+<pre><code>   (gdb) p (void *)1342177280
+   $18 = (void *) 0x50000000
+   (gdb) p mem_map
+   $19 = (mem_map_t *) 0x50004000
+</code></pre>
+<p>  These check out fine.</p>
+<p>  Now to check out the page_struct itself.  In particular, the flags<br>  field shows whether the page is considered free or not:</p>
+<pre><code>   (gdb) p (void *)132
+   $21 = (void *) 0x84
+</code></pre>
+<p>  The “reserved” bit is the high bit, which is definitely not set, so<br>  the kernel considers the signal stack page to be free and available to<br>  be used.</p>
+<p>  At this point, I jump to conclusions and start looking at my early<br>  boot code, because that’s where that page is supposed to be reserved.</p>
+<p>  In my setup_arch procedure, I have the following code which looks just<br>  fine:</p>
+<pre><code>   bootmap_size = init_bootmem(start_pfn, end_pfn - start_pfn);
+   free_bootmem(__pa(low_physmem) + bootmap_size, high_physmem - low_physmem);
+</code></pre>
+<p>  Two stack pages have already been allocated, and low_physmem points to<br>  the third page, which is the beginning of free memory.<br>  The init_bootmem call declares the entire memory to the boot memory<br>  manager, which marks it all reserved.  The free_bootmem call frees up<br>  all of it, except for the first two pages.  This looks correct to me.</p>
+<p>  So, I decide to see init_bootmem run and make sure that it is marking<br>  those first two pages as reserved.  I never get that far.</p>
+<p>  Stepping into init_bootmem, and looking at bootmem_map before looking<br>  at what it contains shows the following:</p>
+<pre><code>   (gdb) p bootmem_map
+   $3 = (void *) 0x50000000
+</code></pre>
+<p>  Aha!  The light dawns.  That first page is doing double duty as a<br>  stack and as the boot memory map.  The last thing that the boot memory<br>  manager does is to free the pages used by its memory map, so this page<br>  is getting freed even its marked as reserved.</p>
+<p>  The fix was to initialize the boot memory manager before allocating<br>  those two stack pages, and then allocate them through the boot memory<br>  manager.  After doing this, and fixing a couple of subsequent buglets,<br>  the stack corruption problem disappeared.</p>
+<p>  1133..  WWhhaatt ttoo ddoo wwhheenn UUMMLL ddooeessnn’’tt wwoorrkk</p>
+<p>  1133..11..  SSttrraannggee ccoommppiillaattiioonn eerrrroorrss wwhheenn yyoouu bbuuiilldd ffrroomm ssoouurrccee</p>
+<p>  As of test11, it is necessary to have “ARCH=um” in the environment or<br>  on the make command line for all steps in building UML, including<br>  clean, distclean, or mrproper, config, menuconfig, or xconfig, dep,<br>  and linux.  If you forget for any of them, the i386 build seems to<br>  contaminate the UML build.  If this happens, start from scratch with</p>
+<pre><code>   host%
+   make mrproper ARCH=um
+</code></pre>
+<p>  and repeat the build process with ARCH=um on all the steps.</p>
+<p>  See ``Compiling the kernel and modules’’  for more details.</p>
+<p>  Another cause of strange compilation errors is building UML in<br>  /usr/src/linux.  If you do this, the first thing you need to do is<br>  clean up the mess you made.  The /usr/src/linux/asm link will now<br>  point to /usr/src/linux/asm-um.  Make it point back to<br>  /usr/src/linux/asm-i386.  Then, move your UML pool someplace else and<br>  build it there.  Also see below, where a more specific set of symptoms<br>  is described.</p>
+<p>  1133..33..  AA vvaarriieettyy ooff ppaanniiccss aanndd hhaannggss wwiitthh //ttmmpp oonn aa rreeiisseerrffss  ffiilleessyyss--<br>  tteemm</p>
+<p>  I saw this on reiserfs 3.5.21 and it seems to be fixed in 3.5.27.<br>  Panics preceded by</p>
+<pre><code>   Detaching pid nnnn
+</code></pre>
+<p>  are diagnostic of this problem.  This is a reiserfs bug which causes a<br>  thread to occasionally read stale data from a mmapped page shared with<br>  another thread.  The fix is to upgrade the filesystem or to have /tmp<br>  be an ext2 filesystem.</p>
+<p>  1133..44..  TThhee ccoommppiillee ffaaiillss wwiitthh eerrrroorrss aabboouutt ccoonnfflliiccttiinngg ttyyppeess ffoorr<br>  ‘’ooppeenn’’,, ‘’dduupp’’,, aanndd ‘’wwaaiittppiidd’’</p>
+<p>  This happens when you build in /usr/src/linux.  The UML build makes<br>  the include/asm link point to include/asm-um.  /usr/include/asm points<br>  to /usr/src/linux/include/asm, so when that link gets moved, files<br>  which need to include the asm-i386 versions of headers get the<br>  incompatible asm-um versions.  The fix is to move the include/asm link<br>  back to include/asm-i386 and to do UML builds someplace else.</p>
+<p>  1133..55..  UUMMLL ddooeessnn’’tt wwoorrkk wwhheenn //ttmmpp iiss aann NNFFSS ffiilleessyysstteemm</p>
+<p>  This seems to be a similar situation with the ReiserFS problem above.<br>  Some versions of NFS seems not to handle mmap correctly, which UML<br>  depends on.  The workaround is have /tmp be a non-NFS directory.</p>
+<p>  1133..66..  UUMMLL hhaannggss oonn bboooott wwhheenn ccoommppiilleedd wwiitthh ggpprrooff ssuuppppoorrtt</p>
+<p>  If you build UML with gprof support and, early in the boot, it does<br>  this</p>
+<pre><code>   kernel BUG at page_alloc.c:100!
+</code></pre>
+<p>  you have a buggy gcc.  You can work around the problem by removing<br>  UM_FASTCALL from CFLAGS in arch/um/Makefile-i386.  This will open up<br>  another bug, but that one is fairly hard to reproduce.</p>
+<p>  1133..77..  ssyyssllooggdd ddiieess wwiitthh aa SSIIGGTTEERRMM oonn ssttaarrttuupp</p>
+<p>  The exact boot error depends on the distribution that you’re booting,<br>  but Debian produces this:</p>
+<pre><code>   /etc/rc2.d/S10sysklogd: line 49:    93 Terminated
+   start-stop-daemon --start --quiet --exec /sbin/syslogd -- $SYSLOGD
+</code></pre>
+<p>  This is a syslogd bug.  There’s a race between a parent process<br>  installing a signal handler and its child sending the signal.  See<br>  this uml-devel post &lt;<a target="_blank" rel="noopener" href="http://www.geocrawler.com/lists/3/Source-">http://www.geocrawler.com/lists/3/Source-</a><br>  Forge/709/0/6612801&gt;  for the details.</p>
+<p>  1133..88..  TTUUNN//TTAAPP nneettwwoorrkkiinngg ddooeessnn’’tt wwoorrkk oonn aa 22..44 hhoosstt</p>
+<p>  There are a couple of problems which were<br>  <a target="_blank" rel="noopener" href="http://www.geocrawler.com/lists/3/SourceForge/597/0/">http://www.geocrawler.com/lists/3/SourceForge/597/0/</a> name=”pointed<br>  out”&gt;  by Tim Robinson <timro at trkr dot net></p>
+<p>  +o  It doesn’t work on hosts running 2.4.7 (or thereabouts) or earlier.<br>     The fix is to upgrade to something more recent and then read the<br>     next item.</p>
+<p>  +o  If you see</p>
+<pre><code>   File descriptor in bad state
+</code></pre>
+<p>  when you bring up the device inside UML, you have a header mismatch<br>  between the original kernel and the upgraded one.  Make /usr/src/linux<br>  point at the new headers.  This will only be a problem if you build<br>  uml_net yourself.</p>
+<p>  1133..99..  YYoouu ccaann nneettwwoorrkk ttoo tthhee hhoosstt bbuutt nnoott ttoo ootthheerr mmaacchhiinneess oonn tthhee<br>  nneett</p>
+<p>  If you can connect to the host, and the host can connect to UML, but<br>  you cannot connect to any other machines, then you may need to enable<br>  IP Masquerading on the host.  Usually this is only experienced when<br>  using private IP addresses (192.168.x.x or 10.x.x.x) for host/UML<br>  networking, rather than the public address space that your host is<br>  connected to.  UML does not enable IP Masquerading, so you will need<br>  to create a static rule to enable it:</p>
+<pre><code>   host%
+   iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+</code></pre>
+<p>  Replace eth0 with the interface that you use to talk to the rest of<br>  the world.</p>
+<p>  Documentation on IP Masquerading, and SNAT, can be found at<br>  <a target="_blank" rel="noopener" href="http://www.netfilter.org/">www.netfilter.org</a>  <a target="_blank" rel="noopener" href="http://www.netfilter.org/">http://www.netfilter.org</a> .</p>
+<p>  If you can reach the local net, but not the outside Internet, then<br>  that is usually a routing problem.  The UML needs a default route:</p>
+<pre><code>   UML#
+   route add default gw gateway IP
+</code></pre>
+<p>  The gateway IP can be any machine on the local net that knows how to<br>  reach the outside world.  Usually, this is the host or the local net-<br>  work’s gateway.</p>
+<p>  Occasionally, we hear from someone who can reach some machines, but<br>  not others on the same net, or who can reach some ports on other<br>  machines, but not others.  These are usually caused by strange<br>  firewalling somewhere between the UML and the other box.  You track<br>  this down by running tcpdump on every interface the packets travel<br>  over and see where they disappear.  When you find a machine that takes<br>  the packets in, but does not send them onward, that’s the culprit.</p>
+<p>  1133..1100..  II hhaavvee nnoo rroooott aanndd II wwaanntt ttoo ssccrreeaamm</p>
+<p>  Thanks to Birgit Wahlich for telling me about this strange one.  It<br>  turns out that there’s a limit of six environment variables on the<br>  kernel command line.  When that limit is reached or exceeded, argument<br>  processing stops, which means that the ‘root=’ argument that UML<br>  usually adds is not seen.  So, the filesystem has no idea what the<br>  root device is, so it panics.</p>
+<p>  The fix is to put less stuff on the command line.  Glomming all your<br>  setup variables into one is probably the best way to go.</p>
+<p>  1133..1111..  UUMMLL bbuuiilldd ccoonnfflliicctt bbeettwweeeenn ppttrraaccee..hh aanndd uuccoonntteexxtt..hh</p>
+<p>  On some older systems, /usr/include/asm/ptrace.h and<br>  /usr/include/sys/ucontext.h define the same names.  So, when they’re<br>  included together, the defines from one completely mess up the parsing<br>  of the other, producing errors like:<br>       /usr/include/sys/ucontext.h:47: parse error before<br>       `10’</p>
+<p>  plus a pile of warnings.</p>
+<p>  This is a libc botch, which has since been fixed, and I don’t see any<br>  way around it besides upgrading.</p>
+<p>  1133..1122..  TThhee UUMMLL BBooggooMMiippss iiss eexxaaccttllyy hhaallff tthhee hhoosstt’’ss BBooggooMMiippss</p>
+<p>  On i386 kernels, there are two ways of running the loop that is used<br>  to calculate the BogoMips rating, using the TSC if it’s there or using<br>  a one-instruction loop.  The TSC produces twice the BogoMips as the<br>  loop.  UML uses the loop, since it has nothing resembling a TSC, and<br>  will get almost exactly the same BogoMips as a host using the loop.<br>  However, on a host with a TSC, its BogoMips will be double the loop<br>  BogoMips, and therefore double the UML BogoMips.</p>
+<p>  1133..1133..  WWhheenn yyoouu rruunn UUMMLL,, iitt iimmmmeeddiiaatteellyy sseeggffaauullttss</p>
+<p>  If the host is configured with the 2G/2G address space split, that’s<br>  why.  See ``UML on 2G/2G hosts’’  for the details on getting UML to<br>  run on your host.</p>
+<p>  1133..1144..  xxtteerrmmss aappppeeaarr,, tthheenn iimmmmeeddiiaatteellyy ddiissaappppeeaarr</p>
+<p>  If you’re running an up to date kernel with an old release of<br>  uml_utilities, the port-helper program will not work properly, so<br>  xterms will exit straight after they appear. The solution is to<br>  upgrade to the latest release of uml_utilities.  Usually this problem<br>  occurs when you have installed a packaged release of UML then compiled<br>  your own development kernel without upgrading the uml_utilities from<br>  the source distribution.</p>
+<p>  1133..1155..  AAnnyy ootthheerr ppaanniicc,, hhaanngg,, oorr ssttrraannggee bbeehhaavviioorr</p>
+<p>  If you’re seeing truly strange behavior, such as hangs or panics that<br>  happen in random places, or you try running the debugger to see what’s<br>  happening and it acts strangely, then it could be a problem in the<br>  host kernel.  If you’re not running a stock Linus or -ac kernel, then<br>  try that.  An early version of the preemption patch and a 2.4.10 SuSE<br>  kernel have caused very strange problems in UML.</p>
+<p>  Otherwise, let me know about it.  Send a message to one of the UML<br>  mailing lists - either the developer list - user-mode-linux-devel at<br>  lists dot sourceforge dot net (subscription info) or the user list -<br>  user-mode-linux-user at lists dot sourceforge do net (subscription<br>  info), whichever you prefer.  Don’t assume that everyone knows about<br>  it and that a fix is imminent.</p>
+<p>  If you want to be super-helpful, read ``Diagnosing Problems’’ and<br>  follow the instructions contained therein.<br>  1144..  DDiiaaggnnoossiinngg PPrroobblleemmss</p>
+<p>  If you get UML to crash, hang, or otherwise misbehave, you should<br>  report this on one of the project mailing lists, either the developer<br>  list - user-mode-linux-devel at lists dot sourceforge dot net<br>  (subscription info) or the user list - user-mode-linux-user at lists<br>  dot sourceforge dot net (subscription info).  When you do, it is<br>  likely that I will want more information.  So, it would be helpful to<br>  read the stuff below, do whatever is applicable in your case, and<br>  report the results to the list.</p>
+<p>  For any diagnosis, you’re going to need to build a debugging kernel.<br>  The binaries from this site aren’t debuggable.  If you haven’t done<br>  this before, read about <code>Compiling the kernel and modules&#39;&#39;  and   </code>Kernel debugging’’  UML first.</p>
+<p>  1144..11..  CCaassee 11 :: NNoorrmmaall kkeerrnneell ppaanniiccss</p>
+<p>  The most common case is for a normal thread to panic.  To debug this,<br>  you will need to run it under the debugger (add ‘debug’ to the command<br>  line).  An xterm will start up with gdb running inside it.  Continue<br>  it when it stops in start_kernel and make it crash.  Now ^C gdb and</p>
+<p>  If the panic was a “Kernel mode fault”, then there will be a segv<br>  frame on the stack and I’m going to want some more information.  The<br>  stack might look something like this:</p>
+<pre><code>   (UML gdb)  backtrace
+   #0  0x1009bf76 in __sigprocmask (how=1, set=0x5f347940, oset=0x0)
+       at ../sysdeps/unix/sysv/linux/sigprocmask.c:49
+   #1  0x10091411 in change_sig (signal=10, on=1) at process.c:218
+   #2  0x10094785 in timer_handler (sig=26) at time_kern.c:32
+   #3  0x1009bf38 in __restore ()
+       at ../sysdeps/unix/sysv/linux/i386/sigaction.c:125
+   #4  0x1009534c in segv (address=8, ip=268849158, is_write=2, is_user=0)
+       at trap_kern.c:66
+   #5  0x10095c04 in segv_handler (sig=11) at trap_user.c:285
+   #6  0x1009bf38 in __restore ()
+</code></pre>
+<p>  I’m going to want to see the symbol and line information for the value<br>  of ip in the segv frame.  In this case, you would do the following:</p>
+<pre><code>   (UML gdb)  i sym 268849158
+</code></pre>
+<p>  and</p>
+<pre><code>   (UML gdb)  i line *268849158
+</code></pre>
+<p>  The reason for this is the __restore frame right above the segv_han-<br>  dler frame is hiding the frame that actually segfaulted.  So, I have<br>  to get that information from the faulting ip.</p>
+<p>  1144..22..  CCaassee 22 :: TTrraacciinngg tthhrreeaadd ppaanniiccss</p>
+<p>  The less common and more painful case is when the tracing thread<br>  panics.  In this case, the kernel debugger will be useless because it<br>  needs a healthy tracing thread in order to work.  The first thing to<br>  do is get a backtrace from the tracing thread.  This is done by<br>  figuring out what its pid is, firing up gdb, and attaching it to that<br>  pid.  You can figure out the tracing thread pid by looking at the<br>  first line of the console output, which will look like this:</p>
+<pre><code>   tracing thread pid = 15851
+</code></pre>
+<p>  or by running ps on the host and finding the line that looks like<br>  this:</p>
+<pre><code>   jdike 15851 4.5 0.4 132568 1104 pts/0 S 21:34 0:05 ./linux [(tracing thread)]
+</code></pre>
+<p>  If the panic was ‘segfault in signals’, then follow the instructions<br>  above for collecting information about the location of the seg fault.</p>
+<p>  If the tracing thread flaked out all by itself, then send that<br>  backtrace in and wait for our crack debugging team to fix the problem.</p>
+<p>  1144..33..  CCaassee 33 :: TTrraacciinngg tthhrreeaadd ppaanniiccss ccaauusseedd bbyy ootthheerr tthhrreeaaddss</p>
+<p>  However, there are cases where the misbehavior of another thread<br>  caused the problem.  The most common panic of this type is:</p>
+<pre><code>   wait_for_stop failed to wait for  &lt;pid&gt;  to stop with  &lt;signal number&gt;
+</code></pre>
+<p>  In this case, you’ll need to get a backtrace from the process men-<br>  tioned in the panic, which is complicated by the fact that the kernel<br>  debugger is defunct and without some fancy footwork, another gdb can’t<br>  attach to it.  So, this is how the fancy footwork goes:</p>
+<p>  In a shell:</p>
+<pre><code>   host% kill -STOP pid
+</code></pre>
+<p>  Run gdb on the tracing thread as described in case 2 and do:</p>
+<pre><code>   (host gdb)  call detach(pid)
+</code></pre>
+<p>  If you get a segfault, do it again.  It always works the second time.</p>
+<p>  Detach from the tracing thread and attach to that other thread:</p>
+<pre><code>   (host gdb)  detach
+
+
+
+
+
+
+   (host gdb)  attach pid
+</code></pre>
+<p>  If gdb hangs when attaching to that process, go back to a shell and<br>  do:</p>
+<pre><code>   host%
+   kill -CONT pid
+</code></pre>
+<p>  And then get the backtrace:</p>
+<pre><code>   (host gdb)  backtrace
+</code></pre>
+<p>  1144..44..  CCaassee 44 :: HHaannggss</p>
+<p>  Hangs seem to be fairly rare, but they sometimes happen.  When a hang<br>  happens, we need a backtrace from the offending process.  Run the<br>  kernel debugger as described in case 1 and get a backtrace.  If the<br>  current process is not the idle thread, then send in the backtrace.<br>  You can tell that it’s the idle thread if the stack looks like this:</p>
+<pre><code>   #0  0x100b1401 in __libc_nanosleep ()
+   #1  0x100a2885 in idle_sleep (secs=10) at time.c:122
+   #2  0x100a546f in do_idle () at process_kern.c:445
+   #3  0x100a5508 in cpu_idle () at process_kern.c:471
+   #4  0x100ec18f in start_kernel () at init/main.c:592
+   #5  0x100a3e10 in start_kernel_proc (unused=0x0) at um_arch.c:71
+   #6  0x100a383f in signal_tramp (arg=0x100a3dd8) at trap_user.c:50
+</code></pre>
+<p>  If this is the case, then some other process is at fault, and went to<br>  sleep when it shouldn’t have.  Run ps on the host and figure out which<br>  process should not have gone to sleep and stayed asleep.  Then attach<br>  to it with gdb and get a backtrace as described in case 3.</p>
+<p>  1155..  TThhaannkkss</p>
+<p>  A number of people have helped this project in various ways, and this<br>  page gives recognition where recognition is due.</p>
+<p>  If you’re listed here and you would prefer a real link on your name,<br>  or no link at all, instead of the despammed email address pseudo-link,<br>  let me know.</p>
+<p>  If you’re not listed here and you think maybe you should be, please<br>  let me know that as well.  I try to get everyone, but sometimes my<br>  bookkeeping lapses and I forget about contributions.</p>
+<p>  1155..11..  CCooddee aanndd DDooccuummeennttaattiioonn</p>
+<p>  Rusty Russell <rusty at linuxcare.com.au>  -</p>
+<p>  +o  wrote the  HOWTO &lt;<a target="_blank" rel="noopener" href="http://user-mode-/">http://user-mode-</a><br>     linux.sourceforge.net/UserModeLinux-HOWTO.html&gt;</p>
+<p>  +o  prodded me into making this project official and putting it on<br>     SourceForge</p>
+<p>  +o  came up with the way cool UML logo &lt;<a target="_blank" rel="noopener" href="http://user-mode-/">http://user-mode-</a><br>     linux.sourceforge.net/uml-small.png&gt;</p>
+<p>  +o  redid the config process</p>
+<p>  Peter Moulder <reiter at netspace.net.au>  - Fixed my config and build<br>  processes, and added some useful code to the block driver</p>
+<p>  Bill Stearns <wstearns at pobox.com>  -</p>
+<p>  +o  HOWTO updates</p>
+<p>  +o  lots of bug reports</p>
+<p>  +o  lots of testing</p>
+<p>  +o  dedicated a box (uml.ists.dartmouth.edu) to support UML development</p>
+<p>  +o  wrote the mkrootfs script, which allows bootable filesystems of<br>     RPM-based distributions to be cranked out</p>
+<p>  +o  cranked out a large number of filesystems with said script</p>
+<p>  Jim Leu <jleu at mindspring.com>  - Wrote the virtual ethernet driver<br>  and associated usermode tools</p>
+<p>  Lars Brinkhoff <a target="_blank" rel="noopener" href="http://lars.nocrew.org/">http://lars.nocrew.org/</a>  - Contributed the ptrace<br>  proxy from his own  project <a target="_blank" rel="noopener" href="http://a386.nocrew.org/">http://a386.nocrew.org/</a> to allow easier<br>  kernel debugging</p>
+<p>  Andrea Arcangeli <andrea at suse.de>  - Redid some of the early boot<br>  code so that it would work on machines with Large File Support</p>
+<p>  Chris Emerson <a target="_blank" rel="noopener" href="http://www.chiark.greenend.org.uk/~cemerson/">http://www.chiark.greenend.org.uk/~cemerson/</a>  - Did<br>  the first UML port to Linux/ppc</p>
+<p>  Harald Welte <laforge at gnumonks.org>  - Wrote the multicast<br>  transport for the network driver</p>
+<p>  Jorgen Cederlof - Added special file support to hostfs</p>
+<p>  Greg Lonnon  <glonnon at ridgerun dot com>  - Changed the ubd driver<br>  to allow it to layer a COW file on a shared read-only filesystem and<br>  wrote the iomem emulation support</p>
+<p>  Henrik Nordstrom <a target="_blank" rel="noopener" href="http://hem.passagen.se/hno/">http://hem.passagen.se/hno/</a>  - Provided a variety<br>  of patches, fixes, and clues</p>
+<p>  Lennert Buytenhek - Contributed various patches, a rewrite of the<br>  network driver, the first implementation of the mconsole driver, and<br>  did the bulk of the work needed to get SMP working again.</p>
+<p>  Yon Uriarte - Fixed the TUN/TAP network backend while I slept.</p>
+<p>  Adam Heath - Made a bunch of nice cleanups to the initialization code,<br>  plus various other small patches.</p>
+<p>  Matt Zimmerman - Matt volunteered to be the UML Debian maintainer and<br>  is doing a real nice job of it.  He also noticed and fixed a number of<br>  actually and potentially exploitable security holes in uml_net.  Plus<br>  the occasional patch.  I like patches.</p>
+<p>  James McMechan - James seems to have taken over maintenance of the ubd<br>  driver and is doing a nice job of it.</p>
+<p>  Chandan Kudige - wrote the umlgdb script which automates the reloading<br>  of module symbols.</p>
+<p>  Steve Schmidtke - wrote the UML slirp transport and hostaudio drivers,<br>  enabling UML processes to access audio devices on the host. He also<br>  submitted patches for the slip transport and lots of other things.</p>
+<p>  David Coulson <a target="_blank" rel="noopener" href="http://davidcoulson.net/">http://davidcoulson.net</a>  -</p>
+<p>  +o  Set up the usermodelinux.org <a target="_blank" rel="noopener" href="http://usermodelinux.org/">http://usermodelinux.org</a>  site,<br>     which is a great way of keeping the UML user community on top of<br>     UML goings-on.</p>
+<p>  +o  Site documentation and updates</p>
+<p>  +o  Nifty little UML management daemon  UMLd<br>     <a target="_blank" rel="noopener" href="http://uml.openconsultancy.com/umld/">http://uml.openconsultancy.com/umld/</a></p>
+<p>  +o  Lots of testing and bug reports</p>
+<p>  1155..22..  FFlluusshhiinngg oouutt bbuuggss</p>
+<p>  +o  Yuri Pudgorodsky</p>
+<p>  +o  Gerald Britton</p>
+<p>  +o  Ian Wehrman</p>
+<p>  +o  Gord Lamb</p>
+<p>  +o  Eugene Koontz</p>
+<p>  +o  John H. Hartman</p>
+<p>  +o  Anders Karlsson</p>
+<p>  +o  Daniel Phillips</p>
+<p>  +o  John Fremlin</p>
+<p>  +o  Rainer Burgstaller</p>
+<p>  +o  James Stevenson</p>
+<p>  +o  Matt Clay</p>
+<p>  +o  Cliff Jefferies</p>
+<p>  +o  Geoff Hoff</p>
+<p>  +o  Lennert Buytenhek</p>
+<p>  +o  Al Viro</p>
+<p>  +o  Frank Klingenhoefer</p>
+<p>  +o  Livio Baldini Soares</p>
+<p>  +o  Jon Burgess</p>
+<p>  +o  Petru Paler</p>
+<p>  +o  Paul</p>
+<p>  +o  Chris Reahard</p>
+<p>  +o  Sverker Nilsson</p>
+<p>  +o  Gong Su</p>
+<p>  +o  johan verrept</p>
+<p>  +o  Bjorn Eriksson</p>
+<p>  +o  Lorenzo Allegrucci</p>
+<p>  +o  Muli Ben-Yehuda</p>
+<p>  +o  David Mansfield</p>
+<p>  +o  Howard Goff</p>
+<p>  +o  Mike Anderson</p>
+<p>  +o  John Byrne</p>
+<p>  +o  Sapan J. Batia</p>
+<p>  +o  Iris Huang</p>
+<p>  +o  Jan Hudec</p>
+<p>  +o  Voluspa</p>
+<p>  1155..33..  BBuugglleettss aanndd cclleeaann--uuppss</p>
+<p>  +o  Dave Zarzycki</p>
+<p>  +o  Adam Lazur</p>
+<p>  +o  Boria Feigin</p>
+<p>  +o  Brian J. Murrell</p>
+<p>  +o  JS</p>
+<p>  +o  Roman Zippel</p>
+<p>  +o  Wil Cooley</p>
+<p>  +o  Ayelet Shemesh</p>
+<p>  +o  Will Dyson</p>
+<p>  +o  Sverker Nilsson</p>
+<p>  +o  dvorak</p>
+<p>  +o  v.naga srinivas</p>
+<p>  +o  Shlomi Fish</p>
+<p>  +o  Roger Binns</p>
+<p>  +o  johan verrept</p>
+<p>  +o  MrChuoi</p>
+<p>  +o  Peter Cleve</p>
+<p>  +o  Vincent Guffens</p>
+<p>  +o  Nathan Scott</p>
+<p>  +o  Patrick Caulfield</p>
+<p>  +o  jbearce</p>
+<p>  +o  Catalin Marinas</p>
+<p>  +o  Shane Spencer</p>
+<p>  +o  Zou Min</p>
+<p>  +o  Ryan Boder</p>
+<p>  +o  Lorenzo Colitti</p>
+<p>  +o  Gwendal Grignou</p>
+<p>  +o  Andre’ Breiler</p>
+<p>  +o  Tsutomu Yasuda</p>
+<p>  1155..44..  CCaassee SSttuuddiieess</p>
+<p>  +o  Jon Wright</p>
+<p>  +o  William McEwan</p>
+<p>  +o  Michael Richardson</p>
+<p>  1155..55..  OOtthheerr ccoonnttrriibbuuttiioonnss</p>
+<p>  Bill Carr &lt;Bill.Carr at compaq.com&gt;  made the Red Hat mkrootfs script<br>  work with RH 6.2.</p>
+<p>  Michael Jennings <mikejen at hevanet.com>  sent in some material which<br>  is now gracing the top of the  index  page &lt;<a target="_blank" rel="noopener" href="http://user-mode-/">http://user-mode-</a><br>  linux.sourceforge.net/index.html&gt;  of this site.</p>
+<p>  SGI <a target="_blank" rel="noopener" href="http://www.sgi.com/">http://www.sgi.com</a>  (and more specifically Ralf Baechle <ralf at
+  uni-koblenz.de> ) gave me an account on oss.sgi.com<br>  <a target="_blank" rel="noopener" href="http://www.oss.sgi.com/">http://www.oss.sgi.com</a> .  The bandwidth there made it possible to<br>  produce most of the filesystems available on the project download<br>  page.</p>
+<p>  Laurent Bonnaud &lt;Laurent.Bonnaud at inpg.fr&gt;  took the old grotty<br>  Debian filesystem that I’ve been distributing and updated it to 2.2.<br>  It is now available by itself here.</p>
+<p>  Rik van Riel gave me some ftp space on ftp.nl.linux.org so I can make<br>  releases even when Sourceforge is broken.</p>
+<p>  Rodrigo de Castro looked at my broken pte code and told me what was<br>  wrong with it, letting me fix a long-standing (several weeks) and<br>  serious set of bugs.</p>
+<p>  Chris Reahard built a specialized root filesystem for running a DNS<br>  server jailed inside UML.  It’s available from the download<br>  <a target="_blank" rel="noopener" href="http://user-mode-linux.sourceforge.net/dl-sf.html">http://user-mode-linux.sourceforge.net/dl-sf.html</a>  page in the Jail<br>  Filesystems section.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/" title="Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_UserModeLinux-HOWTO/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_zynq-7000/" title="Kernel-3.10.0-957.el7_zynq-7000"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_kernel-parameters/" title="Kernel-2.6.32-573.12.1.el6_kernel-parameters"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

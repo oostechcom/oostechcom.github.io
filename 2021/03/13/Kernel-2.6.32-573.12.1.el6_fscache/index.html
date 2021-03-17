@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_fscache | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;           General Filesystem Caching           &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;OVERVIEW&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; This facility is a general purpose cache for network filesystem">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_fscache">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;           General Filesystem Caching           &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;OVERVIEW&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; This facility is a general purpose cache for network filesystem">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_fscache" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_fscache
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>          ==========================
+          General Filesystem Caching
+          ==========================
+</code></pre>
+<p>========<br>OVERVIEW<br>========</p>
+<p>This facility is a general purpose cache for network filesystems, though it<br>could be used for caching other things such as ISO9660 filesystems too.</p>
+<p>FS-Cache mediates between cache backends (such as CacheFS) and network<br>filesystems:</p>
+<pre><code>+---------+
+|         |                        +--------------+
+|   NFS   |--+                     |              |
+|         |  |                 +--&gt;|   CacheFS    |
++---------+  |   +----------+  |   |  /dev/hda5   |
+             |   |          |  |   +--------------+
++---------+  +--&gt;|          |  |
+|         |      |          |--+
+|   AFS   |-----&gt;| FS-Cache |
+|         |      |          |--+
++---------+  +--&gt;|          |  |
+             |   |          |  |   +--------------+
++---------+  |   +----------+  |   |              |
+|         |  |                 +--&gt;|  CacheFiles  |
+|  ISOFS  |--+                     |  /var/cache  |
+|         |                        +--------------+
++---------+
+</code></pre>
+<p>Or to look at it another way, FS-Cache is a module that provides a caching<br>facility to a network filesystem such that the cache is transparent to the<br>user:</p>
+<pre><code>+---------+
+|         |
+| Server  |
+|         |
++---------+
+     |                  NETWORK
+~~~~~|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     |
+     |           +----------+
+     V           |          |
++---------+      |          |
+|         |      |          |
+|   NFS   |-----&gt;| FS-Cache |
+|         |      |          |--+
++---------+      |          |  |   +--------------+   +--------------+
+     |           |          |  |   |              |   |              |
+     V           +----------+  +--&gt;|  CacheFiles  |--&gt;|  Ext3        |
++---------+                        |  /var/cache  |   |  /dev/sda6   |
+|         |                        +--------------+   +--------------+
+|   VFS   |                                ^                     ^
+|         |                                |                     |
++---------+                                +--------------+      |
+     |                  KERNEL SPACE                      |      |
+~~~~~|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|~~~~~~|~~~~
+     |                  USER SPACE                        |      |
+     V                                                    |      |
++---------+                                           +--------------+
+|         |                                           |              |
+| Process |                                           | cachefilesd  |
+|         |                                           |              |
++---------+                                           +--------------+
+</code></pre>
+<p>FS-Cache does not follow the idea of completely loading every netfs file<br>opened in its entirety into a cache before permitting it to be accessed and<br>then serving the pages out of that cache rather than the netfs inode because:</p>
+<p> (1) It must be practical to operate without a cache.</p>
+<p> (2) The size of any accessible file must not be limited to the size of the<br>     cache.</p>
+<p> (3) The combined size of all opened files (this includes mapped libraries)<br>     must not be limited to the size of the cache.</p>
+<p> (4) The user should not be forced to download an entire file just to do a<br>     one-off access of a small portion of it (such as might be done with the<br>     “file” program).</p>
+<p>It instead serves the cache out in PAGE_SIZE chunks as and when requested by<br>the netfs(‘s) using it.</p>
+<p>FS-Cache provides the following facilities:</p>
+<p> (1) More than one cache can be used at once.  Caches can be selected<br>     explicitly by use of tags.</p>
+<p> (2) Caches can be added / removed at any time.</p>
+<p> (3) The netfs is provided with an interface that allows either party to<br>     withdraw caching facilities from a file (required for (2)).</p>
+<p> (4) The interface to the netfs returns as few errors as possible, preferring<br>     rather to let the netfs remain oblivious.</p>
+<p> (5) Cookies are used to represent indices, files and other objects to the<br>     netfs.  The simplest cookie is just a NULL pointer - indicating nothing<br>     cached there.</p>
+<p> (6) The netfs is allowed to propose - dynamically - any index hierarchy it<br>     desires, though it must be aware that the index search function is<br>     recursive, stack space is limited, and indices can only be children of<br>     indices.</p>
+<p> (7) Data I/O is done direct to and from the netfs’s pages.  The netfs<br>     indicates that page A is at index B of the data-file represented by cookie<br>     C, and that it should be read or written.  The cache backend may or may<br>     not start I/O on that page, but if it does, a netfs callback will be<br>     invoked to indicate completion.  The I/O may be either synchronous or<br>     asynchronous.</p>
+<p> (8) Cookies can be “retired” upon release.  At this point FS-Cache will mark<br>     them as obsolete and the index hierarchy rooted at that point will get<br>     recycled.</p>
+<p> (9) The netfs provides a “match” function for index searches.  In addition to<br>     saying whether a match was made or not, this can also specify that an<br>     entry should be updated or deleted.</p>
+<p>(10) As much as possible is done asynchronously.</p>
+<p>FS-Cache maintains a virtual indexing tree in which all indices, files, objects<br>and pages are kept.  Bits of this tree may actually reside in one or more<br>caches.</p>
+<pre><code>                                       FSDEF
+                                         |
+                    +------------------------------------+
+                    |                                    |
+                   NFS                                  AFS
+                    |                                    |
+       +--------------------------+                +-----------+
+       |                          |                |           |
+    homedir                     mirror          afs.org   redhat.com
+       |                          |                            |
+ +------------+           +---------------+              +----------+
+ |            |           |               |              |          |
+</code></pre>
+<p>   00001        00002       00007           00125        vol00001   vol00002<br>     |            |           |               |                         |<br> +—+—+     +—–+      +—+      +——+——+            +—–+—-+<br> |   |   |     |     |      |   |      |      |      |            |     |    |<br>PG0 PG1 PG2   PG0  XATTR   PG0 PG1   DIRENT DIRENT DIRENT        R/W   R/O  Bak<br>                     |                                            |<br>                    PG0                                       +——-+<br>                                                              |       |<br>                                                            00001   00003<br>                                                              |<br>                                                          +—+—+<br>                                                          |   |   |<br>                                                         PG0 PG1 PG2</p>
+<p>In the example above, you can see two netfs’s being backed: NFS and AFS.  These<br>have different index hierarchies:</p>
+<p> (*) The NFS primary index contains per-server indices.  Each server index is<br>     indexed by NFS file handles to get data file objects.  Each data file<br>     objects can have an array of pages, but may also have further child<br>     objects, such as extended attributes and directory entries.  Extended<br>     attribute objects themselves have page-array contents.</p>
+<p> (*) The AFS primary index contains per-cell indices.  Each cell index contains<br>     per-logical-volume indices.  Each of volume index contains up to three<br>     indices for the read-write, read-only and backup mirrors of those volumes.<br>     Each of these contains vnode data file objects, each of which contains an<br>     array of pages.</p>
+<p>The very top index is the FS-Cache master index in which individual netfs’s<br>have entries.</p>
+<p>Any index object may reside in more than one cache, provided it only has index<br>children.  Any index with non-index object children will be assumed to only<br>reside in one cache.</p>
+<p>The netfs API to FS-Cache can be found in:</p>
+<pre><code>Documentation/filesystems/caching/netfs-api.txt
+</code></pre>
+<p>The cache backend API to FS-Cache can be found in:</p>
+<pre><code>Documentation/filesystems/caching/backend-api.txt
+</code></pre>
+<p>A description of the internal representations and object state machine can be<br>found in:</p>
+<pre><code>Documentation/filesystems/caching/object.txt
+</code></pre>
+<p>=======================<br>STATISTICAL INFORMATION<br>=======================</p>
+<p>If FS-Cache is compiled with the following options enabled:</p>
+<pre><code>CONFIG_FSCACHE_STATS=y
+CONFIG_FSCACHE_HISTOGRAM=y
+</code></pre>
+<p>then it will gather certain statistics and display them through a number of<br>proc files.</p>
+<p> (*) /proc/fs/fscache/stats</p>
+<pre><code> This shows counts of a number of events that can happen in FS-Cache:
+
+CLASS    EVENT    MEANING
+=======    =======    =======================================================
+Cookies    idx=N    Number of index cookies allocated
+    dat=N    Number of data storage cookies allocated
+    spc=N    Number of special cookies allocated
+Objects    alc=N    Number of objects allocated
+    nal=N    Number of object allocation failures
+    avl=N    Number of objects that reached the available state
+    ded=N    Number of objects that reached the dead state
+ChkAux    non=N    Number of objects that didn&#39;t have a coherency check
+    ok=N    Number of objects that passed a coherency check
+    upd=N    Number of objects that needed a coherency data update
+    obs=N    Number of objects that were declared obsolete
+Pages    mrk=N    Number of pages marked as being cached
+    unc=N    Number of uncache page requests seen
+Acquire    n=N    Number of acquire cookie requests seen
+    nul=N    Number of acq reqs given a NULL parent
+    noc=N    Number of acq reqs rejected due to no cache available
+    ok=N    Number of acq reqs succeeded
+    nbf=N    Number of acq reqs rejected due to error
+    oom=N    Number of acq reqs failed on ENOMEM
+Lookups    n=N    Number of lookup calls made on cache backends
+    neg=N    Number of negative lookups made
+    pos=N    Number of positive lookups made
+    crt=N    Number of objects created by lookup
+    tmo=N    Number of lookups timed out and requeued
+Updates    n=N    Number of update cookie requests seen
+    nul=N    Number of upd reqs given a NULL parent
+    run=N    Number of upd reqs granted CPU time
+Relinqs    n=N    Number of relinquish cookie requests seen
+    nul=N    Number of rlq reqs given a NULL parent
+    wcr=N    Number of rlq reqs waited on completion of creation
+AttrChg    n=N    Number of attribute changed requests seen
+    ok=N    Number of attr changed requests queued
+    nbf=N    Number of attr changed rejected -ENOBUFS
+    oom=N    Number of attr changed failed -ENOMEM
+    run=N    Number of attr changed ops given CPU time
+Allocs    n=N    Number of allocation requests seen
+    ok=N    Number of successful alloc reqs
+    wt=N    Number of alloc reqs that waited on lookup completion
+    nbf=N    Number of alloc reqs rejected -ENOBUFS
+    int=N    Number of alloc reqs aborted -ERESTARTSYS
+    ops=N    Number of alloc reqs submitted
+    owt=N    Number of alloc reqs waited for CPU time
+    abt=N    Number of alloc reqs aborted due to object death
+Retrvls    n=N    Number of retrieval (read) requests seen
+    ok=N    Number of successful retr reqs
+    wt=N    Number of retr reqs that waited on lookup completion
+    nod=N    Number of retr reqs returned -ENODATA
+    nbf=N    Number of retr reqs rejected -ENOBUFS
+    int=N    Number of retr reqs aborted -ERESTARTSYS
+    oom=N    Number of retr reqs failed -ENOMEM
+    ops=N    Number of retr reqs submitted
+    owt=N    Number of retr reqs waited for CPU time
+    abt=N    Number of retr reqs aborted due to object death
+Stores    n=N    Number of storage (write) requests seen
+    ok=N    Number of successful store reqs
+    agn=N    Number of store reqs on a page already pending storage
+    nbf=N    Number of store reqs rejected -ENOBUFS
+    oom=N    Number of store reqs failed -ENOMEM
+    ops=N    Number of store reqs submitted
+    run=N    Number of store reqs granted CPU time
+    pgs=N    Number of pages given store req processing time
+    rxd=N    Number of store reqs deleted from tracking tree
+    olm=N    Number of store reqs over store limit
+VmScan    nos=N    Number of release reqs against pages with no pending store
+    gon=N    Number of release reqs against pages stored by time lock granted
+    bsy=N    Number of release reqs ignored due to in-progress store
+    can=N    Number of page stores cancelled due to release req
+Ops    pend=N    Number of times async ops added to pending queues
+    run=N    Number of times async ops given CPU time
+    enq=N    Number of times async ops queued for processing
+    can=N    Number of async ops cancelled
+    rej=N    Number of async ops rejected due to object lookup/create failure
+    dfr=N    Number of async ops queued for deferred release
+    rel=N    Number of async ops released
+    gc=N    Number of deferred-release async ops garbage collected
+CacheOp    alo=N    Number of in-progress alloc_object() cache ops
+    luo=N    Number of in-progress lookup_object() cache ops
+    luc=N    Number of in-progress lookup_complete() cache ops
+    gro=N    Number of in-progress grab_object() cache ops
+    upo=N    Number of in-progress update_object() cache ops
+    dro=N    Number of in-progress drop_object() cache ops
+    pto=N    Number of in-progress put_object() cache ops
+    syn=N    Number of in-progress sync_cache() cache ops
+    atc=N    Number of in-progress attr_changed() cache ops
+    rap=N    Number of in-progress read_or_alloc_page() cache ops
+    ras=N    Number of in-progress read_or_alloc_pages() cache ops
+    alp=N    Number of in-progress allocate_page() cache ops
+    als=N    Number of in-progress allocate_pages() cache ops
+    wrp=N    Number of in-progress write_page() cache ops
+    ucp=N    Number of in-progress uncache_page() cache ops
+    dsp=N    Number of in-progress dissociate_pages() cache ops
+</code></pre>
+<p> (*) /proc/fs/fscache/histogram</p>
+<pre><code>cat /proc/fs/fscache/histogram
+JIFS  SECS  OBJ INST  OP RUNS   OBJ RUNS  RETRV DLY RETRIEVLS
+===== ===== ========= ========= ========= ========= =========
+
+ This shows the breakdown of the number of times each amount of time
+ between 0 jiffies and HZ-1 jiffies a variety of tasks took to run.  The
+ columns are as follows:
+
+COLUMN        TIME MEASUREMENT
+=======        =======================================================
+OBJ INST    Length of time to instantiate an object
+OP RUNS        Length of time a call to process an operation took
+OBJ RUNS    Length of time a call to process an object event took
+RETRV DLY    Time between an requesting a read and lookup completing
+RETRIEVLS    Time between beginning and end of a retrieval
+
+ Each row shows the number of events that took a particular range of times.
+ Each step is 1 jiffy in size.  The JIFS column indicates the particular
+ jiffy range covered, and the SECS field the equivalent number of seconds.
+</code></pre>
+<p>===========<br>OBJECT LIST<br>===========</p>
+<p>If CONFIG_FSCACHE_OBJECT_LIST is enabled, the FS-Cache facility will maintain a<br>list of all the objects currently allocated and allow them to be viewed<br>through:</p>
+<pre><code>/proc/fs/fscache/objects
+</code></pre>
+<p>This will look something like:</p>
+<pre><code>[root@andromeda ~]# head /proc/fs/fscache/objects
+OBJECT   PARENT   STAT CHLDN OPS OOP IPR EX READS EM EV F S | NETFS_COOKIE_DEF TY FL NETFS_DATA       OBJECT_KEY, AUX_DATA
+======== ======== ==== ===== === === === == ===== == == = = | ================ == == ================ ================
+   17e4b        2 ACTV     0   0   0   0  0     0 7b  4 0 8 | NFS.fh           DT  0 ffff88001dd82820 010006017edcf8bbc93b43298fdfbe71e50b57b13a172c0117f38472, e567634700000000000000000000000063f2404a000000000000000000000000c9030000000000000000000063f2404a
+   1693a        2 ACTV     0   0   0   0  0     0 7b  4 0 8 | NFS.fh           DT  0 ffff88002db23380 010006017edcf8bbc93b43298fdfbe71e50b57b1e0162c01a2df0ea6, 420ebc4a000000000000000000000000420ebc4a0000000000000000000000000e1801000000000000000000420ebc4a
+</code></pre>
+<p>where the first set of columns before the ‘|’ describe the object:</p>
+<pre><code>COLUMN    DESCRIPTION
+=======    ===============================================================
+OBJECT    Object debugging ID (appears as OBJ%x in some debug messages)
+PARENT    Debugging ID of parent object
+STAT    Object state
+CHLDN    Number of child objects of this object
+OPS    Number of outstanding operations on this object
+OOP    Number of outstanding child object management operations
+IPR
+EX    Number of outstanding exclusive operations
+READS    Number of outstanding read operations
+EM    Object&#39;s event mask
+EV    Events raised on this object
+F    Object flags
+S    Object slow-work work item flags
+</code></pre>
+<p>and the second set of columns describe the object’s cookie, if present:</p>
+<pre><code>COLUMN        DESCRIPTION
+===============    =======================================================
+NETFS_COOKIE_DEF Name of netfs cookie definition
+TY        Cookie type (IX - index, DT - data, hex - special)
+FL        Cookie flags
+NETFS_DATA    Netfs private data stored in the cookie
+OBJECT_KEY    Object key    &#125; 1 column, with separating comma
+AUX_DATA    Object aux data    &#125; presence may be configured
+</code></pre>
+<p>The data shown may be filtered by attaching the a key to an appropriate keyring<br>before viewing the file.  Something like:</p>
+<pre><code>    keyctl add user fscache:objlist &lt;restrictions&gt; @s
+</code></pre>
+<p>where <restrictions> are a selection of the following letters:</p>
+<pre><code>K    Show hexdump of object key (don&#39;t show if not given)
+A    Show hexdump of object aux data (don&#39;t show if not given)
+</code></pre>
+<p>and the following paired letters:</p>
+<pre><code>C    Show objects that have a cookie
+c    Show objects that don&#39;t have a cookie
+B    Show objects that are busy
+b    Show objects that aren&#39;t busy
+W    Show objects that have pending writes
+w    Show objects that don&#39;t have pending writes
+R    Show objects that have outstanding reads
+r    Show objects that don&#39;t have outstanding reads
+S    Show objects that have slow work queued
+s    Show objects that don&#39;t have slow work queued
+</code></pre>
+<p>If neither side of a letter pair is given, then both are implied.  For example:</p>
+<pre><code>keyctl add user fscache:objlist KB @s
+</code></pre>
+<p>shows objects that are busy, and lists their object keys, but does not dump<br>their auxiliary data.  It also implies “CcWwRrSs”, but as ‘B’ is given, ‘b’ is<br>not implied.</p>
+<p>By default all objects and all fields will be shown.</p>
+<p>=========<br>DEBUGGING<br>=========</p>
+<p>If CONFIG_FSCACHE_DEBUG is enabled, the FS-Cache facility can have runtime<br>debugging enabled by adjusting the value in:</p>
+<pre><code>/sys/module/fscache/parameters/debug
+</code></pre>
+<p>This is a bitmask of debugging streams to enable:</p>
+<pre><code>BIT    VALUE    STREAM                POINT
+=======    =======    ===============================    =======================
+0    1    Cache management        Function entry trace
+1    2                    Function exit trace
+2    4                    General
+3    8    Cookie management        Function entry trace
+4    16                    Function exit trace
+5    32                    General
+6    64    Page handling            Function entry trace
+7    128                    Function exit trace
+8    256                    General
+9    512    Operation management        Function entry trace
+10    1024                    Function exit trace
+11    2048                    General
+</code></pre>
+<p>The appropriate set of values should be OR’d together and the result written to<br>the control file.  For example:</p>
+<pre><code>echo $((1|8|64)) &gt;/sys/module/fscache/parameters/debug
+</code></pre>
+<p>will turn on all function entry debugging.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/" title="Kernel-2.6.32-573.12.1.el6_fscache" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fscache/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fw-decoder-regs/" title="Kernel-2.6.32-573.12.1.el6_fw-decoder-regs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_feature-removal-schedule/" title="Kernel-2.6.32-573.12.1.el6_feature-removal-schedule"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

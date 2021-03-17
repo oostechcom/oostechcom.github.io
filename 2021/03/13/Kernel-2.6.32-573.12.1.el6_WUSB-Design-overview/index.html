@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview | oosTech.com</title>
+  <meta name="description" content="Linux UWB + Wireless USB + WiNET    (C) 2005-2006 Intel Corporation   Inaky Perez-Gonzalez &amp;#105;&amp;#x6e;&amp;#97;&amp;#107;&amp;#x79;&amp;#x2e;&amp;#112;&amp;#101;&amp;#114;&amp;#101;&amp;#122;&amp;#x2d;&amp;#x67;&amp;#111;&amp;#x6e;&amp;#122;&amp;#97;&amp;#108;&amp;#1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Linux UWB + Wireless USB + WiNET    (C) 2005-2006 Intel Corporation   Inaky Perez-Gonzalez &amp;#105;&amp;#x6e;&amp;#97;&amp;#107;&amp;#x79;&amp;#x2e;&amp;#112;&amp;#101;&amp;#114;&amp;#101;&amp;#122;&amp;#x2d;&amp;#x67;&amp;#111;&amp;#x6e;&amp;#122;&amp;#97;&amp;#108;&amp;#1">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Linux UWB + Wireless USB + WiNET</p>
+<p>   (C) 2005-2006 Intel Corporation<br>   Inaky Perez-Gonzalez <a href="mailto:&#105;&#x6e;&#97;&#107;&#x79;&#x2e;&#112;&#101;&#114;&#101;&#122;&#x2d;&#x67;&#111;&#x6e;&#122;&#97;&#108;&#101;&#x7a;&#x40;&#105;&#110;&#x74;&#101;&#108;&#x2e;&#99;&#x6f;&#109;">&#105;&#x6e;&#97;&#107;&#x79;&#x2e;&#112;&#101;&#114;&#101;&#122;&#x2d;&#x67;&#111;&#x6e;&#122;&#97;&#108;&#101;&#x7a;&#x40;&#105;&#110;&#x74;&#101;&#108;&#x2e;&#99;&#x6f;&#109;</a></p>
+<p>   This program is free software; you can redistribute it and/or<br>   modify it under the terms of the GNU General Public License version<br>   2 as published by the Free Software Foundation.</p>
+<p>   This program is distributed in the hope that it will be useful,<br>   but WITHOUT ANY WARRANTY; without even the implied warranty of<br>   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<br>   GNU General Public License for more details.</p>
+<p>   You should have received a copy of the GNU General Public License<br>   along with this program; if not, write to the Free Software<br>   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA<br>   02110-1301, USA.</p>
+<p>Please visit <a target="_blank" rel="noopener" href="http://bughost.org/thewiki/Design-overview.txt-1.8">http://bughost.org/thewiki/Design-overview.txt-1.8</a> for<br>updated content.</p>
+<pre><code>* Design-overview.txt-1.8
+</code></pre>
+<p>This code implements a Ultra Wide Band stack for Linux, as well as<br>drivers for the the USB based UWB radio controllers defined in the<br>Wireless USB 1.0 specification (including Wireless USB host controller<br>and an Intel WiNET controller).</p>
+<ol>
+<li><p>Introduction</p>
+<ol>
+<li><p>HWA: Host Wire adapters, your Wireless USB dongle</p>
+</li>
+<li><p>DWA: Device Wired Adaptor, a Wireless USB hub for wired<br>devices</p>
+</li>
+<li><p>WHCI: Wireless Host Controller Interface, the PCI WUSB host<br>adapter</p>
+</li>
+</ol>
+</li>
+<li><p>The UWB stack</p>
+<ol>
+<li><p>Devices and hosts: the basic structure</p>
+</li>
+<li><p>Host Controller life cycle</p>
+</li>
+<li><p>On the air: beacons and enumerating the radio neighborhood</p>
+</li>
+<li><p>Device lists</p>
+</li>
+<li><p>Bandwidth allocation</p>
+</li>
+</ol>
+</li>
+<li><p>Wireless USB Host Controller drivers</p>
+</li>
+<li><p>Glossary</p>
+</li>
+</ol>
+<pre><code>Introduction
+</code></pre>
+<p>UWB is a wide-band communication protocol that is to serve also as the<br>low-level protocol for others (much like TCP sits on IP). Currently<br>these others are Wireless USB and TCP/IP, but seems Bluetooth and<br>Firewire/1394 are coming along.</p>
+<p>UWB uses a band from roughly 3 to 10 GHz, transmitting at a max of<br>~-41dB (or 0.074 uW/MHz–geography specific data is still being<br>negotiated w/ regulators, so watch for changes). That band is divided in<br>a bunch of ~1.5 GHz wide channels (or band groups) composed of three<br>subbands/subchannels (528 MHz each). Each channel is independent of each<br>other, so you could consider them different “busses”. Initially this<br>driver considers them all a single one.</p>
+<p>Radio time is divided in 65536 us long /superframes/, each one divided<br>in 256 256us long /MASs/ (Media Allocation Slots), which are the basic<br>time/media allocation units for transferring data. At the beginning of<br>each superframe there is a Beacon Period (BP), where every device<br>transmit its beacon on a single MAS. The length of the BP depends on how<br>many devices are present and the length of their beacons.</p>
+<p>Devices have a MAC (fixed, 48 bit address) and a device (changeable, 16<br>bit address) and send periodic beacons to advertise themselves and pass<br>info on what they are and do. They advertise their capabilities and a<br>bunch of other stuff.</p>
+<p>The different logical parts of this driver are:</p>
+<pre><code>*
+
+  *UWB*: the Ultra-Wide-Band stack -- manages the radio and
+  associated spectrum to allow for devices sharing it. Allows to
+  control bandwidth assignment, beaconing, scanning, etc
+
+*
+
+  *WUSB*: the layer that sits on top of UWB to provide Wireless USB.
+  The Wireless USB spec defines means to control a UWB radio and to
+  do the actual WUSB.
+
+
+  HWA: Host Wire adapters, your Wireless USB dongle
+</code></pre>
+<p>WUSB also defines a device called a Host Wire Adaptor (HWA), which in<br>mere terms is a USB dongle that enables your PC to have UWB and Wireless<br>USB. The Wireless USB Host Controller in a HWA looks to the host like a<br>[Wireless] USB controller connected via USB (!)</p>
+<p>The HWA itself is broken in two or three main interfaces:</p>
+<pre><code>*
+
+  *RC*: Radio control -- this implements an interface to the
+  Ultra-Wide-Band radio controller. The driver for this implements a
+  USB-based UWB Radio Controller to the UWB stack.
+
+*
+
+  *HC*: the wireless USB host controller. It looks like a USB host
+  whose root port is the radio and the WUSB devices connect to it.
+  To the system it looks like a separate USB host. The driver (will)
+  implement a USB host controller (similar to UHCI, OHCI or EHCI)
+  for which the root hub is the radio...To reiterate: it is a USB
+  controller that is connected via USB instead of PCI.
+
+*
+
+  *WINET*: some HW provide a WiNET interface (IP over UWB). This
+  package provides a driver for it (it looks like a network
+  interface, winetX). The driver detects when there is a link up for
+  their type and kick into gear.
+
+
+  DWA: Device Wired Adaptor, a Wireless USB hub for wired devices
+</code></pre>
+<p>These are the complement to HWAs. They are a USB host for connecting<br>wired devices, but it is connected to your PC connected via Wireless<br>USB. To the system it looks like yet another USB host. To the untrained<br>eye, it looks like a hub that connects upstream wirelessly.</p>
+<p>We still offer no support for this; however, it should share a lot of<br>code with the HWA-RC driver; there is a bunch of factorization work that<br>has been done to support that in upcoming releases.</p>
+<pre><code>  WHCI: Wireless Host Controller Interface, the PCI WUSB host adapter
+</code></pre>
+<p>This is your usual PCI device that implements WHCI. Similar in concept<br>to EHCI, it allows your wireless USB devices (including DWAs) to connect<br>to your host via a PCI interface. As in the case of the HWA, it has a<br>Radio Control interface and the WUSB Host Controller interface per se.</p>
+<p>There is still no driver support for this, but will be in upcoming<br>releases.</p>
+<pre><code>The UWB stack
+</code></pre>
+<p>The main mission of the UWB stack is to keep a tally of which devices<br>are in radio proximity to allow drivers to connect to them. As well, it<br>provides an API for controlling the local radio controllers (RCs from<br>now on), such as to start/stop beaconing, scan, allocate bandwidth, etc.</p>
+<pre><code>  Devices and hosts: the basic structure
+</code></pre>
+<p>The main building block here is the UWB device (struct uwb_dev). For<br>each device that pops up in radio presence (ie: the UWB host receives a<br>beacon from it) you get a struct uwb_dev that will show up in<br>/sys/class/uwb and in /sys/bus/uwb/devices.</p>
+<p>For each RC that is detected, a new struct uwb_rc is created. In turn, a<br>RC is also a device, so they also show in /sys/class/uwb and<br>/sys/bus/uwb/devices, but at the same time, only radio controllers show<br>up in /sys/class/uwb_rc.</p>
+<pre><code>*
+
+  [*] The reason for RCs being also devices is that not only we can
+  see them while enumerating the system device tree, but also on the
+  radio (their beacons and stuff), so the handling has to be
+  likewise to that of a device.
+</code></pre>
+<p>Each RC driver is implemented by a separate driver that plugs into the<br>interface that the UWB stack provides through a struct uwb_rc_ops. The<br>spec creators have been nice enough to make the message format the same<br>for HWA and WHCI RCs, so the driver is really a very thin transport that<br>moves the requests from the UWB API to the device [/uwb_rc_ops-&gt;cmd()/]<br>and sends the replies and notifications back to the API<br>[/uwb_rc_neh_grok()/]. Notifications are handled to the UWB daemon, that<br>is chartered, among other things, to keep the tab of how the UWB radio<br>neighborhood looks, creating and destroying devices as they show up or<br>disappear.</p>
+<p>Command execution is very simple: a command block is sent and a event<br>block or reply is expected back. For sending/receiving command/events, a<br>handle called /neh/ (Notification/Event Handle) is opened with<br>/uwb_rc_neh_open()/.</p>
+<p>The HWA-RC (USB dongle) driver (drivers/uwb/hwa-rc.c) does this job for<br>the USB connected HWA. Eventually, drivers/whci-rc.c will do the same<br>for the PCI connected WHCI controller.</p>
+<pre><code>  Host Controller life cycle
+</code></pre>
+<p>So let’s say we connect a dongle to the system: it is detected and<br>firmware uploaded if needed [for Intel’s i1480<br>/drivers/uwb/ptc/usb.c:ptc_usb_probe()/] and then it is reenumerated.<br>Now we have a real HWA device connected and<br>/drivers/uwb/hwa-rc.c:hwarc_probe()/ picks it up, that will set up the<br>Wire-Adaptor environment and then suck it into the UWB stack’s vision of<br>the world [/drivers/uwb/lc-rc.c:uwb_rc_add()/].</p>
+<pre><code>*
+
+  [*] The stack should put a new RC to scan for devices
+  [/uwb_rc_scan()/] so it finds what&#39;s available around and tries to
+  connect to them, but this is policy stuff and should be driven
+  from user space. As of now, the operator is expected to do it
+  manually; see the release notes for documentation on the procedure.
+</code></pre>
+<p>When a dongle is disconnected, /drivers/uwb/hwa-rc.c:hwarc_disconnect()/<br>takes time of tearing everything down safely (or not…).</p>
+<pre><code>  On the air: beacons and enumerating the radio neighborhood
+</code></pre>
+<p>So assuming we have devices and we have agreed for a channel to connect<br>on (let’s say 9), we put the new RC to beacon:</p>
+<pre><code>*
+
+        $ echo 9 0 &gt; /sys/class/uwb_rc/uwb0/beacon
+</code></pre>
+<p>Now it is visible. If there were other devices in the same radio channel<br>and beacon group (that’s what the zero is for), the dongle’s radio<br>control interface will send beacon notifications on its<br>notification/event endpoint (NEEP). The beacon notifications are part of<br>the event stream that is funneled into the API with<br>/drivers/uwb/neh.c:uwb_rc_neh_grok()/ and delivered to the UWBD, the UWB<br>daemon through a notification list.</p>
+<p>UWBD wakes up and scans the event list; finds a beacon and adds it to<br>the BEACON CACHE (/uwb_beca/). If he receives a number of beacons from<br>the same device, he considers it to be ‘onair’ and creates a new device<br>[/drivers/uwb/lc-dev.c:uwbd_dev_onair()/]. Similarly, when no beacons<br>are received in some time, the device is considered gone and wiped out<br>[uwbd calls periodically /uwb/beacon.c:uwb_beca_purge()/ that will purge<br>the beacon cache of dead devices].</p>
+<pre><code>  Device lists
+</code></pre>
+<p>All UWB devices are kept in the list of the struct bus_type uwb_bus.</p>
+<pre><code>  Bandwidth allocation
+</code></pre>
+<p>The UWB stack maintains a local copy of DRP availability through<br>processing of incoming <em>DRP Availability Change</em> notifications. This<br>local copy is currently used to present the current bandwidth<br>availability to the user through the sysfs file<br>/sys/class/uwb_rc/uwbx/bw_avail. In the future the bandwidth<br>availability information will be used by the bandwidth reservation<br>routines.</p>
+<p>The bandwidth reservation routines are in progress and are thus not<br>present in the current release. When completed they will enable a user<br>to initiate DRP reservation requests through interaction with sysfs. DRP<br>reservation requests from remote UWB devices will also be handled. The<br>bandwidth management done by the UWB stack will include callbacks to the<br>higher layers will enable the higher layers to use the reservations upon<br>completion. [Note: The bandwidth reservation work is in progress and<br>subject to change.]</p>
+<pre><code>Wireless USB Host Controller drivers
+</code></pre>
+<p><em>WARNING</em> This section needs a lot of work!</p>
+<p>As explained above, there are three different types of HCs in the WUSB<br>world: HWA-HC, DWA-HC and WHCI-HC.</p>
+<p>HWA-HC and DWA-HC share that they are Wire-Adapters (USB or WUSB<br>connected controllers), and their transfer management system is almost<br>identical. So is their notification delivery system.</p>
+<p>HWA-HC and WHCI-HC share that they are both WUSB host controllers, so<br>they have to deal with WUSB device life cycle and maintenance, wireless<br>root-hub</p>
+<p>HWA exposes a Host Controller interface (HWA-HC 0xe0/02/02). This has<br>three endpoints (Notifications, Data Transfer In and Data Transfer<br>Out–known as NEP, DTI and DTO in the code).</p>
+<p>We reserve UWB bandwidth for our Wireless USB Cluster, create a Cluster<br>ID and tell the HC to use all that. Then we start it. This means the HC<br>starts sending MMCs.</p>
+<pre><code>*
+
+  The MMCs are blocks of data defined somewhere in the WUSB1.0 spec
+  that define a stream in the UWB channel time allocated for sending
+  WUSB IEs (host to device commands/notifications) and Device
+  Notifications (device initiated to host). Each host defines a
+  unique Wireless USB cluster through MMCs. Devices can connect to a
+  single cluster at the time. The IEs are Information Elements, and
+  among them are the bandwidth allocations that tell each device
+  when can they transmit or receive.
+</code></pre>
+<p>Now it all depends on external stimuli.</p>
+<p><em>New device connection</em></p>
+<p>A new device pops up, it scans the radio looking for MMCs that give out<br>the existence of Wireless USB channels. Once one (or more) are found,<br>selects which one to connect to. Sends a /DN_Connect/ (device<br>notification connect) during the DNTS (Device Notification Time<br>Slot–announced in the MMCs</p>
+<p>HC picks the /DN_Connect/ out (nep module sends to notif.c for delivery<br>into /devconnect/). This process starts the authentication process for<br>the device. First we allocate a /fake port/ and assign an<br>unauthenticated address (128 to 255–what we really do is<br>0x80 | fake_port_idx). We fiddle with the fake port status and /khubd/<br>sees a new connection, so he moves on to enable the fake port with a reset.</p>
+<p>So now we are in the reset path – we know we have a non-yet enumerated<br>device with an unauthorized address; we ask user space to authenticate<br>(FIXME: not yet done, similar to bluetooth pairing), then we do the key<br>exchange (FIXME: not yet done) and issue a /set address 0/ to bring the<br>device to the default state. Device is authenticated.</p>
+<p>From here, the USB stack takes control through the usb_hcd ops. khubd<br>has seen the port status changes, as we have been toggling them. It will<br>start enumerating and doing transfers through usb_hcd-&gt;urb_enqueue() to<br>read descriptors and move our data.</p>
+<p><em>Device life cycle and keep alives</em></p>
+<p>Every time there is a successful transfer to/from a device, we update a<br>per-device activity timestamp. If not, every now and then we check and<br>if the activity timestamp gets old, we ping the device by sending it a<br>Keep Alive IE; it responds with a /DN_Alive/ pong during the DNTS (this<br>arrives to us as a notification through<br>devconnect.c:wusb_handle_dn_alive(). If a device times out, we<br>disconnect it from the system (cleaning up internal information and<br>toggling the bits in the fake hub port, which kicks khubd into removing<br>the rest of the stuff).</p>
+<p>This is done through devconnect:__wusb_check_devs(), which will scan the<br>device list looking for whom needs refreshing.</p>
+<p>If the device wants to disconnect, it will either die (ugly) or send a<br>/DN_Disconnect/ that will prompt a disconnection from the system.</p>
+<p><em>Sending and receiving data</em></p>
+<p>Data is sent and received through /Remote Pipes/ (rpipes). An rpipe is<br>/aimed/ at an endpoint in a WUSB device. This is the same for HWAs and<br>DWAs.</p>
+<p>Each HC has a number of rpipes and buffers that can be assigned to them;<br>when doing a data transfer (xfer), first the rpipe has to be aimed and<br>prepared (buffers assigned), then we can start queueing requests for<br>data in or out.</p>
+<p>Data buffers have to be segmented out before sending–so we send first a<br>header (segment request) and then if there is any data, a data buffer<br>immediately after to the DTI interface (yep, even the request). If our<br>buffer is bigger than the max segment size, then we just do multiple<br>requests.</p>
+<p>[This sucks, because doing USB scatter gatter in Linux is resource<br>intensive, if any…not that the current approach is not. It just has to<br>be cleaned up a lot :)].</p>
+<p>If reading, we don’t send data buffers, just the segment headers saying<br>we want to read segments.</p>
+<p>When the xfer is executed, we receive a notification that says data is<br>ready in the DTI endpoint (handled through<br>xfer.c:wa_handle_notif_xfer()). In there we read from the DTI endpoint a<br>descriptor that gives us the status of the transfer, its identification<br>(given when we issued it) and the segment number. If it was a data read,<br>we issue another URB to read into the destination buffer the chunk of<br>data coming out of the remote endpoint. Done, wait for the next guy. The<br>callbacks for the URBs issued from here are the ones that will declare<br>the xfer complete at some point and call it’s callback.</p>
+<p>Seems simple, but the implementation is not trivial.</p>
+<pre><code>*
+
+  *WARNING* Old!!
+</code></pre>
+<p>The main xfer descriptor, wa_xfer (equivalent to a URB) contains an<br>array of segments, tallys on segments and buffers and callback<br>information. Buried in there is a lot of URBs for executing the segments<br>and buffer transfers.</p>
+<p>For OUT xfers, there is an array of segments, one URB for each, another<br>one of buffer URB. When submitting, we submit URBs for segment request<br>1, buffer 1, segment 2, buffer 2…etc. Then we wait on the DTI for xfer<br>result data; when all the segments are complete, we call the callback to<br>finalize the transfer.</p>
+<p>For IN xfers, we only issue URBs for the segments we want to read and<br>then wait for the xfer result data.</p>
+<p><em>URB mapping into xfers</em></p>
+<p>This is done by hwahc_op_urb_[en|de]queue(). In enqueue() we aim an<br>rpipe to the endpoint where we have to transmit, create a transfer<br>context (wa_xfer) and submit it. When the xfer is done, our callback is<br>called and we assign the status bits and release the xfer resources.</p>
+<p>In dequeue() we are basically cancelling/aborting the transfer. We issue<br>a xfer abort request to the HC, cancel all the URBs we had submitted<br>and not yet done and when all that is done, the xfer callback will be<br>called–this will call the URB callback.</p>
+<pre><code>Glossary
+</code></pre>
+<p><em>DWA</em> – Device Wire Adapter</p>
+<p>USB host, wired for downstream devices, upstream connects wirelessly<br>with Wireless USB.</p>
+<p><em>EVENT</em> – Response to a command on the NEEP</p>
+<p><em>HWA</em> – Host Wire Adapter / USB dongle for UWB and Wireless USB</p>
+<p><em>NEH</em> – Notification/Event Handle</p>
+<p>Handle/file descriptor for receiving notifications or events. The WA<br>code requires you to get one of this to listen for notifications or<br>events on the NEEP.</p>
+<p><em>NEEP</em> – Notification/Event EndPoint</p>
+<p>Stuff related to the management of the first endpoint of a HWA USB<br>dongle that is used to deliver an stream of events and notifications to<br>the host.</p>
+<p><em>NOTIFICATION</em> – Message coming in the NEEP as response to something.</p>
+<p><em>RC</em> – Radio Control</p>
+<p>Design-overview.txt-1.8 (last edited 2006-11-04 12:22:24 by<br>InakyPerezGonzalez)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/" title="Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_WUSB-Design-overview/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_aic79xx/" title="Kernel-2.6.32-573.12.1.el6_aic79xx"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_Smack/" title="Kernel-2.6.32-573.12.1.el6_Smack"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

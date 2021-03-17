@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_atomic_ops | oosTech.com</title>
+  <meta name="description" content="Semantics and Behavior of Atomic and              Bitmask Operations            David S. Miller       This document is intended to serve as a guide to Linux port  maintainers on how to implement a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_atomic_ops">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Semantics and Behavior of Atomic and              Bitmask Operations            David S. Miller       This document is intended to serve as a guide to Linux port  maintainers on how to implement a">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_atomic_ops" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_atomic_ops
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Semantics and Behavior of Atomic and
+             Bitmask Operations
+
+          David S. Miller     
+
+This document is intended to serve as a guide to Linux port
+</code></pre>
+<p>maintainers on how to implement atomic counter, bitops, and spinlock<br>interfaces properly.</p>
+<pre><code>The atomic_t type should be defined as a signed integer.
+</code></pre>
+<p>Also, it should be made opaque such that any kind of cast to a normal<br>C integer type will fail.  Something like the following should<br>suffice:</p>
+<pre><code>typedef struct &#123; volatile int counter; &#125; atomic_t;
+</code></pre>
+<p>Historically, counter has been declared volatile.  This is now discouraged.<br>See Documentation/volatile-considered-harmful.txt for the complete rationale.</p>
+<p>local_t is very similar to atomic_t. If the counter is per CPU and only<br>updated by one CPU, local_t is probably more appropriate. Please see<br>Documentation/local_ops.txt for the semantics of local_t.</p>
+<p>The first operations to implement for atomic_t’s are the initializers and<br>plain reads.</p>
+<pre><code>#define ATOMIC_INIT(i)        &#123; (i) &#125;
+#define atomic_set(v, i)    ((v)-&gt;counter = (i))
+</code></pre>
+<p>The first macro is used in definitions, such as:</p>
+<p>static atomic_t my_counter = ATOMIC_INIT(1);</p>
+<p>The initializer is atomic in that the return values of the atomic operations<br>are guaranteed to be correct reflecting the initialized value if the<br>initializer is used before runtime.  If the initializer is used at runtime, a<br>proper implicit or explicit read memory barrier is needed before reading the<br>value with atomic_read from another thread.</p>
+<p>The second interface can be used at runtime, as in:</p>
+<pre><code>struct foo &#123; atomic_t counter; &#125;;
+...
+
+struct foo *k;
+
+k = kmalloc(sizeof(*k), GFP_KERNEL);
+if (!k)
+    return -ENOMEM;
+atomic_set(&amp;k-&gt;counter, 0);
+</code></pre>
+<p>The setting is atomic in that the return values of the atomic operations by<br>all threads are guaranteed to be correct reflecting either the value that has<br>been set with this operation or set with another operation.  A proper implicit<br>or explicit memory barrier is needed before the value set with the operation<br>is guaranteed to be readable with atomic_read from another thread.</p>
+<p>Next, we have:</p>
+<pre><code>#define atomic_read(v)    ((v)-&gt;counter)
+</code></pre>
+<p>which simply reads the counter value currently visible to the calling thread.<br>The read is atomic in that the return value is guaranteed to be one of the<br>values initialized or modified with the interface operations if a proper<br>implicit or explicit memory barrier is used after possible runtime<br>initialization by any other thread and the value is modified only with the<br>interface operations.  atomic_read does not guarantee that the runtime<br>initialization by any other thread is visible yet, so the user of the<br>interface must take care of that with a proper implicit or explicit memory<br>barrier.</p>
+<p><strong>* WARNING: atomic_read() and atomic_set() DO NOT IMPLY BARRIERS! *</strong></p>
+<p>Some architectures may choose to use the volatile keyword, barriers, or inline<br>assembly to guarantee some degree of immediacy for atomic_read() and<br>atomic_set().  This is not uniformly guaranteed, and may change in the future,<br>so all users of atomic_t should treat atomic_read() and atomic_set() as simple<br>C statements that may be reordered or optimized away entirely by the compiler<br>or processor, and explicitly invoke the appropriate compiler and/or memory<br>barrier for each use case.  Failure to do so will result in code that may<br>suddenly break when used with different architectures or compiler<br>optimizations, or even changes in unrelated code which changes how the<br>compiler optimizes the section accessing atomic_t variables.</p>
+<p><strong>* YOU HAVE BEEN WARNED! *</strong></p>
+<p>Now, we move onto the atomic operation interfaces typically implemented with<br>the help of assembly code.</p>
+<pre><code>void atomic_add(int i, atomic_t *v);
+void atomic_sub(int i, atomic_t *v);
+void atomic_inc(atomic_t *v);
+void atomic_dec(atomic_t *v);
+</code></pre>
+<p>These four routines add and subtract integral values to/from the given<br>atomic_t value.  The first two routines pass explicit integers by<br>which to make the adjustment, whereas the latter two use an implicit<br>adjustment value of “1”.</p>
+<p>One very important aspect of these two routines is that they DO NOT<br>require any explicit memory barriers.  They need only perform the<br>atomic_t counter update in an SMP safe manner.</p>
+<p>Next, we have:</p>
+<pre><code>int atomic_inc_return(atomic_t *v);
+int atomic_dec_return(atomic_t *v);
+</code></pre>
+<p>These routines add 1 and subtract 1, respectively, from the given<br>atomic_t and return the new counter value after the operation is<br>performed.</p>
+<p>Unlike the above routines, it is required that explicit memory<br>barriers are performed before and after the operation.  It must be<br>done such that all memory operations before and after the atomic<br>operation calls are strongly ordered with respect to the atomic<br>operation itself.</p>
+<p>For example, it should behave as if a smp_mb() call existed both<br>before and after the atomic operation.</p>
+<p>If the atomic instructions used in an implementation provide explicit<br>memory barrier semantics which satisfy the above requirements, that is<br>fine as well.</p>
+<p>Let’s move on:</p>
+<pre><code>int atomic_add_return(int i, atomic_t *v);
+int atomic_sub_return(int i, atomic_t *v);
+</code></pre>
+<p>These behave just like atomic_{inc,dec}<em>return() except that an<br>explicit counter adjustment is given instead of the implicit “1”.<br>This means that like atomic</em>{inc,dec}_return(), the memory barrier<br>semantics are required.</p>
+<p>Next:</p>
+<pre><code>int atomic_inc_and_test(atomic_t *v);
+int atomic_dec_and_test(atomic_t *v);
+</code></pre>
+<p>These two routines increment and decrement by 1, respectively, the<br>given atomic counter.  They return a boolean indicating whether the<br>resulting counter value was zero or not.</p>
+<p>It requires explicit memory barrier semantics around the operation as<br>above.</p>
+<pre><code>int atomic_sub_and_test(int i, atomic_t *v);
+</code></pre>
+<p>This is identical to atomic_dec_and_test() except that an explicit<br>decrement is given instead of the implicit “1”.  It requires explicit<br>memory barrier semantics around the operation.</p>
+<pre><code>int atomic_add_negative(int i, atomic_t *v);
+</code></pre>
+<p>The given increment is added to the given atomic counter value.  A<br>boolean is return which indicates whether the resulting counter value<br>is negative.  It requires explicit memory barrier semantics around the<br>operation.</p>
+<p>Then:</p>
+<pre><code>int atomic_xchg(atomic_t *v, int new);
+</code></pre>
+<p>This performs an atomic exchange operation on the atomic variable v, setting<br>the given new value.  It returns the old value that the atomic variable v had<br>just before the operation.</p>
+<pre><code>int atomic_cmpxchg(atomic_t *v, int old, int new);
+</code></pre>
+<p>This performs an atomic compare exchange operation on the atomic value v,<br>with the given old and new values. Like all atomic_xxx operations,<br>atomic_cmpxchg will only satisfy its atomicity semantics as long as all<br>other accesses of *v are performed through atomic_xxx operations.</p>
+<p>atomic_cmpxchg requires explicit memory barriers around the operation.</p>
+<p>The semantics for atomic_cmpxchg are the same as those defined for ‘cas’<br>below.</p>
+<p>Finally:</p>
+<pre><code>int atomic_add_unless(atomic_t *v, int a, int u);
+</code></pre>
+<p>If the atomic value v is not equal to u, this function adds a to v, and<br>returns non zero. If v is equal to u then it returns zero. This is done as<br>an atomic operation.</p>
+<p>atomic_add_unless requires explicit memory barriers around the operation<br>unless it fails (returns 0).</p>
+<p>atomic_inc_not_zero, equivalent to atomic_add_unless(v, 1, 0)</p>
+<p>If a caller requires memory barrier semantics around an atomic_t<br>operation which does not return a value, a set of interfaces are<br>defined which accomplish this:</p>
+<pre><code>void smp_mb__before_atomic_dec(void);
+void smp_mb__after_atomic_dec(void);
+void smp_mb__before_atomic_inc(void);
+void smp_mb__after_atomic_inc(void);
+</code></pre>
+<p>For example, smp_mb__before_atomic_dec() can be used like so:</p>
+<pre><code>obj-&gt;dead = 1;
+smp_mb__before_atomic_dec();
+atomic_dec(&amp;obj-&gt;ref_count);
+</code></pre>
+<p>It makes sure that all memory operations preceding the atomic_dec()<br>call are strongly ordered with respect to the atomic counter<br>operation.  In the above example, it guarantees that the assignment of<br>“1” to obj-&gt;dead will be globally visible to other cpus before the<br>atomic counter decrement.</p>
+<p>Without the explicit smp_mb__before_atomic_dec() call, the<br>implementation could legally allow the atomic counter update visible<br>to other cpus before the “obj-&gt;dead = 1;” assignment.</p>
+<p>The other three interfaces listed are used to provide explicit<br>ordering with respect to memory operations after an atomic_dec() call<br>(smp_mb__after_atomic_dec()) and around atomic_inc() calls<br>(smp_mb__{before,after}_atomic_inc()).</p>
+<p>A missing memory barrier in the cases where they are required by the<br>atomic_t implementation above can have disastrous results.  Here is<br>an example, which follows a pattern occurring frequently in the Linux<br>kernel.  It is the use of atomic counters to implement reference<br>counting, and it works such that once the counter falls to zero it can<br>be guaranteed that no other entity can be accessing the object:</p>
+<p>static void obj_list_add(struct obj *obj, struct list_head *head)<br>{<br>    obj-&gt;active = 1;<br>    list_add(&amp;obj-&gt;list, head);<br>}</p>
+<p>static void obj_list_del(struct obj *obj)<br>{<br>    list_del(&amp;obj-&gt;list);<br>    obj-&gt;active = 0;<br>}</p>
+<p>static void obj_destroy(struct obj *obj)<br>{<br>    BUG_ON(obj-&gt;active);<br>    kfree(obj);<br>}</p>
+<p>struct obj *obj_list_peek(struct list_head *head)<br>{<br>    if (!list_empty(head)) {<br>        struct obj *obj;</p>
+<pre><code>    obj = list_entry(head-&gt;next, struct obj, list);
+    atomic_inc(&amp;obj-&gt;refcnt);
+    return obj;
+&#125;
+return NULL;
+</code></pre>
+<p>}</p>
+<p>void obj_poke(void)<br>{<br>    struct obj *obj;</p>
+<pre><code>spin_lock(&amp;global_list_lock);
+obj = obj_list_peek(&amp;global_list);
+spin_unlock(&amp;global_list_lock);
+
+if (obj) &#123;
+    obj-&gt;ops-&gt;poke(obj);
+    if (atomic_dec_and_test(&amp;obj-&gt;refcnt))
+        obj_destroy(obj);
+&#125;
+</code></pre>
+<p>}</p>
+<p>void obj_timeout(struct obj *obj)<br>{<br>    spin_lock(&amp;global_list_lock);<br>    obj_list_del(obj);<br>    spin_unlock(&amp;global_list_lock);</p>
+<pre><code>if (atomic_dec_and_test(&amp;obj-&gt;refcnt))
+    obj_destroy(obj);
+</code></pre>
+<p>}</p>
+<p>(This is a simplification of the ARP queue management in the<br> generic neighbour discover code of the networking.  Olaf Kirch<br> found a bug wrt. memory barriers in kfree_skb() that exposed<br> the atomic_t memory barrier requirements quite clearly.)</p>
+<p>Given the above scheme, it must be the case that the obj-&gt;active<br>update done by the obj list deletion be visible to other processors<br>before the atomic counter decrement is performed.</p>
+<p>Otherwise, the counter could fall to zero, yet obj-&gt;active would still<br>be set, thus triggering the assertion in obj_destroy().  The error<br>sequence looks like this:</p>
+<pre><code>cpu 0                cpu 1
+obj_poke()            obj_timeout()
+obj = obj_list_peek();
+... gains ref to obj, refcnt=2
+                obj_list_del(obj);
+                obj-&gt;active = 0 ...
+                ... visibility delayed ...
+                atomic_dec_and_test()
+                ... refcnt drops to 1 ...
+atomic_dec_and_test()
+... refcount drops to 0 ...
+obj_destroy()
+BUG() triggers since obj-&gt;active
+still seen as one
+                obj-&gt;active update visibility occurs
+</code></pre>
+<p>With the memory barrier semantics required of the atomic_t operations<br>which return values, the above sequence of memory visibility can never<br>happen.  Specifically, in the above case the atomic_dec_and_test()<br>counter decrement would not become globally visible until the<br>obj-&gt;active update does.</p>
+<p>As a historical note, 32-bit Sparc used to only allow usage of<br>24-bits of it’s atomic_t type.  This was because it used 8 bits<br>as a spinlock for SMP safety.  Sparc32 lacked a “compare and swap”<br>type instruction.  However, 32-bit Sparc has since been moved over<br>to a “hash table of spinlocks” scheme, that allows the full 32-bit<br>counter to be realized.  Essentially, an array of spinlocks are<br>indexed into based upon the address of the atomic_t being operated<br>on, and that lock protects the atomic operation.  Parisc uses the<br>same scheme.</p>
+<p>Another note is that the atomic_t operations returning values are<br>extremely slow on an old 386.</p>
+<p>We will now cover the atomic bitmask operations.  You will find that<br>their SMP and memory barrier semantics are similar in shape and scope<br>to the atomic_t ops above.</p>
+<p>Native atomic bit operations are defined to operate on objects aligned<br>to the size of an “unsigned long” C data type, and are least of that<br>size.  The endianness of the bits within each “unsigned long” are the<br>native endianness of the cpu.</p>
+<pre><code>void set_bit(unsigned long nr, volatile unsigned long *addr);
+void clear_bit(unsigned long nr, volatile unsigned long *addr);
+void change_bit(unsigned long nr, volatile unsigned long *addr);
+</code></pre>
+<p>These routines set, clear, and change, respectively, the bit number<br>indicated by “nr” on the bit mask pointed to by “ADDR”.</p>
+<p>They must execute atomically, yet there are no implicit memory barrier<br>semantics required of these interfaces.</p>
+<pre><code>int test_and_set_bit(unsigned long nr, volatile unsigned long *addr);
+int test_and_clear_bit(unsigned long nr, volatile unsigned long *addr);
+int test_and_change_bit(unsigned long nr, volatile unsigned long *addr);
+</code></pre>
+<p>Like the above, except that these routines return a boolean which<br>indicates whether the changed bit was set <em>BEFORE</em> the atomic bit<br>operation.</p>
+<p>WARNING! It is incredibly important that the value be a boolean,<br>ie. “0” or “1”.  Do not try to be fancy and save a few instructions by<br>declaring the above to return “long” and just returning something like<br>“old_val &amp; mask” because that will not work.</p>
+<p>For one thing, this return value gets truncated to int in many code<br>paths using these interfaces, so on 64-bit if the bit is set in the<br>upper 32-bits then testers will never see that.</p>
+<p>One great example of where this problem crops up are the thread_info<br>flag operations.  Routines such as test_and_set_ti_thread_flag() chop<br>the return value into an int.  There are other places where things<br>like this occur as well.</p>
+<p>These routines, like the atomic_t counter operations returning values,<br>require explicit memory barrier semantics around their execution.  All<br>memory operations before the atomic bit operation call must be made<br>visible globally before the atomic bit operation is made visible.<br>Likewise, the atomic bit operation must be visible globally before any<br>subsequent memory operation is made visible.  For example:</p>
+<pre><code>obj-&gt;dead = 1;
+if (test_and_set_bit(0, &amp;obj-&gt;flags))
+    /* ... */;
+obj-&gt;killed = 1;
+</code></pre>
+<p>The implementation of test_and_set_bit() must guarantee that<br>“obj-&gt;dead = 1;” is visible to cpus before the atomic memory operation<br>done by test_and_set_bit() becomes visible.  Likewise, the atomic<br>memory operation done by test_and_set_bit() must become visible before<br>“obj-&gt;killed = 1;” is visible.</p>
+<p>Finally there is the basic operation:</p>
+<pre><code>int test_bit(unsigned long nr, __const__ volatile unsigned long *addr);
+</code></pre>
+<p>Which returns a boolean indicating if bit “nr” is set in the bitmask<br>pointed to by “addr”.</p>
+<p>If explicit memory barriers are required around clear_bit() (which<br>does not return a value, and thus does not need to provide memory<br>barrier semantics), two interfaces are provided:</p>
+<pre><code>void smp_mb__before_clear_bit(void);
+void smp_mb__after_clear_bit(void);
+</code></pre>
+<p>They are used as follows, and are akin to their atomic_t operation<br>brothers:</p>
+<pre><code>/* All memory operations before this call will
+ * be globally visible before the clear_bit().
+ */
+smp_mb__before_clear_bit();
+clear_bit( ... );
+
+/* The clear_bit() will be visible before all
+ * subsequent memory operations.
+ */
+ smp_mb__after_clear_bit();
+</code></pre>
+<p>There are two special bitops with lock barrier semantics (acquire/release,<br>same as spinlocks). These operate in the same way as their non-_lock/unlock<br>postfixed variants, except that they are to provide acquire/release semantics,<br>respectively. This means they can be used for bit_spin_trylock and<br>bit_spin_unlock type operations without specifying any more barriers.</p>
+<pre><code>int test_and_set_bit_lock(unsigned long nr, unsigned long *addr);
+void clear_bit_unlock(unsigned long nr, unsigned long *addr);
+void __clear_bit_unlock(unsigned long nr, unsigned long *addr);
+</code></pre>
+<p>The __clear_bit_unlock version is non-atomic, however it still implements<br>unlock barrier semantics. This can be useful if the lock itself is protecting<br>the other bits in the word.</p>
+<p>Finally, there are non-atomic versions of the bitmask operations<br>provided.  They are used in contexts where some other higher-level SMP<br>locking scheme is being used to protect the bitmask, and thus less<br>expensive non-atomic operations may be used in the implementation.<br>They have names similar to the above bitmask operation interfaces,<br>except that two underscores are prefixed to the interface name.</p>
+<pre><code>void __set_bit(unsigned long nr, volatile unsigned long *addr);
+void __clear_bit(unsigned long nr, volatile unsigned long *addr);
+void __change_bit(unsigned long nr, volatile unsigned long *addr);
+int __test_and_set_bit(unsigned long nr, volatile unsigned long *addr);
+int __test_and_clear_bit(unsigned long nr, volatile unsigned long *addr);
+int __test_and_change_bit(unsigned long nr, volatile unsigned long *addr);
+</code></pre>
+<p>These non-atomic variants also do not require any special memory<br>barrier semantics.</p>
+<p>The routines xchg() and cmpxchg() need the same exact memory barriers<br>as the atomic and bit operations returning values.</p>
+<p>Spinlocks and rwlocks have memory barrier expectations as well.<br>The rule to follow is simple:</p>
+<ol>
+<li><p>When acquiring a lock, the implementation must make it globally<br>visible before any subsequent memory operation.</p>
+</li>
+<li><p>When releasing a lock, the implementation must make it such that<br>all previous memory operations are globally visible before the<br>lock release.</p>
+</li>
+</ol>
+<p>Which finally brings us to _atomic_dec_and_lock().  There is an<br>architecture-neutral version implemented in lib/dec_and_lock.c,<br>but most platforms will wish to optimize this in assembler.</p>
+<pre><code>int _atomic_dec_and_lock(atomic_t *atomic, spinlock_t *lock);
+</code></pre>
+<p>Atomically decrement the given counter, and if will drop to zero<br>atomically acquire the given spinlock and perform the decrement<br>of the counter to zero.  If it does not drop to zero, do nothing<br>with the spinlock.</p>
+<p>It is actually pretty simple to get the memory barrier correct.<br>Simply satisfy the spinlock grab requirements, which is make<br>sure the spinlock operation is globally visible before any<br>subsequent memory operation.</p>
+<p>We can demonstrate this operation more clearly if we define<br>an abstract atomic operation:</p>
+<pre><code>long cas(long *mem, long old, long new);
+</code></pre>
+<p>“cas” stands for “compare and swap”.  It atomically:</p>
+<ol>
+<li>Compares “old” with the value currently at “mem”.</li>
+<li>If they are equal, “new” is written to “mem”.</li>
+<li>Regardless, the current value at “mem” is returned.</li>
+</ol>
+<p>As an example usage, here is what an atomic counter update<br>might look like:</p>
+<p>void example_atomic_inc(long *counter)<br>{<br>    long old, new, ret;</p>
+<pre><code>while (1) &#123;
+    old = *counter;
+    new = old + 1;
+
+    ret = cas(counter, old, new);
+    if (ret == old)
+        break;
+&#125;
+</code></pre>
+<p>}</p>
+<p>Let’s use cas() in order to build a pseudo-C atomic_dec_and_lock():</p>
+<p>int _atomic_dec_and_lock(atomic_t *atomic, spinlock_t *lock)<br>{<br>    long old, new, ret;<br>    int went_to_zero;</p>
+<pre><code>went_to_zero = 0;
+while (1) &#123;
+    old = atomic_read(atomic);
+    new = old - 1;
+    if (new == 0) &#123;
+        went_to_zero = 1;
+        spin_lock(lock);
+    &#125;
+    ret = cas(atomic, old, new);
+    if (ret == old)
+        break;
+    if (went_to_zero) &#123;
+        spin_unlock(lock);
+        went_to_zero = 0;
+    &#125;
+&#125;
+
+return went_to_zero;
+</code></pre>
+<p>}</p>
+<p>Now, as far as memory barriers go, as long as spin_lock()<br>strictly orders all subsequent memory operations (including<br>the cas()) with respect to itself, things will be fine.</p>
+<p>Said another way, _atomic_dec_and_lock() must guarantee that<br>a counter dropping to zero is never made visible before the<br>spinlock being acquired.</p>
+<p>Note that this also means that for the case where the counter<br>is not dropping to zero, there are no memory ordering<br>requirements.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/" title="Kernel-2.6.32-573.12.1.el6_atomic_ops" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_atomic_ops/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_autofs4-mount-control/" title="Kernel-2.6.32-573.12.1.el6_autofs4-mount-control"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_atarikbd/" title="Kernel-2.6.32-573.12.1.el6_atarikb"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

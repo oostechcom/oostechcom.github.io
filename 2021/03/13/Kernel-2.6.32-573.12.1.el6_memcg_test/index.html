@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_memcg_test | oosTech.com</title>
+  <meta name="description" content="Memory Resource Controller(Memcg)  Implementation Memo.Last Updated: 2010&#x2F;2Base Kernel Version: based on 2.6.33-rc7-mm(candidate for 34). Because VM is getting complex (one of reasons is memcg…), memc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_memcg_test">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Memory Resource Controller(Memcg)  Implementation Memo.Last Updated: 2010&#x2F;2Base Kernel Version: based on 2.6.33-rc7-mm(candidate for 34). Because VM is getting complex (one of reasons is memcg…), memc">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#under-cpuset"><span class="toc-number">1.</span> <span class="toc-text"> under cpuset.</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#move-task-%E2%80%9C-G1-TASK-%E2%80%9D-G2-amp"><span class="toc-number">2.</span> <span class="toc-text"> move_task “${G1_TASK}” ${G2} &amp;</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-offline-gt-sys-devices-system-memory-memoryXXX-state"><span class="toc-number"></span> <span class="toc-text">echo offline &gt; &#x2F;sys&#x2F;devices&#x2F;system&#x2F;memory&#x2F;memoryXXX&#x2F;state</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-t-cgroup-none-cgroup-t-cpuset-memory-cpu-devices"><span class="toc-number"></span> <span class="toc-text">mount -t cgroup none &#x2F;cgroup -t cpuset,memory,cpu,devices</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-t-cgroup-none-cgroup-t-memory"><span class="toc-number"></span> <span class="toc-text">mount -t cgroup none &#x2F;cgroup -t memory</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-cgroup-test"><span class="toc-number"></span> <span class="toc-text">mkdir &#x2F;cgroup&#x2F;test</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-40M-gt-cgroup-test-memory-limit-in-bytes"><span class="toc-number"></span> <span class="toc-text">echo 40M &gt; &#x2F;cgroup&#x2F;test&#x2F;memory.limit_in_bytes</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-0-gt-cgroup-test-tasks"><span class="toc-number"></span> <span class="toc-text">echo 0 &gt; &#x2F;cgroup&#x2F;test&#x2F;tasks</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#move-all-tasks-in-cgroup-test-to-cgroup"><span class="toc-number"></span> <span class="toc-text">move all tasks in &#x2F;cgroup&#x2F;test to &#x2F;cgroup</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#sbin-swapoff-a"><span class="toc-number"></span> <span class="toc-text">&#x2F;sbin&#x2F;swapoff -a</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#rmdir-cgroup-test"><span class="toc-number"></span> <span class="toc-text">rmdir &#x2F;cgroup&#x2F;test</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kill-malloc-task"><span class="toc-number"></span> <span class="toc-text">kill malloc task.</span></a>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_memcg_test" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_memcg_test
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Memory Resource Controller(Memcg)  Implementation Memo.<br>Last Updated: 2010/2<br>Base Kernel Version: based on 2.6.33-rc7-mm(candidate for 34).</p>
+<p>Because VM is getting complex (one of reasons is memcg…), memcg’s behavior<br>is complex. This is a document for memcg’s internal behavior.<br>Please note that implementation details can be changed.</p>
+<p>(*) Topics on API should be in Documentation/cgroups/memory.txt)</p>
+<ol start="0">
+<li><p>How to record usage ?<br>2 objects are used.</p>
+<p>page_cgroup ….an object per page.<br> Allocated at boot or memory hotplug. Freed at memory hot removal.</p>
+<p>swap_cgroup … an entry per swp_entry.<br> Allocated at swapon(). Freed at swapoff().</p>
+<p>The page_cgroup has USED bit and double count against a page_cgroup never<br>occurs. swap_cgroup is used only when a charged page is swapped-out.</p>
+</li>
+<li><p>Charge</p>
+<p>a page/swp_entry may be charged (usage += PAGE_SIZE) at</p>
+<p> mem_cgroup_newpage_charge()<br>   Called at new page fault and Copy-On-Write.</p>
+<p> mem_cgroup_try_charge_swapin()<br>   Called at do_swap_page() (page fault on swap entry) and swapoff.<br>   Followed by charge-commit-cancel protocol. (With swap accounting)<br>   At commit, a charge recorded in swap_cgroup is removed.</p>
+<p> mem_cgroup_cache_charge()<br>   Called at add_to_page_cache()</p>
+<p> mem_cgroup_cache_charge_swapin()<br>   Called at shmem’s swapin.</p>
+<p> mem_cgroup_prepare_migration()<br>   Called before migration. “extra” charge is done and followed by<br>   charge-commit-cancel protocol.<br>   At commit, charge against oldpage or newpage will be committed.</p>
+</li>
+<li><p>Uncharge<br>a page/swp_entry may be uncharged (usage -= PAGE_SIZE) by</p>
+<p> mem_cgroup_uncharge_page()<br>   Called when an anonymous page is fully unmapped. I.e., mapcount goes<br>   to 0. If the page is SwapCache, uncharge is delayed until<br>   mem_cgroup_uncharge_swapcache().</p>
+<p> mem_cgroup_uncharge_cache_page()<br>   Called when a page-cache is deleted from radix-tree. If the page is<br>   SwapCache, uncharge is delayed until mem_cgroup_uncharge_swapcache().</p>
+<p> mem_cgroup_uncharge_swapcache()<br>   Called when SwapCache is removed from radix-tree. The charge itself<br>   is moved to swap_cgroup. (If mem+swap controller is disabled, no<br>   charge to swap occurs.)</p>
+<p> mem_cgroup_uncharge_swap()<br>   Called when swp_entry’s refcnt goes down to 0. A charge against swap<br>   disappears.</p>
+<p> mem_cgroup_end_migration(old, new)<br> At success of migration old is uncharged (if necessary), a charge<br> to new page is committed. At failure, charge to old page is committed.</p>
+</li>
+<li><p>charge-commit-cancel<br> In some case, we can’t know this “charge” is valid or not at charging<br> (because of races).<br> To handle such case, there are charge-commit-cancel functions.</p>
+<pre><code> mem_cgroup_try_charge_XXX
+ mem_cgroup_commit_charge_XXX
+ mem_cgroup_cancel_charge_XXX
+</code></pre>
+<p> these are used in swap-in and migration.</p>
+<p> At try_charge(), there are no flags to say “this page is charged”.<br> at this point, usage += PAGE_SIZE.</p>
+<p> At commit(), the function checks the page should be charged or not<br> and set flags or avoid charging.(usage -= PAGE_SIZE)</p>
+<p> At cancel(), simply usage -= PAGE_SIZE.</p>
+</li>
+</ol>
+<p>Under below explanation, we assume CONFIG_MEM_RES_CTRL_SWAP=y.</p>
+<ol start="4">
+<li><p>Anonymous<br> Anonymous page is newly allocated at</p>
+<pre><code>   - page fault into MAP_ANONYMOUS mapping.
+   - Copy-On-Write.
+</code></pre>
+<p>  It is charged right after it’s allocated before doing any page table<br> related operations. Of course, it’s uncharged when another page is used<br> for the fault address.</p>
+<p> At freeing anonymous page (by exit() or munmap()), zap_pte() is called<br> and pages for ptes are freed one by one.(see mm/memory.c). Uncharges<br> are done at page_remove_rmap() when page_mapcount() goes down to 0.</p>
+<p> Another page freeing is by page-reclaim (vmscan.c) and anonymous<br> pages are swapped out. In this case, the page is marked as<br> PageSwapCache(). uncharge() routine doesn’t uncharge the page marked<br> as SwapCache(). It’s delayed until __delete_from_swap_cache().</p>
+<p> 4.1 Swap-in.<br> At swap-in, the page is taken from swap-cache. There are 2 cases.</p>
+<p> (a) If the SwapCache is newly allocated and read, it has no charges.<br> (b) If the SwapCache has been mapped by processes, it has been</p>
+<pre><code> charged already.
+</code></pre>
+<p> This swap-in is one of the most complicated work. In do_swap_page(),<br> following events occur when pte is unchanged.</p>
+<p> (1) the page (SwapCache) is looked up.<br> (2) lock_page()<br> (3) try_charge_swapin()<br> (4) reuse_swap_page() (may call delete_swap_cache())<br> (5) commit_charge_swapin()<br> (6) swap_free().</p>
+<p> Considering following situation for example.</p>
+<p> (A) The page has not been charged before (2) and reuse_swap_page()</p>
+<pre><code> doesn&#39;t call delete_from_swap_cache().
+</code></pre>
+<p> (B) The page has not been charged before (2) and reuse_swap_page()</p>
+<pre><code> calls delete_from_swap_cache().
+</code></pre>
+<p> (C) The page has been charged before (2) and reuse_swap_page() doesn’t</p>
+<pre><code> call delete_from_swap_cache().
+</code></pre>
+<p> (D) The page has been charged before (2) and reuse_swap_page() calls</p>
+<pre><code> delete_from_swap_cache().
+
+ memory.usage/memsw.usage changes to this page/swp_entry will be
+</code></pre>
+<p>  Case          (A)      (B)       (C)     (D)</p>
+<pre><code>  Event
+Before (2)     0/ 1     0/ 1      1/ 1    1/ 1
+   ===========================================
+   (3)        +1/+1    +1/+1     +1/+1   +1/+1
+   (4)          -       0/ 0       -     -1/ 0
+   (5)         0/-1     0/ 0     -1/-1    0/ 0
+   (6)          -       0/-1       -      0/-1
+   ===========================================
+Result         1/ 1     1/ 1      1/ 1    1/ 1
+
+In any cases, charges to this page should be 1/ 1.
+</code></pre>
+<p> 4.2 Swap-out.<br> At swap-out, typical state transition is below.</p>
+<p> (a) add to swap cache. (marked as SwapCache)</p>
+<pre><code> swp_entry&#39;s refcnt += 1.
+</code></pre>
+<p> (b) fully unmapped.</p>
+<pre><code> swp_entry&#39;s refcnt += # of ptes.
+</code></pre>
+<p> (c) write back to swap.<br> (d) delete from swap cache. (remove from SwapCache)</p>
+<pre><code> swp_entry&#39;s refcnt -= 1.
+</code></pre>
+</li>
+</ol>
+<pre><code>At (b), the page is marked as SwapCache and not uncharged.
+At (d), the page is removed from SwapCache and a charge in page_cgroup
+is moved to swap_cgroup.
+
+Finally, at task exit,
+(e) zap_pte() is called and swp_entry&#39;s refcnt -=1 -&gt; 0.
+Here, a charge in swap_cgroup disappears.
+</code></pre>
+<ol start="5">
+<li><p>Page Cache</p>
+<pre><code>Page Cache is charged at
+</code></pre>
+<ul>
+<li><p>add_to_page_cache_locked().</p>
+<p>uncharged at</p>
+</li>
+<li><p>__remove_from_page_cache().</p>
+<p>The logic is very clear. (About migration, see below)<br>Note: __remove_from_page_cache() is called by remove_from_page_cache()<br>and __remove_mapping().</p>
+</li>
+</ul>
+</li>
+<li><p>Shmem(tmpfs) Page Cache<br> Memcg’s charge/uncharge have special handlers of shmem. The best way<br> to understand shmem’s page state transition is to read mm/shmem.c.<br> But brief explanation of the behavior of memcg around shmem will be<br> helpful to understand the logic.</p>
+<p> Shmem’s page (just leaf page, not direct/indirect block) can be on</p>
+<pre><code> - radix-tree of shmem&#39;s inode.
+ - SwapCache.
+ - Both on radix-tree and SwapCache. This happens at swap-in
+   and swap-out,
+</code></pre>
+<p> It’s charged when…</p>
+<ul>
+<li>A new page is added to shmem’s radix-tree.</li>
+<li>A swp page is read. (move a charge from swap_cgroup to page_cgroup)<br>It’s uncharged when</li>
+<li>A page is removed from radix-tree and not SwapCache.</li>
+<li>When SwapCache is removed, a charge is moved to swap_cgroup.</li>
+<li>When swp_entry’s refcnt goes down to 0, a charge in swap_cgroup<br>disappears.</li>
+</ul>
+</li>
+<li><p>Page Migration</p>
+<pre><code>One of the most complicated functions is page-migration-handler.
+</code></pre>
+<p> Memcg has 2 routines. Assume that we are migrating a page’s contents<br> from OLDPAGE to NEWPAGE.</p>
+<p> Usual migration logic is..<br> (a) remove the page from LRU.<br> (b) allocate NEWPAGE (migration target)<br> (c) lock by lock_page().<br> (d) unmap all mappings.<br> (e-1) If necessary, replace entry in radix-tree.<br> (e-2) move contents of a page.<br> (f) map all mappings again.<br> (g) pushback the page to LRU.<br> (-) OLDPAGE will be freed.</p>
+<p> Before (g), memcg should complete all necessary charge/uncharge to<br> NEWPAGE/OLDPAGE.</p>
+<p> The point is….</p>
+<ul>
+<li><p>If OLDPAGE is anonymous, all charges will be dropped at (d) because</p>
+<pre><code>try_to_unmap() drops all mapcount and the page will not be
+</code></pre>
+<p>SwapCache.</p>
+</li>
+<li><p>If OLDPAGE is SwapCache, charges will be kept at (g) because<br>__delete_from_swap_cache() isn’t called at (e-1)</p>
+</li>
+<li><p>If OLDPAGE is page-cache, charges will be kept at (g) because<br>remove_from_swap_cache() isn’t called at (e-1)</p>
+<p>memcg provides following hooks.</p>
+</li>
+<li><p>mem_cgroup_prepare_migration(OLDPAGE)<br>Called after (b) to account a charge (usage += PAGE_SIZE) against<br>memcg which OLDPAGE belongs to.</p>
+<ul>
+<li>mem_cgroup_end_migration(OLDPAGE, NEWPAGE)<br>Called after (f) before (g).<br>If OLDPAGE is used, commit OLDPAGE again. If OLDPAGE is already<br>charged, a charge by prepare_migration() is automatically canceled.<br>If NEWPAGE is used, commit NEWPAGE and uncharge OLDPAGE.</li>
+</ul>
+<p>But zap_pte() (by exit or munmap) can be called while migration,<br>we have to check if OLDPAGE/NEWPAGE is a valid page after commit().</p>
+</li>
+</ul>
+</li>
+<li><p>LRU</p>
+<pre><code> Each memcg has its own private LRU. Now, it&#39;s handling is under global
+</code></pre>
+<p> VM’s control (means that it’s handled under global zone-&gt;lru_lock).<br> Almost all routines around memcg’s LRU is called by global LRU’s<br> list management functions under zone-&gt;lru_lock().</p>
+<p> A special function is mem_cgroup_isolate_pages(). This scans<br> memcg’s private LRU and call __isolate_lru_page() to extract a page<br> from LRU.<br> (By __isolate_lru_page(), the page is removed from both of global and<br>  private LRU.)</p>
+</li>
+</ol>
+<ol start="9">
+<li><p>Typical Tests.</p>
+<p>Tests for racy cases.</p>
+</li>
+<li><p>1 Small limit to memcg.<br> When you do test to do racy case, it’s good test to set memcg’s limit<br> to be very small rather than GB. Many races found in the test under<br> xKB or xxMB limits.<br> (Memory behavior under GB and Memory behavior under MB shows very<br>  different situation.)</p>
+</li>
+<li><p>2 Shmem<br> Historically, memcg’s shmem handling was poor and we saw some amount<br> of troubles here. This is because shmem is page-cache but can be<br> SwapCache. Test with shmem/tmpfs is always good test.</p>
+</li>
+<li><p>3 Migration<br> For NUMA, migration is an another special case. To do easy test, cpuset<br> is useful. Following is a sample script to do migration.</p>
+<p> mount -t cgroup -o cpuset none /opt/cpuset</p>
+<p> mkdir /opt/cpuset/01<br> echo 1 &gt; /opt/cpuset/01/cpuset.cpus<br> echo 0 &gt; /opt/cpuset/01/cpuset.mems<br> echo 1 &gt; /opt/cpuset/01/cpuset.memory_migrate<br> mkdir /opt/cpuset/02<br> echo 1 &gt; /opt/cpuset/02/cpuset.cpus<br> echo 1 &gt; /opt/cpuset/02/cpuset.mems<br> echo 1 &gt; /opt/cpuset/02/cpuset.memory_migrate</p>
+<p> In above set, when you moves a task from 01 to 02, page migration to<br> node 0 to node 1 will occur. Following is a script to migrate all</p>
+<h2 id="under-cpuset"><a href="#under-cpuset" class="headerlink" title=" under cpuset."></a> under cpuset.</h2><p> move_task()<br> {<br> for pid in $1</p>
+<pre><code> do
+         /bin/echo $pid &gt;$2/tasks 2&gt;/dev/null
+ echo -n $pid
+ echo -n &quot; &quot;
+ done
+</code></pre>
+<p> echo END<br> }</p>
+<p> G1_TASK=<code>cat $&#123;G1&#125;/tasks</code><br> G2_TASK=<code>cat $&#123;G2&#125;/tasks</code></p>
+<h2 id="move-task-“-G1-TASK-”-G2-amp"><a href="#move-task-“-G1-TASK-”-G2-amp" class="headerlink" title=" move_task “${G1_TASK}” ${G2} &amp;"></a> move_task “${G1_TASK}” ${G2} &amp;</h2></li>
+<li><p>4 Memory hotplug.<br> memory hotplug test is one of good test.<br> to offline memory, do following.</p>
+<h1 id="echo-offline-gt-sys-devices-system-memory-memoryXXX-state"><a href="#echo-offline-gt-sys-devices-system-memory-memoryXXX-state" class="headerlink" title="echo offline &gt; /sys/devices/system/memory/memoryXXX/state"></a>echo offline &gt; /sys/devices/system/memory/memoryXXX/state</h1><p> (XXX is the place of memory)<br> This is an easy way to test page migration, too.</p>
+</li>
+<li><p>5 mkdir/rmdir<br> When using hierarchy, mkdir/rmdir test should be done.<br> Use tests like the following.</p>
+<p> echo 1 &gt;/opt/cgroup/01/memory/use_hierarchy<br> mkdir /opt/cgroup/01/child_a<br> mkdir /opt/cgroup/01/child_b</p>
+<p> set limit to 01.<br> add limit to 01/child_b<br> run jobs under child_a and child_b</p>
+<p> create/delete following groups at random while jobs are running.<br> /opt/cgroup/01/child_a/child_aa<br> /opt/cgroup/01/child_b/child_bb<br> /opt/cgroup/01/child_c</p>
+<p> running new jobs in new group is also good.</p>
+</li>
+<li><p>6 Mount with other subsystems.<br> Mounting with other subsystems is a good test because there is a<br> race and lock dependency with other cgroup subsystems.</p>
+<p> example)</p>
+<h1 id="mount-t-cgroup-none-cgroup-t-cpuset-memory-cpu-devices"><a href="#mount-t-cgroup-none-cgroup-t-cpuset-memory-cpu-devices" class="headerlink" title="mount -t cgroup none /cgroup -t cpuset,memory,cpu,devices"></a>mount -t cgroup none /cgroup -t cpuset,memory,cpu,devices</h1><p> and do task move, mkdir, rmdir etc…under this.</p>
+</li>
+<li><p>7 swapoff.<br> Besides management of swap is one of complicated parts of memcg,<br> call path of swap-in at swapoff is not same as usual swap-in path..<br> It’s worth to be tested explicitly.</p>
+<p> For example, test like following is good.<br> (Shell-A)</p>
+<h1 id="mount-t-cgroup-none-cgroup-t-memory"><a href="#mount-t-cgroup-none-cgroup-t-memory" class="headerlink" title="mount -t cgroup none /cgroup -t memory"></a>mount -t cgroup none /cgroup -t memory</h1><h1 id="mkdir-cgroup-test"><a href="#mkdir-cgroup-test" class="headerlink" title="mkdir /cgroup/test"></a>mkdir /cgroup/test</h1><h1 id="echo-40M-gt-cgroup-test-memory-limit-in-bytes"><a href="#echo-40M-gt-cgroup-test-memory-limit-in-bytes" class="headerlink" title="echo 40M &gt; /cgroup/test/memory.limit_in_bytes"></a>echo 40M &gt; /cgroup/test/memory.limit_in_bytes</h1><h1 id="echo-0-gt-cgroup-test-tasks"><a href="#echo-0-gt-cgroup-test-tasks" class="headerlink" title="echo 0 &gt; /cgroup/test/tasks"></a>echo 0 &gt; /cgroup/test/tasks</h1><p> Run malloc(100M) program under this. You’ll see 60M of swaps.<br> (Shell-B)</p>
+<h1 id="move-all-tasks-in-cgroup-test-to-cgroup"><a href="#move-all-tasks-in-cgroup-test-to-cgroup" class="headerlink" title="move all tasks in /cgroup/test to /cgroup"></a>move all tasks in /cgroup/test to /cgroup</h1><h1 id="sbin-swapoff-a"><a href="#sbin-swapoff-a" class="headerlink" title="/sbin/swapoff -a"></a>/sbin/swapoff -a</h1><h1 id="rmdir-cgroup-test"><a href="#rmdir-cgroup-test" class="headerlink" title="rmdir /cgroup/test"></a>rmdir /cgroup/test</h1><h1 id="kill-malloc-task"><a href="#kill-malloc-task" class="headerlink" title="kill malloc task."></a>kill malloc task.</h1><p> Of course, tmpfs v.s. swapoff test should be tested, too.</p>
+</li>
+<li><p>8 OOM-Killer<br> Out-of-memory caused by memcg’s limit will kill tasks under<br> the memcg. When hierarchy is used, a task under hierarchy<br> will be killed by the kernel.<br> In this case, panic_on_oom shouldn’t be invoked and tasks<br> in other groups shouldn’t be killed.</p>
+<p> It’s not difficult to cause OOM under memcg as following.<br> Case A) when you can swapoff<br> #swapoff -a<br> #echo 50M &gt; /memory.limit_in_bytes<br> run 51M of malloc</p>
+<p> Case B) when you use mem+swap limitation.<br> #echo 50M &gt; memory.limit_in_bytes<br> #echo 50M &gt; memory.memsw.limit_in_bytes<br> run 51M of malloc</p>
+</li>
+<li><p>9 Move charges at task migration<br> Charges associated with a task can be moved along with task migration.</p>
+<p> (Shell-A)<br> #mkdir /cgroup/A<br> #echo $$ &gt;/cgroup/A/tasks<br> run some programs which uses some amount of memory in /cgroup/A.</p>
+<p> (Shell-B)<br> #mkdir /cgroup/B<br> #echo 1 &gt;/cgroup/B/memory.move_charge_at_immigrate<br> #echo “pid of the program running in group A” &gt;/cgroup/B/tasks</p>
+<p> You can see charges have been moved by reading *.usage_in_bytes or<br> memory.stat of both A and B.<br> See 8.2 of Documentation/cgroups/memory.txt to see what value should be<br> written to move_charge_at_immigrate.</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/" title="Kernel-2.6.32-573.12.1.el6_memcg_test" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_memcg_test/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_memory-hotplug/" title="Kernel-2.6.32-573.12.1.el6_memory-hotplug"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_megaraid/" title="Kernel-2.6.32-573.12.1.el6_megarai"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

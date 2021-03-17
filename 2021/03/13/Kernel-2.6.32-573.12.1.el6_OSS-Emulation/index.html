@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_OSS-Emulation | oosTech.com</title>
+  <meta name="description" content="NOTES ON KERNEL OSS-EMULATION     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;      Jan. 22, 2004  Takashi Iwai &lt;tiwai@suse.de&gt;  ModulesALSA provides a powerful OSS emulation on the kernel.The OSS emulatio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_OSS-Emulation">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="NOTES ON KERNEL OSS-EMULATION     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;      Jan. 22, 2004  Takashi Iwai &lt;tiwai@suse.de&gt;  ModulesALSA provides a powerful OSS emulation on the kernel.The OSS emulatio">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Modules"><span class="toc-number">1.</span> <span class="toc-text">Modules</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Device-Mapping"><span class="toc-number">2.</span> <span class="toc-text">Device Mapping</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PCM-Mode"><span class="toc-number">3.</span> <span class="toc-text">PCM Mode</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Mixer-Elements"><span class="toc-number">4.</span> <span class="toc-text">Mixer Elements</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Duplex-Streams"><span class="toc-number">5.</span> <span class="toc-text">Duplex Streams</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Unsupported-Features"><span class="toc-number">6.</span> <span class="toc-text">Unsupported Features</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MMAP-on-ICE1712-driver"><span class="toc-number">6.1.</span> <span class="toc-text">MMAP on ICE1712 driver</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_OSS-Emulation" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_OSS-Emulation
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    NOTES ON KERNEL OSS-EMULATION
+    =============================
+
+    Jan. 22, 2004  Takashi Iwai &lt;tiwai@suse.de&gt;
+</code></pre>
+<h1 id="Modules"><a href="#Modules" class="headerlink" title="Modules"></a>Modules</h1><p>ALSA provides a powerful OSS emulation on the kernel.<br>The OSS emulation for PCM, mixer and sequencer devices is implemented<br>as add-on kernel modules, snd-pcm-oss, snd-mixer-oss and snd-seq-oss.<br>When you need to access the OSS PCM, mixer or sequencer devices, the<br>corresponding module has to be loaded.</p>
+<p>These modules are loaded automatically when the corresponding service<br>is called.  The alias is defined sound-service-x-y, where x and y are<br>the card number and the minor unit number.  Usually you don’t have to<br>define these aliases by yourself.</p>
+<p>Only necessary step for auto-loading of OSS modules is to define the<br>card alias in /etc/modprobe.conf, such as</p>
+<pre><code>alias sound-slot-0 snd-emu10k1
+</code></pre>
+<p>As the second card, define sound-slot-1 as well.<br>Note that you can’t use the aliased name as the target name (i.e.<br>“alias sound-slot-0 snd-card-0” doesn’t work any more like the old<br>modutils).</p>
+<p>The currently available OSS configuration is shown in<br>/proc/asound/oss/sndstat.  This shows in the same syntax of<br>/dev/sndstat, which is available on the commercial OSS driver.<br>On ALSA, you can symlink /dev/sndstat to this proc file.</p>
+<p>Please note that the devices listed in this proc file appear only<br>after the corresponding OSS-emulation module is loaded.  Don’t worry<br>even if “NOT ENABLED IN CONFIG” is shown in it.</p>
+<h1 id="Device-Mapping"><a href="#Device-Mapping" class="headerlink" title="Device Mapping"></a>Device Mapping</h1><p>ALSA supports the following OSS device files:</p>
+<pre><code>PCM:
+    /dev/dspX
+    /dev/adspX
+
+Mixer:
+    /dev/mixerX
+
+MIDI:
+    /dev/midi0X
+    /dev/amidi0X
+
+Sequencer:
+    /dev/sequencer
+    /dev/sequencer2 (aka /dev/music)
+</code></pre>
+<p>where X is the card number from 0 to 7.</p>
+<p>(NOTE: Some distributions have the device files like /dev/midi0 and<br>       /dev/midi1.  They are NOT for OSS but for tclmidi, which is<br>       a totally different thing.)</p>
+<p>Unlike the real OSS, ALSA cannot use the device files more than the<br>assigned ones.  For example, the first card cannot use /dev/dsp1 or<br>/dev/dsp2, but only /dev/dsp0 and /dev/adsp0.</p>
+<p>As seen above, PCM and MIDI may have two devices.  Usually, the first<br>PCM device (hw:0,0 in ALSA) is mapped to /dev/dsp and the secondary<br>device (hw:0,1) to /dev/adsp (if available).  For MIDI, /dev/midi and<br>/dev/amidi, respectively.</p>
+<p>You can change this device mapping via the module options of<br>snd-pcm-oss and snd-rawmidi.  In the case of PCM, the following<br>options are available for snd-pcm-oss:</p>
+<pre><code>dsp_map        PCM device number assigned to /dev/dspX
+        (default = 0)
+adsp_map    PCM device number assigned to /dev/adspX
+        (default = 1)
+</code></pre>
+<p>For example, to map the third PCM device (hw:0,2) to /dev/adsp0,<br>define like this:</p>
+<pre><code>options snd-pcm-oss adsp_map=2
+</code></pre>
+<p>The options take arrays.  For configuring the second card, specify<br>two entries separated by comma.  For example, to map the third PCM<br>device on the second card to /dev/adsp1, define like below:</p>
+<pre><code>options snd-pcm-oss adsp_map=0,2
+</code></pre>
+<p>To change the mapping of MIDI devices, the following options are<br>available for snd-rawmidi:</p>
+<pre><code>midi_map    MIDI device number assigned to /dev/midi0X
+        (default = 0)
+amidi_map    MIDI device number assigned to /dev/amidi0X
+        (default = 1)
+</code></pre>
+<p>For example, to assign the third MIDI device on the first card to<br>/dev/midi00, define as follows:</p>
+<pre><code>options snd-rawmidi midi_map=2
+</code></pre>
+<h1 id="PCM-Mode"><a href="#PCM-Mode" class="headerlink" title="PCM Mode"></a>PCM Mode</h1><p>As default, ALSA emulates the OSS PCM with so-called plugin layer,<br>i.e. tries to convert the sample format, rate or channels<br>automatically when the card doesn’t support it natively.<br>This will lead to some problems for some applications like quake or<br>wine, especially if they use the card only in the MMAP mode.</p>
+<p>In such a case, you can change the behavior of PCM per application by<br>writing a command to the proc file.  There is a proc file for each PCM<br>stream, /proc/asound/cardX/pcmY[cp]/oss, where X is the card number<br>(zero-based), Y the PCM device number (zero-based), and ‘p’ is for<br>playback and ‘c’ for capture, respectively.  Note that this proc file<br>exists only after snd-pcm-oss module is loaded.</p>
+<p>The command sequence has the following syntax:</p>
+<pre><code>app_name fragments fragment_size [options]
+</code></pre>
+<p>app_name is the name of application with (higher priority) or without<br>path.<br>fragments specifies the number of fragments or zero if no specific<br>number is given.<br>fragment_size is the size of fragment in bytes or zero if not given.<br>options is the optional parameters.  The following options are<br>available:</p>
+<pre><code>disable        the application tries to open a pcm device for
+        this channel but does not want to use it.
+direct        don&#39;t use plugins
+block        force block open mode
+non-block    force non-block open mode
+partial-frag    write also partial fragments (affects playback only)
+no-silence    do not fill silence ahead to avoid clicks
+</code></pre>
+<p>The disable option is useful when one stream direction (playback or<br>capture) is not handled correctly by the application although the<br>hardware itself does support both directions.<br>The direct option is used, as mentioned above, to bypass the automatic<br>conversion and useful for MMAP-applications.<br>For example, to playback the first PCM device without plugins for<br>quake, send a command via echo like the following:</p>
+<pre><code>% echo &quot;quake 0 0 direct&quot; &gt; /proc/asound/card0/pcm0p/oss
+</code></pre>
+<p>While quake wants only playback, you may append the second command<br>to notify driver that only this direction is about to be allocated:</p>
+<pre><code>% echo &quot;quake 0 0 disable&quot; &gt; /proc/asound/card0/pcm0c/oss
+</code></pre>
+<p>The permission of proc files depend on the module options of snd.<br>As default it’s set as root, so you’ll likely need to be superuser for<br>sending the command above.</p>
+<p>The block and non-block options are used to change the behavior of<br>opening the device file.</p>
+<p>As default, ALSA behaves as original OSS drivers, i.e. does not block<br>the file when it’s busy. The -EBUSY error is returned in this case.</p>
+<p>This blocking behavior can be changed globally via nonblock_open<br>module option of snd-pcm-oss.  For using the blocking mode as default<br>for OSS devices, define like the following:</p>
+<pre><code>options snd-pcm-oss nonblock_open=0
+</code></pre>
+<p>The partial-frag and no-silence commands have been added recently.<br>Both commands are for optimization use only.  The former command<br>specifies to invoke the write transfer only when the whole fragment is<br>filled.  The latter stops writing the silence data ahead<br>automatically.  Both are disabled as default.</p>
+<p>You can check the currently defined configuration by reading the proc<br>file.  The read image can be sent to the proc file again, hence you<br>can save the current configuration</p>
+<pre><code>% cat /proc/asound/card0/pcm0p/oss &gt; /somewhere/oss-cfg
+</code></pre>
+<p>and restore it like</p>
+<pre><code>% cat /somewhere/oss-cfg &gt; /proc/asound/card0/pcm0p/oss
+</code></pre>
+<p>Also, for clearing all the current configuration, send “erase” command<br>as below:</p>
+<pre><code>% echo &quot;erase&quot; &gt; /proc/asound/card0/pcm0p/oss
+</code></pre>
+<h1 id="Mixer-Elements"><a href="#Mixer-Elements" class="headerlink" title="Mixer Elements"></a>Mixer Elements</h1><p>Since ALSA has completely different mixer interface, the emulation of<br>OSS mixer is relatively complicated.  ALSA builds up a mixer element<br>from several different ALSA (mixer) controls based on the name<br>string.  For example, the volume element SOUND_MIXER_PCM is composed<br>from “PCM Playback Volume” and “PCM Playback Switch” controls for the<br>playback direction and from “PCM Capture Volume” and “PCM Capture<br>Switch” for the capture directory (if exists).  When the PCM volume of<br>OSS is changed, all the volume and switch controls above are adjusted<br>automatically.</p>
+<p>As default, ALSA uses the following control for OSS volumes:</p>
+<pre><code>OSS volume        ALSA control        Index
+-----------------------------------------------------
+SOUND_MIXER_VOLUME     Master            0
+SOUND_MIXER_BASS    Tone Control - Bass    0
+SOUND_MIXER_TREBLE    Tone Control - Treble    0
+SOUND_MIXER_SYNTH    Synth            0
+SOUND_MIXER_PCM        PCM            0
+SOUND_MIXER_SPEAKER    PC Speaker         0
+SOUND_MIXER_LINE    Line            0
+SOUND_MIXER_MIC        Mic             0
+SOUND_MIXER_CD        CD             0
+SOUND_MIXER_IMIX    Monitor Mix         0
+SOUND_MIXER_ALTPCM    PCM            1
+SOUND_MIXER_RECLEV    (not assigned)
+SOUND_MIXER_IGAIN    Capture            0
+SOUND_MIXER_OGAIN    Playback        0
+SOUND_MIXER_LINE1    Aux            0
+SOUND_MIXER_LINE2    Aux            1
+SOUND_MIXER_LINE3    Aux            2
+SOUND_MIXER_DIGITAL1    Digital            0
+SOUND_MIXER_DIGITAL2    Digital            1
+SOUND_MIXER_DIGITAL3    Digital            2
+SOUND_MIXER_PHONEIN    Phone            0
+SOUND_MIXER_PHONEOUT    Phone            1
+SOUND_MIXER_VIDEO    Video            0
+SOUND_MIXER_RADIO    Radio            0
+SOUND_MIXER_MONITOR    Monitor            0
+</code></pre>
+<p>The second column is the base-string of the corresponding ALSA<br>control.  In fact, the controls with “XXX [Playback|Capture]<br>[Volume|Switch]” will be checked in addition.</p>
+<p>The current assignment of these mixer elements is listed in the proc<br>file, /proc/asound/cardX/oss_mixer, which will be like the following</p>
+<pre><code>VOLUME &quot;Master&quot; 0
+BASS &quot;&quot; 0
+TREBLE &quot;&quot; 0
+SYNTH &quot;&quot; 0
+PCM &quot;PCM&quot; 0
+...
+</code></pre>
+<p>where the first column is the OSS volume element, the second column<br>the base-string of the corresponding ALSA control, and the third the<br>control index.  When the string is empty, it means that the<br>corresponding OSS control is not available.</p>
+<p>For changing the assignment, you can write the configuration to this<br>proc file.  For example, to map “Wave Playback” to the PCM volume,<br>send the command like the following:</p>
+<pre><code>% echo &#39;VOLUME &quot;Wave Playback&quot; 0&#39; &gt; /proc/asound/card0/oss_mixer
+</code></pre>
+<p>The command is exactly as same as listed in the proc file.  You can<br>change one or more elements, one volume per line.  In the last<br>example, both “Wave Playback Volume” and “Wave Playback Switch” will<br>be affected when PCM volume is changed.</p>
+<p>Like the case of PCM proc file, the permission of proc files depend on<br>the module options of snd.  you’ll likely need to be superuser for<br>sending the command above.</p>
+<p>As well as in the case of PCM proc file, you can save and restore the<br>current mixer configuration by reading and writing the whole file<br>image.</p>
+<h1 id="Duplex-Streams"><a href="#Duplex-Streams" class="headerlink" title="Duplex Streams"></a>Duplex Streams</h1><p>Note that when attempting to use a single device file for playback and<br>capture, the OSS API provides no way to set the format, sample rate or<br>number of channels different in each direction.  Thus<br>    io_handle = open(“device”, O_RDWR)<br>will only function correctly if the values are the same in each direction.</p>
+<p>To use different values in the two directions, use both<br>    input_handle = open(“device”, O_RDONLY)<br>    output_handle = open(“device”, O_WRONLY)<br>and set the values for the corresponding handle.</p>
+<h1 id="Unsupported-Features"><a href="#Unsupported-Features" class="headerlink" title="Unsupported Features"></a>Unsupported Features</h1><h2 id="MMAP-on-ICE1712-driver"><a href="#MMAP-on-ICE1712-driver" class="headerlink" title="MMAP on ICE1712 driver"></a>MMAP on ICE1712 driver</h2><p>ICE1712 supports only the unconventional format, interleaved<br>10-channels 24bit (packed in 32bit) format.  Therefore you cannot mmap<br>the buffer as the conventional (mono or 2-channels, 8 or 16bit) format<br>on OSS.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/" title="Kernel-2.6.32-573.12.1.el6_OSS-Emulation" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_OSS-Emulation/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_Overview/" title="Kernel-2.6.32-573.12.1.el6_Overview"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_NinjaSCSI/" title="Kernel-2.6.32-573.12.1.el6_NinjaSCSI"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

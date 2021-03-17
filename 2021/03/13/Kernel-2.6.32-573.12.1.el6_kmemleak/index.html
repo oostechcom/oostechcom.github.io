@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_kmemleak | oosTech.com</title>
+  <meta name="description" content="Kernel Memory Leak DetectorIntroductionKmemleak provides a way of detecting possible kernel memory leaks in away similar to a tracing garbage collector(http:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Garbage_collection_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_kmemleak">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Kernel Memory Leak DetectorIntroductionKmemleak provides a way of detecting possible kernel memory leaks in away similar to a tracing garbage collector(http:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Garbage_collection_">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kernel-Memory-Leak-Detector"><span class="toc-number">1.</span> <span class="toc-text">Kernel Memory Leak Detector</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Usage"><span class="toc-number">1.2.</span> <span class="toc-text">Usage</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-t-debugfs-nodev-sys-kernel-debug"><span class="toc-number">2.</span> <span class="toc-text">mount -t debugfs nodev &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cat-sys-kernel-debug-kmemleak"><span class="toc-number">3.</span> <span class="toc-text">cat &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;kmemleak</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-scan-gt-sys-kernel-debug-kmemleak"><span class="toc-number">4.</span> <span class="toc-text">echo scan &gt; &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;kmemleak</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-clear-gt-sys-kernel-debug-kmemleak"><span class="toc-number">5.</span> <span class="toc-text">echo clear &gt; &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;kmemleak</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Basic-Algorithm"><span class="toc-number">5.1.</span> <span class="toc-text">Basic Algorithm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Testing-specific-sections-with-kmemleak"><span class="toc-number">5.2.</span> <span class="toc-text">Testing specific sections with kmemleak</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-clear-gt-sys-kernel-debug-kmemleak-1"><span class="toc-number">6.</span> <span class="toc-text">echo clear &gt; &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;kmemleak</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-scan-gt-sys-kernel-debug-kmemleak-1"><span class="toc-number">7.</span> <span class="toc-text">echo scan &gt; &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;kmemleak</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cat-sys-kernel-debug-kmemleak-1"><span class="toc-number">8.</span> <span class="toc-text">cat &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;kmemleak</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Kmemleak-API"><span class="toc-number">8.1.</span> <span class="toc-text">Kmemleak API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Dealing-with-false-positives-negatives"><span class="toc-number">8.2.</span> <span class="toc-text">Dealing with false positives&#x2F;negatives</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Limitations-and-Drawbacks"><span class="toc-number">8.3.</span> <span class="toc-text">Limitations and Drawbacks</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_kmemleak" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_kmemleak
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Kernel-Memory-Leak-Detector"><a href="#Kernel-Memory-Leak-Detector" class="headerlink" title="Kernel Memory Leak Detector"></a>Kernel Memory Leak Detector</h1><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Kmemleak provides a way of detecting possible kernel memory leaks in a<br>way similar to a tracing garbage collector<br>(<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29#Tracing_garbage_collectors">http://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29#Tracing_garbage_collectors</a>),<br>with the difference that the orphan objects are not freed but only<br>reported via /sys/kernel/debug/kmemleak. A similar method is used by the<br>Valgrind tool (memcheck –leak-check) to detect the memory leaks in<br>user-space applications.</p>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>CONFIG_DEBUG_KMEMLEAK in “Kernel hacking” has to be enabled. A kernel<br>thread scans the memory every 10 minutes (by default) and prints the<br>number of new unreferenced objects found. To display the details of all<br>the possible memory leaks:</p>
+<h1 id="mount-t-debugfs-nodev-sys-kernel-debug"><a href="#mount-t-debugfs-nodev-sys-kernel-debug" class="headerlink" title="mount -t debugfs nodev /sys/kernel/debug/"></a>mount -t debugfs nodev /sys/kernel/debug/</h1><h1 id="cat-sys-kernel-debug-kmemleak"><a href="#cat-sys-kernel-debug-kmemleak" class="headerlink" title="cat /sys/kernel/debug/kmemleak"></a>cat /sys/kernel/debug/kmemleak</h1><p>To trigger an intermediate memory scan:</p>
+<h1 id="echo-scan-gt-sys-kernel-debug-kmemleak"><a href="#echo-scan-gt-sys-kernel-debug-kmemleak" class="headerlink" title="echo scan &gt; /sys/kernel/debug/kmemleak"></a>echo scan &gt; /sys/kernel/debug/kmemleak</h1><p>To clear the list of all current possible memory leaks:</p>
+<h1 id="echo-clear-gt-sys-kernel-debug-kmemleak"><a href="#echo-clear-gt-sys-kernel-debug-kmemleak" class="headerlink" title="echo clear &gt; /sys/kernel/debug/kmemleak"></a>echo clear &gt; /sys/kernel/debug/kmemleak</h1><p>New leaks will then come up upon reading /sys/kernel/debug/kmemleak<br>again.</p>
+<p>Note that the orphan objects are listed in the order they were allocated<br>and one object at the beginning of the list may cause other subsequent<br>objects to be reported as orphan.</p>
+<p>Memory scanning parameters can be modified at run-time by writing to the<br>/sys/kernel/debug/kmemleak file. The following parameters are supported:</p>
+<p>  off        - disable kmemleak (irreversible)<br>  stack=on    - enable the task stacks scanning (default)<br>  stack=off    - disable the tasks stacks scanning<br>  scan=on    - start the automatic memory scanning thread (default)<br>  scan=off    - stop the automatic memory scanning thread<br>  scan=<secs>    - set the automatic memory scanning period in seconds<br>          (default 600, 0 to stop the automatic scanning)<br>  scan        - trigger a memory scan<br>  clear        - clear list of current memory leak suspects, done by<br>          marking all current reported unreferenced objects grey<br>  dump=<addr>    - dump information about the object found at <addr></p>
+<p>Kmemleak can also be disabled at boot-time by passing “kmemleak=off” on<br>the kernel command line.</p>
+<p>Memory may be allocated or freed before kmemleak is initialised and<br>these actions are stored in an early log buffer. The size of this buffer<br>is configured via the CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE option.</p>
+<h2 id="Basic-Algorithm"><a href="#Basic-Algorithm" class="headerlink" title="Basic Algorithm"></a>Basic Algorithm</h2><p>The memory allocations via kmalloc, vmalloc, kmem_cache_alloc and<br>friends are traced and the pointers, together with additional<br>information like size and stack trace, are stored in a prio search tree.<br>The corresponding freeing function calls are tracked and the pointers<br>removed from the kmemleak data structures.</p>
+<p>An allocated block of memory is considered orphan if no pointer to its<br>start address or to any location inside the block can be found by<br>scanning the memory (including saved registers). This means that there<br>might be no way for the kernel to pass the address of the allocated<br>block to a freeing function and therefore the block is considered a<br>memory leak.</p>
+<p>The scanning algorithm steps:</p>
+<ol>
+<li>mark all objects as white (remaining white objects will later be<br>considered orphan)</li>
+<li>scan the memory starting with the data section and stacks, checking<br>the values against the addresses stored in the prio search tree. If<br>a pointer to a white object is found, the object is added to the<br>gray list</li>
+<li>scan the gray objects for matching addresses (some white objects<br>can become gray and added at the end of the gray list) until the<br>gray set is finished</li>
+<li>the remaining white objects are considered orphan and reported via<br>/sys/kernel/debug/kmemleak</li>
+</ol>
+<p>Some allocated memory blocks have pointers stored in the kernel’s<br>internal data structures and they cannot be detected as orphans. To<br>avoid this, kmemleak can also store the number of values pointing to an<br>address inside the block address range that need to be found so that the<br>block is not considered a leak. One example is __vmalloc().</p>
+<h2 id="Testing-specific-sections-with-kmemleak"><a href="#Testing-specific-sections-with-kmemleak" class="headerlink" title="Testing specific sections with kmemleak"></a>Testing specific sections with kmemleak</h2><p>Upon initial bootup your /sys/kernel/debug/kmemleak output page may be<br>quite extensive. This can also be the case if you have very buggy code<br>when doing development. To work around these situations you can use the<br>‘clear’ command to clear all reported unreferenced objects from the<br>/sys/kernel/debug/kmemleak output. By issuing a ‘scan’ after a ‘clear’<br>you can find new unreferenced objects; this should help with testing<br>specific sections of code.</p>
+<p>To test a critical section on demand with a clean kmemleak do:</p>
+<h1 id="echo-clear-gt-sys-kernel-debug-kmemleak-1"><a href="#echo-clear-gt-sys-kernel-debug-kmemleak-1" class="headerlink" title="echo clear &gt; /sys/kernel/debug/kmemleak"></a>echo clear &gt; /sys/kernel/debug/kmemleak</h1><p>  … test your kernel or modules …</p>
+<h1 id="echo-scan-gt-sys-kernel-debug-kmemleak-1"><a href="#echo-scan-gt-sys-kernel-debug-kmemleak-1" class="headerlink" title="echo scan &gt; /sys/kernel/debug/kmemleak"></a>echo scan &gt; /sys/kernel/debug/kmemleak</h1><p>Then as usual to get your report with:</p>
+<h1 id="cat-sys-kernel-debug-kmemleak-1"><a href="#cat-sys-kernel-debug-kmemleak-1" class="headerlink" title="cat /sys/kernel/debug/kmemleak"></a>cat /sys/kernel/debug/kmemleak</h1><h2 id="Kmemleak-API"><a href="#Kmemleak-API" class="headerlink" title="Kmemleak API"></a>Kmemleak API</h2><p>See the include/linux/kmemleak.h header for the functions prototype.</p>
+<p>kmemleak_init         - initialize kmemleak<br>kmemleak_alloc         - notify of a memory block allocation<br>kmemleak_free         - notify of a memory block freeing<br>kmemleak_not_leak     - mark an object as not a leak<br>kmemleak_ignore         - do not scan or report an object as leak<br>kmemleak_scan_area     - add scan areas inside a memory block<br>kmemleak_no_scan     - do not scan a memory block<br>kmemleak_erase         - erase an old value in a pointer variable<br>kmemleak_alloc_recursive - as kmemleak_alloc but checks the recursiveness<br>kmemleak_free_recursive     - as kmemleak_free but checks the recursiveness</p>
+<h2 id="Dealing-with-false-positives-negatives"><a href="#Dealing-with-false-positives-negatives" class="headerlink" title="Dealing with false positives/negatives"></a>Dealing with false positives/negatives</h2><p>The false negatives are real memory leaks (orphan objects) but not<br>reported by kmemleak because values found during the memory scanning<br>point to such objects. To reduce the number of false negatives, kmemleak<br>provides the kmemleak_ignore, kmemleak_scan_area, kmemleak_no_scan and<br>kmemleak_erase functions (see above). The task stacks also increase the<br>amount of false negatives and their scanning is not enabled by default.</p>
+<p>The false positives are objects wrongly reported as being memory leaks<br>(orphan). For objects known not to be leaks, kmemleak provides the<br>kmemleak_not_leak function. The kmemleak_ignore could also be used if<br>the memory block is known not to contain other pointers and it will no<br>longer be scanned.</p>
+<p>Some of the reported leaks are only transient, especially on SMP<br>systems, because of pointers temporarily stored in CPU registers or<br>stacks. Kmemleak defines MSECS_MIN_AGE (defaulting to 1000) representing<br>the minimum age of an object to be reported as a memory leak.</p>
+<h2 id="Limitations-and-Drawbacks"><a href="#Limitations-and-Drawbacks" class="headerlink" title="Limitations and Drawbacks"></a>Limitations and Drawbacks</h2><p>The main drawback is the reduced performance of memory allocation and<br>freeing. To avoid other penalties, the memory scanning is only performed<br>when the /sys/kernel/debug/kmemleak file is read. Anyway, this tool is<br>intended for debugging purposes where the performance might not be the<br>most important requirement.</p>
+<p>To keep the algorithm simple, kmemleak scans for values pointing to any<br>address inside a block’s address range. This may lead to an increased<br>number of false negatives. However, it is likely that a real memory leak<br>will eventually become visible.</p>
+<p>Another source of false negatives is the data stored in non-pointer<br>values. In a future version, kmemleak could only scan the pointer<br>members in the allocated structures. This feature would solve many of<br>the false negative cases described above.</p>
+<p>The tool can report false positives. These are cases where an allocated<br>block doesn’t need to be freed (some cases in the init_call functions),<br>the pointer is calculated by other methods than the usual container_of<br>macro or the pointer is stored in a location not scanned by kmemleak.</p>
+<p>Page allocations and ioremap are not tracked. Only the ARM and x86<br>architectures are currently supported.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/" title="Kernel-2.6.32-573.12.1.el6_kmemleak" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemleak/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_kmemtrace/" title="Kernel-2.6.32-573.12.1.el6_kmemtrace"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_keys-request-key/" title="Kernel-2.6.32-573.12.1.el6_keys-request-key"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

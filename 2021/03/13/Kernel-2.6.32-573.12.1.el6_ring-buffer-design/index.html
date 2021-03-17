@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_ring-buffer-design | oosTech.com</title>
+  <meta name="description" content="Lockless Ring Buffer Design     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  Copyright 2009 Red Hat Inc.   Author:   Steven Rostedt &amp;#x73;&amp;#x72;&amp;#x6f;&amp;#x73;&amp;#116;&amp;#101;&amp;#x64;&amp;#116;&amp;#64;&amp;#114;&amp;#x65;&amp;#100;&amp;#104;&amp;#9">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_ring-buffer-design">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Lockless Ring Buffer Design     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  Copyright 2009 Red Hat Inc.   Author:   Steven Rostedt &amp;#x73;&amp;#x72;&amp;#x6f;&amp;#x73;&amp;#116;&amp;#101;&amp;#x64;&amp;#116;&amp;#64;&amp;#114;&amp;#x65;&amp;#100;&amp;#104;&amp;#9">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Terminology-used-in-this-Document"><span class="toc-number">1.</span> <span class="toc-text">Terminology used in this Document</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Generic-Ring-Buffer"><span class="toc-number">2.</span> <span class="toc-text">The Generic Ring Buffer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Making-the-Ring-Buffer-Lockless"><span class="toc-number">3.</span> <span class="toc-text">Making the Ring Buffer Lockless:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nested-writes"><span class="toc-number">4.</span> <span class="toc-text">Nested writes</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_ring-buffer-design" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_ring-buffer-design
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Lockless Ring Buffer Design
+    ===========================
+</code></pre>
+<p>Copyright 2009 Red Hat Inc.<br>   Author:   Steven Rostedt <a href="mailto:&#x73;&#x72;&#x6f;&#x73;&#116;&#101;&#x64;&#116;&#64;&#114;&#x65;&#100;&#104;&#97;&#116;&#46;&#x63;&#111;&#x6d;">&#x73;&#x72;&#x6f;&#x73;&#116;&#101;&#x64;&#116;&#64;&#114;&#x65;&#100;&#104;&#97;&#116;&#46;&#x63;&#111;&#x6d;</a><br>  License:   The GNU Free Documentation License, Version 1.2<br>               (dual licensed under the GPL v2)<br>Reviewers:   Mathieu Desnoyers, Huang Ying, Hidetoshi Seto,<br>         and Frederic Weisbecker.</p>
+<p>Written for: 2.6.31</p>
+<h2 id="Terminology-used-in-this-Document"><a href="#Terminology-used-in-this-Document" class="headerlink" title="Terminology used in this Document"></a>Terminology used in this Document</h2><p>tail - where new writes happen in the ring buffer.</p>
+<p>head - where new reads happen in the ring buffer.</p>
+<p>producer - the task that writes into the ring buffer (same as writer)</p>
+<p>writer - same as producer</p>
+<p>consumer - the task that reads from the buffer (same as reader)</p>
+<p>reader - same as consumer.</p>
+<p>reader_page - A page outside the ring buffer used solely (for the most part)<br>    by the reader.</p>
+<p>head_page - a pointer to the page that the reader will use next</p>
+<p>tail_page - a pointer to the page that will be written to next</p>
+<p>commit_page - a pointer to the page with the last finished non nested write.</p>
+<p>cmpxchg - hardware assisted atomic transaction that performs the following:</p>
+<p>   A = B iff previous A == C</p>
+<p>   R = cmpxchg(A, C, B) is saying that we replace A with B if and only if<br>      current A is equal to C, and we put the old (current) A into R</p>
+<p>   R gets the previous A regardless if A is updated with B or not.</p>
+<p>   To see if the update was successful a compare of R == C may be used.</p>
+<h2 id="The-Generic-Ring-Buffer"><a href="#The-Generic-Ring-Buffer" class="headerlink" title="The Generic Ring Buffer"></a>The Generic Ring Buffer</h2><p>The ring buffer can be used in either an overwrite mode or in<br>producer/consumer mode.</p>
+<p>Producer/consumer mode is where the producer were to fill up the<br>buffer before the consumer could free up anything, the producer<br>will stop writing to the buffer. This will lose most recent events.</p>
+<p>Overwrite mode is where the produce were to fill up the buffer<br>before the consumer could free up anything, the producer will<br>overwrite the older data. This will lose the oldest events.</p>
+<p>No two writers can write at the same time (on the same per cpu buffer),<br>but a writer may interrupt another writer, but it must finish writing<br>before the previous writer may continue. This is very important to the<br>algorithm. The writers act like a “stack”. The way interrupts works<br>enforces this behavior.</p>
+<p>  writer1 start<br>     <preempted> writer2 start<br>         <preempted> writer3 start<br>                     writer3 finishes<br>                 writer2 finishes<br>  writer1 finishes</p>
+<p>This is very much like a writer being preempted by an interrupt and<br>the interrupt doing a write as well.</p>
+<p>Readers can happen at any time. But no two readers may run at the<br>same time, nor can a reader preempt/interrupt another reader. A reader<br>can not preempt/interrupt a writer, but it may read/consume from the<br>buffer at the same time as a writer is writing, but the reader must be<br>on another processor to do so. A reader may read on its own processor<br>and can be preempted by a writer.</p>
+<p>A writer can preempt a reader, but a reader can not preempt a writer.<br>But a reader can read the buffer at the same time (on another processor)<br>as a writer.</p>
+<p>The ring buffer is made up of a list of pages held together by a link list.</p>
+<p>At initialization a reader page is allocated for the reader that is not<br>part of the ring buffer.</p>
+<p>The head_page, tail_page and commit_page are all initialized to point<br>to the same page.</p>
+<p>The reader page is initialized to have its next pointer pointing to<br>the head page, and its previous pointer pointing to a page before<br>the head page.</p>
+<p>The reader has its own page to use. At start up time, this page is<br>allocated but is not attached to the list. When the reader wants<br>to read from the buffer, if its page is empty (like it is on start up)<br>it will swap its page with the head_page. The old reader page will<br>become part of the ring buffer and the head_page will be removed.<br>The page after the inserted page (old reader_page) will become the<br>new head page.</p>
+<p>Once the new page is given to the reader, the reader could do what<br>it wants with it, as long as a writer has left that page.</p>
+<p>A sample of how the reader page is swapped: Note this does not<br>show the head page in the buffer, it is for demonstrating a swap<br>only.</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |<br>  +——+<br>                  +—+   +—+   +—+<br>                  |   |–&gt;|   |–&gt;|   |<br>                  |   |&lt;–|   |&lt;–|   |<br>                  +—+   +—+   +—+<br>                   ^ |             ^ |<br>                   | +————-+ |<br>                   +—————–+</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |——————-+<br>  +——+                   v<br>    |             +—+   +—+   +—+<br>    |             |   |–&gt;|   |–&gt;|   |<br>    |             |   |&lt;–|   |&lt;–|   |&lt;-+<br>    |             +—+   +—+   +—+  |<br>    |              ^ |             ^ |   |<br>    |              | +————-+ |   |<br>    |              +—————–+   |<br>    +————————————+</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |——————-+<br>  +——+ &lt;—————+ v<br>    |  ^          +—+   +—+   +—+<br>    |  |          |   |–&gt;|   |–&gt;|   |<br>    |  |          |   |   |   |&lt;–|   |&lt;-+<br>    |  |          +—+   +—+   +—+  |<br>    |  |             |             ^ |   |<br>    |  |             +————-+ |   |<br>    |  +—————————–+   |<br>    +————————————+</p>
+<p>  +——+<br>  |buffer|          RING BUFFER<br>  |page  |——————-+<br>  +——+ &lt;—————+ v<br>    |  ^          +—+   +—+   +—+<br>    |  |          |   |   |   |–&gt;|   |<br>    |  |  New     |   |   |   |&lt;–|   |&lt;-+<br>    |  | Reader   +—+   +—+   +—+  |<br>    |  |  page —-^                 |   |<br>    |  |                             |   |<br>    |  +—————————–+   |<br>    +————————————+</p>
+<p>It is possible that the page swapped is the commit page and the tail page,<br>if what is in the ring buffer is less than what is held in a buffer page.</p>
+<pre><code>      reader page    commit page   tail page
+          |              |             |
+          v              |             |
+         +---+           |             |
+         |   |&lt;----------+             |
+         |   |&lt;------------------------+
+         |   |------+
+         +---+      |
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>This case is still valid for this algorithm.<br>When the writer leaves the page, it simply goes into the ring buffer<br>since the reader page still points to the next location in the ring<br>buffer.</p>
+<p>The main pointers:</p>
+<p>  reader page - The page used solely by the reader and is not part<br>                of the ring buffer (may be swapped in)</p>
+<p>  head page - the next page in the ring buffer that will be swapped<br>              with the reader page.</p>
+<p>  tail page - the page where the next write will take place.</p>
+<p>  commit page - the page that last finished a write.</p>
+<p>The commit page only is updated by the outer most writer in the<br>writer stack. A writer that preempts another writer will not move the<br>commit page.</p>
+<p>When data is written into the ring buffer, a position is reserved<br>in the ring buffer and passed back to the writer. When the writer<br>is finished writing data into that position, it commits the write.</p>
+<p>Another write (or a read) may take place at anytime during this<br>transaction. If another write happens it must finish before continuing<br>with the previous write.</p>
+<p>   Write reserve:</p>
+<pre><code>   Buffer page
+  +---------+
+  |written  |
+  +---------+  &lt;--- given back to writer (current commit)
+  |reserved |
+  +---------+ &lt;--- tail pointer
+  | empty   |
+  +---------+
+</code></pre>
+<p>   Write commit:</p>
+<pre><code>   Buffer page
+  +---------+
+  |written  |
+  +---------+
+  |written  |
+  +---------+  &lt;--- next positon for write (current commit)
+  | empty   |
+  +---------+
+</code></pre>
+<p> If a write happens after the first reserve:</p>
+<pre><code>   Buffer page
+  +---------+
+  |written  |
+  +---------+  &lt;-- current commit
+  |reserved |
+  +---------+  &lt;--- given back to second writer
+  |reserved |
+  +---------+ &lt;--- tail pointer
+</code></pre>
+<p>  After second writer commits:</p>
+<pre><code>   Buffer page
+  +---------+
+  |written  |
+  +---------+  &lt;--(last full commit)
+  |reserved |
+  +---------+
+  |pending  |
+  |commit   |
+  +---------+ &lt;--- tail pointer
+</code></pre>
+<p>  When the first writer commits:</p>
+<pre><code>   Buffer page
+  +---------+
+  |written  |
+  +---------+
+  |written  |
+  +---------+
+  |written  |
+  +---------+  &lt;--(last full commit and tail pointer)
+</code></pre>
+<p>The commit pointer points to the last write location that was<br>committed without preempting another write. When a write that<br>preempted another write is committed, it only becomes a pending commit<br>and will not be a full commit till all writes have been committed.</p>
+<p>The commit page points to the page that has the last full commit.<br>The tail page points to the page with the last write (before<br>committing).</p>
+<p>The tail page is always equal to or after the commit page. It may<br>be several pages ahead. If the tail page catches up to the commit<br>page then no more writes may take place (regardless of the mode<br>of the ring buffer: overwrite and produce/consumer).</p>
+<p>The order of pages are:</p>
+<p> head page<br> commit page<br> tail page</p>
+<p>Possible scenario:<br>                             tail page<br>  head page         commit page  |<br>      |                 |        |<br>      v                 v        v<br>    +—+    +—+    +—+    +—+<br>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>There is a special case that the head page is after either the commit page<br>and possibly the tail page. That is when the commit (and tail) page has been<br>swapped with the reader page. This is because the head page is always<br>part of the ring buffer, but the reader page is not. When ever there<br>has been less than a full page that has been committed inside the ring buffer,<br>and a reader swaps out a page, it will be swapping out the commit page.</p>
+<pre><code>      reader page    commit page   tail page
+          |              |             |
+          v              |             |
+         +---+           |             |
+         |   |&lt;----------+             |
+         |   |&lt;------------------------+
+         |   |------+
+         +---+      |
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+<br>                        ^<br>                        |<br>                    head page</p>
+<p>In this case, the head page will not move when the tail and commit<br>move back into the ring buffer.</p>
+<p>The reader can not swap a page into the ring buffer if the commit page<br>is still on that page. If the read meets the last commit (real commit<br>not pending or reserved), then there is nothing more to read.<br>The buffer is considered empty until another full commit finishes.</p>
+<p>When the tail meets the head page, if the buffer is in overwrite mode,<br>the head page will be pushed ahead one. If the buffer is in producer/consumer<br>mode, the write will fail.</p>
+<p>Overwrite mode:</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+<br>                        ^<br>                        |<br>                    head page</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+<br>                                 ^<br>                                 |<br>                             head page</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+<br>                                 ^<br>                                 |<br>                             head page</p>
+<p>Note, the reader page will still point to the previous head page.<br>But when a swap takes place, it will use the most recent head page.</p>
+<h2 id="Making-the-Ring-Buffer-Lockless"><a href="#Making-the-Ring-Buffer-Lockless" class="headerlink" title="Making the Ring Buffer Lockless:"></a>Making the Ring Buffer Lockless:</h2><p>The main idea behind the lockless algorithm is to combine the moving<br>of the head_page pointer with the swapping of pages with the reader.<br>State flags are placed inside the pointer to the page. To do this,<br>each page must be aligned in memory by 4 bytes. This will allow the 2<br>least significant bits of the address to be used as flags. Since<br>they will always be zero for the address. To get the address,<br>simply mask out the flags.</p>
+<p>  MASK = ~3</p>
+<p>  address &amp; MASK</p>
+<p>Two flags will be kept by these two bits:</p>
+<p>   HEADER - the page being pointed to is a head page</p>
+<p>   UPDATE - the page being pointed to is being updated by a writer<br>          and was or is about to be a head page.</p>
+<pre><code>      reader page
+          |
+          v
+         +---+
+         |   |------+
+         +---+      |
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-H-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The above pointer “-H-&gt;” would have the HEADER flag set. That is<br>the next page is the next page to be swapped out by the reader.<br>This pointer means the next page is the head page.</p>
+<p>When the tail page meets the head pointer, it will use cmpxchg to<br>change the pointer to the UPDATE state:</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-H-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>“-U-&gt;” represents a pointer in the UPDATE state.</p>
+<p>Any access to the reader will need to take some sort of lock to serialize<br>the readers. But the writers will never take a lock to write to the<br>ring buffer. This means we only need to worry about a single reader,<br>and writes only preempt in “stack” formation.</p>
+<p>When the reader tries to swap the page with the ring buffer, it<br>will also use cmpxchg. If the flag bit in the pointer to the<br>head page does not have the HEADER flag set, the compare will fail<br>and the reader will need to look for the new head page and try again.<br>Note, the flag UPDATE and HEADER are never set at the same time.</p>
+<p>The reader swaps the reader page as follows:</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |<br>  +——+<br>                  +—+    +—+    +—+<br>                  |   |—&gt;|   |—&gt;|   |<br>                  |   |&lt;—|   |&lt;—|   |<br>                  +—+    +—+    +—+<br>                   ^ |               ^ |<br>                   | +—————+ |<br>                   +—–H————-+</p>
+<p>The reader sets the reader page next pointer as HEADER to the page after<br>the head page.</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |——-H———–+<br>  +——+                   v<br>    |             +—+    +—+    +—+<br>    |             |   |—&gt;|   |—&gt;|   |<br>    |             |   |&lt;—|   |&lt;—|   |&lt;-+<br>    |             +—+    +—+    +—+  |<br>    |              ^ |               ^ |   |<br>    |              | +—————+ |   |<br>    |              +—–H————-+   |<br>    +————————————–+</p>
+<p>It does a cmpxchg with the pointer to the previous head page to make it<br>point to the reader page. Note that the new pointer does not have the HEADER<br>flag set.  This action atomically moves the head page forward.</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |——-H———–+<br>  +——+                   v<br>    |  ^          +—+   +—+   +—+<br>    |  |          |   |–&gt;|   |–&gt;|   |<br>    |  |          |   |&lt;–|   |&lt;–|   |&lt;-+<br>    |  |          +—+   +—+   +—+  |<br>    |  |             |             ^ |   |<br>    |  |             +————-+ |   |<br>    |  +—————————–+   |<br>    +————————————+</p>
+<p>After the new head page is set, the previous pointer of the head page is<br>updated to the reader page.</p>
+<p>  +——+<br>  |reader|          RING BUFFER<br>  |page  |——-H———–+<br>  +——+ &lt;—————+ v<br>    |  ^          +—+   +—+   +—+<br>    |  |          |   |–&gt;|   |–&gt;|   |<br>    |  |          |   |   |   |&lt;–|   |&lt;-+<br>    |  |          +—+   +—+   +—+  |<br>    |  |             |             ^ |   |<br>    |  |             +————-+ |   |<br>    |  +—————————–+   |<br>    +————————————+</p>
+<p>  +——+<br>  |buffer|          RING BUFFER<br>  |page  |——-H———–+  &lt;— New head page<br>  +——+ &lt;—————+ v<br>    |  ^          +—+   +—+   +—+<br>    |  |          |   |   |   |–&gt;|   |<br>    |  |  New     |   |   |   |&lt;–|   |&lt;-+<br>    |  | Reader   +—+   +—+   +—+  |<br>    |  |  page —-^                 |   |<br>    |  |                             |   |<br>    |  +—————————–+   |<br>    +————————————+</p>
+<p>Another important point. The page that the reader page points back to<br>by its previous pointer (the one that now points to the new head page)<br>never points back to the reader page. That is because the reader page is<br>not part of the ring buffer. Traversing the ring buffer via the next pointers<br>will always stay in the ring buffer. Traversing the ring buffer via the<br>prev pointers may not.</p>
+<p>Note, the way to determine a reader page is simply by examining the previous<br>pointer of the page. If the next pointer of the previous page does not<br>point back to the original page, then the original page is a reader page:</p>
+<pre><code>         +--------+
+         | reader |  next   +----+
+         |  page  |--------&gt;|    |&lt;====== (buffer page)
+         +--------+         +----+
+             |                | ^
+             |                v | next
+        prev |              +----+
+             +-------------&gt;|    |
+                            +----+
+</code></pre>
+<p>The way the head page moves forward:</p>
+<p>When the tail page meets the head page and the buffer is in overwrite mode<br>and more writes take place, the head page must be moved forward before the<br>writer may move the tail page. The way this is done is that the writer<br>performs a cmpxchg to convert the pointer to the head page from the HEADER<br>flag to have the UPDATE flag set. Once this is done, the reader will<br>not be able to swap the head page from the buffer, nor will it be able to<br>move the head page, until the writer is finished with the move.</p>
+<p>This eliminates any races that the reader can have on the writer. The reader<br>must spin, and this is why the reader can not preempt the writer.</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-H-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The following page will be made into the new head page.</p>
+<pre><code>       tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>After the new head page has been set, we can set the old head page<br>pointer back to NORMAL.</p>
+<pre><code>       tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>After the head page has been moved, the tail page may now move forward.</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The above are the trivial updates. Now for the more complex scenarios.</p>
+<p>As stated before, if enough writes preempt the first write, the<br>tail page may make it all the way around the buffer and meet the commit<br>page. At this time, we must start dropping writes (usually with some kind<br>of warning to the user). But what happens if the commit was still on the<br>reader page? The commit page is not part of the ring buffer. The tail page<br>must account for this.</p>
+<pre><code>      reader page    commit page
+          |              |
+          v              |
+         +---+           |
+         |   |&lt;----------+
+         |   |
+         |   |------+
+         +---+      |
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-H-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+<br>               ^<br>               |<br>           tail page</p>
+<p>If the tail page were to simply push the head page forward, the commit when<br>leaving the reader page would not be pointing to the correct page.</p>
+<p>The solution to this is to test if the commit page is on the reader page<br>before pushing the head page. If it is, then it can be assumed that the<br>tail page wrapped the buffer, and we must drop new writes.</p>
+<p>This is not a race condition, because the commit page can only be moved<br>by the outter most writer (the writer that was preempted).<br>This means that the commit will not move while a writer is moving the<br>tail page. The reader can not swap the reader page if it is also being<br>used as the commit page. The reader can simply check that the commit<br>is off the reader page. Once the commit page leaves the reader page<br>it will never go back on it unless a reader does another swap with the<br>buffer page that is also the commit page.</p>
+<h2 id="Nested-writes"><a href="#Nested-writes" class="headerlink" title="Nested writes"></a>Nested writes</h2><p>In the pushing forward of the tail page we must first push forward<br>the head page if the head page is the next page. If the head page<br>is not the next page, the tail page is simply updated with a cmpxchg.</p>
+<p>Only writers move the tail page. This must be done atomically to protect<br>against nested writers.</p>
+<p>  temp_page = tail_page<br>  next_page = temp_page-&gt;next<br>  cmpxchg(tail_page, temp_page, next_page)</p>
+<p>The above will update the tail page if it is still pointing to the expected<br>page. If this fails, a nested write pushed it forward, the the current write<br>does not need to push it.</p>
+<pre><code>       temp page
+           |
+           v
+        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>Nested write comes in and moves the tail page forward:</p>
+<pre><code>                tail page (moved by nested writer)
+        temp page   |
+           |        |
+           v        v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The above would fail the cmpxchg, but since the tail page has already<br>been moved forward, the writer will just try again to reserve storage<br>on the new tail page.</p>
+<p>But the moving of the head page is a bit more complex.</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-H-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The write converts the head page pointer to UPDATE.</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>But if a nested writer preempts here. It will see that the next<br>page is a head page, but it is also nested. It will detect that<br>it is nested and will save that information. The detection is the<br>fact that it sees the UPDATE flag instead of a HEADER or NORMAL<br>pointer.</p>
+<p>The nested writer will set the new head page pointer.</p>
+<pre><code>       tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>But it will not reset the update back to normal. Only the writer<br>that converted a pointer from HEAD to UPDATE will convert it back<br>to NORMAL.</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>After the nested writer finishes, the outer most writer will convert<br>the UPDATE pointer to NORMAL.</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>It can be even more complex if several nested writes came in and moved<br>the tail page ahead several pages:</p>
+<p>(first writer)</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-H-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The write converts the head page pointer to UPDATE.</p>
+<pre><code>        tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>Next writer comes in, and sees the update and sets up the new<br>head page.</p>
+<p>(second writer)</p>
+<pre><code>       tail page
+           |
+           v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The nested writer moves the tail page forward. But does not set the old<br>update page to NORMAL because it is not the outer most writer.</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>Another writer preempts and sees the page after the tail page is a head page.<br>It changes it from HEAD to UPDATE.</p>
+<p>(third writer)</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-U-&gt;|   |—&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The writer will move the head page forward:</p>
+<p>(third writer)</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-U-&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>But now that the third writer did change the HEAD flag to UPDATE it<br>will convert it to normal:</p>
+<p>(third writer)</p>
+<pre><code>                tail page
+                    |
+                    v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>Then it will move the tail page, and return back to the second writer.</p>
+<p>(second writer)</p>
+<pre><code>                         tail page
+                             |
+                             v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The second writer will fail to move the tail page because it was already<br>moved, so it will try again and add its data to the new tail page.<br>It will return to the first writer.</p>
+<p>(first writer)</p>
+<pre><code>                         tail page
+                             |
+                             v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>The first writer can not know atomically test if the tail page moved<br>while it updates the HEAD page. It will then update the head page to<br>what it thinks is the new head page.</p>
+<p>(first writer)</p>
+<pre><code>                         tail page
+                             |
+                             v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>Since the cmpxchg returns the old value of the pointer the first writer<br>will see it succeeded in updating the pointer from NORMAL to HEAD.<br>But as we can see, this is not good enough. It must also check to see<br>if the tail page is either where it use to be or on the next page:</p>
+<p>(first writer)</p>
+<pre><code>           A        B    tail page
+           |        |        |
+           v        v        v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |-H-&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>If tail page != A and tail page does not equal B, then it must reset the<br>pointer back to NORMAL. The fact that it only needs to worry about<br>nested writers, it only needs to check this after setting the HEAD page.</p>
+<p>(first writer)</p>
+<pre><code>           A        B    tail page
+           |        |        |
+           v        v        v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |-U-&gt;|   |—&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+<p>Now the writer can update the head page. This is also why the head page must<br>remain in UPDATE and only reset by the outer most writer. This prevents<br>the reader from seeing the incorrect head page.</p>
+<p>(first writer)</p>
+<pre><code>           A        B    tail page
+           |        |        |
+           v        v        v
++---+    +---+    +---+    +---+
+</code></pre>
+<p>&lt;—|   |—&gt;|   |—&gt;|   |—&gt;|   |-H-&gt;<br>—&gt;|   |&lt;—|   |&lt;—|   |&lt;—|   |&lt;—<br>    +—+    +—+    +—+    +—+</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/" title="Kernel-2.6.32-573.12.1.el6_ring-buffer-design" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ring-buffer-design/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_rtc/" title="Kernel-2.6.32-573.12.1.el6_rtc"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_relay/" title="Kernel-2.6.32-573.12.1.el6_relay"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

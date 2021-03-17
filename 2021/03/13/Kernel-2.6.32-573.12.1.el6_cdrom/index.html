@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_cdro | oosTech.com</title>
+  <meta name="description" content="Summary of CDROM ioctl calls.     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;      Edward A. Falk &lt;efalk@google.com&gt;      November, 2004  This document attempts to describe the ioctl(2) calls supported byt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_cdro">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Summary of CDROM ioctl calls.     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;      Edward A. Falk &lt;efalk@google.com&gt;      November, 2004  This document attempts to describe the ioctl(2) calls supported byt">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_cdrom" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_cdro
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Summary of CDROM ioctl calls.
+    ============================
+
+    Edward A. Falk &lt;efalk@google.com&gt;
+
+    November, 2004
+</code></pre>
+<p>This document attempts to describe the ioctl(2) calls supported by<br>the CDROM layer.  These are by-and-large implemented (as of Linux 2.6)<br>in drivers/cdrom/cdrom.c and drivers/block/scsi_ioctl.c</p>
+<p>ioctl values are listed in &lt;linux/cdrom.h&gt;.  As of this writing, they<br>are as follows:</p>
+<pre><code>CDROMPAUSE        Pause Audio Operation
+CDROMRESUME        Resume paused Audio Operation
+CDROMPLAYMSF        Play Audio MSF (struct cdrom_msf)
+CDROMPLAYTRKIND        Play Audio Track/index (struct cdrom_ti)
+CDROMREADTOCHDR        Read TOC header (struct cdrom_tochdr)
+CDROMREADTOCENTRY    Read TOC entry (struct cdrom_tocentry)
+CDROMSTOP        Stop the cdrom drive
+CDROMSTART        Start the cdrom drive
+CDROMEJECT        Ejects the cdrom media
+CDROMVOLCTRL        Control output volume (struct cdrom_volctrl)
+CDROMSUBCHNL        Read subchannel data (struct cdrom_subchnl)
+CDROMREADMODE2        Read CDROM mode 2 data (2336 Bytes)
+                   (struct cdrom_read)
+CDROMREADMODE1        Read CDROM mode 1 data (2048 Bytes)
+                   (struct cdrom_read)
+CDROMREADAUDIO        (struct cdrom_read_audio)
+CDROMEJECT_SW        enable(1)/disable(0) auto-ejecting
+CDROMMULTISESSION    Obtain the start-of-last-session
+              address of multi session disks
+              (struct cdrom_multisession)
+CDROM_GET_MCN        Obtain the &quot;Universal Product Code&quot;
+               if available (struct cdrom_mcn)
+CDROM_GET_UPC        Deprecated, use CDROM_GET_MCN instead.
+CDROMRESET        hard-reset the drive
+CDROMVOLREAD        Get the drive&#39;s volume setting
+                  (struct cdrom_volctrl)
+CDROMREADRAW        read data in raw mode (2352 Bytes)
+                   (struct cdrom_read)
+CDROMREADCOOKED        read data in cooked mode
+CDROMSEEK        seek msf address
+CDROMPLAYBLK        scsi-cd only, (struct cdrom_blk)
+CDROMREADALL        read all 2646 bytes
+CDROMGETSPINDOWN    return 4-bit spindown value
+CDROMSETSPINDOWN    set 4-bit spindown value
+CDROMCLOSETRAY        pendant of CDROMEJECT
+CDROM_SET_OPTIONS    Set behavior options
+CDROM_CLEAR_OPTIONS    Clear behavior options
+CDROM_SELECT_SPEED    Set the CD-ROM speed
+CDROM_SELECT_DISC    Select disc (for juke-boxes)
+CDROM_MEDIA_CHANGED    Check is media changed
+CDROM_DRIVE_STATUS    Get tray position, etc.
+CDROM_DISC_STATUS    Get disc type, etc.
+CDROM_CHANGER_NSLOTS    Get number of slots
+CDROM_LOCKDOOR        lock or unlock door
+CDROM_DEBUG        Turn debug messages on/off
+CDROM_GET_CAPABILITY    get capabilities
+CDROMAUDIOBUFSIZ    set the audio buffer size
+DVD_READ_STRUCT        Read structure
+DVD_WRITE_STRUCT    Write structure
+DVD_AUTH        Authentication
+CDROM_SEND_PACKET    send a packet to the drive
+CDROM_NEXT_WRITABLE    get next writable block
+CDROM_LAST_WRITTEN    get last block written on disc
+</code></pre>
+<p>The information that follows was determined from reading kernel source<br>code.  It is likely that some corrections will be made over time.</p>
+<p>General:</p>
+<pre><code>Unless otherwise specified, all ioctl calls return 0 on success
+and -1 with errno set to an appropriate value on error.  (Some
+ioctls return non-negative data values.)
+
+Unless otherwise specified, all ioctl calls return -1 and set
+errno to EFAULT on a failed attempt to copy data to or from user
+address space.
+
+Individual drivers may return error codes not listed here.
+
+Unless otherwise specified, all data structures and constants
+are defined in &lt;linux/cdrom.h&gt;
+</code></pre>
+<p>CDROMPAUSE            Pause Audio Operation</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMPAUSE, 0);
+
+inputs:        none
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+</code></pre>
+<p>CDROMRESUME            Resume paused Audio Operation</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMRESUME, 0);
+
+inputs:        none
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+</code></pre>
+<p>CDROMPLAYMSF            Play Audio MSF (struct cdrom_msf)</p>
+<pre><code>usage:
+
+  struct cdrom_msf msf;
+  ioctl(fd, CDROMPLAYMSF, &amp;msf);
+
+inputs:
+  cdrom_msf structure, describing a segment of music to play
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+
+notes:
+  MSF stands for minutes-seconds-frames
+  LBA stands for logical block address
+
+  Segment is described as start and end times, where each time
+  is described as minutes:seconds:frames.  A frame is 1/75 of
+  a second.
+</code></pre>
+<p>CDROMPLAYTRKIND            Play Audio Track/index (struct cdrom_ti)</p>
+<pre><code>usage:
+
+  struct cdrom_ti ti;
+  ioctl(fd, CDROMPLAYTRKIND, &amp;ti);
+
+inputs:
+  cdrom_ti structure, describing a segment of music to play
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+
+notes:
+  Segment is described as start and end times, where each time
+  is described as a track and an index.
+</code></pre>
+<p>CDROMREADTOCHDR            Read TOC header (struct cdrom_tochdr)</p>
+<pre><code>usage:
+
+  cdrom_tochdr header;
+  ioctl(fd, CDROMREADTOCHDR, &amp;header);
+
+inputs:
+  cdrom_tochdr structure
+
+outputs:
+  cdrom_tochdr structure
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+</code></pre>
+<p>CDROMREADTOCENTRY        Read TOC entry (struct cdrom_tocentry)</p>
+<pre><code>usage:
+
+  struct cdrom_tocentry entry;
+  ioctl(fd, CDROMREADTOCENTRY, &amp;entry);
+
+inputs:
+  cdrom_tocentry structure
+
+outputs:
+  cdrom_tocentry structure
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+  EINVAL    entry.cdte_format not CDROM_MSF or CDROM_LBA
+  EINVAL    requested track out of bounds
+  EIO        I/O error reading TOC
+
+notes:
+  TOC stands for Table Of Contents
+  MSF stands for minutes-seconds-frames
+  LBA stands for logical block address
+</code></pre>
+<p>CDROMSTOP            Stop the cdrom drive</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMSTOP, 0);
+
+inputs:        none
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+
+notes:
+  Exact interpretation of this ioctl depends on the device,
+  but most seem to spin the drive down.
+</code></pre>
+<p>CDROMSTART            Start the cdrom drive</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMSTART, 0);
+
+inputs:        none
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+
+notes:
+  Exact interpretation of this ioctl depends on the device,
+  but most seem to spin the drive up and/or close the tray.
+  Other devices ignore the ioctl completely.
+</code></pre>
+<p>CDROMEJECT            Ejects the cdrom media</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMEJECT, 0);
+
+inputs:        none
+
+outputs:    none
+
+error returns:
+  ENOSYS    cd drive not capable of ejecting
+  EBUSY        other processes are accessing drive, or door is locked
+
+notes:
+  See CDROM_LOCKDOOR, below.
+</code></pre>
+<p>CDROMCLOSETRAY            pendant of CDROMEJECT</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMCLOSETRAY, 0);
+
+inputs:        none
+
+outputs:    none
+
+error returns:
+  ENOSYS    cd drive not capable of closing the tray
+  EBUSY        other processes are accessing drive, or door is locked
+
+notes:
+  See CDROM_LOCKDOOR, below.
+</code></pre>
+<p>CDROMVOLCTRL            Control output volume (struct cdrom_volctrl)</p>
+<pre><code>usage:
+
+  struct cdrom_volctrl volume;
+  ioctl(fd, CDROMVOLCTRL, &amp;volume);
+
+inputs:
+  cdrom_volctrl structure containing volumes for up to 4
+  channels.
+
+outputs:    none
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+</code></pre>
+<p>CDROMVOLREAD            Get the drive’s volume setting<br>                      (struct cdrom_volctrl)</p>
+<pre><code>usage:
+
+  struct cdrom_volctrl volume;
+  ioctl(fd, CDROMVOLREAD, &amp;volume);
+
+inputs:        none
+
+outputs:
+  The current volume settings.
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+</code></pre>
+<p>CDROMSUBCHNL            Read subchannel data (struct cdrom_subchnl)</p>
+<pre><code>usage:
+
+  struct cdrom_subchnl q;
+  ioctl(fd, CDROMSUBCHNL, &amp;q);
+
+inputs:
+  cdrom_subchnl structure
+
+outputs:
+  cdrom_subchnl structure
+
+error return:
+  ENOSYS    cd drive not audio-capable.
+  EINVAL    format not CDROM_MSF or CDROM_LBA
+
+notes:
+  Format is converted to CDROM_MSF on return
+</code></pre>
+<p>CDROMREADRAW            read data in raw mode (2352 Bytes)<br>                       (struct cdrom_read)</p>
+<pre><code>usage:
+
+  union &#123;
+    struct cdrom_msf msf;        /* input */
+    char buffer[CD_FRAMESIZE_RAW];    /* return */
+  &#125; arg;
+  ioctl(fd, CDROMREADRAW, &amp;arg);
+
+inputs:
+  cdrom_msf structure indicating an address to read.
+  Only the start values are significant.
+
+outputs:
+  Data written to address provided by user.
+
+error return:
+  EINVAL    address less than 0, or msf less than 0:2:0
+  ENOMEM    out of memory
+
+notes:
+  As of 2.6.8.1, comments in &lt;linux/cdrom.h&gt; indicate that this
+  ioctl accepts a cdrom_read structure, but actual source code
+  reads a cdrom_msf structure and writes a buffer of data to
+  the same address.
+
+  MSF values are converted to LBA values via this formula:
+
+    lba = (((m * CD_SECS) + s) * CD_FRAMES + f) - CD_MSF_OFFSET;
+</code></pre>
+<p>CDROMREADMODE1            Read CDROM mode 1 data (2048 Bytes)<br>                       (struct cdrom_read)</p>
+<pre><code>notes:
+  Identical to CDROMREADRAW except that block size is
+  CD_FRAMESIZE (2048) bytes
+</code></pre>
+<p>CDROMREADMODE2            Read CDROM mode 2 data (2336 Bytes)<br>                       (struct cdrom_read)</p>
+<pre><code>notes:
+  Identical to CDROMREADRAW except that block size is
+  CD_FRAMESIZE_RAW0 (2336) bytes
+</code></pre>
+<p>CDROMREADAUDIO            (struct cdrom_read_audio)</p>
+<pre><code>usage:
+
+  struct cdrom_read_audio ra;
+  ioctl(fd, CDROMREADAUDIO, &amp;ra);
+
+inputs:
+  cdrom_read_audio structure containing read start
+  point and length
+
+outputs:
+  audio data, returned to buffer indicated by ra
+
+error return:
+  EINVAL    format not CDROM_MSF or CDROM_LBA
+  EINVAL    nframes not in range [1 75]
+  ENXIO        drive has no queue (probably means invalid fd)
+  ENOMEM    out of memory
+</code></pre>
+<p>CDROMEJECT_SW            enable(1)/disable(0) auto-ejecting</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, CDROMEJECT_SW, val);
+
+inputs:
+  Flag specifying auto-eject flag.
+
+outputs:    none
+
+error return:
+  ENOSYS    Drive is not capable of ejecting.
+  EBUSY        Door is locked
+</code></pre>
+<p>CDROMMULTISESSION        Obtain the start-of-last-session<br>                  address of multi session disks<br>                  (struct cdrom_multisession)<br>    usage:</p>
+<pre><code>  struct cdrom_multisession ms_info;
+  ioctl(fd, CDROMMULTISESSION, &amp;ms_info);
+
+inputs:
+  cdrom_multisession structure containing desired
+  format.
+
+outputs:
+  cdrom_multisession structure is filled with last_session
+  information.
+
+error return:
+  EINVAL    format not CDROM_MSF or CDROM_LBA
+</code></pre>
+<p>CDROM_GET_MCN            Obtain the “Universal Product Code”<br>                   if available (struct cdrom_mcn)</p>
+<pre><code>usage:
+
+  struct cdrom_mcn mcn;
+  ioctl(fd, CDROM_GET_MCN, &amp;mcn);
+
+inputs:        none
+
+outputs:
+  Universal Product Code
+
+error return:
+  ENOSYS    Drive is not capable of reading MCN data.
+
+notes:
+  Source code comments state:
+
+    The following function is implemented, although very few
+    audio discs give Universal Product Code information, which
+    should just be the Medium Catalog Number on the box.  Note,
+    that the way the code is written on the CD is /not/ uniform
+    across all discs!
+</code></pre>
+<p>CDROM_GET_UPC            CDROM_GET_MCN  (deprecated)</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+<p>CDROMRESET            hard-reset the drive</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROMRESET, 0);
+
+inputs:        none
+
+outputs:    none
+
+error return:
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  ENOSYS    Drive is not capable of resetting.
+</code></pre>
+<p>CDROMREADCOOKED            read data in cooked mode</p>
+<pre><code>usage:
+
+  u8 buffer[CD_FRAMESIZE]
+  ioctl(fd, CDROMREADCOOKED, buffer);
+
+inputs:        none
+
+outputs:
+  2048 bytes of data, &quot;cooked&quot; mode.
+
+notes:
+  Not implemented on all drives.
+</code></pre>
+<p>CDROMREADALL            read all 2646 bytes</p>
+<pre><code>Same as CDROMREADCOOKED, but reads 2646 bytes.
+</code></pre>
+<p>CDROMSEEK            seek msf address</p>
+<pre><code>usage:
+
+  struct cdrom_msf msf;
+  ioctl(fd, CDROMSEEK, &amp;msf);
+
+inputs:
+  MSF address to seek to.
+
+outputs:    none
+</code></pre>
+<p>CDROMPLAYBLK            scsi-cd only, (struct cdrom_blk)</p>
+<pre><code>usage:
+
+  struct cdrom_blk blk;
+  ioctl(fd, CDROMPLAYBLK, &amp;blk);
+
+inputs:
+  Region to play
+
+outputs:    none
+</code></pre>
+<p>CDROMGETSPINDOWN</p>
+<pre><code>usage:
+
+  char spindown;
+  ioctl(fd, CDROMGETSPINDOWN, &amp;spindown);
+
+inputs:        none
+
+outputs:
+  The value of the current 4-bit spindown value.
+</code></pre>
+<p>CDROMSETSPINDOWN</p>
+<pre><code>usage:
+
+  char spindown
+  ioctl(fd, CDROMSETSPINDOWN, &amp;spindown);
+
+inputs:
+  4-bit value used to control spindown (TODO: more detail here)
+
+outputs:    none
+</code></pre>
+<p>CDROM_SET_OPTIONS        Set behavior options</p>
+<pre><code>usage:
+
+  int options;
+  ioctl(fd, CDROM_SET_OPTIONS, options);
+
+inputs:
+  New values for drive options.  The logical &#39;or&#39; of:
+    CDO_AUTO_CLOSE    close tray on first open(2)
+    CDO_AUTO_EJECT    open tray on last release
+    CDO_USE_FFLAGS    use O_NONBLOCK information on open
+    CDO_LOCK        lock tray on open files
+    CDO_CHECK_TYPE    check type on open for data
+
+outputs:
+  Returns the resulting options settings in the
+  ioctl return value.  Returns -1 on error.
+
+error return:
+  ENOSYS    selected option(s) not supported by drive.
+</code></pre>
+<p>CDROM_CLEAR_OPTIONS        Clear behavior options</p>
+<pre><code>Same as CDROM_SET_OPTIONS, except that selected options are
+turned off.
+</code></pre>
+<p>CDROM_SELECT_SPEED        Set the CD-ROM speed</p>
+<pre><code>usage:
+
+  int speed;
+  ioctl(fd, CDROM_SELECT_SPEED, speed);
+
+inputs:
+  New drive speed.
+
+outputs:    none
+
+error return:
+  ENOSYS    speed selection not supported by drive.
+</code></pre>
+<p>CDROM_SELECT_DISC        Select disc (for juke-boxes)</p>
+<pre><code>usage:
+
+  int disk;
+  ioctl(fd, CDROM_SELECT_DISC, disk);
+
+inputs:
+  Disk to load into drive.
+
+outputs:    none
+
+error return:
+  EINVAL    Disk number beyond capacity of drive
+</code></pre>
+<p>CDROM_MEDIA_CHANGED        Check is media changed</p>
+<pre><code>usage:
+
+  int slot;
+  ioctl(fd, CDROM_MEDIA_CHANGED, slot);
+
+inputs:
+  Slot number to be tested, always zero except for jukeboxes.
+  May also be special values CDSL_NONE or CDSL_CURRENT
+
+outputs:
+  Ioctl return value is 0 or 1 depending on whether the media
+  has been changed, or -1 on error.
+
+error returns:
+  ENOSYS    Drive can&#39;t detect media change
+  EINVAL    Slot number beyond capacity of drive
+  ENOMEM    Out of memory
+</code></pre>
+<p>CDROM_DRIVE_STATUS        Get tray position, etc.</p>
+<pre><code>usage:
+
+  int slot;
+  ioctl(fd, CDROM_DRIVE_STATUS, slot);
+
+inputs:
+  Slot number to be tested, always zero except for jukeboxes.
+  May also be special values CDSL_NONE or CDSL_CURRENT
+
+outputs:
+  Ioctl return value will be one of the following values
+  from &lt;linux/cdrom.h&gt;:
+
+    CDS_NO_INFO        Information not available.
+    CDS_NO_DISC
+    CDS_TRAY_OPEN
+    CDS_DRIVE_NOT_READY
+    CDS_DISC_OK
+    -1            error
+
+error returns:
+  ENOSYS    Drive can&#39;t detect drive status
+  EINVAL    Slot number beyond capacity of drive
+  ENOMEM    Out of memory
+</code></pre>
+<p>CDROM_DISC_STATUS        Get disc type, etc.</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROM_DISC_STATUS, 0);
+
+inputs:        none
+
+outputs:
+  Ioctl return value will be one of the following values
+  from &lt;linux/cdrom.h&gt;:
+    CDS_NO_INFO
+    CDS_AUDIO
+    CDS_MIXED
+    CDS_XA_2_2
+    CDS_XA_2_1
+    CDS_DATA_1
+
+error returns:    none at present
+
+notes:
+  Source code comments state:
+
+    Ok, this is where problems start.  The current interface for
+    the CDROM_DISC_STATUS ioctl is flawed.  It makes the false
+    assumption that CDs are all CDS_DATA_1 or all CDS_AUDIO, etc.
+    Unfortunately, while this is often the case, it is also
+    very common for CDs to have some tracks with data, and some
+    tracks with audio.    Just because I feel like it, I declare
+    the following to be the best way to cope.  If the CD has
+    ANY data tracks on it, it will be returned as a data CD.
+    If it has any XA tracks, I will return it as that.    Now I
+    could simplify this interface by combining these returns with
+    the above, but this more clearly demonstrates the problem
+    with the current interface.  Too bad this wasn&#39;t designed
+    to use bitmasks...           -Erik
+
+    Well, now we have the option CDS_MIXED: a mixed-type CD.
+    User level programmers might feel the ioctl is not very
+    useful.
+        ---david
+</code></pre>
+<p>CDROM_CHANGER_NSLOTS        Get number of slots</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROM_CHANGER_NSLOTS, 0);
+
+inputs:        none
+
+outputs:
+  The ioctl return value will be the number of slots in a
+  CD changer.  Typically 1 for non-multi-disk devices.
+
+error returns:    none
+</code></pre>
+<p>CDROM_LOCKDOOR            lock or unlock door</p>
+<pre><code>usage:
+
+  int lock;
+  ioctl(fd, CDROM_LOCKDOOR, lock);
+
+inputs:
+  Door lock flag, 1=lock, 0=unlock
+
+outputs:    none
+
+error returns:
+  EDRIVE_CANT_DO_THIS    Door lock function not supported.
+  EBUSY            Attempt to unlock when multiple users
+              have the drive open and not CAP_SYS_ADMIN
+
+notes:
+  As of 2.6.8.1, the lock flag is a global lock, meaning that
+  all CD drives will be locked or unlocked together.  This is
+  probably a bug.
+
+  The EDRIVE_CANT_DO_THIS value is defined in &lt;linux/cdrom.h&gt;
+  and is currently (2.6.8.1) the same as EOPNOTSUPP
+</code></pre>
+<p>CDROM_DEBUG            Turn debug messages on/off</p>
+<pre><code>usage:
+
+  int debug;
+  ioctl(fd, CDROM_DEBUG, debug);
+
+inputs:
+  Cdrom debug flag, 0=disable, 1=enable
+
+outputs:
+  The ioctl return value will be the new debug flag.
+
+error return:
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+</code></pre>
+<p>CDROM_GET_CAPABILITY        get capabilities</p>
+<pre><code>usage:
+
+  ioctl(fd, CDROM_GET_CAPABILITY, 0);
+
+inputs:        none
+
+outputs:
+  The ioctl return value is the current device capability
+  flags.  See CDC_CLOSE_TRAY, CDC_OPEN_TRAY, etc.
+</code></pre>
+<p>CDROMAUDIOBUFSIZ        set the audio buffer size</p>
+<pre><code>usage:
+
+  int arg;
+  ioctl(fd, CDROMAUDIOBUFSIZ, val);
+
+inputs:
+  New audio buffer size
+
+outputs:
+  The ioctl return value is the new audio buffer size, or -1
+  on error.
+
+error return:
+  ENOSYS    Not supported by this driver.
+
+notes:
+  Not supported by all drivers.
+</code></pre>
+<p>DVD_READ_STRUCT            Read structure</p>
+<pre><code>usage:
+
+  dvd_struct s;
+  ioctl(fd, DVD_READ_STRUCT, &amp;s);
+
+inputs:
+  dvd_struct structure, containing:
+    type        specifies the information desired, one of
+                DVD_STRUCT_PHYSICAL, DVD_STRUCT_COPYRIGHT,
+            DVD_STRUCT_DISCKEY, DVD_STRUCT_BCA,
+            DVD_STRUCT_MANUFACT
+    physical.layer_num    desired layer, indexed from 0
+    copyright.layer_num    desired layer, indexed from 0
+    disckey.agid
+
+outputs:
+  dvd_struct structure, containing:
+    physical        for type == DVD_STRUCT_PHYSICAL
+    copyright        for type == DVD_STRUCT_COPYRIGHT
+    disckey.value    for type == DVD_STRUCT_DISCKEY
+    bca.&#123;len,value&#125;    for type == DVD_STRUCT_BCA
+    manufact.&#123;len,valu&#125;    for type == DVD_STRUCT_MANUFACT
+
+error returns:
+  EINVAL    physical.layer_num exceeds number of layers
+  EIO        Received invalid response from drive
+</code></pre>
+<p>DVD_WRITE_STRUCT        Write structure</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+<p>DVD_AUTH            Authentication</p>
+<pre><code>usage:
+
+  dvd_authinfo ai;
+  ioctl(fd, DVD_AUTH, &amp;ai);
+
+inputs:
+  dvd_authinfo structure.  See &lt;linux/cdrom.h&gt;
+
+outputs:
+  dvd_authinfo structure.
+
+error return:
+  ENOTTY    ai.type not recognized.
+</code></pre>
+<p>CDROM_SEND_PACKET        send a packet to the drive</p>
+<pre><code>usage:
+
+  struct cdrom_generic_command cgc;
+  ioctl(fd, CDROM_SEND_PACKET, &amp;cgc);
+
+inputs:
+  cdrom_generic_command structure containing the packet to send.
+
+outputs:    none
+  cdrom_generic_command structure containing results.
+
+error return:
+  EIO        command failed.
+  EPERM        Operation not permitted, either because a
+        write command was attempted on a drive which
+        is opened read-only, or because the command
+        requires CAP_SYS_RAWIO
+  EINVAL    cgc.data_direction not set
+</code></pre>
+<p>CDROM_NEXT_WRITABLE        get next writable block</p>
+<pre><code>usage:
+
+  long next;
+  ioctl(fd, CDROM_NEXT_WRITABLE, &amp;next);
+
+inputs:        none
+
+outputs:
+  The next writable block.
+
+notes:
+  If the device does not support this ioctl directly, the
+  ioctl will return CDROM_LAST_WRITTEN + 7.
+</code></pre>
+<p>CDROM_LAST_WRITTEN        get last block written on disc</p>
+<pre><code>usage:
+
+  long last;
+  ioctl(fd, CDROM_LAST_WRITTEN, &amp;last);
+
+inputs:        none
+
+outputs:
+  The last block written on disc
+
+notes:
+  If the device does not support this ioctl directly, the
+  result is derived from the disc&#39;s table of contents.  If the
+  table of contents can&#39;t be read, this ioctl returns an
+  error.
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/" title="Kernel-2.6.32-573.12.1.el6_cdro" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cds/" title="Kernel-2.6.32-573.12.1.el6_cds"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/" title="Kernel-2.6.32-573.12.1.el6_cachetlb"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

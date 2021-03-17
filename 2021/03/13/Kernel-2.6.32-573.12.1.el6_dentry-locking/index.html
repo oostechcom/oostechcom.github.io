@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_dentry-locking | oosTech.com</title>
+  <meta name="description" content="RCU-based dcache locking modelOn many workloads, the most common operation on dcache is to look up adentry, given a parent dentry and the name of the child. Typically,for every open(), stat() etc., th">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_dentry-locking">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="RCU-based dcache locking modelOn many workloads, the most common operation on dcache is to look up adentry, given a parent dentry and the name of the child. Typically,for every open(), stat() etc., th">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#RCU-based-dcache-locking-model"><span class="toc-number">1.</span> <span class="toc-text">RCU-based dcache locking model</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Dcache-locking-details"><span class="toc-number">2.</span> <span class="toc-text">Dcache locking details</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Safe-lock-free-look-up-of-dcache-hash-table"><span class="toc-number">3.</span> <span class="toc-text">Safe lock-free look-up of dcache hash table</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Maintaining-POSIX-rename-semantics"><span class="toc-number">4.</span> <span class="toc-text">Maintaining POSIX rename semantics</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Important-guidelines-for-filesystem-developers-related-to-dcache-rcu"><span class="toc-number">5.</span> <span class="toc-text">Important guidelines for filesystem developers related to dcache_rcu</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Papers-and-other-documentation-on-dcache-locking"><span class="toc-number">6.</span> <span class="toc-text">Papers and other documentation on dcache locking</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_dentry-locking" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_dentry-locking
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="RCU-based-dcache-locking-model"><a href="#RCU-based-dcache-locking-model" class="headerlink" title="RCU-based dcache locking model"></a>RCU-based dcache locking model</h1><p>On many workloads, the most common operation on dcache is to look up a<br>dentry, given a parent dentry and the name of the child. Typically,<br>for every open(), stat() etc., the dentry corresponding to the<br>pathname will be looked up by walking the tree starting with the first<br>component of the pathname and using that dentry along with the next<br>component to look up the next level and so on. Since it is a frequent<br>operation for workloads like multiuser environments and web servers,<br>it is important to optimize this path.</p>
+<p>Prior to 2.5.10, dcache_lock was acquired in d_lookup and thus in<br>every component during path look-up. Since 2.5.10 onwards, fast-walk<br>algorithm changed this by holding the dcache_lock at the beginning and<br>walking as many cached path component dentries as possible. This<br>significantly decreases the number of acquisition of<br>dcache_lock. However it also increases the lock hold time<br>significantly and affects performance in large SMP machines. Since<br>2.5.62 kernel, dcache has been using a new locking model that uses RCU<br>to make dcache look-up lock-free.</p>
+<p>The current dcache locking model is not very different from the<br>existing dcache locking model. Prior to 2.5.62 kernel, dcache_lock<br>protected the hash chain, d_child, d_alias, d_lru lists as well as<br>d_inode and several other things like mount look-up. RCU-based changes<br>affect only the way the hash chain is protected. For everything else<br>the dcache_lock must be taken for both traversing as well as<br>updating. The hash chain updates too take the dcache_lock.  The<br>significant change is the way d_lookup traverses the hash chain, it<br>doesn’t acquire the dcache_lock for this and rely on RCU to ensure<br>that the dentry has not been <em>freed</em>.</p>
+<h1 id="Dcache-locking-details"><a href="#Dcache-locking-details" class="headerlink" title="Dcache locking details"></a>Dcache locking details</h1><p>For many multi-user workloads, open() and stat() on files are very<br>frequently occurring operations. Both involve walking of path names to<br>find the dentry corresponding to the concerned file. In 2.4 kernel,<br>dcache_lock was held during look-up of each path component. Contention<br>and cache-line bouncing of this global lock caused significant<br>scalability problems. With the introduction of RCU in Linux kernel,<br>this was worked around by making the look-up of path components during<br>path walking lock-free.</p>
+<h1 id="Safe-lock-free-look-up-of-dcache-hash-table"><a href="#Safe-lock-free-look-up-of-dcache-hash-table" class="headerlink" title="Safe lock-free look-up of dcache hash table"></a>Safe lock-free look-up of dcache hash table</h1><p>Dcache is a complex data structure with the hash table entries also<br>linked together in other lists. In 2.4 kernel, dcache_lock protected<br>all the lists. We applied RCU only on hash chain walking. The rest of<br>the lists are still protected by dcache_lock.  Some of the important<br>changes are :</p>
+<ol>
+<li><p>The deletion from hash chain is done using hlist_del_rcu() macro<br>which doesn’t initialize next pointer of the deleted dentry and<br>this allows us to walk safely lock-free while a deletion is<br>happening.</p>
+</li>
+<li><p>Insertion of a dentry into the hash table is done using<br>hlist_add_head_rcu() which take care of ordering the writes - the<br>writes to the dentry must be visible before the dentry is<br>inserted. This works in conjunction with hlist_for_each_rcu() while<br>walking the hash chain. The only requirement is that all<br>initialization to the dentry must be done before<br>hlist_add_head_rcu() since we don’t have dcache_lock protection<br>while traversing the hash chain. This isn’t different from the<br>existing code.</p>
+</li>
+<li><p>The dentry looked up without holding dcache_lock by cannot be<br>returned for walking if it is unhashed. It then may have a NULL<br>d_inode or other bogosity since RCU doesn’t protect the other<br>fields in the dentry. We therefore use a flag DCACHE_UNHASHED to<br>indicate unhashed dentries and use this in conjunction with a<br>per-dentry lock (d_lock). Once looked up without the dcache_lock,<br>we acquire the per-dentry lock (d_lock) and check if the dentry is<br>unhashed. If so, the look-up is failed. If not, the reference count<br>of the dentry is increased and the dentry is returned.</p>
+</li>
+<li><p>Once a dentry is looked up, it must be ensured during the path walk<br>for that component it doesn’t go away. In pre-2.5.10 code, this was<br>done holding a reference to the dentry. dcache_rcu does the same.<br>In some sense, dcache_rcu path walking looks like the pre-2.5.10<br>version.</p>
+</li>
+<li><p>All dentry hash chain updates must take the dcache_lock as well as<br>the per-dentry lock in that order. dput() does this to ensure that<br>a dentry that has just been looked up in another CPU doesn’t get<br>deleted before dget() can be done on it.</p>
+</li>
+<li><p>There are several ways to do reference counting of RCU protected<br>objects. One such example is in ipv4 route cache where deferred<br>freeing (using call_rcu()) is done as soon as the reference count<br>goes to zero. This cannot be done in the case of dentries because<br>tearing down of dentries require blocking (dentry_iput()) which<br>isn’t supported from RCU callbacks. Instead, tearing down of<br>dentries happen synchronously in dput(), but actual freeing happens<br>later when RCU grace period is over. This allows safe lock-free<br>walking of the hash chains, but a matched dentry may have been<br>partially torn down. The checking of DCACHE_UNHASHED flag with<br>d_lock held detects such dentries and prevents them from being<br>returned from look-up.</p>
+</li>
+</ol>
+<h1 id="Maintaining-POSIX-rename-semantics"><a href="#Maintaining-POSIX-rename-semantics" class="headerlink" title="Maintaining POSIX rename semantics"></a>Maintaining POSIX rename semantics</h1><p>Since look-up of dentries is lock-free, it can race against a<br>concurrent rename operation. For example, during rename of file A to<br>B, look-up of either A or B must succeed.  So, if look-up of B happens<br>after A has been removed from the hash chain but not added to the new<br>hash chain, it may fail.  Also, a comparison while the name is being<br>written concurrently by a rename may result in false positive matches<br>violating rename semantics.  Issues related to race with rename are<br>handled as described below :</p>
+<ol>
+<li><p>Look-up can be done in two ways - d_lookup() which is safe from<br>simultaneous renames and __d_lookup() which is not.  If<br>__d_lookup() fails, it must be followed up by a d_lookup() to<br>correctly determine whether a dentry is in the hash table or<br>not. d_lookup() protects look-ups using a sequence lock<br>(rename_lock).</p>
+</li>
+<li><p>The name associated with a dentry (d_name) may be changed if a<br>rename is allowed to happen simultaneously. To avoid memcmp() in<br>__d_lookup() go out of bounds due to a rename and false positive<br>comparison, the name comparison is done while holding the<br>per-dentry lock. This prevents concurrent renames during this<br>operation.</p>
+</li>
+<li><p>Hash table walking during look-up may move to a different bucket as<br>the current dentry is moved to a different bucket due to rename.<br>But we use hlists in dcache hash table and they are<br>null-terminated.  So, even if a dentry moves to a different bucket,<br>hash chain walk will terminate. [with a list_head list, it may not<br>since termination is when the list_head in the original bucket is<br>reached].  Since we redo the d_parent check and compare name while<br>holding d_lock, lock-free look-up will not race against d_move().</p>
+</li>
+<li><p>There can be a theoretical race when a dentry keeps coming back to<br>original bucket due to double moves. Due to this look-up may<br>consider that it has never moved and can end up in a infinite loop.<br>But this is not any worse that theoretical livelocks we already<br>have in the kernel.</p>
+</li>
+</ol>
+<h1 id="Important-guidelines-for-filesystem-developers-related-to-dcache-rcu"><a href="#Important-guidelines-for-filesystem-developers-related-to-dcache-rcu" class="headerlink" title="Important guidelines for filesystem developers related to dcache_rcu"></a>Important guidelines for filesystem developers related to dcache_rcu</h1><ol>
+<li><p>Existing dcache interfaces (pre-2.5.62) exported to filesystem<br>don’t change. Only dcache internal implementation changes. However<br>filesystems <em>must not</em> delete from the dentry hash chains directly<br>using the list macros like allowed earlier. They must use dcache<br>APIs like d_drop() or __d_drop() depending on the situation.</p>
+</li>
+<li><p>d_flags is now protected by a per-dentry lock (d_lock). All access<br>to d_flags must be protected by it.</p>
+</li>
+<li><p>For a hashed dentry, checking of d_count needs to be protected by<br>d_lock.</p>
+</li>
+</ol>
+<h1 id="Papers-and-other-documentation-on-dcache-locking"><a href="#Papers-and-other-documentation-on-dcache-locking" class="headerlink" title="Papers and other documentation on dcache locking"></a>Papers and other documentation on dcache locking</h1><ol>
+<li><p>Scaling dcache with RCU (<a target="_blank" rel="noopener" href="http://linuxjournal.com/article.php?sid=7124">http://linuxjournal.com/article.php?sid=7124</a>).</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://lse.sourceforge.net/locking/dcache/dcache.html">http://lse.sourceforge.net/locking/dcache/dcache.html</a></p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/" title="Kernel-2.6.32-573.12.1.el6_dentry-locking" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_dentry-locking/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_depca/" title="Kernel-2.6.32-573.12.1.el6_depca"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_dell_rbu/" title="Kernel-2.6.32-573.12.1.el6_dell_rbu"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

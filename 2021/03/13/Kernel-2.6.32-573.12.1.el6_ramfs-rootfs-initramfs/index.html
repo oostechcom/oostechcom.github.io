@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs | oosTech.com</title>
+  <meta name="description" content="ramfs, rootfs and initramfsOctober 17, 2005Rob Landley &amp;#114;&amp;#111;&amp;#98;&amp;#64;&amp;#x6c;&amp;#97;&amp;#x6e;&amp;#100;&amp;#108;&amp;#101;&amp;#121;&amp;#46;&amp;#110;&amp;#101;&amp;#x74;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; What is ramfs?Ramfs is a very">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="ramfs, rootfs and initramfsOctober 17, 2005Rob Landley &amp;#114;&amp;#111;&amp;#98;&amp;#64;&amp;#x6c;&amp;#97;&amp;#x6e;&amp;#100;&amp;#108;&amp;#101;&amp;#121;&amp;#46;&amp;#110;&amp;#101;&amp;#x74;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; What is ramfs?Ramfs is a very">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-ramfs"><span class="toc-number">1.</span> <span class="toc-text">What is ramfs?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ramfs-and-ramdisk"><span class="toc-number">2.</span> <span class="toc-text">ramfs and ramdisk:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ramfs-and-tmpfs"><span class="toc-number">3.</span> <span class="toc-text">ramfs and tmpfs:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-rootfs"><span class="toc-number">4.</span> <span class="toc-text">What is rootfs?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-initramfs"><span class="toc-number">5.</span> <span class="toc-text">What is initramfs?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Populating-initramfs"><span class="toc-number">6.</span> <span class="toc-text">Populating initramfs:</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Copyright-2006-Rob-Landley-114-111-98-x40-x6c-97-110-100-x6c-101-121-x2e-x6e-101-x74-and-TimeSys-Corporation"><span class="toc-number"></span> <span class="toc-text">Copyright 2006 Rob Landley &amp;#114;&amp;#111;&amp;#98;&amp;#x40;&amp;#x6c;&amp;#97;&amp;#110;&amp;#100;&amp;#x6c;&amp;#101;&amp;#121;&amp;#x2e;&amp;#x6e;&amp;#101;&amp;#x74; and TimeSys Corporation.</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Licensed-under-GPL-version-2"><span class="toc-number"></span> <span class="toc-text">Licensed under GPL version 2</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#External-initramfs-images"><span class="toc-number">1.</span> <span class="toc-text">External initramfs images:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Contents-of-initramfs"><span class="toc-number">2.</span> <span class="toc-text">Contents of initramfs:</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Testing-external-initramfs-using-the-initrd-loading-mechanism"><span class="toc-number"></span> <span class="toc-text">Testing external initramfs using the initrd loading mechanism.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Why-cpio-rather-than-tar"><span class="toc-number">1.</span> <span class="toc-text">Why cpio rather than tar?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Future-directions"><span class="toc-number">2.</span> <span class="toc-text">Future directions:</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>ramfs, rootfs and initramfs<br>October 17, 2005<br>Rob Landley <a href="mailto:&#114;&#111;&#98;&#64;&#x6c;&#97;&#x6e;&#100;&#108;&#101;&#121;&#46;&#110;&#101;&#x74;">&#114;&#111;&#98;&#64;&#x6c;&#97;&#x6e;&#100;&#108;&#101;&#121;&#46;&#110;&#101;&#x74;</a><br>=============================</p>
+<h2 id="What-is-ramfs"><a href="#What-is-ramfs" class="headerlink" title="What is ramfs?"></a>What is ramfs?</h2><p>Ramfs is a very simple filesystem that exports Linux’s disk caching<br>mechanisms (the page cache and dentry cache) as a dynamically resizable<br>RAM-based filesystem.</p>
+<p>Normally all files are cached in memory by Linux.  Pages of data read from<br>backing store (usually the block device the filesystem is mounted on) are kept<br>around in case it’s needed again, but marked as clean (freeable) in case the<br>Virtual Memory system needs the memory for something else.  Similarly, data<br>written to files is marked clean as soon as it has been written to backing<br>store, but kept around for caching purposes until the VM reallocates the<br>memory.  A similar mechanism (the dentry cache) greatly speeds up access to<br>directories.</p>
+<p>With ramfs, there is no backing store.  Files written into ramfs allocate<br>dentries and page cache as usual, but there’s nowhere to write them to.<br>This means the pages are never marked clean, so they can’t be freed by the<br>VM when it’s looking to recycle memory.</p>
+<p>The amount of code required to implement ramfs is tiny, because all the<br>work is done by the existing Linux caching infrastructure.  Basically,<br>you’re mounting the disk cache as a filesystem.  Because of this, ramfs is not<br>an optional component removable via menuconfig, since there would be negligible<br>space savings.</p>
+<h2 id="ramfs-and-ramdisk"><a href="#ramfs-and-ramdisk" class="headerlink" title="ramfs and ramdisk:"></a>ramfs and ramdisk:</h2><p>The older “ram disk” mechanism created a synthetic block device out of<br>an area of RAM and used it as backing store for a filesystem.  This block<br>device was of fixed size, so the filesystem mounted on it was of fixed<br>size.  Using a ram disk also required unnecessarily copying memory from the<br>fake block device into the page cache (and copying changes back out), as well<br>as creating and destroying dentries.  Plus it needed a filesystem driver<br>(such as ext2) to format and interpret this data.</p>
+<p>Compared to ramfs, this wastes memory (and memory bus bandwidth), creates<br>unnecessary work for the CPU, and pollutes the CPU caches.  (There are tricks<br>to avoid this copying by playing with the page tables, but they’re unpleasantly<br>complicated and turn out to be about as expensive as the copying anyway.)<br>More to the point, all the work ramfs is doing has to happen <em>anyway</em>,<br>since all file access goes through the page and dentry caches.  The RAM<br>disk is simply unnecessary; ramfs is internally much simpler.</p>
+<p>Another reason ramdisks are semi-obsolete is that the introduction of<br>loopback devices offered a more flexible and convenient way to create<br>synthetic block devices, now from files instead of from chunks of memory.<br>See losetup (8) for details.</p>
+<h2 id="ramfs-and-tmpfs"><a href="#ramfs-and-tmpfs" class="headerlink" title="ramfs and tmpfs:"></a>ramfs and tmpfs:</h2><p>One downside of ramfs is you can keep writing data into it until you fill<br>up all memory, and the VM can’t free it because the VM thinks that files<br>should get written to backing store (rather than swap space), but ramfs hasn’t<br>got any backing store.  Because of this, only root (or a trusted user) should<br>be allowed write access to a ramfs mount.</p>
+<p>A ramfs derivative called tmpfs was created to add size limits, and the ability<br>to write the data to swap space.  Normal users can be allowed write access to<br>tmpfs mounts.  See Documentation/filesystems/tmpfs.txt for more information.</p>
+<h2 id="What-is-rootfs"><a href="#What-is-rootfs" class="headerlink" title="What is rootfs?"></a>What is rootfs?</h2><p>Rootfs is a special instance of ramfs (or tmpfs, if that’s enabled), which is<br>always present in 2.6 systems.  You can’t unmount rootfs for approximately the<br>same reason you can’t kill the init process; rather than having special code<br>to check for and handle an empty list, it’s smaller and simpler for the kernel<br>to just make sure certain lists can’t become empty.</p>
+<p>Most systems just mount another filesystem over rootfs and ignore it.  The<br>amount of space an empty instance of ramfs takes up is tiny.</p>
+<h2 id="What-is-initramfs"><a href="#What-is-initramfs" class="headerlink" title="What is initramfs?"></a>What is initramfs?</h2><p>All 2.6 Linux kernels contain a gzipped “cpio” format archive, which is<br>extracted into rootfs when the kernel boots up.  After extracting, the kernel<br>checks to see if rootfs contains a file “init”, and if so it executes it as PID</p>
+<ol>
+<li> If found, this init process is responsible for bringing the system the<br>rest of the way up, including locating and mounting the real root device (if<br>any).  If rootfs does not contain an init program after the embedded cpio<br>archive is extracted into it, the kernel will fall through to the older code<br>to locate and mount a root partition, then exec some variant of /sbin/init<br>out of that.</li>
+</ol>
+<p>All this differs from the old initrd in several ways:</p>
+<ul>
+<li><p>The old initrd was always a separate file, while the initramfs archive is<br>linked into the linux kernel image.  (The directory linux-*/usr is devoted<br>to generating this archive during the build.)</p>
+</li>
+<li><p>The old initrd file was a gzipped filesystem image (in some file format,<br>such as ext2, that needed a driver built into the kernel), while the new<br>initramfs archive is a gzipped cpio archive (like tar only simpler,<br>see cpio(1) and Documentation/early-userspace/buffer-format.txt).  The<br>kernel’s cpio extraction code is not only extremely small, it’s also<br>__init text and data that can be discarded during the boot process.</p>
+</li>
+<li><p>The program run by the old initrd (which was called /initrd, not /init) did<br>some setup and then returned to the kernel, while the init program from<br>initramfs is not expected to return to the kernel.  (If /init needs to hand<br>off control it can overmount / with a new root device and exec another init<br>program.  See the switch_root utility, below.)</p>
+</li>
+<li><p>When switching another root device, initrd would pivot_root and then<br>umount the ramdisk.  But initramfs is rootfs: you can neither pivot_root<br>rootfs, nor unmount it.  Instead delete everything out of rootfs to<br>free up the space (find -xdev / -exec rm ‘{}’ ‘;’), overmount rootfs<br>with the new root (cd /newmount; mount –move . /; chroot .), attach<br>stdin/stdout/stderr to the new /dev/console, and exec the new init.</p>
+<p>Since this is a remarkably persnickety process (and involves deleting<br>commands before you can run them), the klibc package introduced a helper<br>program (utils/run_init.c) to do all this for you.  Most other packages<br>(such as busybox) have named this command “switch_root”.</p>
+</li>
+</ul>
+<h2 id="Populating-initramfs"><a href="#Populating-initramfs" class="headerlink" title="Populating initramfs:"></a>Populating initramfs:</h2><p>The 2.6 kernel build process always creates a gzipped cpio format initramfs<br>archive and links it into the resulting kernel binary.  By default, this<br>archive is empty (consuming 134 bytes on x86).</p>
+<p>The config option CONFIG_INITRAMFS_SOURCE (in General Setup in menuconfig,<br>and living in usr/Kconfig) can be used to specify a source for the<br>initramfs archive, which will automatically be incorporated into the<br>resulting binary.  This option can point to an existing gzipped cpio<br>archive, a directory containing files to be archived, or a text file<br>specification such as the following example:</p>
+<p>  dir /dev 755 0 0<br>  nod /dev/console 644 0 0 c 5 1<br>  nod /dev/loop0 644 0 0 b 7 0<br>  dir /bin 755 1000 1000<br>  slink /bin/sh busybox 777 0 0<br>  file /bin/busybox initramfs/busybox 755 0 0<br>  dir /proc 755 0 0<br>  dir /sys 755 0 0<br>  dir /mnt 755 0 0<br>  file /init initramfs/init.sh 755 0 0</p>
+<p>Run “usr/gen_init_cpio” (after the kernel build) to get a usage message<br>documenting the above file format.</p>
+<p>One advantage of the configuration file is that root access is not required to<br>set permissions or create device nodes in the new archive.  (Note that those<br>two example “file” entries expect to find files named “init.sh” and “busybox” in<br>a directory called “initramfs”, under the linux-2.6.* directory.  See<br>Documentation/early-userspace/README for more details.)</p>
+<p>The kernel does not depend on external cpio tools.  If you specify a<br>directory instead of a configuration file, the kernel’s build infrastructure<br>creates a configuration file from that directory (usr/Makefile calls<br>scripts/gen_initramfs_list.sh), and proceeds to package up that directory<br>using the config file (by feeding it to usr/gen_init_cpio, which is created<br>from usr/gen_init_cpio.c).  The kernel’s build-time cpio creation code is<br>entirely self-contained, and the kernel’s boot-time extractor is also<br>(obviously) self-contained.</p>
+<p>The one thing you might need external cpio utilities installed for is creating<br>or extracting your own preprepared cpio files to feed to the kernel build<br>(instead of a config file or directory).</p>
+<p>The following command line can extract a cpio image (either by the above script<br>or by the kernel build) back into its component files:</p>
+<p>  cpio -i -d -H newc -F initramfs_data.cpio –no-absolute-filenames</p>
+<p>The following shell script can create a prebuilt cpio archive you can<br>use in place of the above config file:</p>
+<p>  #!/bin/sh</p>
+<h1 id="Copyright-2006-Rob-Landley-114-111-98-x40-x6c-97-110-100-x6c-101-121-x2e-x6e-101-x74-and-TimeSys-Corporation"><a href="#Copyright-2006-Rob-Landley-114-111-98-x40-x6c-97-110-100-x6c-101-121-x2e-x6e-101-x74-and-TimeSys-Corporation" class="headerlink" title="Copyright 2006 Rob Landley &#114;&#111;&#98;&#x40;&#x6c;&#97;&#110;&#100;&#x6c;&#101;&#121;&#x2e;&#x6e;&#101;&#x74; and TimeSys Corporation."></a>Copyright 2006 Rob Landley <a href="mailto:&#114;&#111;&#98;&#x40;&#x6c;&#97;&#110;&#100;&#x6c;&#101;&#121;&#x2e;&#x6e;&#101;&#x74;">&#114;&#111;&#98;&#x40;&#x6c;&#97;&#110;&#100;&#x6c;&#101;&#121;&#x2e;&#x6e;&#101;&#x74;</a> and TimeSys Corporation.</h1><h1 id="Licensed-under-GPL-version-2"><a href="#Licensed-under-GPL-version-2" class="headerlink" title="Licensed under GPL version 2"></a>Licensed under GPL version 2</h1><p>  if [ $# -ne 2 ]<br>  then<br>    echo “usage: mkinitramfs directory imagename.cpio.gz”<br>    exit 1<br>  fi</p>
+<p>  if [ -d “$1” ]<br>  then<br>    echo “creating $2 from $1”<br>    (cd “$1”; find . | cpio -o -H newc | gzip) &gt; “$2”<br>  else<br>    echo “First argument must be a directory”<br>    exit 1<br>  fi</p>
+<p>Note: The cpio man page contains some bad advice that will break your initramfs<br>archive if you follow it.  It says “A typical way to generate the list<br>of filenames is with the find command; you should give find the -depth option<br>to minimize problems with permissions on directories that are unwritable or not<br>searchable.”  Don’t do this when creating initramfs.cpio.gz images, it won’t<br>work.  The Linux kernel cpio extractor won’t create files in a directory that<br>doesn’t exist, so the directory entries must go before the files that go in<br>those directories.  The above script gets them in the right order.</p>
+<h2 id="External-initramfs-images"><a href="#External-initramfs-images" class="headerlink" title="External initramfs images:"></a>External initramfs images:</h2><p>If the kernel has initrd support enabled, an external cpio.gz archive can also<br>be passed into a 2.6 kernel in place of an initrd.  In this case, the kernel<br>will autodetect the type (initramfs, not initrd) and extract the external cpio<br>archive into rootfs before trying to run /init.</p>
+<p>This has the memory efficiency advantages of initramfs (no ramdisk block<br>device) but the separate packaging of initrd (which is nice if you have<br>non-GPL code you’d like to run from initramfs, without conflating it with<br>the GPL licensed Linux kernel binary).</p>
+<p>It can also be used to supplement the kernel’s built-in initramfs image.  The<br>files in the external archive will overwrite any conflicting files in<br>the built-in initramfs archive.  Some distributors also prefer to customize<br>a single kernel image with task-specific initramfs images, without recompiling.</p>
+<h2 id="Contents-of-initramfs"><a href="#Contents-of-initramfs" class="headerlink" title="Contents of initramfs:"></a>Contents of initramfs:</h2><p>An initramfs archive is a complete self-contained root filesystem for Linux.<br>If you don’t already understand what shared libraries, devices, and paths<br>you need to get a minimal root filesystem up and running, here are some<br>references:<br><a target="_blank" rel="noopener" href="http://www.tldp.org/HOWTO/Bootdisk-HOWTO/">http://www.tldp.org/HOWTO/Bootdisk-HOWTO/</a><br><a target="_blank" rel="noopener" href="http://www.tldp.org/HOWTO/From-PowerUp-To-Bash-Prompt-HOWTO.html">http://www.tldp.org/HOWTO/From-PowerUp-To-Bash-Prompt-HOWTO.html</a><br><a target="_blank" rel="noopener" href="http://www.linuxfromscratch.org/lfs/view/stable/">http://www.linuxfromscratch.org/lfs/view/stable/</a></p>
+<p>The “klibc” package (<a target="_blank" rel="noopener" href="http://www.kernel.org/pub/linux/libs/klibc">http://www.kernel.org/pub/linux/libs/klibc</a>) is<br>designed to be a tiny C library to statically link early userspace<br>code against, along with some related utilities.  It is BSD licensed.</p>
+<p>I use uClibc (<a target="_blank" rel="noopener" href="http://www.uclibc.org/">http://www.uclibc.org</a>) and busybox (<a target="_blank" rel="noopener" href="http://www.busybox.net/">http://www.busybox.net</a>)<br>myself.  These are LGPL and GPL, respectively.  (A self-contained initramfs<br>package is planned for the busybox 1.3 release.)</p>
+<p>In theory you could use glibc, but that’s not well suited for small embedded<br>uses like this.  (A “hello world” program statically linked against glibc is<br>over 400k.  With uClibc it’s 7k.  Also note that glibc dlopens libnss to do<br>name lookups, even when otherwise statically linked.)</p>
+<p>A good first step is to get initramfs to run a statically linked “hello world”<br>program as init, and test it under an emulator like qemu (<a target="_blank" rel="noopener" href="http://www.qemu.org/">www.qemu.org</a>) or<br>User Mode Linux, like so:</p>
+<p>  cat &gt; hello.c &lt;&lt; EOF<br>  #include &lt;stdio.h&gt;<br>  #include &lt;unistd.h&gt;</p>
+<p>  int main(int argc, char *argv[])<br>  {<br>    printf(“Hello world!\n”);<br>    sleep(999999999);<br>  }<br>  EOF<br>  gcc -static hello.c -o init<br>  echo init | cpio -o -H newc | gzip &gt; test.cpio.gz</p>
+<h1 id="Testing-external-initramfs-using-the-initrd-loading-mechanism"><a href="#Testing-external-initramfs-using-the-initrd-loading-mechanism" class="headerlink" title="Testing external initramfs using the initrd loading mechanism."></a>Testing external initramfs using the initrd loading mechanism.</h1><p>  qemu -kernel /boot/vmlinuz -initrd test.cpio.gz /dev/zero</p>
+<p>When debugging a normal root filesystem, it’s nice to be able to boot with<br>“init=/bin/sh”.  The initramfs equivalent is “rdinit=/bin/sh”, and it’s<br>just as useful.</p>
+<h2 id="Why-cpio-rather-than-tar"><a href="#Why-cpio-rather-than-tar" class="headerlink" title="Why cpio rather than tar?"></a>Why cpio rather than tar?</h2><p>This decision was made back in December, 2001.  The discussion started here:</p>
+<p>  <a target="_blank" rel="noopener" href="http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1538.html">http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1538.html</a></p>
+<p>And spawned a second thread (specifically on tar vs cpio), starting here:</p>
+<p>  <a target="_blank" rel="noopener" href="http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1587.html">http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1587.html</a></p>
+<p>The quick and dirty summary version (which is no substitute for reading<br>the above threads) is:</p>
+<ol>
+<li><p>cpio is a standard.  It’s decades old (from the AT&amp;T days), and already<br>widely used on Linux (inside RPM, Red Hat’s device driver disks).  Here’s<br>a Linux Journal article about it from 1996:</p>
+<p>   <a target="_blank" rel="noopener" href="http://www.linuxjournal.com/article/1213">http://www.linuxjournal.com/article/1213</a></p>
+<p>It’s not as popular as tar because the traditional cpio command line tools<br>require _truly_hideous_ command line arguments.  But that says nothing<br>either way about the archive format, and there are alternative tools,<br>such as:</p>
+<p>  <a target="_blank" rel="noopener" href="http://freshmeat.net/projects/afio/">http://freshmeat.net/projects/afio/</a></p>
+</li>
+<li><p>The cpio archive format chosen by the kernel is simpler and cleaner (and<br>thus easier to create and parse) than any of the (literally dozens of)<br>various tar archive formats.  The complete initramfs archive format is<br>explained in buffer-format.txt, created in usr/gen_init_cpio.c, and<br>extracted in init/initramfs.c.  All three together come to less than 26k<br>total of human-readable text.</p>
+</li>
+<li><p>The GNU project standardizing on tar is approximately as relevant as<br>Windows standardizing on zip.  Linux is not part of either, and is free<br>to make its own technical decisions.</p>
+</li>
+<li><p>Since this is a kernel internal format, it could easily have been<br>something brand new.  The kernel provides its own tools to create and<br>extract this format anyway.  Using an existing standard was preferable,<br>but not essential.</p>
+</li>
+<li><p>Al Viro made the decision (quote: “tar is ugly as hell and not going to be<br>supported on the kernel side”):</p>
+<p>   <a target="_blank" rel="noopener" href="http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1540.html">http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1540.html</a></p>
+<p>explained his reasoning:</p>
+<p>   <a target="_blank" rel="noopener" href="http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1550.html">http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1550.html</a><br>   <a target="_blank" rel="noopener" href="http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1638.html">http://www.uwsg.iu.edu/hypermail/linux/kernel/0112.2/1638.html</a></p>
+<p>and, most importantly, designed and implemented the initramfs code.</p>
+</li>
+</ol>
+<h2 id="Future-directions"><a href="#Future-directions" class="headerlink" title="Future directions:"></a>Future directions:</h2><p>Today (2.6.16), initramfs is always compiled in, but not always used.  The<br>kernel falls back to legacy boot code that is reached only if initramfs does<br>not contain an /init program.  The fallback is legacy code, there to ensure a<br>smooth transition and allowing early boot functionality to gradually move to<br>“early userspace” (I.E. initramfs).</p>
+<p>The move to early userspace is necessary because finding and mounting the real<br>root device is complex.  Root partitions can span multiple devices (raid or<br>separate journal).  They can be out on the network (requiring dhcp, setting a<br>specific MAC address, logging into a server, etc).  They can live on removable<br>media, with dynamically allocated major/minor numbers and persistent naming<br>issues requiring a full udev implementation to sort out.  They can be<br>compressed, encrypted, copy-on-write, loopback mounted, strangely partitioned,<br>and so on.</p>
+<p>This kind of complexity (which inevitably includes policy) is rightly handled<br>in userspace.  Both klibc and busybox/uClibc are working on simple initramfs<br>packages to drop into a kernel build.</p>
+<p>The klibc package has now been accepted into Andrew Morton’s 2.6.17-mm tree.<br>The kernel’s current early boot code (partition detection, etc) will probably<br>be migrated into a default initramfs, automatically created and used by the<br>kernel build.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/" title="Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramfs-rootfs-initramfs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ray_cs/" title="Kernel-2.6.32-573.12.1.el6_ray_cs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ramdisk/" title="Kernel-2.6.32-573.12.1.el6_ramdisk"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_robust-futex-ABI | oosTech.com</title>
+  <meta name="description" content="Started by Paul Jackson &amp;#112;&amp;#106;&amp;#64;&amp;#115;&amp;#x67;&amp;#105;&amp;#x2e;&amp;#99;&amp;#x6f;&amp;#x6d; The robust futex ABIRobust_futexes provide a mechanism that is used in addition to normalfutexes, for kernel assist o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_robust-futex-ABI">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Started by Paul Jackson &amp;#112;&amp;#106;&amp;#64;&amp;#115;&amp;#x67;&amp;#105;&amp;#x2e;&amp;#99;&amp;#x6f;&amp;#x6d; The robust futex ABIRobust_futexes provide a mechanism that is used in addition to normalfutexes, for kernel assist o">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#The-robust-futex-ABI"><span class="toc-number">1.</span> <span class="toc-text">The robust futex ABI</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_robust-futex-ABI" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_robust-futex-ABI
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Started by Paul Jackson <a href="mailto:&#112;&#106;&#64;&#115;&#x67;&#105;&#x2e;&#99;&#x6f;&#x6d;">&#112;&#106;&#64;&#115;&#x67;&#105;&#x2e;&#99;&#x6f;&#x6d;</a></p>
+<h2 id="The-robust-futex-ABI"><a href="#The-robust-futex-ABI" class="headerlink" title="The robust futex ABI"></a>The robust futex ABI</h2><p>Robust_futexes provide a mechanism that is used in addition to normal<br>futexes, for kernel assist of cleanup of held locks on task exit.</p>
+<p>The interesting data as to what futexes a thread is holding is kept on a<br>linked list in user space, where it can be updated efficiently as locks<br>are taken and dropped, without kernel intervention.  The only additional<br>kernel intervention required for robust_futexes above and beyond what is<br>required for futexes is:</p>
+<ol>
+<li>a one time call, per thread, to tell the kernel where its list of<br>held robust_futexes begins, and</li>
+<li>internal kernel code at exit, to handle any listed locks held<br>by the exiting thread.</li>
+</ol>
+<p>The existing normal futexes already provide a “Fast Userspace Locking”<br>mechanism, which handles uncontested locking without needing a system<br>call, and handles contested locking by maintaining a list of waiting<br>threads in the kernel.  Options on the sys_futex(2) system call support<br>waiting on a particular futex, and waking up the next waiter on a<br>particular futex.</p>
+<p>For robust_futexes to work, the user code (typically in a library such<br>as glibc linked with the application) has to manage and place the<br>necessary list elements exactly as the kernel expects them.  If it fails<br>to do so, then improperly listed locks will not be cleaned up on exit,<br>probably causing deadlock or other such failure of the other threads<br>waiting on the same locks.</p>
+<p>A thread that anticipates possibly using robust_futexes should first<br>issue the system call:</p>
+<pre><code>asmlinkage long
+sys_set_robust_list(struct robust_list_head __user *head, size_t len);
+</code></pre>
+<p>The pointer ‘head’ points to a structure in the threads address space<br>consisting of three words.  Each word is 32 bits on 32 bit arch’s, or 64<br>bits on 64 bit arch’s, and local byte order.  Each thread should have<br>its own thread private ‘head’.</p>
+<p>If a thread is running in 32 bit compatibility mode on a 64 native arch<br>kernel, then it can actually have two such structures - one using 32 bit<br>words for 32 bit compatibility mode, and one using 64 bit words for 64<br>bit native mode.  The kernel, if it is a 64 bit kernel supporting 32 bit<br>compatibility mode, will attempt to process both lists on each task<br>exit, if the corresponding sys_set_robust_list() call has been made to<br>setup that list.</p>
+<p>  The first word in the memory structure at ‘head’ contains a<br>  pointer to a single linked list of ‘lock entries’, one per lock,<br>  as described below.  If the list is empty, the pointer will point<br>  to itself, ‘head’.  The last ‘lock entry’ points back to the ‘head’.</p>
+<p>  The second word, called ‘offset’, specifies the offset from the<br>  address of the associated ‘lock entry’, plus or minus, of what will<br>  be called the ‘lock word’, from that ‘lock entry’.  The ‘lock word’<br>  is always a 32 bit word, unlike the other words above.  The ‘lock<br>  word’ holds 3 flag bits in the upper 3 bits, and the thread id (TID)<br>  of the thread holding the lock in the bottom 29 bits.  See further<br>  below for a description of the flag bits.</p>
+<p>  The third word, called ‘list_op_pending’, contains transient copy of<br>  the address of the ‘lock entry’, during list insertion and removal,<br>  and is needed to correctly resolve races should a thread exit while<br>  in the middle of a locking or unlocking operation.</p>
+<p>Each ‘lock entry’ on the single linked list starting at ‘head’ consists<br>of just a single word, pointing to the next ‘lock entry’, or back to<br>‘head’ if there are no more entries.  In addition, nearby to each ‘lock<br>entry’, at an offset from the ‘lock entry’ specified by the ‘offset’<br>word, is one ‘lock word’.</p>
+<p>The ‘lock word’ is always 32 bits, and is intended to be the same 32 bit<br>lock variable used by the futex mechanism, in conjunction with<br>robust_futexes.  The kernel will only be able to wakeup the next thread<br>waiting for a lock on a threads exit if that next thread used the futex<br>mechanism to register the address of that ‘lock word’ with the kernel.</p>
+<p>For each futex lock currently held by a thread, if it wants this<br>robust_futex support for exit cleanup of that lock, it should have one<br>‘lock entry’ on this list, with its associated ‘lock word’ at the<br>specified ‘offset’.  Should a thread die while holding any such locks,<br>the kernel will walk this list, mark any such locks with a bit<br>indicating their holder died, and wakeup the next thread waiting for<br>that lock using the futex mechanism.</p>
+<p>When a thread has invoked the above system call to indicate it<br>anticipates using robust_futexes, the kernel stores the passed in ‘head’<br>pointer for that task.  The task may retrieve that value later on by<br>using the system call:</p>
+<pre><code>asmlinkage long
+sys_get_robust_list(int pid, struct robust_list_head __user **head_ptr,
+                    size_t __user *len_ptr);
+</code></pre>
+<p>It is anticipated that threads will use robust_futexes embedded in<br>larger, user level locking structures, one per lock.  The kernel<br>robust_futex mechanism doesn’t care what else is in that structure, so<br>long as the ‘offset’ to the ‘lock word’ is the same for all<br>robust_futexes used by that thread.  The thread should link those locks<br>it currently holds using the ‘lock entry’ pointers.  It may also have<br>other links between the locks, such as the reverse side of a double<br>linked list, but that doesn’t matter to the kernel.</p>
+<p>By keeping its locks linked this way, on a list starting with a ‘head’<br>pointer known to the kernel, the kernel can provide to a thread the<br>essential service available for robust_futexes, which is to help clean<br>up locks held at the time of (a perhaps unexpectedly) exit.</p>
+<p>Actual locking and unlocking, during normal operations, is handled<br>entirely by user level code in the contending threads, and by the<br>existing futex mechanism to wait for, and wakeup, locks.  The kernels<br>only essential involvement in robust_futexes is to remember where the<br>list ‘head’ is, and to walk the list on thread exit, handling locks<br>still held by the departing thread, as described below.</p>
+<p>There may exist thousands of futex lock structures in a threads shared<br>memory, on various data structures, at a given point in time. Only those<br>lock structures for locks currently held by that thread should be on<br>that thread’s robust_futex linked lock list a given time.</p>
+<p>A given futex lock structure in a user shared memory region may be held<br>at different times by any of the threads with access to that region. The<br>thread currently holding such a lock, if any, is marked with the threads<br>TID in the lower 29 bits of the ‘lock word’.</p>
+<p>When adding or removing a lock from its list of held locks, in order for<br>the kernel to correctly handle lock cleanup regardless of when the task<br>exits (perhaps it gets an unexpected signal 9 in the middle of<br>manipulating this list), the user code must observe the following<br>protocol on ‘lock entry’ insertion and removal:</p>
+<p>On insertion:</p>
+<ol>
+<li>set the ‘list_op_pending’ word to the address of the ‘lock entry’<br>to be inserted,</li>
+<li>acquire the futex lock,</li>
+<li>add the lock entry, with its thread id (TID) in the bottom 29 bits<br>of the ‘lock word’, to the linked list starting at ‘head’, and</li>
+<li>clear the ‘list_op_pending’ word.</li>
+</ol>
+<p>On removal:</p>
+<ol>
+<li>set the ‘list_op_pending’ word to the address of the ‘lock entry’<br>to be removed,</li>
+<li>remove the lock entry for this lock from the ‘head’ list,</li>
+<li>release the futex lock, and</li>
+<li>clear the ‘lock_op_pending’ word.</li>
+</ol>
+<p>On exit, the kernel will consider the address stored in<br>‘list_op_pending’ and the address of each ‘lock word’ found by walking<br>the list starting at ‘head’.  For each such address, if the bottom 29<br>bits of the ‘lock word’ at offset ‘offset’ from that address equals the<br>exiting threads TID, then the kernel will do two things:</p>
+<ol>
+<li>if bit 31 (0x80000000) is set in that word, then attempt a futex<br>wakeup on that address, which will waken the next thread that has<br>used to the futex mechanism to wait on that address, and</li>
+<li>atomically set  bit 30 (0x40000000) in the ‘lock word’.</li>
+</ol>
+<p>In the above, bit 31 was set by futex waiters on that lock to indicate<br>they were waiting, and bit 30 is set by the kernel to indicate that the<br>lock owner died holding the lock.</p>
+<p>The kernel exit code will silently stop scanning the list further if at<br>any point:</p>
+<ol>
+<li>the ‘head’ pointer or an subsequent linked list pointer<br>is not a valid address of a user space word</li>
+<li>the calculated location of the ‘lock word’ (address plus<br>‘offset’) is not the valid address of a 32 bit user space<br>word</li>
+<li>if the list contains more than 1 million (subject to<br>future kernel configuration changes) elements.</li>
+</ol>
+<p>When the kernel sees a list entry whose ‘lock word’ doesn’t have the<br>current threads TID in the lower 29 bits, it does nothing with that<br>entry, and goes on to the next entry.</p>
+<p>Bit 29 (0x20000000) of the ‘lock word’ is reserved for future use.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/" title="Kernel-2.6.32-573.12.1.el6_robust-futex-ABI" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futex-ABI/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_robust-futexes/" title="Kernel-2.6.32-573.12.1.el6_robust-futexes"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_riscom8/" title="Kernel-2.6.32-573.12.1.el6_riscom8"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_as-iosche | oosTech.com</title>
+  <meta name="description" content="Anticipatory IO schedulerNick Piggin &amp;#112;&amp;#x69;&amp;#x67;&amp;#103;&amp;#x69;&amp;#x6e;&amp;#x40;&amp;#x63;&amp;#x79;&amp;#98;&amp;#x65;&amp;#114;&amp;#x6f;&amp;#110;&amp;#x65;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;&amp;#x2e;&amp;#x61;&amp;#117;    13 Sep 2003 Attention! Databa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_as-iosche">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Anticipatory IO schedulerNick Piggin &amp;#112;&amp;#x69;&amp;#x67;&amp;#103;&amp;#x69;&amp;#x6e;&amp;#x40;&amp;#x63;&amp;#x79;&amp;#98;&amp;#x65;&amp;#114;&amp;#x6f;&amp;#110;&amp;#x65;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;&amp;#x2e;&amp;#x61;&amp;#117;    13 Sep 2003 Attention! Databa">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Anticipatory-IO-scheduler"><span class="toc-number">1.</span> <span class="toc-text">Anticipatory IO scheduler</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Selecting-IO-schedulers"><span class="toc-number">2.</span> <span class="toc-text">Selecting IO schedulers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Anticipatory-IO-scheduler-Policies"><span class="toc-number">3.</span> <span class="toc-text">Anticipatory IO scheduler Policies</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tuning-the-anticipatory-IO-scheduler"><span class="toc-number">4.</span> <span class="toc-text">Tuning the anticipatory IO scheduler</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_as-iosched" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_as-iosche
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="Anticipatory-IO-scheduler"><a href="#Anticipatory-IO-scheduler" class="headerlink" title="Anticipatory IO scheduler"></a>Anticipatory IO scheduler</h2><p>Nick Piggin <a href="mailto:&#112;&#x69;&#x67;&#103;&#x69;&#x6e;&#x40;&#x63;&#x79;&#98;&#x65;&#114;&#x6f;&#110;&#x65;&#46;&#x63;&#111;&#x6d;&#x2e;&#x61;&#117;">&#112;&#x69;&#x67;&#103;&#x69;&#x6e;&#x40;&#x63;&#x79;&#98;&#x65;&#114;&#x6f;&#110;&#x65;&#46;&#x63;&#111;&#x6d;&#x2e;&#x61;&#117;</a>    13 Sep 2003</p>
+<p>Attention! Database servers, especially those using “TCQ” disks should<br>investigate performance with the ‘deadline’ IO scheduler. Any system with high<br>disk performance requirements should do so, in fact.</p>
+<p>If you see unusual performance characteristics of your disk systems, or you<br>see big performance regressions versus the deadline scheduler, please email<br>me. Database users don’t bother unless you’re willing to test a lot of patches<br>from me ;) its a known issue.</p>
+<p>Also, users with hardware RAID controllers, doing striping, may find<br>highly variable performance results with using the as-iosched. The<br>as-iosched anticipatory implementation is based on the notion that a disk<br>device has only one physical seeking head.  A striped RAID controller<br>actually has a head for each physical device in the logical RAID device.</p>
+<p>However, setting the antic_expire (see tunable parameters below) produces<br>very similar behavior to the deadline IO scheduler.</p>
+<h2 id="Selecting-IO-schedulers"><a href="#Selecting-IO-schedulers" class="headerlink" title="Selecting IO schedulers"></a>Selecting IO schedulers</h2><p>Refer to Documentation/block/switching-sched.txt for information on<br>selecting an io scheduler on a per-device basis.</p>
+<h2 id="Anticipatory-IO-scheduler-Policies"><a href="#Anticipatory-IO-scheduler-Policies" class="headerlink" title="Anticipatory IO scheduler Policies"></a>Anticipatory IO scheduler Policies</h2><p>The as-iosched implementation implements several layers of policies<br>to determine when an IO request is dispatched to the disk controller.<br>Here are the policies outlined, in order of application.</p>
+<ol>
+<li>one-way Elevator algorithm.</li>
+</ol>
+<p>The elevator algorithm is similar to that used in deadline scheduler, with<br>the addition that it allows limited backward movement of the elevator<br>(i.e. seeks backwards).  A seek backwards can occur when choosing between<br>two IO requests where one is behind the elevator’s current position, and<br>the other is in front of the elevator’s position. If the seek distance to<br>the request in back of the elevator is less than half the seek distance to<br>the request in front of the elevator, then the request in back can be chosen.<br>Backward seeks are also limited to a maximum of MAXBACK (1024*1024) sectors.<br>This favors forward movement of the elevator, while allowing opportunistic<br>“short” backward seeks.</p>
+<ol start="2">
+<li>FIFO expiration times for reads and for writes.</li>
+</ol>
+<p>This is again very similar to the deadline IO scheduler.  The expiration<br>times for requests on these lists is tunable using the parameters read_expire<br>and write_expire discussed below.  When a read or a write expires in this way,<br>the IO scheduler will interrupt its current elevator sweep or read anticipation<br>to service the expired request.</p>
+<ol start="3">
+<li>Read and write request batching</li>
+</ol>
+<p>A batch is a collection of read requests or a collection of write<br>requests.  The as scheduler alternates dispatching read and write batches<br>to the driver.  In the case a read batch, the scheduler submits read<br>requests to the driver as long as there are read requests to submit, and<br>the read batch time limit has not been exceeded (read_batch_expire).<br>The read batch time limit begins counting down only when there are<br>competing write requests pending.</p>
+<p>In the case of a write batch, the scheduler submits write requests to<br>the driver as long as there are write requests available, and the<br>write batch time limit has not been exceeded (write_batch_expire).<br>However, the length of write batches will be gradually shortened<br>when read batches frequently exceed their time limit.</p>
+<p>When changing between batch types, the scheduler waits for all requests<br>from the previous batch to complete before scheduling requests for the<br>next batch.</p>
+<p>The read and write fifo expiration times described in policy 2 above<br>are checked only when in scheduling IO of a batch for the corresponding<br>(read/write) type.  So for example, the read FIFO timeout values are<br>tested only during read batches.  Likewise, the write FIFO timeout<br>values are tested only during write batches.  For this reason,<br>it is generally not recommended for the read batch time<br>to be longer than the write expiration time, nor for the write batch<br>time to exceed the read expiration time (see tunable parameters below).</p>
+<p>When the IO scheduler changes from a read to a write batch,<br>it begins the elevator from the request that is on the head of the<br>write expiration FIFO.  Likewise, when changing from a write batch to<br>a read batch, scheduler begins the elevator from the first entry<br>on the read expiration FIFO.</p>
+<ol start="4">
+<li>Read anticipation.</li>
+</ol>
+<p>Read anticipation occurs only when scheduling a read batch.<br>This implementation of read anticipation allows only one read request<br>to be dispatched to the disk controller at a time.  In<br>contrast, many write requests may be dispatched to the disk controller<br>at a time during a write batch.  It is this characteristic that can make<br>the anticipatory scheduler perform anomalously with controllers supporting<br>TCQ, or with hardware striped RAID devices. Setting the antic_expire<br>queue parameter (see below) to zero disables this behavior, and the<br>anticipatory scheduler behaves essentially like the deadline scheduler.</p>
+<p>When read anticipation is enabled (antic_expire is not zero), reads<br>are dispatched to the disk controller one at a time.<br>At the end of each read request, the IO scheduler examines its next<br>candidate read request from its sorted read list.  If that next request<br>is from the same process as the request that just completed,<br>or if the next request in the queue is “very close” to the<br>just completed request, it is dispatched immediately.  Otherwise,<br>statistics (average think time, average seek distance) on the process<br>that submitted the just completed request are examined.  If it seems<br>likely that that process will submit another request soon, and that<br>request is likely to be near the just completed request, then the IO<br>scheduler will stop dispatching more read requests for up to (antic_expire)<br>milliseconds, hoping that process will submit a new request near the one<br>that just completed.  If such a request is made, then it is dispatched<br>immediately.  If the antic_expire wait time expires, then the IO scheduler<br>will dispatch the next read request from the sorted read queue.</p>
+<p>To decide whether an anticipatory wait is worthwhile, the scheduler<br>maintains statistics for each process that can be used to compute<br>mean “think time” (the time between read requests), and mean seek<br>distance for that process.  One observation is that these statistics<br>are associated with each process, but those statistics are not associated<br>with a specific IO device.  So for example, if a process is doing IO<br>on several file systems on separate devices, the statistics will be<br>a combination of IO behavior from all those devices.</p>
+<h2 id="Tuning-the-anticipatory-IO-scheduler"><a href="#Tuning-the-anticipatory-IO-scheduler" class="headerlink" title="Tuning the anticipatory IO scheduler"></a>Tuning the anticipatory IO scheduler</h2><p>When using ‘as’, the anticipatory IO scheduler there are 5 parameters under<br>/sys/block/*/queue/iosched/. All are units of milliseconds.</p>
+<p>The parameters are:</p>
+<ul>
+<li><p>read_expire<br>  Controls how long until a read request becomes “expired”. It also controls the<br>  interval between which expired requests are served, so set to 50, a request<br>  might take anywhere &lt; 100ms to be serviced <em>if</em> it is the next on the<br>  expired list. Obviously request expiration strategies won’t make the disk<br>  go faster. The result basically equates to the timeslice a single reader<br>  gets in the presence of other IO. 100*((seek time / read_expire) + 1) is<br>  very roughly the % streaming read efficiency your disk should get with<br>  multiple readers.</p>
+</li>
+<li><p>read_batch_expire<br>  Controls how much time a batch of reads is given before pending writes are<br>  served. A higher value is more efficient. This might be set below read_expire<br>  if writes are to be given higher priority than reads, but reads are to be<br>  as efficient as possible when there are no writes. Generally though, it<br>  should be some multiple of read_expire.</p>
+</li>
+<li><p>write_expire, and</p>
+</li>
+<li><p>write_batch_expire are equivalent to the above, for writes.</p>
+</li>
+<li><p>antic_expire<br>  Controls the maximum amount of time we can anticipate a good read (one<br>  with a short seek distance from the most recently completed request) before<br>  giving up. Many other factors may cause anticipation to be stopped early,<br>  or some processes will not be “anticipated” at all. Should be a bit higher<br>  for big seek time devices though not a linear correspondence - most<br>  processes have only a few ms thinktime.</p>
+</li>
+</ul>
+<p>In addition to the tunables above there is a read-only file named est_time<br>which, when read, will show:</p>
+<pre><code>- The probability of a task exiting without a cooperating task
+  submitting an anticipated IO.
+
+- The current mean think time.
+
+- The seek distance used to determine if an incoming IO is better.
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/" title="Kernel-2.6.32-573.12.1.el6_as-iosche" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_as-iosched/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_asus-laptop/" title="Kernel-2.6.32-573.12.1.el6_asus-laptop"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_arrayRCU/" title="Kernel-2.6.32-573.12.1.el6_arrayRCU"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

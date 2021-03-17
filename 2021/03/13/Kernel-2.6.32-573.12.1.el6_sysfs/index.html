@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_sysfs | oosTech.com</title>
+  <meta name="description" content="sysfs - The filesystem for exporting kernel objects.  Patrick Mochel    &amp;#109;&amp;#x6f;&amp;#x63;&amp;#x68;&amp;#101;&amp;#108;&amp;#x40;&amp;#x6f;&amp;#x73;&amp;#x64;&amp;#x6c;&amp;#46;&amp;#111;&amp;#x72;&amp;#103;Mike Murphy &amp;#x6d;&amp;#x61;&amp;#x6d;&amp;#117;&amp;#1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_sysfs">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="sysfs - The filesystem for exporting kernel objects.  Patrick Mochel    &amp;#109;&amp;#x6f;&amp;#x63;&amp;#x68;&amp;#101;&amp;#108;&amp;#x40;&amp;#x6f;&amp;#x73;&amp;#x64;&amp;#x6c;&amp;#46;&amp;#111;&amp;#x72;&amp;#103;Mike Murphy &amp;#x6d;&amp;#x61;&amp;#x6d;&amp;#117;&amp;#1">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_sysfs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_sysfs
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>sysfs - <em>The</em> filesystem for exporting kernel objects. </p>
+<p>Patrick Mochel    <a href="mailto:&#109;&#x6f;&#x63;&#x68;&#101;&#108;&#x40;&#x6f;&#x73;&#x64;&#x6c;&#46;&#111;&#x72;&#103;">&#109;&#x6f;&#x63;&#x68;&#101;&#108;&#x40;&#x6f;&#x73;&#x64;&#x6c;&#46;&#111;&#x72;&#103;</a><br>Mike Murphy <a href="mailto:&#x6d;&#x61;&#x6d;&#117;&#114;&#112;&#x68;&#64;&#x63;&#115;&#x2e;&#99;&#108;&#x65;&#x6d;&#x73;&#111;&#x6e;&#x2e;&#x65;&#100;&#117;">&#x6d;&#x61;&#x6d;&#117;&#114;&#112;&#x68;&#64;&#x63;&#115;&#x2e;&#99;&#108;&#x65;&#x6d;&#x73;&#111;&#x6e;&#x2e;&#x65;&#100;&#117;</a></p>
+<p>Revised:    22 February 2009<br>Original:   10 January 2003</p>
+<p>What it is:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">sysfs is a ram-based filesystem initially based on ramfs. It provides</span><br><span class="line">a means to export kernel data structures, their attributes, and the </span><br><span class="line">linkages between them to userspace. </span><br><span class="line"></span><br><span class="line">sysfs is tied inherently to the kobject infrastructure. Please read</span><br><span class="line">Documentation&#x2F;kobject.txt for more information concerning the kobject</span><br><span class="line">interface. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Using sysfs</span><br></pre></td></tr></table></figure>
+
+<p>sysfs is always compiled in if CONFIG_SYSFS is defined. You can access<br>it by doing:</p>
+<pre><code>mount -t sysfs sysfs /sys 
+</code></pre>
+<p>Directory Creation</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">For every kobject that is registered with the system, a directory is</span><br><span class="line">created for it in sysfs. That directory is created as a subdirectory</span><br><span class="line">of the kobject&#39;s parent, expressing internal object hierarchies to</span><br><span class="line">userspace. Top-level directories in sysfs represent the common</span><br><span class="line">ancestors of object hierarchies; i.e. the subsystems the objects</span><br><span class="line">belong to. </span><br><span class="line"></span><br><span class="line">Sysfs internally stores the kobject that owns the directory in the</span><br><span class="line">-&gt;d_fsdata pointer of the directory&#39;s dentry. This allows sysfs to do</span><br><span class="line">reference counting directly on the kobject when the file is opened and</span><br><span class="line">closed. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Attributes</span><br><span class="line">~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">Attributes can be exported for kobjects in the form of regular files in</span><br><span class="line">the filesystem. Sysfs forwards file I&#x2F;O operations to methods defined</span><br><span class="line">for the attributes, providing a means to read and write kernel</span><br><span class="line">attributes.</span><br><span class="line"></span><br><span class="line">Attributes should be ASCII text files, preferably with only one value</span><br><span class="line">per file. It is noted that it may not be efficient to contain only one</span><br><span class="line">value per file, so it is socially acceptable to express an array of</span><br><span class="line">values of the same type. </span><br><span class="line"></span><br><span class="line">Mixing types, expressing multiple lines of data, and doing fancy</span><br><span class="line">formatting of data is heavily frowned upon. Doing these things may get</span><br><span class="line">you publically humiliated and your code rewritten without notice. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">An attribute definition is simply:</span><br><span class="line"></span><br><span class="line">struct attribute &#123;</span><br><span class="line">        char                    * name;</span><br><span class="line">        struct module		*owner;</span><br><span class="line">        mode_t                  mode;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int sysfs_create_file(struct kobject * kobj, const struct attribute * attr);</span><br><span class="line">void sysfs_remove_file(struct kobject * kobj, const struct attribute * attr);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">A bare attribute contains no means to read or write the value of the</span><br><span class="line">attribute. Subsystems are encouraged to define their own attribute</span><br><span class="line">structure and wrapper functions for adding and removing attributes for</span><br><span class="line">a specific object type. </span><br><span class="line"></span><br><span class="line">For example, the driver model defines struct device_attribute like:</span><br><span class="line"></span><br><span class="line">struct device_attribute &#123;</span><br><span class="line">	struct attribute	attr;</span><br><span class="line">	ssize_t (*show)(struct device *dev, struct device_attribute *attr,</span><br><span class="line">			char *buf);</span><br><span class="line">	ssize_t (*store)(struct device *dev, struct device_attribute *attr,</span><br><span class="line">			 const char *buf, size_t count);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int device_create_file(struct device *, struct device_attribute *);</span><br><span class="line">void device_remove_file(struct device *, struct device_attribute *);</span><br><span class="line"></span><br><span class="line">It also defines this helper for defining device attributes: </span><br><span class="line"></span><br><span class="line">#define DEVICE_ATTR(_name, _mode, _show, _store) \</span><br><span class="line">struct device_attribute dev_attr_##_name &#x3D; __ATTR(_name, _mode, _show, _store)</span><br><span class="line"></span><br><span class="line">For example, declaring</span><br><span class="line"></span><br><span class="line">static DEVICE_ATTR(foo, S_IWUSR | S_IRUGO, show_foo, store_foo);</span><br><span class="line"></span><br><span class="line">is equivalent to doing:</span><br><span class="line"></span><br><span class="line">static struct device_attribute dev_attr_foo &#x3D; &#123;</span><br><span class="line">       .attr	&#x3D; &#123;</span><br><span class="line">		.name &#x3D; &quot;foo&quot;,</span><br><span class="line">		.mode &#x3D; S_IWUSR | S_IRUGO,</span><br><span class="line">		.show &#x3D; show_foo,</span><br><span class="line">		.store &#x3D; store_foo,</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Subsystem-Specific Callbacks</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">When a subsystem defines a new attribute type, it must implement a</span><br><span class="line">set of sysfs operations for forwarding read and write calls to the</span><br><span class="line">show and store methods of the attribute owners. </span><br><span class="line"></span><br><span class="line">struct sysfs_ops &#123;</span><br><span class="line">        ssize_t (*show)(struct kobject *, struct attribute *, char *);</span><br><span class="line">        ssize_t (*store)(struct kobject *, struct attribute *, const char *);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">[ Subsystems should have already defined a struct kobj_type as a</span><br><span class="line">descriptor for this type, which is where the sysfs_ops pointer is</span><br><span class="line">stored. See the kobject documentation for more information. ]</span><br><span class="line"></span><br><span class="line">When a file is read or written, sysfs calls the appropriate method</span><br><span class="line">for the type. The method then translates the generic struct kobject</span><br><span class="line">and struct attribute pointers to the appropriate pointer types, and</span><br><span class="line">calls the associated methods. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">To illustrate:</span><br><span class="line"></span><br><span class="line">#define to_dev_attr(_attr) container_of(_attr, struct device_attribute, attr)</span><br><span class="line">#define to_dev(d) container_of(d, struct device, kobj)</span><br><span class="line"></span><br><span class="line">static ssize_t</span><br><span class="line">dev_attr_show(struct kobject * kobj, struct attribute * attr, char * buf)</span><br><span class="line">&#123;</span><br><span class="line">        struct device_attribute * dev_attr &#x3D; to_dev_attr(attr);</span><br><span class="line">        struct device * dev &#x3D; to_dev(kobj);</span><br><span class="line">        ssize_t ret &#x3D; 0;</span><br><span class="line"></span><br><span class="line">        if (dev_attr-&gt;show)</span><br><span class="line">                ret &#x3D; dev_attr-&gt;show(dev, buf);</span><br><span class="line">        return ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Reading&#x2F;Writing Attribute Data</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">To read or write attributes, show() or store() methods must be</span><br><span class="line">specified when declaring the attribute. The method types should be as</span><br><span class="line">simple as those defined for device attributes:</span><br><span class="line"></span><br><span class="line">ssize_t (*show)(struct device * dev, struct device_attribute * attr,</span><br><span class="line">                char * buf);</span><br><span class="line">ssize_t (*store)(struct device * dev, struct device_attribute * attr,</span><br><span class="line">                 const char * buf);</span><br><span class="line"></span><br><span class="line">IOW, they should take only an object, an attribute, and a buffer as parameters.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sysfs allocates a buffer of size (PAGE_SIZE) and passes it to the</span><br><span class="line">method. Sysfs will call the method exactly once for each read or</span><br><span class="line">write. This forces the following behavior on the method</span><br><span class="line">implementations: </span><br><span class="line"></span><br><span class="line">- On read(2), the show() method should fill the entire buffer. </span><br><span class="line">  Recall that an attribute should only be exporting one value, or an</span><br><span class="line">  array of similar values, so this shouldn&#39;t be that expensive. </span><br><span class="line"></span><br><span class="line">  This allows userspace to do partial reads and forward seeks</span><br><span class="line">  arbitrarily over the entire file at will. If userspace seeks back to</span><br><span class="line">  zero or does a pread(2) with an offset of &#39;0&#39; the show() method will</span><br><span class="line">  be called again, rearmed, to fill the buffer.</span><br><span class="line"></span><br><span class="line">- On write(2), sysfs expects the entire buffer to be passed during the</span><br><span class="line">  first write. Sysfs then passes the entire buffer to the store()</span><br><span class="line">  method. </span><br><span class="line">  </span><br><span class="line">  When writing sysfs files, userspace processes should first read the</span><br><span class="line">  entire file, modify the values it wishes to change, then write the</span><br><span class="line">  entire buffer back. </span><br><span class="line"></span><br><span class="line">  Attribute method implementations should operate on an identical</span><br><span class="line">  buffer when reading and writing values. </span><br><span class="line"></span><br><span class="line">Other notes:</span><br><span class="line"></span><br><span class="line">- Writing causes the show() method to be rearmed regardless of current</span><br><span class="line">  file position.</span><br><span class="line"></span><br><span class="line">- The buffer will always be PAGE_SIZE bytes in length. On i386, this</span><br><span class="line">  is 4096. </span><br><span class="line"></span><br><span class="line">- show() methods should return the number of bytes printed into the</span><br><span class="line">  buffer. This is the return value of snprintf().</span><br><span class="line"></span><br><span class="line">- show() should always use snprintf(). </span><br><span class="line"></span><br><span class="line">- store() should return the number of bytes used from the buffer. This</span><br><span class="line">  can be done using strlen().</span><br><span class="line"></span><br><span class="line">- show() or store() can always return errors. If a bad value comes</span><br><span class="line">  through, be sure to return an error.</span><br><span class="line"></span><br><span class="line">- The object passed to the methods will be pinned in memory via sysfs</span><br><span class="line">  referencing counting its embedded object. However, the physical </span><br><span class="line">  entity (e.g. device) the object represents may not be present. Be </span><br><span class="line">  sure to have a way to check this, if necessary. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">A very simple (and naive) implementation of a device attribute is:</span><br><span class="line"></span><br><span class="line">static ssize_t show_name(struct device *dev, struct device_attribute *attr, char *buf)</span><br><span class="line">&#123;</span><br><span class="line">	return snprintf(buf, PAGE_SIZE, &quot;%s\n&quot;, dev-&gt;name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static ssize_t store_name(struct device * dev, const char * buf)</span><br><span class="line">&#123;</span><br><span class="line">	sscanf(buf, &quot;%20s&quot;, dev-&gt;name);</span><br><span class="line">	return strnlen(buf, PAGE_SIZE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static DEVICE_ATTR(name, S_IRUGO, show_name, store_name);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">(Note that the real implementation doesn&#39;t allow userspace to set the </span><br><span class="line">name for a device.)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Top Level Directory Layout</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">The sysfs directory arrangement exposes the relationship of kernel</span><br><span class="line">data structures. </span><br><span class="line"></span><br><span class="line">The top level sysfs directory looks like:</span><br><span class="line"></span><br><span class="line">block&#x2F;</span><br><span class="line">bus&#x2F;</span><br><span class="line">class&#x2F;</span><br><span class="line">dev&#x2F;</span><br><span class="line">devices&#x2F;</span><br><span class="line">firmware&#x2F;</span><br><span class="line">net&#x2F;</span><br><span class="line">fs&#x2F;</span><br><span class="line"></span><br><span class="line">devices&#x2F; contains a filesystem representation of the device tree. It maps</span><br><span class="line">directly to the internal kernel device tree, which is a hierarchy of</span><br><span class="line">struct device. </span><br><span class="line"></span><br><span class="line">bus&#x2F; contains flat directory layout of the various bus types in the</span><br><span class="line">kernel. Each bus&#39;s directory contains two subdirectories:</span><br><span class="line"></span><br><span class="line">	devices&#x2F;</span><br><span class="line">	drivers&#x2F;</span><br><span class="line"></span><br><span class="line">devices&#x2F; contains symlinks for each device discovered in the system</span><br><span class="line">that point to the device&#39;s directory under root&#x2F;.</span><br><span class="line"></span><br><span class="line">drivers&#x2F; contains a directory for each device driver that is loaded</span><br><span class="line">for devices on that particular bus (this assumes that drivers do not</span><br><span class="line">span multiple bus types).</span><br><span class="line"></span><br><span class="line">fs&#x2F; contains a directory for some filesystems.  Currently each</span><br><span class="line">filesystem wanting to export attributes must create its own hierarchy</span><br><span class="line">below fs&#x2F; (see .&#x2F;fuse.txt for an example).</span><br><span class="line"></span><br><span class="line">dev&#x2F; contains two directories char&#x2F; and block&#x2F;. Inside these two</span><br><span class="line">directories there are symlinks named &lt;major&gt;:&lt;minor&gt;.  These symlinks</span><br><span class="line">point to the sysfs directory for the given device.  &#x2F;sys&#x2F;dev provides a</span><br><span class="line">quick way to lookup the sysfs interface for a device from the result of</span><br><span class="line">a stat(2) operation.</span><br><span class="line"></span><br><span class="line">More information can driver-model specific features can be found in</span><br><span class="line">Documentation&#x2F;driver-model&#x2F;. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">TODO: Finish this section.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Current Interfaces</span><br></pre></td></tr></table></figure>
+
+<p>The following interface layers currently exist in sysfs:</p>
+<ul>
+<li>devices (include/linux/device.h)</li>
+</ul>
+<hr>
+<p>Structure:</p>
+<p>struct device_attribute {<br>    struct attribute    attr;<br>    ssize_t (*show)(struct device *dev, struct device_attribute *attr,<br>            char *buf);<br>    ssize_t (*store)(struct device *dev, struct device_attribute *attr,<br>             const char *buf, size_t count);<br>};</p>
+<p>Declaring:</p>
+<p>DEVICE_ATTR(_name, _mode, _show, _store);</p>
+<p>Creation/Removal:</p>
+<p>int device_create_file(struct device *device, struct device_attribute * attr);<br>void device_remove_file(struct device * dev, struct device_attribute * attr);</p>
+<ul>
+<li>bus drivers (include/linux/device.h)</li>
+</ul>
+<hr>
+<p>Structure:</p>
+<p>struct bus_attribute {<br>        struct attribute        attr;<br>        ssize_t (*show)(struct bus_type *, char * buf);<br>        ssize_t (*store)(struct bus_type *, const char * buf);<br>};</p>
+<p>Declaring:</p>
+<p>BUS_ATTR(_name, _mode, _show, _store)</p>
+<p>Creation/Removal:</p>
+<p>int bus_create_file(struct bus_type *, struct bus_attribute *);<br>void bus_remove_file(struct bus_type *, struct bus_attribute *);</p>
+<ul>
+<li>device drivers (include/linux/device.h)</li>
+</ul>
+<hr>
+<p>Structure:</p>
+<p>struct driver_attribute {<br>        struct attribute        attr;<br>        ssize_t (*show)(struct device_driver *, char * buf);<br>        ssize_t (*store)(struct device_driver *, const char * buf,<br>                         size_t count);<br>};</p>
+<p>Declaring:</p>
+<p>DRIVER_ATTR(_name, _mode, _show, _store)</p>
+<p>Creation/Removal:</p>
+<p>int driver_create_file(struct device_driver *, struct driver_attribute *);<br>void driver_remove_file(struct device_driver *, struct driver_attribute *);</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/" title="Kernel-2.6.32-573.12.1.el6_sysfs" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysfs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysv-fs/" title="Kernel-2.6.32-573.12.1.el6_sysv-fs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sysrq/" title="Kernel-2.6.32-573.12.1.el6_sysrq"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

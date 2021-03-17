@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_blkio-controller | oosTech.com</title>
+  <meta name="description" content="Block IO Controller             &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  Overviewcgroup subsys “blkio” implements the block io controller. There seems to bea need of various kinds of IO control policies (like">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_blkio-controller">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Block IO Controller             &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  Overviewcgroup subsys “blkio” implements the block io controller. There seems to bea need of various kinds of IO control policies (like">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HOWTO"><span class="toc-number">2.</span> <span class="toc-text">HOWTO</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Hierarchical-Cgroups"><span class="toc-number">3.</span> <span class="toc-text">Hierarchical Cgroups</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Various-user-visible-config-options"><span class="toc-number">4.</span> <span class="toc-text">Various user visible config options</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Details-of-cgroup-files"><span class="toc-number">5.</span> <span class="toc-text">Details of cgroup files</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CFQ-sysfs-tunable"><span class="toc-number">6.</span> <span class="toc-text">CFQ sysfs tunable</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#What-works"><span class="toc-number">7.</span> <span class="toc-text">What works</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_blkio-controller" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_blkio-controller
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>            Block IO Controller
+            ===================
+</code></pre>
+<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>cgroup subsys “blkio” implements the block io controller. There seems to be<br>a need of various kinds of IO control policies (like proportional BW, max BW)<br>both at leaf nodes as well as at intermediate nodes in a storage hierarchy.<br>Plan is to use the same cgroup based management interface for blkio controller<br>and based on user options switch IO policies in the background.</p>
+<p>In the first phase, this patchset implements proportional weight time based<br>division of disk policy. It is implemented in CFQ. Hence this policy takes<br>effect only on leaf nodes when CFQ is being used.</p>
+<h1 id="HOWTO"><a href="#HOWTO" class="headerlink" title="HOWTO"></a>HOWTO</h1><p>You can do a very simple testing of running two dd threads in two different<br>cgroups. Here is what you can do.</p>
+<ul>
+<li><p>Enable Block IO controller<br>  CONFIG_BLK_CGROUP=y</p>
+</li>
+<li><p>Enable group scheduling in CFQ<br>  CONFIG_CFQ_GROUP_IOSCHED=y</p>
+</li>
+<li><p>Compile and boot into kernel and mount IO controller (blkio).</p>
+<p>  mount -t cgroup -o blkio none /cgroup</p>
+</li>
+<li><p>Create two cgroups<br>  mkdir -p /cgroup/test1/ /cgroup/test2</p>
+</li>
+<li><p>Set weights of group test1 and test2<br>  echo 1000 &gt; /cgroup/test1/blkio.weight<br>  echo 500 &gt; /cgroup/test2/blkio.weight</p>
+</li>
+<li><p>Create two same size files (say 512MB each) on same disk (file1, file2) and<br>launch two dd threads in different cgroup to read those files.</p>
+<p>  sync<br>  echo 3 &gt; /proc/sys/vm/drop_caches</p>
+<p>  dd if=/mnt/sdb/zerofile1 of=/dev/null &amp;<br>  echo $! &gt; /cgroup/test1/tasks<br>  cat /cgroup/test1/tasks</p>
+<p>  dd if=/mnt/sdb/zerofile2 of=/dev/null &amp;<br>  echo $! &gt; /cgroup/test2/tasks<br>  cat /cgroup/test2/tasks</p>
+</li>
+<li><p>At macro level, first dd should finish first. To get more precise data, keep<br>on looking at (with the help of script), at blkio.disk_time and<br>blkio.disk_sectors files of both test1 and test2 groups. This will tell how<br>much disk time (in milli seconds), each group got and how many secotors each<br>group dispatched to the disk. We provide fairness in terms of disk time, so<br>ideally io.disk_time of cgroups should be in proportion to the weight.</p>
+</li>
+</ul>
+<h1 id="Hierarchical-Cgroups"><a href="#Hierarchical-Cgroups" class="headerlink" title="Hierarchical Cgroups"></a>Hierarchical Cgroups</h1><ul>
+<li><p>Currently none of the IO control policy supports hierarhical groups. But<br>cgroup interface does allow creation of hierarhical cgroups and internally<br>IO policies treat them as flat hierarchy.</p>
+<p>So this patch will allow creation of cgroup hierarhcy but at the backend<br>everything will be treated as flat. So if somebody created a hierarchy like<br>as follows.</p>
+<pre><code>      root
+      /  \
+       test1 test2
+      |
+       test3
+</code></pre>
+<p>CFQ and throttling will practically treat all groups at same level.</p>
+<pre><code>          pivot
+           /  |   \  \
+      root  test1 test2  test3
+</code></pre>
+<p>Down the line we can implement hierarchical accounting/control support<br>and also introduce a new cgroup file “use_hierarchy” which will control<br>whether cgroup hierarchy is viewed as flat or hierarchical by the policy..<br>This is how memory controller also has implemented the things.</p>
+</li>
+</ul>
+<h1 id="Various-user-visible-config-options"><a href="#Various-user-visible-config-options" class="headerlink" title="Various user visible config options"></a>Various user visible config options</h1><p>CONFIG_BLK_CGROUP<br>    - Block IO controller.</p>
+<p>CONFIG_DEBUG_BLK_CGROUP<br>    - Debug help. Right now some additional stats file show up in cgroup<br>      if this option is enabled.</p>
+<p>CONFIG_CFQ_GROUP_IOSCHED<br>    - Enables group scheduling in CFQ. Currently only 1 level of group<br>      creation is allowed.</p>
+<h1 id="Details-of-cgroup-files"><a href="#Details-of-cgroup-files" class="headerlink" title="Details of cgroup files"></a>Details of cgroup files</h1><ul>
+<li><p>blkio.weight</p>
+<ul>
+<li>Specifies per cgroup weight.<br>Currently allowed range of weights is from 100 to 1000.</li>
+</ul>
+</li>
+<li><p>blkio.time</p>
+<ul>
+<li>disk time allocated to cgroup per device in milliseconds. First<br>two fields specify the major and minor number of the device and<br>third field specifies the disk time allocated to group in<br>milliseconds.</li>
+</ul>
+</li>
+<li><p>blkio.sectors</p>
+<ul>
+<li>number of sectors transferred to/from disk by the group. First<br>two fields specify the major and minor number of the device and<br>third field specifies the number of sectors transferred by the<br>group to/from the device.</li>
+</ul>
+</li>
+<li><p>blkio.io_service_bytes</p>
+<ul>
+<li>Number of bytes transferred to/from the disk by the group. These<br>are further divided by the type of operation - read or write, sync<br>or async. First two fields specify the major and minor number of the<br>device, third field specifies the operation type and the fourth field<br>specifies the number of bytes.</li>
+</ul>
+</li>
+<li><p>blkio.io_serviced</p>
+<ul>
+<li>Number of IOs completed to/from the disk by the group. These<br>are further divided by the type of operation - read or write, sync<br>or async. First two fields specify the major and minor number of the<br>device, third field specifies the operation type and the fourth field<br>specifies the number of IOs.</li>
+</ul>
+</li>
+<li><p>blkio.io_service_time</p>
+<ul>
+<li>Total amount of time between request dispatch and request completion<br>for the IOs done by this cgroup. This is in nanoseconds to make it<br>meaningful for flash devices too. For devices with queue depth of 1,<br>this time represents the actual service time. When queue_depth &gt; 1,<br>that is no longer true as requests may be served out of order. This<br>may cause the service time for a given IO to include the service time<br>of multiple IOs when served out of order which may result in total<br>io_service_time &gt; actual time elapsed. This time is further divided by<br>the type of operation - read or write, sync or async. First two fields<br>specify the major and minor number of the device, third field<br>specifies the operation type and the fourth field specifies the<br>io_service_time in ns.</li>
+</ul>
+</li>
+<li><p>blkio.io_wait_time</p>
+<ul>
+<li>Total amount of time the IOs for this cgroup spent waiting in the<br>scheduler queues for service. This can be greater than the total time<br>elapsed since it is cumulative io_wait_time for all IOs. It is not a<br>measure of total time the cgroup spent waiting but rather a measure of<br>the wait_time for its individual IOs. For devices with queue_depth &gt; 1<br>this metric does not include the time spent waiting for service once<br>the IO is dispatched to the device but till it actually gets serviced<br>(there might be a time lag here due to re-ordering of requests by the<br>device). This is in nanoseconds to make it meaningful for flash<br>devices too. This time is further divided by the type of operation -<br>read or write, sync or async. First two fields specify the major and<br>minor number of the device, third field specifies the operation type<br>and the fourth field specifies the io_wait_time in ns.</li>
+</ul>
+</li>
+<li><p>blkio.io_merged</p>
+<ul>
+<li>Total number of bios/requests merged into requests belonging to this<br>cgroup. This is further divided by the type of operation - read or<br>write, sync or async.</li>
+</ul>
+</li>
+<li><p>blkio.io_queued</p>
+<ul>
+<li>Total number of requests queued up at any given instant for this<br>cgroup. This is further divided by the type of operation - read or<br>write, sync or async.</li>
+</ul>
+</li>
+<li><p>blkio.avg_queue_size</p>
+<ul>
+<li>Debugging aid only enabled if CONFIG_DEBUG_BLK_CGROUP=y.<br>The average queue size for this cgroup over the entire time of this<br>cgroup’s existence. Queue size samples are taken each time one of the<br>queues of this cgroup gets a timeslice.</li>
+</ul>
+</li>
+<li><p>blkio.group_wait_time</p>
+<ul>
+<li>Debugging aid only enabled if CONFIG_DEBUG_BLK_CGROUP=y.<br>This is the amount of time the cgroup had to wait since it became busy<br>(i.e., went from 0 to 1 request queued) to get a timeslice for one of<br>its queues. This is different from the io_wait_time which is the<br>cumulative total of the amount of time spent by each IO in that cgroup<br>waiting in the scheduler queue. This is in nanoseconds. If this is<br>read when the cgroup is in a waiting (for timeslice) state, the stat<br>will only report the group_wait_time accumulated till the last time it<br>got a timeslice and will not include the current delta.</li>
+</ul>
+</li>
+<li><p>blkio.empty_time</p>
+<ul>
+<li>Debugging aid only enabled if CONFIG_DEBUG_BLK_CGROUP=y.<br>This is the amount of time a cgroup spends without any pending<br>requests when not being served, i.e., it does not include any time<br>spent idling for one of the queues of the cgroup. This is in<br>nanoseconds. If this is read when the cgroup is in an empty state,<br>the stat will only report the empty_time accumulated till the last<br>time it had a pending request and will not include the current delta.</li>
+</ul>
+</li>
+<li><p>blkio.idle_time</p>
+<ul>
+<li>Debugging aid only enabled if CONFIG_DEBUG_BLK_CGROUP=y.<br>This is the amount of time spent by the IO scheduler idling for a<br>given cgroup in anticipation of a better request than the exising ones<br>from other queues/cgroups. This is in nanoseconds. If this is read<br>when the cgroup is in an idling state, the stat will only report the<br>idle_time accumulated till the last idle period and will not include<br>the current delta.</li>
+</ul>
+</li>
+<li><p>blkio.dequeue</p>
+<ul>
+<li>Debugging aid only enabled if CONFIG_DEBUG_BLK_CGROUP=y. This<br>gives the statistics about how many a times a group was dequeued<br>from service tree of the device. First two fields specify the major<br>and minor number of the device and third field specifies the number<br>of times a group was dequeued from a particular device.</li>
+</ul>
+</li>
+<li><p>blkio.reset_stats</p>
+<ul>
+<li>Writing an int to this file will result in resetting all the stats<br>for that cgroup.</li>
+</ul>
+</li>
+</ul>
+<h1 id="CFQ-sysfs-tunable"><a href="#CFQ-sysfs-tunable" class="headerlink" title="CFQ sysfs tunable"></a>CFQ sysfs tunable</h1><p>/sys/block/<disk>/queue/iosched/group_isolation</p>
+<p>If group_isolation=1, it provides stronger isolation between groups at the<br>expense of throughput. By default group_isolation is 1. In general that<br>means that if group_isolation=0, expect fairness for sequential workload<br>only. Set group_isolation=1 to see fairness for random IO workload also.</p>
+<p>Generally CFQ will put random seeky workload in sync-noidle category. CFQ<br>will disable idling on these queues and it does a collective idling on group<br>of such queues. Generally these are slow moving queues and if there is a<br>sync-noidle service tree in each group, that group gets exclusive access to<br>disk for certain period. That means it will bring the throughput down if<br>group does not have enough IO to drive deeper queue depths and utilize disk<br>capacity to the fullest in the slice allocated to it. But the flip side is<br>that even a random reader should get better latencies and overall throughput<br>if there are lots of sequential readers/sync-idle workload running in the<br>system.</p>
+<p>If group_isolation=0, then CFQ automatically moves all the random seeky queues<br>in the root group. That means there will be no service differentiation for<br>that kind of workload. This leads to better throughput as we do collective<br>idling on root sync-noidle tree.</p>
+<h1 id="What-works"><a href="#What-works" class="headerlink" title="What works"></a>What works</h1><ul>
+<li>Currently only sync IO queues are support. All the buffered writes are<br>still system wide and not per group. Hence we will not see service<br>differentiation between buffered writes between groups.</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/" title="Kernel-2.6.32-573.12.1.el6_blkio-controller" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_blkio-controller/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_board/" title="Kernel-2.6.32-573.12.1.el6_boar"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_binfmt_misc/" title="Kernel-2.6.32-573.12.1.el6_binfmt_misc"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

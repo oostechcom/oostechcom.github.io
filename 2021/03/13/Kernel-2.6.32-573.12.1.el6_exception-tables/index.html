@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_exception-tables | oosTech.com</title>
+  <meta name="description" content="Kernel level exception handling in Linux    Commentary by Joerg Pommnitz &amp;#106;&amp;#x6f;&amp;#x65;&amp;#114;&amp;#103;&amp;#x40;&amp;#114;&amp;#97;&amp;#x6c;&amp;#101;&amp;#x69;&amp;#103;&amp;#104;&amp;#46;&amp;#x69;&amp;#98;&amp;#x6d;&amp;#x2e;&amp;#99;&amp;#x6f;&amp;#x6d; Whe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_exception-tables">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Kernel level exception handling in Linux    Commentary by Joerg Pommnitz &amp;#106;&amp;#x6f;&amp;#x65;&amp;#114;&amp;#103;&amp;#x40;&amp;#114;&amp;#97;&amp;#x6c;&amp;#101;&amp;#x69;&amp;#103;&amp;#104;&amp;#46;&amp;#x69;&amp;#98;&amp;#x6d;&amp;#x2e;&amp;#99;&amp;#x6f;&amp;#x6d; Whe">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_exception-tables" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_exception-tables
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code> Kernel level exception handling in Linux
+</code></pre>
+<p>  Commentary by Joerg Pommnitz <a href="mailto:&#106;&#x6f;&#x65;&#114;&#103;&#x40;&#114;&#97;&#x6c;&#101;&#x69;&#103;&#104;&#46;&#x69;&#98;&#x6d;&#x2e;&#99;&#x6f;&#x6d;">&#106;&#x6f;&#x65;&#114;&#103;&#x40;&#114;&#97;&#x6c;&#101;&#x69;&#103;&#104;&#46;&#x69;&#98;&#x6d;&#x2e;&#99;&#x6f;&#x6d;</a></p>
+<p>When a process runs in kernel mode, it often has to access user<br>mode memory whose address has been passed by an untrusted program.<br>To protect itself the kernel has to verify this address.</p>
+<p>In older versions of Linux this was done with the<br>int verify_area(int type, const void * addr, unsigned long size)<br>function (which has since been replaced by access_ok()).</p>
+<p>This function verified that the memory area starting at address<br>‘addr’ and of size ‘size’ was accessible for the operation specified<br>in type (read or write). To do this, verify_read had to look up the<br>virtual memory area (vma) that contained the address addr. In the<br>normal case (correctly working program), this test was successful.<br>It only failed for a few buggy programs. In some kernel profiling<br>tests, this normally unneeded verification used up a considerable<br>amount of time.</p>
+<p>To overcome this situation, Linus decided to let the virtual memory<br>hardware present in every Linux-capable CPU handle this test.</p>
+<p>How does this work?</p>
+<p>Whenever the kernel tries to access an address that is currently not<br>accessible, the CPU generates a page fault exception and calls the<br>page fault handler</p>
+<p>void do_page_fault(struct pt_regs *regs, unsigned long error_code)</p>
+<p>in arch/x86/mm/fault.c. The parameters on the stack are set up by<br>the low level assembly glue in arch/x86/kernel/entry_32.S. The parameter<br>regs is a pointer to the saved registers on the stack, error_code<br>contains a reason code for the exception.</p>
+<p>do_page_fault first obtains the unaccessible address from the CPU<br>control register CR2. If the address is within the virtual address<br>space of the process, the fault probably occurred, because the page<br>was not swapped in, write protected or something similar. However,<br>we are interested in the other case: the address is not valid, there<br>is no vma that contains this address. In this case, the kernel jumps<br>to the bad_area label.</p>
+<p>There it uses the address of the instruction that caused the exception<br>(i.e. regs-&gt;eip) to find an address where the execution can continue<br>(fixup). If this search is successful, the fault handler modifies the<br>return address (again regs-&gt;eip) and returns. The execution will<br>continue at the address in fixup.</p>
+<p>Where does fixup point to?</p>
+<p>Since we jump to the contents of fixup, fixup obviously points<br>to executable code. This code is hidden inside the user access macros.<br>I have picked the get_user macro defined in arch/x86/include/asm/uaccess.h<br>as an example. The definition is somewhat hard to follow, so let’s peek at<br>the code generated by the preprocessor and the compiler. I selected<br>the get_user call in drivers/char/sysrq.c for a detailed examination.</p>
+<p>The original code in sysrq.c line 587:<br>        get_user(c, buf);</p>
+<p>The preprocessor output (edited to become somewhat readable):</p>
+<p>(<br>  {<br>    long <strong>gu_err = - 14 , __gu_val = 0;<br>    const __typeof</strong>(<em>( (  buf ) )) <em>__gu_addr = ((buf));<br>    if (((((0 + current_set[0])-&gt;tss.segment) == 0x18 )  ||<br>       (((sizeof(</em>(buf))) &lt;= 0xC0000000UL) &amp;&amp;<br>       ((unsigned long)(__gu_addr ) &lt;= 0xC0000000UL - (sizeof(</em>(buf)))))))<br>      do {<br>        <strong>gu_err  = 0;<br>        switch ((sizeof(<em>(buf)))) {<br>          case 1:<br>            <strong>asm</strong> <strong>volatile</strong>(<br>              “1:      mov” “b” “ %2,%” “b” “1\n”<br>              “2:\n”<br>              “.section .fixup,&quot;ax&quot;\n”<br>              “3:      movl %3,%0\n”<br>              “        xor” “b” “ %” “b” “1,%” “b” “1\n”<br>              “        jmp 2b\n”<br>              “.section __ex_table,&quot;a&quot;\n”<br>              “        .align 4\n”<br>              “        .long 1b,3b\n”<br>              “.text”        : “=r”(__gu_err), “=q” (__gu_val): “m”((</em>(struct __large_struct <em>)<br>                            (   <strong>gu_addr   )) ), “i”(- 14 ), “0”(  __gu_err  )) ;<br>              break;<br>          case 2:<br>            __asm</strong> <strong>volatile</strong>(<br>              “1:      mov” “w” “ %2,%” “w” “1\n”<br>              “2:\n”<br>              “.section .fixup,&quot;ax&quot;\n”<br>              “3:      movl %3,%0\n”<br>              “        xor” “w” “ %” “w” “1,%” “w” “1\n”<br>              “        jmp 2b\n”<br>              “.section __ex_table,&quot;a&quot;\n”<br>              “        .align 4\n”<br>              “        .long 1b,3b\n”<br>              “.text”        : “=r”(__gu_err), “=r” (__gu_val) : “m”((</em>(struct __large_struct <em>)<br>                            (   <strong>gu_addr   )) ), “i”(- 14 ), “0”(  __gu_err  ));<br>              break;<br>          case 4:<br>            __asm</strong> <strong>volatile</strong>(<br>              “1:      mov” “l” “ %2,%” “” “1\n”<br>              “2:\n”<br>              “.section .fixup,&quot;ax&quot;\n”<br>              “3:      movl %3,%0\n”<br>              “        xor” “l” “ %” “” “1,%” “” “1\n”<br>              “        jmp 2b\n”<br>              “.section __ex_table,&quot;a&quot;\n”<br>              “        .align 4\n”        “        .long 1b,3b\n”<br>              “.text”        : “=r”(__gu_err), “=r” (__gu_val) : “m”((</em>(struct __large_struct *)<br>                            (   __gu_addr   )) ), “i”(- 14 ), “0”(__gu_err));<br>              break;<br>          default:<br>            (__gu_val) = __get_user_bad();<br>        }<br>      } while (0) ;<br>    ((c)) = (__typeof</strong>(*((buf))))__gu_val;<br>    __gu_err;<br>  }<br>);</p>
+<p>WOW! Black GCC/assembly magic. This is impossible to follow, so let’s<br>see what code gcc generates:</p>
+<blockquote>
+<pre><code>    xorl %edx,%edx
+    movl current_set,%eax
+    cmpl $24,788(%eax)
+    je .L1424
+    cmpl $-1073741825,64(%esp)
+    ja .L1423
+</code></pre>
+<p>.L1424:<br>        movl %edx,%eax<br>        movl 64(%esp),%ebx<br>#APP<br>1:      movb (%ebx),%dl                /* this is the actual user access */<br>2:<br>.section .fixup,”ax”<br>3:      movl $-14,%eax<br>        xorb %dl,%dl<br>        jmp 2b<br>.section __ex_table,”a”<br>        .align 4<br>        .long 1b,3b<br>.text<br>#NO_APP<br>.L1423:<br>        movzbl %dl,%esi</p>
+</blockquote>
+<p>The optimizer does a good job and gives us something we can actually<br>understand. Can we? The actual user access is quite obvious. Thanks<br>to the unified address space we can just access the address in user<br>memory. But what does the .section stuff do?????</p>
+<p>To understand this we have to look at the final kernel:</p>
+<blockquote>
+<p>objdump –section-headers vmlinux</p>
+<p>vmlinux:     file format elf32-i386</p>
+<p>Sections:<br>Idx Name          Size      VMA       LMA       File off  Algn<br>  0 .text         00098f40  c0100000  c0100000  00001000  2<strong>4<br>                  CONTENTS, ALLOC, LOAD, READONLY, CODE<br>  1 .fixup        000016bc  c0198f40  c0198f40  00099f40  2</strong>0<br>                  CONTENTS, ALLOC, LOAD, READONLY, CODE<br>  2 .rodata       0000f127  c019a5fc  c019a5fc  0009b5fc  2<strong>2<br>                  CONTENTS, ALLOC, LOAD, READONLY, DATA<br>  3 __ex_table    000015c0  c01a9724  c01a9724  000aa724  2</strong>2<br>                  CONTENTS, ALLOC, LOAD, READONLY, DATA<br>  4 .data         0000ea58  c01abcf0  c01abcf0  000abcf0  2<strong>4<br>                  CONTENTS, ALLOC, LOAD, DATA<br>  5 .bss          00018e21  c01ba748  c01ba748  000ba748  2</strong>2<br>                  ALLOC<br>  6 .comment      00000ec4  00000000  00000000  000ba748  2<strong>0<br>                  CONTENTS, READONLY<br>  7 .note         00001068  00000ec4  00000ec4  000bb60c  2</strong>0<br>                  CONTENTS, READONLY</p>
+</blockquote>
+<p>There are obviously 2 non standard ELF sections in the generated object<br>file. But first we want to find out what happened to our code in the<br>final kernel executable:</p>
+<blockquote>
+<p>objdump –disassemble –section=.text vmlinux</p>
+<p>c017e785 &lt;do_con_write+c1&gt; xorl   %edx,%edx<br>c017e787 &lt;do_con_write+c3&gt; movl   0xc01c7bec,%eax<br>c017e78c &lt;do_con_write+c8&gt; cmpl   $0x18,0x314(%eax)<br>c017e793 &lt;do_con_write+cf&gt; je     c017e79f &lt;do_con_write+db&gt;<br>c017e795 &lt;do_con_write+d1&gt; cmpl   $0xbfffffff,0x40(%esp,1)<br>c017e79d &lt;do_con_write+d9&gt; ja     c017e7a7 &lt;do_con_write+e3&gt;<br>c017e79f &lt;do_con_write+db&gt; movl   %edx,%eax<br>c017e7a1 &lt;do_con_write+dd&gt; movl   0x40(%esp,1),%ebx<br>c017e7a5 &lt;do_con_write+e1&gt; movb   (%ebx),%dl<br>c017e7a7 &lt;do_con_write+e3&gt; movzbl %dl,%esi</p>
+</blockquote>
+<p>The whole user memory access is reduced to 10 x86 machine instructions.<br>The instructions bracketed in the .section directives are no longer<br>in the normal execution path. They are located in a different section<br>of the executable file:</p>
+<blockquote>
+<p>objdump –disassemble –section=.fixup vmlinux</p>
+<p>c0199ff5 &lt;.fixup+10b5&gt; movl   $0xfffffff2,%eax<br>c0199ffa &lt;.fixup+10ba&gt; xorb   %dl,%dl<br>c0199ffc &lt;.fixup+10bc&gt; jmp    c017e7a7 &lt;do_con_write+e3&gt;</p>
+</blockquote>
+<p>And finally:</p>
+<blockquote>
+<p>objdump –full-contents –section=__ex_table vmlinux</p>
+<p> c01aa7c4 93c017c0 e09f19c0 97c017c0 99c017c0  …………….<br> c01aa7d4 f6c217c0 e99f19c0 a5e717c0 f59f19c0  …………….<br> c01aa7e4 080a18c0 01a019c0 0a0a18c0 04a019c0  …………….</p>
+</blockquote>
+<p>or in human readable byte order:</p>
+<blockquote>
+<p> c01aa7c4 c017c093 c0199fe0 c017c097 c017c099  …………….<br> c01aa7d4 c017c2f6 c0199fe9 c017e7a5 c0199ff5  …………….<br>                               ^^^^^^^^^^^^^^^^^<br>                               this is the interesting part!<br> c01aa7e4 c0180a08 c019a001 c0180a0a c019a004  …………….</p>
+</blockquote>
+<p>What happened? The assembly directives</p>
+<p>.section .fixup,”ax”<br>.section __ex_table,”a”</p>
+<p>told the assembler to move the following code to the specified<br>sections in the ELF object file. So the instructions<br>3:      movl $-14,%eax<br>        xorb %dl,%dl<br>        jmp 2b<br>ended up in the .fixup section of the object file and the addresses<br>        .long 1b,3b<br>ended up in the __ex_table section of the object file. 1b and 3b<br>are local labels. The local label 1b (1b stands for next label 1<br>backward) is the address of the instruction that might fault, i.e.<br>in our case the address of the label 1 is c017e7a5:<br>the original assembly code: &gt; 1:      movb (%ebx),%dl<br>and linked in vmlinux     : &gt; c017e7a5 &lt;do_con_write+e1&gt; movb   (%ebx),%dl</p>
+<p>The local label 3 (backwards again) is the address of the code to handle<br>the fault, in our case the actual value is c0199ff5:<br>the original assembly code: &gt; 3:      movl $-14,%eax<br>and linked in vmlinux     : &gt; c0199ff5 &lt;.fixup+10b5&gt; movl   $0xfffffff2,%eax</p>
+<p>The assembly code</p>
+<blockquote>
+<p>.section __ex_table,”a”<br>        .align 4<br>        .long 1b,3b</p>
+</blockquote>
+<p>becomes the value pair</p>
+<blockquote>
+<p> c01aa7d4 c017c2f6 c0199fe9 c017e7a5 c0199ff5  …………….<br>                               ^this is ^this is<br>                               1b       3b<br>c017e7a5,c0199ff5 in the exception table of the kernel.</p>
+</blockquote>
+<p>So, what actually happens if a fault from kernel mode with no suitable<br>vma occurs?</p>
+<p>1.) access to invalid address:</p>
+<blockquote>
+<p>c017e7a5 &lt;do_con_write+e1&gt; movb   (%ebx),%dl<br>2.) MMU generates exception<br>3.) CPU calls do_page_fault<br>4.) do page fault calls search_exception_table (regs-&gt;eip == c017e7a5);<br>5.) search_exception_table looks up the address c017e7a5 in the<br>    exception table (i.e. the contents of the ELF section __ex_table)<br>    and returns the address of the associated fault handle code c0199ff5.<br>6.) do_page_fault modifies its own return address to point to the fault<br>    handle code and returns.<br>7.) execution continues in the fault handling code.<br>8.) 8a) EAX becomes -EFAULT (== -14)<br>    8b) DL  becomes zero (the value we “read” from user space)<br>    8c) execution continues at local label 2 (address of the<br>        instruction immediately after the faulting user access).</p>
+</blockquote>
+<p>The steps 8a to 8c in a certain way emulate the faulting instruction.</p>
+<p>That’s it, mostly. If you look at our example, you might ask why<br>we set EAX to -EFAULT in the exception handler code. Well, the<br>get_user macro actually returns a value: 0, if the user access was<br>successful, -EFAULT on failure. Our original code did not test this<br>return value, however the inline assembly code in get_user tries to<br>return -EFAULT. GCC selected EAX to return this value.</p>
+<p>NOTE:<br>Due to the way that the exception table is built and needs to be ordered,<br>only use exceptions for code in the .text section.  Any other section<br>will cause the exception table to not be sorted correctly, and the<br>exceptions will fail.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/" title="Kernel-2.6.32-573.12.1.el6_exception-tables" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_exception-tables/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_exofs/" title="Kernel-2.6.32-573.12.1.el6_exofs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_ewrk3/" title="Kernel-2.6.32-573.12.1.el6_ewrk3"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

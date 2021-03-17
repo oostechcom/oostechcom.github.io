@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_tracepoint-analysis | oosTech.com</title>
+  <meta name="description" content="Notes on Analysing Behaviour Using Events and Tracepoints          Documentation written by Mel Gorman     PCL information heavily based on email from Ingo Molnar   Introduction  Tracepoints (see">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_tracepoint-analysis">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Notes on Analysing Behaviour Using Events and Tracepoints          Documentation written by Mel Gorman     PCL information heavily based on email from Ingo Molnar   Introduction  Tracepoints (see">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Listing-Available-Events"><span class="toc-number">2.</span> <span class="toc-text">Listing Available Events</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Standard-Utilities"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 Standard Utilities</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-PCL"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 PCL</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Enabling-Events"><span class="toc-number">3.</span> <span class="toc-text">Enabling Events</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-System-Wide-Event-Enabling"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 System-Wide Event Enabling</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-System-Wide-Event-Enabling-with-SystemTap"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 System-Wide Event Enabling with SystemTap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-System-Wide-Event-Enabling-with-PCL"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 System-Wide Event Enabling with PCL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-Local-Event-Enabling"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 Local Event Enabling</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-Local-Event-Enablement-with-PCL"><span class="toc-number">3.5.</span> <span class="toc-text">2.5 Local Event Enablement with PCL</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Event-Filtering"><span class="toc-number">4.</span> <span class="toc-text">Event Filtering</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Analysing-Event-Variances-with-PCL"><span class="toc-number">5.</span> <span class="toc-text">Analysing Event Variances with PCL</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Higher-Level-Analysis-with-Helper-Scripts"><span class="toc-number">6.</span> <span class="toc-text">Higher-Level Analysis with Helper Scripts</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Lower-Level-Analysis-with-PCL"><span class="toc-number">7.</span> <span class="toc-text">Lower-Level Analysis with PCL</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Samples-30922"><span class="toc-number">8.</span> <span class="toc-text">Samples: 30922</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">9.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Overhead-Command-Shared-Object"><span class="toc-number">10.</span> <span class="toc-text">Overhead    Command                     Shared Object</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6"><span class="toc-number">11.</span> <span class="toc-text">……..  ………  …………………………..</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-1"><span class="toc-number">12.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-2"><span class="toc-number">13.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#For-more-details-try-perf-report-%E2%80%93sort-comm-dso-symbol"><span class="toc-number">14.</span> <span class="toc-text">(For more details, try: perf report –sort comm,dso,symbol)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-3"><span class="toc-number">15.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Samples-27666"><span class="toc-number">16.</span> <span class="toc-text">Samples: 27666</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-4"><span class="toc-number">17.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Overhead-Command-Shared-Object-1"><span class="toc-number">18.</span> <span class="toc-text">Overhead  Command                            Shared Object</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6"><span class="toc-number">19.</span> <span class="toc-text">……..  …….  …………………………………</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-5"><span class="toc-number">20.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-6"><span class="toc-number">21.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#For-more-details-try-perf-report-%E2%80%93sort-comm-dso-symbol-1"><span class="toc-number">22.</span> <span class="toc-text">(For more details, try: perf report –sort comm,dso,symbol)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-7"><span class="toc-number">23.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Samples-27666-1"><span class="toc-number">24.</span> <span class="toc-text">Samples: 27666</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-8"><span class="toc-number">25.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Overhead-Command-Shared-Object-Symbol"><span class="toc-number">26.</span> <span class="toc-text">Overhead  Command                            Shared Object  Symbol</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6%E2%80%A6-%E2%80%A6%E2%80%A6"><span class="toc-number">27.</span> <span class="toc-text">……..  …….  …………………………………  ……</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#-9"><span class="toc-number">28.</span> <span class="toc-text"></span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_tracepoint-analysis" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_tracepoint-analysis
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Notes on Analysing Behaviour Using Events and Tracepoints
+
+        Documentation written by Mel Gorman
+    PCL information heavily based on email from Ingo Molnar
+</code></pre>
+<ol>
+<li><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1></li>
+</ol>
+<p>Tracepoints (see Documentation/trace/tracepoints.txt) can be used without<br>creating custom kernel modules to register probe functions using the event<br>tracing infrastructure.</p>
+<p>Simplistically, tracepoints will represent an important event that when can<br>be taken in conjunction with other tracepoints to build a “Big Picture” of<br>what is going on within the system. There are a large number of methods for<br>gathering and interpreting these events. Lacking any current Best Practises,<br>this document describes some of the methods that can be used.</p>
+<p>This document assumes that debugfs is mounted on /sys/kernel/debug and that<br>the appropriate tracing options have been configured into the kernel. It is<br>assumed that the PCL tool tools/perf has been installed and is in your path.</p>
+<ol start="2">
+<li><h1 id="Listing-Available-Events"><a href="#Listing-Available-Events" class="headerlink" title="Listing Available Events"></a>Listing Available Events</h1></li>
+</ol>
+<h2 id="2-1-Standard-Utilities"><a href="#2-1-Standard-Utilities" class="headerlink" title="2.1 Standard Utilities"></a>2.1 Standard Utilities</h2><p>All possible events are visible from /sys/kernel/debug/tracing/events. Simply<br>calling</p>
+<p>  $ find /sys/kernel/debug/tracing/events -type d</p>
+<p>will give a fair indication of the number of events available.</p>
+<h2 id="2-2-PCL"><a href="#2-2-PCL" class="headerlink" title="2.2 PCL"></a>2.2 PCL</h2><p>Discovery and enumeration of all counters and events, including tracepoints<br>are available with the perf tool. Getting a list of available events is a<br>simple case of</p>
+<p>  $ perf list 2&gt;&amp;1 | grep Tracepoint<br>  ext4:ext4_free_inode                     [Tracepoint event]<br>  ext4:ext4_request_inode                  [Tracepoint event]<br>  ext4:ext4_allocate_inode                 [Tracepoint event]<br>  ext4:ext4_write_begin                    [Tracepoint event]<br>  ext4:ext4_ordered_write_end              [Tracepoint event]<br>  [ …. remaining output snipped …. ]</p>
+<ol start="2">
+<li><h1 id="Enabling-Events"><a href="#Enabling-Events" class="headerlink" title="Enabling Events"></a>Enabling Events</h1></li>
+</ol>
+<h2 id="2-1-System-Wide-Event-Enabling"><a href="#2-1-System-Wide-Event-Enabling" class="headerlink" title="2.1 System-Wide Event Enabling"></a>2.1 System-Wide Event Enabling</h2><p>See Documentation/trace/events.txt for a proper description on how events<br>can be enabled system-wide. A short example of enabling all events related<br>to page allocation would look something like</p>
+<p>  $ for i in <code>find /sys/kernel/debug/tracing/events -name &quot;enable&quot; | grep mm_</code>; do echo 1 &gt; $i; done</p>
+<h2 id="2-2-System-Wide-Event-Enabling-with-SystemTap"><a href="#2-2-System-Wide-Event-Enabling-with-SystemTap" class="headerlink" title="2.2 System-Wide Event Enabling with SystemTap"></a>2.2 System-Wide Event Enabling with SystemTap</h2><p>In SystemTap, tracepoints are accessible using the kernel.trace() function<br>call. The following is an example that reports every 5 seconds what processes<br>were allocating the pages.</p>
+<p>  global page_allocs</p>
+<p>  probe kernel.trace(“mm_page_alloc”) {<br>      page_allocs[execname()]++<br>  }</p>
+<p>  function print_count() {<br>      printf (“%-25s %-s\n”, “#Pages Allocated”, “Process Name”)<br>      foreach (proc in page_allocs-)<br>          printf(“%-25d %s\n”, page_allocs[proc], proc)<br>      printf (“\n”)<br>      delete page_allocs<br>  }</p>
+<p>  probe timer.s(5) {<br>          print_count()<br>  }</p>
+<h2 id="2-3-System-Wide-Event-Enabling-with-PCL"><a href="#2-3-System-Wide-Event-Enabling-with-PCL" class="headerlink" title="2.3 System-Wide Event Enabling with PCL"></a>2.3 System-Wide Event Enabling with PCL</h2><p>By specifying the -a switch and analysing sleep, the system-wide events<br>for a duration of time can be examined.</p>
+<p> $ perf stat -a <br>    -e kmem:mm_page_alloc -e kmem:mm_page_free <br>    -e kmem:mm_page_free_batched <br>    sleep 10<br> Performance counter stats for ‘sleep 10’:</p>
+<pre><code>       9630  kmem:mm_page_alloc
+       2143  kmem:mm_page_free
+       7424  kmem:mm_page_free_batched
+</code></pre>
+<p>   10.002577764  seconds time elapsed</p>
+<p>Similarly, one could execute a shell and exit it as desired to get a report<br>at that point.</p>
+<h2 id="2-4-Local-Event-Enabling"><a href="#2-4-Local-Event-Enabling" class="headerlink" title="2.4 Local Event Enabling"></a>2.4 Local Event Enabling</h2><p>Documentation/trace/ftrace.txt describes how to enable events on a per-thread<br>basis using set_ftrace_pid.</p>
+<h2 id="2-5-Local-Event-Enablement-with-PCL"><a href="#2-5-Local-Event-Enablement-with-PCL" class="headerlink" title="2.5 Local Event Enablement with PCL"></a>2.5 Local Event Enablement with PCL</h2><p>Events can be activate and tracked for the duration of a process on a local<br>basis using PCL such as follows.</p>
+<p>  $ perf stat -e kmem:mm_page_alloc -e kmem:mm_page_free <br>         -e kmem:mm_page_free_batched ./hackbench 10<br>  Time: 0.909</p>
+<pre><code>Performance counter stats for &#39;./hackbench 10&#39;:
+
+      17803  kmem:mm_page_alloc
+      12398  kmem:mm_page_free
+       4827  kmem:mm_page_free_batched
+
+0.973913387  seconds time elapsed
+</code></pre>
+<ol start="3">
+<li><h1 id="Event-Filtering"><a href="#Event-Filtering" class="headerlink" title="Event Filtering"></a>Event Filtering</h1></li>
+</ol>
+<p>Documentation/trace/ftrace.txt covers in-depth how to filter events in<br>ftrace.  Obviously using grep and awk of trace_pipe is an option as well<br>as any script reading trace_pipe.</p>
+<ol start="4">
+<li><h1 id="Analysing-Event-Variances-with-PCL"><a href="#Analysing-Event-Variances-with-PCL" class="headerlink" title="Analysing Event Variances with PCL"></a>Analysing Event Variances with PCL</h1></li>
+</ol>
+<p>Any workload can exhibit variances between runs and it can be important<br>to know what the standard deviation in. By and large, this is left to the<br>performance analyst to do it by hand. In the event that the discrete event<br>occurrences are useful to the performance analyst, then perf can be used.</p>
+<p>  $ perf stat –repeat 5 -e kmem:mm_page_alloc -e kmem:mm_page_free<br>            -e kmem:mm_page_free_batched ./hackbench 10<br>  Time: 0.890<br>  Time: 0.895<br>  Time: 0.915<br>  Time: 1.001<br>  Time: 0.899</p>
+<p>   Performance counter stats for ‘./hackbench 10’ (5 runs):</p>
+<pre><code>      16630  kmem:mm_page_alloc         ( +-   3.542% )
+      11486  kmem:mm_page_free        ( +-   4.771% )
+       4730  kmem:mm_page_free_batched  ( +-   2.325% )
+
+0.982653002  seconds time elapsed   ( +-   1.448% )
+</code></pre>
+<p>In the event that some higher-level event is required that depends on some<br>aggregation of discrete events, then a script would need to be developed.</p>
+<p>Using –repeat, it is also possible to view how events are fluctuating over<br>time on a system wide basis using -a and sleep.</p>
+<p>  $ perf stat -e kmem:mm_page_alloc -e kmem:mm_page_free <br>        -e kmem:mm_page_free_batched <br>        -a –repeat 10 <br>        sleep 1<br>  Performance counter stats for ‘sleep 1’ (10 runs):</p>
+<pre><code>       1066  kmem:mm_page_alloc         ( +-  26.148% )
+        182  kmem:mm_page_free          ( +-   5.464% )
+        890  kmem:mm_page_free_batched  ( +-  30.079% )
+
+1.002251757  seconds time elapsed   ( +-   0.005% )
+</code></pre>
+<ol start="5">
+<li><h1 id="Higher-Level-Analysis-with-Helper-Scripts"><a href="#Higher-Level-Analysis-with-Helper-Scripts" class="headerlink" title="Higher-Level Analysis with Helper Scripts"></a>Higher-Level Analysis with Helper Scripts</h1></li>
+</ol>
+<p>When events are enabled the events that are triggering can be read from<br>/sys/kernel/debug/tracing/trace_pipe in human-readable format although binary<br>options exist as well. By post-processing the output, further information can<br>be gathered on-line as appropriate. Examples of post-processing might include</p>
+<p>  o Reading information from /proc for the PID that triggered the event<br>  o Deriving a higher-level event from a series of lower-level events.<br>  o Calculate latencies between two events</p>
+<p>Documentation/trace/postprocess/trace-pagealloc-postprocess.pl is an example<br>script that can read trace_pipe from STDIN or a copy of a trace. When used<br>on-line, it can be interrupted once to generate a report without existing<br>and twice to exit.</p>
+<p>Simplistically, the script just reads STDIN and counts up events but it<br>also can do more such as</p>
+<p>  o Derive high-level events from many low-level events. If a number of pages<br>    are freed to the main allocator from the per-CPU lists, it recognises<br>    that as one per-CPU drain even though there is no specific tracepoint<br>    for that event<br>  o It can aggregate based on PID or individual process number<br>  o In the event memory is getting externally fragmented, it reports<br>    on whether the fragmentation event was severe or moderate.<br>  o When receiving an event about a PID, it can record who the parent was so<br>    that if large numbers of events are coming from very short-lived<br>    processes, the parent process responsible for creating all the helpers<br>    can be identified</p>
+<ol start="6">
+<li><h1 id="Lower-Level-Analysis-with-PCL"><a href="#Lower-Level-Analysis-with-PCL" class="headerlink" title="Lower-Level Analysis with PCL"></a>Lower-Level Analysis with PCL</h1></li>
+</ol>
+<p>There may also be a requirement to identify what functions with a program<br>were generating events within the kernel. To begin this sort of analysis, the<br>data must be recorded. At the time of writing, this required root</p>
+<p>  $ perf record -c 1 <br>    -e kmem:mm_page_alloc -e kmem:mm_page_free <br>    -e kmem:mm_page_free_batched <br>    ./hackbench 10<br>  Time: 0.894<br>  [ perf record: Captured and wrote 0.733 MB perf.data (~32010 samples) ]</p>
+<p>Note the use of ‘-c 1’ to set the event period to sample. The default sample<br>period is quite high to minimise overhead but the information collected can be<br>very coarse as a result.</p>
+<p>This record outputted a file called perf.data which can be analysed using<br>perf report.</p>
+<p>  $ perf report</p>
+<h1 id="Samples-30922"><a href="#Samples-30922" class="headerlink" title="Samples: 30922"></a>Samples: 30922</h1><h1 id=""><a href="#" class="headerlink" title=""></a></h1><h1 id="Overhead-Command-Shared-Object"><a href="#Overhead-Command-Shared-Object" class="headerlink" title="Overhead    Command                     Shared Object"></a>Overhead    Command                     Shared Object</h1><h1 id="……-………-…………………………"><a href="#……-………-…………………………" class="headerlink" title="……..  ………  ………………………….."></a>……..  ………  …………………………..</h1><h1 id="-1"><a href="#-1" class="headerlink" title=""></a></h1><pre><code>  87.27%  hackbench  [vdso]
+   6.85%  hackbench  /lib/i686/cmov/libc-2.9.so
+   2.62%  hackbench  /lib/ld-2.9.so
+   1.52%       perf  [vdso]
+   1.22%  hackbench  ./hackbench
+   0.48%  hackbench  [kernel]
+   0.02%       perf  /lib/i686/cmov/libc-2.9.so
+   0.01%       perf  /usr/bin/perf
+   0.01%       perf  /lib/ld-2.9.so
+   0.00%  hackbench  /lib/i686/cmov/libpthread-2.9.so
+</code></pre>
+<h1 id="-2"><a href="#-2" class="headerlink" title=""></a></h1><h1 id="For-more-details-try-perf-report-–sort-comm-dso-symbol"><a href="#For-more-details-try-perf-report-–sort-comm-dso-symbol" class="headerlink" title="(For more details, try: perf report –sort comm,dso,symbol)"></a>(For more details, try: perf report –sort comm,dso,symbol)</h1><h1 id="-3"><a href="#-3" class="headerlink" title=""></a></h1><p>According to this, the vast majority of events occured triggered on events<br>within the VDSO. With simple binaries, this will often be the case so lets<br>take a slightly different example. In the course of writing this, it was<br>noticed that X was generating an insane amount of page allocations so lets look<br>at it</p>
+<p>  $ perf record -c 1 -f <br>        -e kmem:mm_page_alloc -e kmem:mm_page_free <br>        -e kmem:mm_page_free_batched <br>        -p <code>pidof X</code></p>
+<p>This was interrupted after a few seconds and</p>
+<p>  $ perf report</p>
+<h1 id="Samples-27666"><a href="#Samples-27666" class="headerlink" title="Samples: 27666"></a>Samples: 27666</h1><h1 id="-4"><a href="#-4" class="headerlink" title=""></a></h1><h1 id="Overhead-Command-Shared-Object-1"><a href="#Overhead-Command-Shared-Object-1" class="headerlink" title="Overhead  Command                            Shared Object"></a>Overhead  Command                            Shared Object</h1><h1 id="……-……-…………………………………"><a href="#……-……-…………………………………" class="headerlink" title="……..  …….  …………………………………"></a>……..  …….  …………………………………</h1><h1 id="-5"><a href="#-5" class="headerlink" title=""></a></h1><pre><code>  51.95%     Xorg  [vdso]
+  47.95%     Xorg  /opt/gfx-test/lib/libpixman-1.so.0.13.1
+   0.09%     Xorg  /lib/i686/cmov/libc-2.9.so
+   0.01%     Xorg  [kernel]
+</code></pre>
+<h1 id="-6"><a href="#-6" class="headerlink" title=""></a></h1><h1 id="For-more-details-try-perf-report-–sort-comm-dso-symbol-1"><a href="#For-more-details-try-perf-report-–sort-comm-dso-symbol-1" class="headerlink" title="(For more details, try: perf report –sort comm,dso,symbol)"></a>(For more details, try: perf report –sort comm,dso,symbol)</h1><h1 id="-7"><a href="#-7" class="headerlink" title=""></a></h1><p>So, almost half of the events are occuring in a library. To get an idea which<br>symbol.</p>
+<p>  $ perf report –sort comm,dso,symbol</p>
+<h1 id="Samples-27666-1"><a href="#Samples-27666-1" class="headerlink" title="Samples: 27666"></a>Samples: 27666</h1><h1 id="-8"><a href="#-8" class="headerlink" title=""></a></h1><h1 id="Overhead-Command-Shared-Object-Symbol"><a href="#Overhead-Command-Shared-Object-Symbol" class="headerlink" title="Overhead  Command                            Shared Object  Symbol"></a>Overhead  Command                            Shared Object  Symbol</h1><h1 id="……-……-…………………………………-……"><a href="#……-……-…………………………………-……" class="headerlink" title="……..  …….  …………………………………  ……"></a>……..  …….  …………………………………  ……</h1><h1 id="-9"><a href="#-9" class="headerlink" title=""></a></h1><pre><code>  51.95%     Xorg  [vdso]                                   [.] 0x000000ffffe424
+  47.93%     Xorg  /opt/gfx-test/lib/libpixman-1.so.0.13.1  [.] pixmanFillsse2
+   0.09%     Xorg  /lib/i686/cmov/libc-2.9.so               [.] _int_malloc
+   0.01%     Xorg  /opt/gfx-test/lib/libpixman-1.so.0.13.1  [.] pixman_region32_copy_f
+   0.01%     Xorg  [kernel]                                 [k] read_hpet
+   0.01%     Xorg  /opt/gfx-test/lib/libpixman-1.so.0.13.1  [.] get_fast_path
+   0.00%     Xorg  [kernel]                                 [k] ftrace_trace_userstack
+</code></pre>
+<p>To see where within the function pixmanFillsse2 things are going wrong</p>
+<p>  $ perf annotate pixmanFillsse2<br>  [ … ]<br>    0.00 :         34eeb:       0f 18 08                prefetcht0 (%eax)<br>         :      }<br>         :<br>         :      extern <strong>inline void __attribute</strong>((<strong>gnu_inline__, __always_inline</strong>, _<br>         :      _mm_store_si128 (__m128i *__P, __m128i __B) :      {<br>         :        *__P = __B;<br>   12.40 :         34eee:       66 0f 7f 80 40 ff ff    movdqa %xmm0,-0xc0(%eax)<br>    0.00 :         34ef5:       ff<br>   12.40 :         34ef6:       66 0f 7f 80 50 ff ff    movdqa %xmm0,-0xb0(%eax)<br>    0.00 :         34efd:       ff<br>   12.39 :         34efe:       66 0f 7f 80 60 ff ff    movdqa %xmm0,-0xa0(%eax)<br>    0.00 :         34f05:       ff<br>   12.67 :         34f06:       66 0f 7f 80 70 ff ff    movdqa %xmm0,-0x90(%eax)<br>    0.00 :         34f0d:       ff<br>   12.58 :         34f0e:       66 0f 7f 40 80          movdqa %xmm0,-0x80(%eax)<br>   12.31 :         34f13:       66 0f 7f 40 90          movdqa %xmm0,-0x70(%eax)<br>   12.40 :         34f18:       66 0f 7f 40 a0          movdqa %xmm0,-0x60(%eax)<br>   12.31 :         34f1d:       66 0f 7f 40 b0          movdqa %xmm0,-0x50(%eax)</p>
+<p>At a glance, it looks like the time is being spent copying pixmaps to<br>the card.  Further investigation would be needed to determine why pixmaps<br>are being copied around so much but a starting point would be to take an<br>ancient build of libpixmap out of the library path where it was totally<br>forgotten about from months ago!</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/" title="Kernel-2.6.32-573.12.1.el6_tracepoint-analysis" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoint-analysis/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_tracepoints/" title="Kernel-2.6.32-573.12.1.el6_tracepoints"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_tproxy/" title="Kernel-2.6.32-573.12.1.el6_tproxy"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

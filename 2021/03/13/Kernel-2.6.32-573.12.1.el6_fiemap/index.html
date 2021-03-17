@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_fiemap | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Fiemap Ioctl&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; The fiemap ioctl is an efficient method for userspace to get fileextent mappings. Instead of block-by-block mapping (such as bmap), fiemapreturns a list of extents">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_fiemap">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Fiemap Ioctl&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; The fiemap ioctl is an efficient method for userspace to get fileextent mappings. Instead of block-by-block mapping (such as bmap), fiemapreturns a list of extents">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Request-Basics"><span class="toc-number">1.</span> <span class="toc-text">Request Basics</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Extent-Mapping"><span class="toc-number">2.</span> <span class="toc-text">Extent Mapping</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#VFS-gt-File-System-Implementation"><span class="toc-number">3.</span> <span class="toc-text">VFS -&gt; File System Implementation</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_fiemap" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_fiemap
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>============<br>Fiemap Ioctl<br>============</p>
+<p>The fiemap ioctl is an efficient method for userspace to get file<br>extent mappings. Instead of block-by-block mapping (such as bmap), fiemap<br>returns a list of extents.</p>
+<h2 id="Request-Basics"><a href="#Request-Basics" class="headerlink" title="Request Basics"></a>Request Basics</h2><p>A fiemap request is encoded within struct fiemap:</p>
+<p>struct fiemap {<br>    __u64    fm_start;     /* logical offset (inclusive) at<br>                  * which to start mapping (in) <em>/<br>    __u64    fm_length;     /</em> logical length of mapping which<br>                  * userspace cares about (in) <em>/<br>    __u32    fm_flags;     /</em> FIEMAP_FLAG_* flags for request (in/out) <em>/<br>    __u32    fm_mapped_extents; /</em> number of extents that were<br>                    * mapped (out) <em>/<br>    __u32    fm_extent_count; /</em> size of fm_extents array (in) <em>/<br>    __u32    fm_reserved;<br>    struct fiemap_extent fm_extents[0]; /</em> array of mapped extents (out) */<br>};</p>
+<p>fm_start, and fm_length specify the logical range within the file<br>which the process would like mappings for. Extents returned mirror<br>those on disk - that is, the logical offset of the 1st returned extent<br>may start before fm_start, and the range covered by the last returned<br>extent may end after fm_length. All offsets and lengths are in bytes.</p>
+<p>Certain flags to modify the way in which mappings are looked up can be<br>set in fm_flags. If the kernel doesn’t understand some particular<br>flags, it will return EBADR and the contents of fm_flags will contain<br>the set of flags which caused the error. If the kernel is compatible<br>with all flags passed, the contents of fm_flags will be unmodified.<br>It is up to userspace to determine whether rejection of a particular<br>flag is fatal to it’s operation. This scheme is intended to allow the<br>fiemap interface to grow in the future but without losing<br>compatibility with old software.</p>
+<p>fm_extent_count specifies the number of elements in the fm_extents[] array<br>that can be used to return extents.  If fm_extent_count is zero, then the<br>fm_extents[] array is ignored (no extents will be returned), and the<br>fm_mapped_extents count will hold the number of extents needed in<br>fm_extents[] to hold the file’s current mapping.  Note that there is<br>nothing to prevent the file from changing between calls to FIEMAP.</p>
+<p>The following flags can be set in fm_flags:</p>
+<ul>
+<li><p>FIEMAP_FLAG_SYNC<br>If this flag is set, the kernel will sync the file before mapping extents.</p>
+</li>
+<li><p>FIEMAP_FLAG_XATTR<br>If this flag is set, the extents returned will describe the inodes<br>extended attribute lookup tree, instead of it’s data tree.</p>
+</li>
+</ul>
+<h2 id="Extent-Mapping"><a href="#Extent-Mapping" class="headerlink" title="Extent Mapping"></a>Extent Mapping</h2><p>Extent information is returned within the embedded fm_extents array<br>which userspace must allocate along with the fiemap structure. The<br>number of elements in the fiemap_extents[] array should be passed via<br>fm_extent_count. The number of extents mapped by kernel will be<br>returned via fm_mapped_extents. If the number of fiemap_extents<br>allocated is less than would be required to map the requested range,<br>the maximum number of extents that can be mapped in the fm_extent[]<br>array will be returned and fm_mapped_extents will be equal to<br>fm_extent_count. In that case, the last extent in the array will not<br>complete the requested range and will not have the FIEMAP_EXTENT_LAST<br>flag set (see the next section on extent flags).</p>
+<p>Each extent is described by a single fiemap_extent structure as<br>returned in fm_extents.</p>
+<p>struct fiemap_extent {<br>    __u64    fe_logical;  /* logical offset in bytes for the start of<br>                  * the extent <em>/<br>    __u64    fe_physical; /</em> physical offset in bytes for the start<br>                  * of the extent <em>/<br>    __u64    fe_length;   /</em> length in bytes for the extent <em>/<br>    __u64    fe_reserved64[2];<br>    __u32    fe_flags;    /</em> FIEMAP_EXTENT_* flags for this extent */<br>    __u32    fe_reserved[3];<br>};</p>
+<p>All offsets and lengths are in bytes and mirror those on disk.  It is valid<br>for an extents logical offset to start before the request or it’s logical<br>length to extend past the request.  Unless FIEMAP_EXTENT_NOT_ALIGNED is<br>returned, fe_logical, fe_physical, and fe_length will be aligned to the<br>block size of the file system.  With the exception of extents flagged as<br>FIEMAP_EXTENT_MERGED, adjacent extents will not be merged.</p>
+<p>The fe_flags field contains flags which describe the extent returned.<br>A special flag, FIEMAP_EXTENT_LAST is always set on the last extent in<br>the file so that the process making fiemap calls can determine when no<br>more extents are available, without having to call the ioctl again.</p>
+<p>Some flags are intentionally vague and will always be set in the<br>presence of other more specific flags. This way a program looking for<br>a general property does not have to know all existing and future flags<br>which imply that property.</p>
+<p>For example, if FIEMAP_EXTENT_DATA_INLINE or FIEMAP_EXTENT_DATA_TAIL<br>are set, FIEMAP_EXTENT_NOT_ALIGNED will also be set. A program looking<br>for inline or tail-packed data can key on the specific flag. Software<br>which simply cares not to try operating on non-aligned extents<br>however, can just key on FIEMAP_EXTENT_NOT_ALIGNED, and not have to<br>worry about all present and future flags which might imply unaligned<br>data. Note that the opposite is not true - it would be valid for<br>FIEMAP_EXTENT_NOT_ALIGNED to appear alone.</p>
+<ul>
+<li><p>FIEMAP_EXTENT_LAST<br>This is the last extent in the file. A mapping attempt past this<br>extent will return nothing.</p>
+</li>
+<li><p>FIEMAP_EXTENT_UNKNOWN<br>The location of this extent is currently unknown. This may indicate<br>the data is stored on an inaccessible volume or that no storage has<br>been allocated for the file yet.</p>
+</li>
+<li><p>FIEMAP_EXTENT_DELALLOC</p>
+<ul>
+<li>This will also set FIEMAP_EXTENT_UNKNOWN.<br>Delayed allocation - while there is data for this extent, it’s<br>physical location has not been allocated yet.</li>
+</ul>
+</li>
+<li><p>FIEMAP_EXTENT_ENCODED<br>This extent does not consist of plain filesystem blocks but is<br>encoded (e.g. encrypted or compressed).  Reading the data in this<br>extent via I/O to the block device will have undefined results.</p>
+</li>
+</ul>
+<p>Note that it is <em>always</em> undefined to try to update the data<br>in-place by writing to the indicated location without the<br>assistance of the filesystem, or to access the data using the<br>information returned by the FIEMAP interface while the filesystem<br>is mounted.  In other words, user applications may only read the<br>extent data via I/O to the block device while the filesystem is<br>unmounted, and then only if the FIEMAP_EXTENT_ENCODED flag is<br>clear; user applications must not try reading or writing to the<br>filesystem via the block device under any other circumstances.</p>
+<ul>
+<li><p>FIEMAP_EXTENT_DATA_ENCRYPTED</p>
+<ul>
+<li>This will also set FIEMAP_EXTENT_ENCODED<br>The data in this extent has been encrypted by the file system.</li>
+</ul>
+</li>
+<li><p>FIEMAP_EXTENT_NOT_ALIGNED<br>Extent offsets and length are not guaranteed to be block aligned.</p>
+</li>
+<li><p>FIEMAP_EXTENT_DATA_INLINE<br>This will also set FIEMAP_EXTENT_NOT_ALIGNED<br>Data is located within a meta data block.</p>
+</li>
+<li><p>FIEMAP_EXTENT_DATA_TAIL<br>This will also set FIEMAP_EXTENT_NOT_ALIGNED<br>Data is packed into a block with data from other files.</p>
+</li>
+<li><p>FIEMAP_EXTENT_UNWRITTEN<br>Unwritten extent - the extent is allocated but it’s data has not been<br>initialized.  This indicates the extent’s data will be all zero if read<br>through the filesystem but the contents are undefined if read directly from<br>the device.</p>
+</li>
+<li><p>FIEMAP_EXTENT_MERGED<br>This will be set when a file does not support extents, i.e., it uses a block<br>based addressing scheme.  Since returning an extent for each block back to<br>userspace would be highly inefficient, the kernel will try to merge most<br>adjacent blocks into ‘extents’.</p>
+</li>
+</ul>
+<h2 id="VFS-gt-File-System-Implementation"><a href="#VFS-gt-File-System-Implementation" class="headerlink" title="VFS -&gt; File System Implementation"></a>VFS -&gt; File System Implementation</h2><p>File systems wishing to support fiemap must implement a -&gt;fiemap callback on<br>their inode_operations structure. The fs -&gt;fiemap call is responsible for<br>defining it’s set of supported fiemap flags, and calling a helper function on<br>each discovered extent:</p>
+<p>struct inode_operations {<br>       …</p>
+<pre><code>   int (*fiemap)(struct inode *, struct fiemap_extent_info *, u64 start,
+                 u64 len);
+</code></pre>
+<p>-&gt;fiemap is passed struct fiemap_extent_info which describes the<br>fiemap request:</p>
+<p>struct fiemap_extent_info {<br>    unsigned int fi_flags;        /* Flags as passed from user <em>/<br>    unsigned int fi_extents_mapped;    /</em> Number of mapped extents <em>/<br>    unsigned int fi_extents_max;    /</em> Size of fiemap_extent array */<br>    struct fiemap_extent <em>fi_extents_start;    /</em> Start of fiemap_extent array */<br>};</p>
+<p>It is intended that the file system should not need to access any of this<br>structure directly.</p>
+<p>Flag checking should be done at the beginning of the -&gt;fiemap callback via the<br>fiemap_check_flags() helper:</p>
+<p>int fiemap_check_flags(struct fiemap_extent_info *fieinfo, u32 fs_flags);</p>
+<p>The struct fieinfo should be passed in as received from ioctl_fiemap(). The<br>set of fiemap flags which the fs understands should be passed via fs_flags. If<br>fiemap_check_flags finds invalid user flags, it will place the bad values in<br>fieinfo-&gt;fi_flags and return -EBADR. If the file system gets -EBADR, from<br>fiemap_check_flags(), it should immediately exit, returning that error back to<br>ioctl_fiemap().</p>
+<p>For each extent in the request range, the file system should call<br>the helper function, fiemap_fill_next_extent():</p>
+<p>int fiemap_fill_next_extent(struct fiemap_extent_info *info, u64 logical,<br>                u64 phys, u64 len, u32 flags, u32 dev);</p>
+<p>fiemap_fill_next_extent() will use the passed values to populate the<br>next free extent in the fm_extents array. ‘General’ extent flags will<br>automatically be set from specific flags on behalf of the calling file<br>system so that the userspace API is not broken.</p>
+<p>fiemap_fill_next_extent() returns 0 on success, and 1 when the<br>user-supplied fm_extents array is full. If an error is encountered<br>while copying the extent to user memory, -EFAULT will be returned.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/" title="Kernel-2.6.32-573.12.1.el6_fiemap" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_fiemap/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_files/" title="Kernel-2.6.32-573.12.1.el6_files"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_fib_trie/" title="Kernel-2.6.32-573.12.1.el6_fib_trie"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_pci | oosTech.com</title>
+  <meta name="description" content="How To Write Linux PCI Drivers      by Martin Mares &lt;mj@ucw.cz&gt; on 07-Feb-2000 updated by Grant Grundler &lt;grundler@parisc-linux.org&gt; on 23-Dec-2006  1234567891011121314151617181920">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_pci">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="How To Write Linux PCI Drivers      by Martin Mares &lt;mj@ucw.cz&gt; on 07-Feb-2000 updated by Grant Grundler &lt;grundler@parisc-linux.org&gt; on 23-Dec-2006  1234567891011121314151617181920">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_pci" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_pci
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>        How To Write Linux PCI Drivers
+
+    by Martin Mares &lt;mj@ucw.cz&gt; on 07-Feb-2000
+updated by Grant Grundler &lt;grundler@parisc-linux.org&gt; on 23-Dec-2006
+</code></pre>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br></pre></td><td class="code"><pre><span class="line">The world of PCI is vast and full of (mostly unpleasant) surprises.</span><br><span class="line">Since each CPU architecture implements different chip-sets and PCI devices</span><br><span class="line">have different requirements (erm, &quot;features&quot;), the result is the PCI support</span><br><span class="line">in the Linux kernel is not as trivial as one would wish. This short paper</span><br><span class="line">tries to introduce all potential driver authors to Linux APIs for</span><br><span class="line">PCI device drivers.</span><br><span class="line"></span><br><span class="line">A more complete resource is the third edition of &quot;Linux Device Drivers&quot;</span><br><span class="line">by Jonathan Corbet, Alessandro Rubini, and Greg Kroah-Hartman.</span><br><span class="line">LDD3 is available for free (under Creative Commons License) from:</span><br><span class="line"></span><br><span class="line">	http:&#x2F;&#x2F;lwn.net&#x2F;Kernel&#x2F;LDD3&#x2F;</span><br><span class="line"></span><br><span class="line">However, keep in mind that all documents are subject to &quot;bit rot&quot;.</span><br><span class="line">Refer to the source code if things are not working as described here.</span><br><span class="line"></span><br><span class="line">Please send questions&#x2F;comments&#x2F;patches about Linux PCI API to the</span><br><span class="line">&quot;Linux PCI&quot; &lt;linux-pci@atrey.karlin.mff.cuni.cz&gt; mailing list.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">0. Structure of PCI drivers</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">PCI drivers &quot;discover&quot; PCI devices in a system via pci_register_driver().</span><br><span class="line">Actually, it&#39;s the other way around. When the PCI generic code discovers</span><br><span class="line">a new device, the driver with a matching &quot;description&quot; will be notified.</span><br><span class="line">Details on this below.</span><br><span class="line"></span><br><span class="line">pci_register_driver() leaves most of the probing for devices to</span><br><span class="line">the PCI layer and supports online insertion&#x2F;removal of devices [thus</span><br><span class="line">supporting hot-pluggable PCI, CardBus, and Express-Card in a single driver].</span><br><span class="line">pci_register_driver() call requires passing in a table of function</span><br><span class="line">pointers and thus dictates the high level structure of a driver.</span><br><span class="line"></span><br><span class="line">Once the driver knows about a PCI device and takes ownership, the</span><br><span class="line">driver generally needs to perform the following initialization:</span><br><span class="line"></span><br><span class="line">	Enable the device</span><br><span class="line">	Request MMIO&#x2F;IOP resources</span><br><span class="line">	Set the DMA mask size (for both coherent and streaming DMA)</span><br><span class="line">	Allocate and initialize shared control data (pci_allocate_coherent())</span><br><span class="line">	Access device configuration space (if needed)</span><br><span class="line">	Register IRQ handler (request_irq())</span><br><span class="line">	Initialize non-PCI (i.e. LAN&#x2F;SCSI&#x2F;etc parts of the chip)</span><br><span class="line">	Enable DMA&#x2F;processing engines</span><br><span class="line"></span><br><span class="line">When done using the device, and perhaps the module needs to be unloaded,</span><br><span class="line">the driver needs to take the follow steps:</span><br><span class="line">	Disable the device from generating IRQs</span><br><span class="line">	Release the IRQ (free_irq())</span><br><span class="line">	Stop all DMA activity</span><br><span class="line">	Release DMA buffers (both streaming and coherent)</span><br><span class="line">	Unregister from other subsystems (e.g. scsi or netdev)</span><br><span class="line">	Release MMIO&#x2F;IOP resources</span><br><span class="line">	Disable the device</span><br><span class="line"></span><br><span class="line">Most of these topics are covered in the following sections.</span><br><span class="line">For the rest look at LDD3 or &lt;linux&#x2F;pci.h&gt; .</span><br><span class="line"></span><br><span class="line">If the PCI subsystem is not configured (CONFIG_PCI is not set), most of</span><br><span class="line">the PCI functions described below are defined as inline functions either</span><br><span class="line">completely empty or just returning an appropriate error codes to avoid</span><br><span class="line">lots of ifdefs in the drivers.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">1. pci_register_driver() call</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">PCI device drivers call pci_register_driver() during their</span><br><span class="line">initialization with a pointer to a structure describing the driver</span><br><span class="line">(struct pci_driver):</span><br><span class="line"></span><br><span class="line">	field name	Description</span><br><span class="line">	----------	------------------------------------------------------</span><br><span class="line">	id_table	Pointer to table of device ID&#39;s the driver is</span><br><span class="line">			interested in.  Most drivers should export this</span><br><span class="line">			table using MODULE_DEVICE_TABLE(pci,...).</span><br><span class="line"></span><br><span class="line">	probe		This probing function gets called (during execution</span><br><span class="line">			of pci_register_driver() for already existing</span><br><span class="line">			devices or later if a new device gets inserted) for</span><br><span class="line">			all PCI devices which match the ID table and are not</span><br><span class="line">			&quot;owned&quot; by the other drivers yet. This function gets</span><br><span class="line">			passed a &quot;struct pci_dev *&quot; for each device whose</span><br><span class="line">			entry in the ID table matches the device. The probe</span><br><span class="line">			function returns zero when the driver chooses to</span><br><span class="line">			take &quot;ownership&quot; of the device or an error code</span><br><span class="line">			(negative number) otherwise.</span><br><span class="line">			The probe function always gets called from process</span><br><span class="line">			context, so it can sleep.</span><br><span class="line"></span><br><span class="line">	remove		The remove() function gets called whenever a device</span><br><span class="line">			being handled by this driver is removed (either during</span><br><span class="line">			deregistration of the driver or when it&#39;s manually</span><br><span class="line">			pulled out of a hot-pluggable slot).</span><br><span class="line">			The remove function always gets called from process</span><br><span class="line">			context, so it can sleep.</span><br><span class="line"></span><br><span class="line">	suspend		Put device into low power state.</span><br><span class="line">	suspend_late	Put device into low power state.</span><br><span class="line"></span><br><span class="line">	resume_early	Wake device from low power state.</span><br><span class="line">	resume		Wake device from low power state.</span><br><span class="line"></span><br><span class="line">		(Please see Documentation&#x2F;power&#x2F;pci.txt for descriptions</span><br><span class="line">		of PCI Power Management and the related functions.)</span><br><span class="line"></span><br><span class="line">	shutdown	Hook into reboot_notifier_list (kernel&#x2F;sys.c).</span><br><span class="line">			Intended to stop any idling DMA operations.</span><br><span class="line">			Useful for enabling wake-on-lan (NIC) or changing</span><br><span class="line">			the power state of a device before reboot.</span><br><span class="line">			e.g. drivers&#x2F;net&#x2F;e100.c.</span><br><span class="line"></span><br><span class="line">	err_handler	See Documentation&#x2F;PCI&#x2F;pci-error-recovery.txt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">The ID table is an array of struct pci_device_id entries ending with an</span><br><span class="line">all-zero entry.  Definitions with static const are generally preferred.</span><br><span class="line">Use of the deprecated macro DEFINE_PCI_DEVICE_TABLE should be avoided.</span><br><span class="line"></span><br><span class="line">Each entry consists of:</span><br><span class="line"></span><br><span class="line">	vendor,device	Vendor and device ID to match (or PCI_ANY_ID)</span><br><span class="line"></span><br><span class="line">	subvendor,	Subsystem vendor and device ID to match (or PCI_ANY_ID)</span><br><span class="line">	subdevice,</span><br><span class="line"></span><br><span class="line">	class		Device class, subclass, and &quot;interface&quot; to match.</span><br><span class="line">			See Appendix D of the PCI Local Bus Spec or</span><br><span class="line">			include&#x2F;linux&#x2F;pci_ids.h for a full list of classes.</span><br><span class="line">			Most drivers do not need to specify class&#x2F;class_mask</span><br><span class="line">			as vendor&#x2F;device is normally sufficient.</span><br><span class="line"></span><br><span class="line">	class_mask	limit which sub-fields of the class field are compared.</span><br><span class="line">			See drivers&#x2F;scsi&#x2F;sym53c8xx_2&#x2F; for example of usage.</span><br><span class="line"></span><br><span class="line">	driver_data	Data private to the driver.</span><br><span class="line">			Most drivers don&#39;t need to use driver_data field.</span><br><span class="line">			Best practice is to use driver_data as an index</span><br><span class="line">			into a static list of equivalent device types,</span><br><span class="line">			instead of using it as a pointer.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Most drivers only need PCI_DEVICE() or PCI_DEVICE_CLASS() to set up</span><br><span class="line">a pci_device_id table.</span><br><span class="line"></span><br><span class="line">New PCI IDs may be added to a device driver pci_ids table at runtime</span><br><span class="line">as shown below:</span><br><span class="line"></span><br><span class="line">echo &quot;vendor device subvendor subdevice class class_mask driver_data&quot; &gt; \</span><br><span class="line">&#x2F;sys&#x2F;bus&#x2F;pci&#x2F;drivers&#x2F;&#123;driver&#125;&#x2F;new_id</span><br><span class="line"></span><br><span class="line">All fields are passed in as hexadecimal values (no leading 0x).</span><br><span class="line">The vendor and device fields are mandatory, the others are optional. Users</span><br><span class="line">need pass only as many optional fields as necessary:</span><br><span class="line">	o subvendor and subdevice fields default to PCI_ANY_ID (FFFFFFFF)</span><br><span class="line">	o class and classmask fields default to 0</span><br><span class="line">	o driver_data defaults to 0UL.</span><br><span class="line"></span><br><span class="line">Note that driver_data must match the value used by any of the pci_device_id</span><br><span class="line">entries defined in the driver. This makes the driver_data field mandatory</span><br><span class="line">if all the pci_device_id entries have a non-zero driver_data value.</span><br><span class="line"></span><br><span class="line">Once added, the driver probe routine will be invoked for any unclaimed</span><br><span class="line">PCI devices listed in its (newly updated) pci_ids list.</span><br><span class="line"></span><br><span class="line">When the driver exits, it just calls pci_unregister_driver() and the PCI layer</span><br><span class="line">automatically calls the remove hook for all devices handled by the driver.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">1.1 &quot;Attributes&quot; for driver functions&#x2F;data</span><br><span class="line"></span><br><span class="line">Please mark the initialization and cleanup functions where appropriate</span><br><span class="line">(the corresponding macros are defined in &lt;linux&#x2F;init.h&gt;):</span><br><span class="line"></span><br><span class="line">	__init		Initialization code. Thrown away after the driver</span><br><span class="line">			initializes.</span><br><span class="line">	__exit		Exit code. Ignored for non-modular drivers.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	__devinit	Device initialization code.</span><br><span class="line">			Identical to __init if the kernel is not compiled</span><br><span class="line">			with CONFIG_HOTPLUG, normal function otherwise.</span><br><span class="line">	__devexit	The same for __exit.</span><br><span class="line"></span><br><span class="line">Tips on when&#x2F;where to use the above attributes:</span><br><span class="line">	o The module_init()&#x2F;module_exit() functions (and all</span><br><span class="line">	  initialization functions called _only_ from these)</span><br><span class="line">	  should be marked __init&#x2F;__exit.</span><br><span class="line"></span><br><span class="line">	o Do not mark the struct pci_driver.</span><br><span class="line"></span><br><span class="line">	o The ID table array should be marked __devinitconst; this is done</span><br><span class="line">	  automatically if the table is declared with DEFINE_PCI_DEVICE_TABLE().</span><br><span class="line"></span><br><span class="line">	o The probe() and remove() functions should be marked __devinit</span><br><span class="line">	  and __devexit respectively.  All initialization functions</span><br><span class="line">	  exclusively called by the probe() routine, can be marked __devinit.</span><br><span class="line">	  Ditto for remove() and __devexit.</span><br><span class="line"></span><br><span class="line">	o If mydriver_remove() is marked with __devexit(), then all address</span><br><span class="line">	  references to mydriver_remove must use __devexit_p(mydriver_remove)</span><br><span class="line">	  (in the struct pci_driver declaration for example).</span><br><span class="line">	  __devexit_p() will generate the function name _or_ NULL if the</span><br><span class="line">	  function will be discarded.  For an example, see drivers&#x2F;net&#x2F;tg3.c.</span><br><span class="line"></span><br><span class="line">	o Do NOT mark a function if you are not sure which mark to use.</span><br><span class="line">	  Better to not mark the function than mark the function wrong.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">2. How to find PCI devices manually</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">PCI drivers should have a really good reason for not using the</span><br><span class="line">pci_register_driver() interface to search for PCI devices.</span><br><span class="line">The main reason PCI devices are controlled by multiple drivers</span><br><span class="line">is because one PCI device implements several different HW services.</span><br><span class="line">E.g. combined serial&#x2F;parallel port&#x2F;floppy controller.</span><br><span class="line"></span><br><span class="line">A manual search may be performed using the following constructs:</span><br><span class="line"></span><br><span class="line">Searching by vendor and device ID:</span><br><span class="line"></span><br><span class="line">	struct pci_dev *dev &#x3D; NULL;</span><br><span class="line">	while (dev &#x3D; pci_get_device(VENDOR_ID, DEVICE_ID, dev))</span><br><span class="line">		configure_device(dev);</span><br><span class="line"></span><br><span class="line">Searching by class ID (iterate in a similar way):</span><br><span class="line"></span><br><span class="line">	pci_get_class(CLASS_ID, dev)</span><br><span class="line"></span><br><span class="line">Searching by both vendor&#x2F;device and subsystem vendor&#x2F;device ID:</span><br><span class="line"></span><br><span class="line">	pci_get_subsys(VENDOR_ID,DEVICE_ID, SUBSYS_VENDOR_ID, SUBSYS_DEVICE_ID, dev).</span><br><span class="line"></span><br><span class="line">You can use the constant PCI_ANY_ID as a wildcard replacement for</span><br><span class="line">VENDOR_ID or DEVICE_ID.  This allows searching for any device from a</span><br><span class="line">specific vendor, for example.</span><br><span class="line"></span><br><span class="line">These functions are hotplug-safe. They increment the reference count on</span><br><span class="line">the pci_dev that they return. You must eventually (possibly at module unload)</span><br><span class="line">decrement the reference count on these devices by calling pci_dev_put().</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3. Device Initialization Steps</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">As noted in the introduction, most PCI drivers need the following steps</span><br><span class="line">for device initialization:</span><br><span class="line"></span><br><span class="line">	Enable the device</span><br><span class="line">	Request MMIO&#x2F;IOP resources</span><br><span class="line">	Set the DMA mask size (for both coherent and streaming DMA)</span><br><span class="line">	Allocate and initialize shared control data (pci_allocate_coherent())</span><br><span class="line">	Access device configuration space (if needed)</span><br><span class="line">	Register IRQ handler (request_irq())</span><br><span class="line">	Initialize non-PCI (i.e. LAN&#x2F;SCSI&#x2F;etc parts of the chip)</span><br><span class="line">	Enable DMA&#x2F;processing engines.</span><br><span class="line"></span><br><span class="line">The driver can access PCI config space registers at any time.</span><br><span class="line">(Well, almost. When running BIST, config space can go away...but</span><br><span class="line">that will just result in a PCI Bus Master Abort and config reads</span><br><span class="line">will return garbage).</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.1 Enable the PCI device</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Before touching any device registers, the driver needs to enable</span><br><span class="line">the PCI device by calling pci_enable_device(). This will:</span><br><span class="line">	o wake up the device if it was in suspended state,</span><br><span class="line">	o allocate I&#x2F;O and memory regions of the device (if BIOS did not),</span><br><span class="line">	o allocate an IRQ (if BIOS did not).</span><br><span class="line"></span><br><span class="line">NOTE: pci_enable_device() can fail! Check the return value.</span><br><span class="line"></span><br><span class="line">[ OS BUG: we don&#39;t check resource allocations before enabling those</span><br><span class="line">  resources. The sequence would make more sense if we called</span><br><span class="line">  pci_request_resources() before calling pci_enable_device().</span><br><span class="line">  Currently, the device drivers can&#39;t detect the bug when when two</span><br><span class="line">  devices have been allocated the same range. This is not a common</span><br><span class="line">  problem and unlikely to get fixed soon.</span><br><span class="line"></span><br><span class="line">  This has been discussed before but not changed as of 2.6.19:</span><br><span class="line">	http:&#x2F;&#x2F;lkml.org&#x2F;lkml&#x2F;2006&#x2F;3&#x2F;2&#x2F;194</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">pci_set_master() will enable DMA by setting the bus master bit</span><br><span class="line">in the PCI_COMMAND register. It also fixes the latency timer value if</span><br><span class="line">it&#39;s set to something bogus by the BIOS.  pci_clear_master() will</span><br><span class="line">disable DMA by clearing the bus master bit.</span><br><span class="line"></span><br><span class="line">If the PCI device can use the PCI Memory-Write-Invalidate transaction,</span><br><span class="line">call pci_set_mwi().  This enables the PCI_COMMAND bit for Mem-Wr-Inval</span><br><span class="line">and also ensures that the cache line size register is set correctly.</span><br><span class="line">Check the return value of pci_set_mwi() as not all architectures</span><br><span class="line">or chip-sets may support Memory-Write-Invalidate.  Alternatively,</span><br><span class="line">if Mem-Wr-Inval would be nice to have but is not required, call</span><br><span class="line">pci_try_set_mwi() to have the system do its best effort at enabling</span><br><span class="line">Mem-Wr-Inval.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.2 Request MMIO&#x2F;IOP resources</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Memory (MMIO), and I&#x2F;O port addresses should NOT be read directly</span><br><span class="line">from the PCI device config space. Use the values in the pci_dev structure</span><br><span class="line">as the PCI &quot;bus address&quot; might have been remapped to a &quot;host physical&quot;</span><br><span class="line">address by the arch&#x2F;chip-set specific kernel support.</span><br><span class="line"></span><br><span class="line">See Documentation&#x2F;IO-mapping.txt for how to access device registers</span><br><span class="line">or device memory.</span><br><span class="line"></span><br><span class="line">The device driver needs to call pci_request_region() to verify</span><br><span class="line">no other device is already using the same address resource.</span><br><span class="line">Conversely, drivers should call pci_release_region() AFTER</span><br><span class="line">calling pci_disable_device().</span><br><span class="line">The idea is to prevent two devices colliding on the same address range.</span><br><span class="line"></span><br><span class="line">[ See OS BUG comment above. Currently (2.6.19), The driver can only</span><br><span class="line">  determine MMIO and IO Port resource availability _after_ calling</span><br><span class="line">  pci_enable_device(). ]</span><br><span class="line"></span><br><span class="line">Generic flavors of pci_request_region() are request_mem_region()</span><br><span class="line">(for MMIO ranges) and request_region() (for IO Port ranges).</span><br><span class="line">Use these for address resources that are not described by &quot;normal&quot; PCI</span><br><span class="line">BARs.</span><br><span class="line"></span><br><span class="line">Also see pci_request_selected_regions() below.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.3 Set the DMA mask size</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">[ If anything below doesn&#39;t make sense, please refer to</span><br><span class="line">  Documentation&#x2F;DMA-API.txt. This section is just a reminder that</span><br><span class="line">  drivers need to indicate DMA capabilities of the device and is not</span><br><span class="line">  an authoritative source for DMA interfaces. ]</span><br><span class="line"></span><br><span class="line">While all drivers should explicitly indicate the DMA capability</span><br><span class="line">(e.g. 32 or 64 bit) of the PCI bus master, devices with more than</span><br><span class="line">32-bit bus master capability for streaming data need the driver</span><br><span class="line">to &quot;register&quot; this capability by calling pci_set_dma_mask() with</span><br><span class="line">appropriate parameters.  In general this allows more efficient DMA</span><br><span class="line">on systems where System RAM exists above 4G _physical_ address.</span><br><span class="line"></span><br><span class="line">Drivers for all PCI-X and PCIe compliant devices must call</span><br><span class="line">pci_set_dma_mask() as they are 64-bit DMA devices.</span><br><span class="line"></span><br><span class="line">Similarly, drivers must also &quot;register&quot; this capability if the device</span><br><span class="line">can directly address &quot;consistent memory&quot; in System RAM above 4G physical</span><br><span class="line">address by calling pci_set_consistent_dma_mask().</span><br><span class="line">Again, this includes drivers for all PCI-X and PCIe compliant devices.</span><br><span class="line">Many 64-bit &quot;PCI&quot; devices (before PCI-X) and some PCI-X devices are</span><br><span class="line">64-bit DMA capable for payload (&quot;streaming&quot;) data but not control</span><br><span class="line">(&quot;consistent&quot;) data.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.4 Setup shared control data</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Once the DMA masks are set, the driver can allocate &quot;consistent&quot; (a.k.a. shared)</span><br><span class="line">memory.  See Documentation&#x2F;DMA-API.txt for a full description of</span><br><span class="line">the DMA APIs. This section is just a reminder that it needs to be done</span><br><span class="line">before enabling DMA on the device.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.5 Initialize device registers</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Some drivers will need specific &quot;capability&quot; fields programmed</span><br><span class="line">or other &quot;vendor specific&quot; register initialized or reset.</span><br><span class="line">E.g. clearing pending interrupts.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.6 Register IRQ handler</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">While calling request_irq() is the last step described here,</span><br><span class="line">this is often just another intermediate step to initialize a device.</span><br><span class="line">This step can often be deferred until the device is opened for use.</span><br><span class="line"></span><br><span class="line">All interrupt handlers for IRQ lines should be registered with IRQF_SHARED</span><br><span class="line">and use the devid to map IRQs to devices (remember that all PCI IRQ lines</span><br><span class="line">can be shared).</span><br><span class="line"></span><br><span class="line">request_irq() will associate an interrupt handler and device handle</span><br><span class="line">with an interrupt number. Historically interrupt numbers represent</span><br><span class="line">IRQ lines which run from the PCI device to the Interrupt controller.</span><br><span class="line">With MSI and MSI-X (more below) the interrupt number is a CPU &quot;vector&quot;.</span><br><span class="line"></span><br><span class="line">request_irq() also enables the interrupt. Make sure the device is</span><br><span class="line">quiesced and does not have any interrupts pending before registering</span><br><span class="line">the interrupt handler.</span><br><span class="line"></span><br><span class="line">MSI and MSI-X are PCI capabilities. Both are &quot;Message Signaled Interrupts&quot;</span><br><span class="line">which deliver interrupts to the CPU via a DMA write to a Local APIC.</span><br><span class="line">The fundamental difference between MSI and MSI-X is how multiple</span><br><span class="line">&quot;vectors&quot; get allocated. MSI requires contiguous blocks of vectors</span><br><span class="line">while MSI-X can allocate several individual ones.</span><br><span class="line"></span><br><span class="line">MSI capability can be enabled by calling pci_enable_msi() or</span><br><span class="line">pci_enable_msix() before calling request_irq(). This causes</span><br><span class="line">the PCI support to program CPU vector data into the PCI device</span><br><span class="line">capability registers.</span><br><span class="line"></span><br><span class="line">If your PCI device supports both, try to enable MSI-X first.</span><br><span class="line">Only one can be enabled at a time.  Many architectures, chip-sets,</span><br><span class="line">or BIOSes do NOT support MSI or MSI-X and the call to pci_enable_msi&#x2F;msix</span><br><span class="line">will fail. This is important to note since many drivers have</span><br><span class="line">two (or more) interrupt handlers: one for MSI&#x2F;MSI-X and another for IRQs.</span><br><span class="line">They choose which handler to register with request_irq() based on the</span><br><span class="line">return value from pci_enable_msi&#x2F;msix().</span><br><span class="line"></span><br><span class="line">There are (at least) two really good reasons for using MSI:</span><br><span class="line">1) MSI is an exclusive interrupt vector by definition.</span><br><span class="line">   This means the interrupt handler doesn&#39;t have to verify</span><br><span class="line">   its device caused the interrupt.</span><br><span class="line"></span><br><span class="line">2) MSI avoids DMA&#x2F;IRQ race conditions. DMA to host memory is guaranteed</span><br><span class="line">   to be visible to the host CPU(s) when the MSI is delivered. This</span><br><span class="line">   is important for both data coherency and avoiding stale control data.</span><br><span class="line">   This guarantee allows the driver to omit MMIO reads to flush</span><br><span class="line">   the DMA stream.</span><br><span class="line"></span><br><span class="line">See drivers&#x2F;infiniband&#x2F;hw&#x2F;mthca&#x2F; or drivers&#x2F;net&#x2F;tg3.c for examples</span><br><span class="line">of MSI&#x2F;MSI-X usage.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4. PCI device shutdown</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">When a PCI device driver is being unloaded, most of the following</span><br><span class="line">steps need to be performed:</span><br><span class="line"></span><br><span class="line">	Disable the device from generating IRQs</span><br><span class="line">	Release the IRQ (free_irq())</span><br><span class="line">	Stop all DMA activity</span><br><span class="line">	Release DMA buffers (both streaming and consistent)</span><br><span class="line">	Unregister from other subsystems (e.g. scsi or netdev)</span><br><span class="line">	Disable device from responding to MMIO&#x2F;IO Port addresses</span><br><span class="line">	Release MMIO&#x2F;IO Port resource(s)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.1 Stop IRQs on the device</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">How to do this is chip&#x2F;device specific. If it&#39;s not done, it opens</span><br><span class="line">the possibility of a &quot;screaming interrupt&quot; if (and only if)</span><br><span class="line">the IRQ is shared with another device.</span><br><span class="line"></span><br><span class="line">When the shared IRQ handler is &quot;unhooked&quot;, the remaining devices</span><br><span class="line">using the same IRQ line will still need the IRQ enabled. Thus if the</span><br><span class="line">&quot;unhooked&quot; device asserts IRQ line, the system will respond assuming</span><br><span class="line">it was one of the remaining devices asserted the IRQ line. Since none</span><br><span class="line">of the other devices will handle the IRQ, the system will &quot;hang&quot; until</span><br><span class="line">it decides the IRQ isn&#39;t going to get handled and masks the IRQ (100,000</span><br><span class="line">iterations later). Once the shared IRQ is masked, the remaining devices</span><br><span class="line">will stop functioning properly. Not a nice situation.</span><br><span class="line"></span><br><span class="line">This is another reason to use MSI or MSI-X if it&#39;s available.</span><br><span class="line">MSI and MSI-X are defined to be exclusive interrupts and thus</span><br><span class="line">are not susceptible to the &quot;screaming interrupt&quot; problem.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.2 Release the IRQ</span><br><span class="line">~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Once the device is quiesced (no more IRQs), one can call free_irq().</span><br><span class="line">This function will return control once any pending IRQs are handled,</span><br><span class="line">&quot;unhook&quot; the drivers IRQ handler from that IRQ, and finally release</span><br><span class="line">the IRQ if no one else is using it.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.3 Stop all DMA activity</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">It&#39;s extremely important to stop all DMA operations BEFORE attempting</span><br><span class="line">to deallocate DMA control data. Failure to do so can result in memory</span><br><span class="line">corruption, hangs, and on some chip-sets a hard crash.</span><br><span class="line"></span><br><span class="line">Stopping DMA after stopping the IRQs can avoid races where the</span><br><span class="line">IRQ handler might restart DMA engines.</span><br><span class="line"></span><br><span class="line">While this step sounds obvious and trivial, several &quot;mature&quot; drivers</span><br><span class="line">didn&#39;t get this step right in the past.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.4 Release DMA buffers</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Once DMA is stopped, clean up streaming DMA first.</span><br><span class="line">I.e. unmap data buffers and return buffers to &quot;upstream&quot;</span><br><span class="line">owners if there is one.</span><br><span class="line"></span><br><span class="line">Then clean up &quot;consistent&quot; buffers which contain the control data.</span><br><span class="line"></span><br><span class="line">See Documentation&#x2F;DMA-API.txt for details on unmapping interfaces.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.5 Unregister from other subsystems</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">Most low level PCI device drivers support some other subsystem</span><br><span class="line">like USB, ALSA, SCSI, NetDev, Infiniband, etc. Make sure your</span><br><span class="line">driver isn&#39;t losing resources from that other subsystem.</span><br><span class="line">If this happens, typically the symptom is an Oops (panic) when</span><br><span class="line">the subsystem attempts to call into a driver that has been unloaded.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.6 Disable Device from responding to MMIO&#x2F;IO Port addresses</span><br></pre></td></tr></table></figure>
+<p>io_unmap() MMIO or IO Port resources and then call pci_disable_device().<br>This is the symmetric opposite of pci_enable_device().<br>Do not access device registers after calling pci_disable_device().</p>
+<p>4.7 Release MMIO/IO Port Resource(s)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">Call pci_release_region() to mark the MMIO or IO Port range as available.</span><br><span class="line">Failure to do so usually results in the inability to reload the driver.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">5. How to access PCI config space</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">You can use pci_(read|write)_config_(byte|word|dword) to access the config</span><br><span class="line">space of a device represented by struct pci_dev *. All these functions return 0</span><br><span class="line">when successful or an error code (PCIBIOS_...) which can be translated to a text</span><br><span class="line">string by pcibios_strerror. Most drivers expect that accesses to valid PCI</span><br><span class="line">devices don&#39;t fail.</span><br><span class="line"></span><br><span class="line">If you don&#39;t have a struct pci_dev available, you can call</span><br><span class="line">pci_bus_(read|write)_config_(byte|word|dword) to access a given device</span><br><span class="line">and function on that bus.</span><br><span class="line"></span><br><span class="line">If you access fields in the standard portion of the config header, please</span><br><span class="line">use symbolic names of locations and bits declared in &lt;linux&#x2F;pci.h&gt;.</span><br><span class="line"></span><br><span class="line">If you need to access Extended PCI Capability registers, just call</span><br><span class="line">pci_find_capability() for the particular capability and it will find the</span><br><span class="line">corresponding register block for you.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">6. Other interesting functions</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">pci_find_slot()			Find pci_dev corresponding to given bus and</span><br><span class="line">				slot numbers.</span><br><span class="line">pci_set_power_state()		Set PCI Power Management state (0&#x3D;D0 ... 3&#x3D;D3)</span><br><span class="line">pci_find_capability()		Find specified capability in device&#39;s capability</span><br><span class="line">				list.</span><br><span class="line">pci_resource_start()		Returns bus start address for a given PCI region</span><br><span class="line">pci_resource_end()		Returns bus end address for a given PCI region</span><br><span class="line">pci_resource_len()		Returns the byte length of a PCI region</span><br><span class="line">pci_set_drvdata()		Set private driver data pointer for a pci_dev</span><br><span class="line">pci_get_drvdata()		Return private driver data pointer for a pci_dev</span><br><span class="line">pci_set_mwi()			Enable Memory-Write-Invalidate transactions.</span><br><span class="line">pci_clear_mwi()			Disable Memory-Write-Invalidate transactions.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">7. Miscellaneous hints</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"></span><br><span class="line">When displaying PCI device names to the user (for example when a driver wants</span><br><span class="line">to tell the user what card has it found), please use pci_name(pci_dev).</span><br><span class="line"></span><br><span class="line">Always refer to the PCI devices by a pointer to the pci_dev structure.</span><br><span class="line">All PCI layer functions use this identification and it&#39;s the only</span><br><span class="line">reasonable one. Don&#39;t use bus&#x2F;slot&#x2F;function numbers except for very</span><br><span class="line">special purposes -- on systems with multiple primary buses their semantics</span><br><span class="line">can be pretty complex.</span><br><span class="line"></span><br><span class="line">Don&#39;t try to turn on Fast Back to Back writes in your driver.  All devices</span><br><span class="line">on the bus need to be capable of doing it, so this is something which needs</span><br><span class="line">to be handled by platform and generic code, not individual drivers.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">8. Vendor and device identifications</span><br></pre></td></tr></table></figure>
+
+<p>One is not not required to add new device ids to include/linux/pci_ids.h.<br>Please add PCI_VENDOR_ID_xxx for vendors and a hex constant for device ids.</p>
+<p>PCI_VENDOR_ID_xxx constants are re-used. The device ids are arbitrary<br>hex numbers (vendor controlled) and normally used only in a single<br>location, the pci_device_id table.</p>
+<p>Please DO submit new vendor/device ids to pciids.sourceforge.net project.</p>
+<ol start="9">
+<li>Obsolete functions<pre><code>
+</code></pre>
+</li>
+</ol>
+<p>There are several functions which you might come across when trying to<br>port an old driver to the new PCI interface.  They are no longer present<br>in the kernel as they aren’t compatible with hotplug or PCI domains or<br>having sane locking.</p>
+<p>pci_find_device()    Superseded by pci_get_device()<br>pci_find_subsys()    Superseded by pci_get_subsys()<br>pci_find_slot()        Superseded by pci_get_slot()</p>
+<p>The alternative is the traditional PCI device driver that walks PCI<br>device lists. This is still possible but discouraged.</p>
+<ol start="10">
+<li>MMIO Space and “Write Posting”<pre><code>
+</code></pre>
+</li>
+</ol>
+<p>Converting a driver from using I/O Port space to using MMIO space<br>often requires some additional changes. Specifically, “write posting”<br>needs to be handled. Many drivers (e.g. tg3, acenic, sym53c8xx_2)<br>already do this. I/O Port space guarantees write transactions reach the PCI<br>device before the CPU can continue. Writes to MMIO space allow the CPU<br>to continue before the transaction reaches the PCI device. HW weenies<br>call this “Write Posting” because the write completion is “posted” to<br>the CPU before the transaction has reached its destination.</p>
+<p>Thus, timing sensitive code should add readl() where the CPU is<br>expected to wait before doing other work.  The classic “bit banging”<br>sequence works fine for I/O Port space:</p>
+<pre><code>   for (i = 8; --i; val &gt;&gt;= 1) &#123;
+           outb(val &amp; 1, ioport_reg);      /* write bit */
+           udelay(10);
+   &#125;
+</code></pre>
+<p>The same sequence for MMIO space should be:</p>
+<pre><code>   for (i = 8; --i; val &gt;&gt;= 1) &#123;
+           writeb(val &amp; 1, mmio_reg);      /* write bit */
+           readb(safe_mmio_reg);           /* flush posted write */
+           udelay(10);
+   &#125;
+</code></pre>
+<p>It is important that “safe_mmio_reg” not have any side effects that<br>interferes with the correct operation of the device.</p>
+<p>Another case to watch out for is when resetting a PCI device. Use PCI<br>Configuration space reads to flush the writel(). This will gracefully<br>handle the PCI master abort on all platforms if the PCI device is<br>expected to not respond to a readl().  Most x86 platforms will allow<br>MMIO reads to master abort (a.k.a. “Soft Fail”) and return garbage<br>(e.g. ~0). But many RISC platforms will crash (a.k.a.”Hard Fail”).</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/" title="Kernel-2.6.32-573.12.1.el6_pci" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_power-management/" title="Kernel-2.6.32-573.12.1.el6_power-management"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_pci-error-recovery/" title="Kernel-2.6.32-573.12.1.el6_pci-error-recovery"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

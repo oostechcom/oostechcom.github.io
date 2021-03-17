@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_gcov | oosTech.com</title>
+  <meta name="description" content="Using gcov with the Linux kernel Introduction Preparation Customization Files Modules Separated build and test machines TroubleshootingAppendix A: sample script: gather_on_build.shAppendix B: sample s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_gcov">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Using gcov with the Linux kernel Introduction Preparation Customization Files Modules Separated build and test machines TroubleshootingAppendix A: sample script: gather_on_build.shAppendix B: sample s">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Using-gcov-with-the-Linux-kernel"><span class="toc-number">1.</span> <span class="toc-text">Using gcov with the Linux kernel</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">2.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cd-tmp-linux-out"><span class="toc-number">3.</span> <span class="toc-text">cd &#x2F;tmp&#x2F;linux-out</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#gcov-o-sys-kernel-debug-gcov-tmp-linux-out-kernel-spinlock-c"><span class="toc-number">4.</span> <span class="toc-text">gcov -o &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;gcov&#x2F;tmp&#x2F;linux-out&#x2F;kernel spinlock.c</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Preparation"><span class="toc-number">5.</span> <span class="toc-text">Preparation</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Customization"><span class="toc-number">6.</span> <span class="toc-text">Customization</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Files"><span class="toc-number">7.</span> <span class="toc-text">Files</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Modules"><span class="toc-number">8.</span> <span class="toc-text">Modules</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Separated-build-and-test-machines"><span class="toc-number">9.</span> <span class="toc-text">Separated build and test machines</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Troubleshooting"><span class="toc-number">10.</span> <span class="toc-text">Troubleshooting</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Appendix-A-gather-on-build-sh"><span class="toc-number">11.</span> <span class="toc-text">Appendix A: gather_on_build.sh</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Appendix-B-gather-on-test-sh"><span class="toc-number">12.</span> <span class="toc-text">Appendix B: gather_on_test.sh</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_gcov" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_gcov
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Using-gcov-with-the-Linux-kernel"><a href="#Using-gcov-with-the-Linux-kernel" class="headerlink" title="Using gcov with the Linux kernel"></a>Using gcov with the Linux kernel</h1><ol>
+<li>Introduction</li>
+<li>Preparation</li>
+<li>Customization</li>
+<li>Files</li>
+<li>Modules</li>
+<li>Separated build and test machines</li>
+<li>Troubleshooting<br>Appendix A: sample script: gather_on_build.sh<br>Appendix B: sample script: gather_on_test.sh</li>
+</ol>
+<ol>
+<li><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1></li>
+</ol>
+<p>gcov profiling kernel support enables the use of GCC’s coverage testing<br>tool gcov [1] with the Linux kernel. Coverage data of a running kernel<br>is exported in gcov-compatible format via the “gcov” debugfs directory.<br>To get coverage data for a specific file, change to the kernel build<br>directory and use gcov with the -o option as follows (requires root):</p>
+<h1 id="cd-tmp-linux-out"><a href="#cd-tmp-linux-out" class="headerlink" title="cd /tmp/linux-out"></a>cd /tmp/linux-out</h1><h1 id="gcov-o-sys-kernel-debug-gcov-tmp-linux-out-kernel-spinlock-c"><a href="#gcov-o-sys-kernel-debug-gcov-tmp-linux-out-kernel-spinlock-c" class="headerlink" title="gcov -o /sys/kernel/debug/gcov/tmp/linux-out/kernel spinlock.c"></a>gcov -o /sys/kernel/debug/gcov/tmp/linux-out/kernel spinlock.c</h1><p>This will create source code files annotated with execution counts<br>in the current directory. In addition, graphical gcov front-ends such<br>as lcov [2] can be used to automate the process of collecting data<br>for the entire kernel and provide coverage overviews in HTML format.</p>
+<p>Possible uses:</p>
+<ul>
+<li>debugging (has this line been reached at all?)</li>
+<li>test improvement (how do I change my test to cover these lines?)</li>
+<li>minimizing kernel configurations (do I need this option if the<br>associated code is never run?)</li>
+</ul>
+<p>–</p>
+<p>[1] <a target="_blank" rel="noopener" href="http://gcc.gnu.org/onlinedocs/gcc/Gcov.html">http://gcc.gnu.org/onlinedocs/gcc/Gcov.html</a><br>[2] <a target="_blank" rel="noopener" href="http://ltp.sourceforge.net/coverage/lcov.php">http://ltp.sourceforge.net/coverage/lcov.php</a></p>
+<ol start="2">
+<li><h1 id="Preparation"><a href="#Preparation" class="headerlink" title="Preparation"></a>Preparation</h1></li>
+</ol>
+<p>Configure the kernel with:</p>
+<pre><code>    CONFIG_DEBUG_FS=y
+    CONFIG_GCOV_KERNEL=y
+</code></pre>
+<p>and to get coverage data for the entire kernel:</p>
+<pre><code>    CONFIG_GCOV_PROFILE_ALL=y
+</code></pre>
+<p>Note that kernels compiled with profiling flags will be significantly<br>larger and run slower. Also CONFIG_GCOV_PROFILE_ALL may not be supported<br>on all architectures.</p>
+<p>Profiling data will only become accessible once debugfs has been<br>mounted:</p>
+<pre><code>    mount -t debugfs none /sys/kernel/debug
+</code></pre>
+<ol start="3">
+<li><h1 id="Customization"><a href="#Customization" class="headerlink" title="Customization"></a>Customization</h1></li>
+</ol>
+<p>To enable profiling for specific files or directories, add a line<br>similar to the following to the respective kernel Makefile:</p>
+<pre><code>    For a single file (e.g. main.o):
+            GCOV_PROFILE_main.o := y
+
+    For all files in one directory:
+            GCOV_PROFILE := y
+</code></pre>
+<p>To exclude files from being profiled even when CONFIG_GCOV_PROFILE_ALL<br>is specified, use:</p>
+<pre><code>            GCOV_PROFILE_main.o := n
+    and:
+            GCOV_PROFILE := n
+</code></pre>
+<p>Only files which are linked to the main kernel image or are compiled as<br>kernel modules are supported by this mechanism.</p>
+<ol start="4">
+<li><h1 id="Files"><a href="#Files" class="headerlink" title="Files"></a>Files</h1></li>
+</ol>
+<p>The gcov kernel support creates the following files in debugfs:</p>
+<pre><code>    /sys/kernel/debug/gcov
+            Parent directory for all gcov-related files.
+
+    /sys/kernel/debug/gcov/reset
+            Global reset file: resets all coverage data to zero when
+            written to.
+
+    /sys/kernel/debug/gcov/path/to/compile/dir/file.gcda
+            The actual gcov data file as understood by the gcov
+            tool. Resets file coverage data to zero when written to.
+
+    /sys/kernel/debug/gcov/path/to/compile/dir/file.gcno
+            Symbolic link to a static data file required by the gcov
+            tool. This file is generated by gcc when compiling with
+            option -ftest-coverage.
+</code></pre>
+<ol start="5">
+<li><h1 id="Modules"><a href="#Modules" class="headerlink" title="Modules"></a>Modules</h1></li>
+</ol>
+<p>Kernel modules may contain cleanup code which is only run during<br>module unload time. The gcov mechanism provides a means to collect<br>coverage data for such code by keeping a copy of the data associated<br>with the unloaded module. This data remains available through debugfs.<br>Once the module is loaded again, the associated coverage counters are<br>initialized with the data from its previous instantiation.</p>
+<p>This behavior can be deactivated by specifying the gcov_persist kernel<br>parameter:</p>
+<pre><code>    gcov_persist=0
+</code></pre>
+<p>At run-time, a user can also choose to discard data for an unloaded<br>module by writing to its data file or the global reset file.</p>
+<ol start="6">
+<li><h1 id="Separated-build-and-test-machines"><a href="#Separated-build-and-test-machines" class="headerlink" title="Separated build and test machines"></a>Separated build and test machines</h1></li>
+</ol>
+<p>The gcov kernel profiling infrastructure is designed to work out-of-the<br>box for setups where kernels are built and run on the same machine. In<br>cases where the kernel runs on a separate machine, special preparations<br>must be made, depending on where the gcov tool is used:</p>
+<p>a) gcov is run on the TEST machine</p>
+<p>The gcov tool version on the test machine must be compatible with the<br>gcc version used for kernel build. Also the following files need to be<br>copied from build to test machine:</p>
+<p>from the source tree:</p>
+<ul>
+<li>all C source files + headers</li>
+</ul>
+<p>from the build tree:</p>
+<ul>
+<li>all C source files + headers</li>
+<li>all .gcda and .gcno files</li>
+<li>all links to directories</li>
+</ul>
+<p>It is important to note that these files need to be placed into the<br>exact same file system location on the test machine as on the build<br>machine. If any of the path components is symbolic link, the actual<br>directory needs to be used instead (due to make’s CURDIR handling).</p>
+<p>b) gcov is run on the BUILD machine</p>
+<p>The following files need to be copied after each test case from test<br>to build machine:</p>
+<p>from the gcov directory in sysfs:</p>
+<ul>
+<li>all .gcda files</li>
+<li>all links to .gcno files</li>
+</ul>
+<p>These files can be copied to any location on the build machine. gcov<br>must then be called with the -o option pointing to that directory.</p>
+<p>Example directory setup on the build machine:</p>
+<p>  /tmp/linux:    kernel source tree<br>  /tmp/out:      kernel build directory as specified by make O=<br>  /tmp/coverage: location of the files copied from the test machine</p>
+<p>  [user@build] cd /tmp/out<br>  [user@build] gcov -o /tmp/coverage/tmp/out/init main.c</p>
+<ol start="7">
+<li><h1 id="Troubleshooting"><a href="#Troubleshooting" class="headerlink" title="Troubleshooting"></a>Troubleshooting</h1></li>
+</ol>
+<p>Problem:  Compilation aborts during linker step.<br>Cause:    Profiling flags are specified for source files which are not<br>          linked to the main kernel or which are linked by a custom<br>          linker procedure.<br>Solution: Exclude affected source files from profiling by specifying<br>          GCOV_PROFILE := n or GCOV_PROFILE_basename.o := n in the<br>          corresponding Makefile.</p>
+<p>Problem:  Files copied from sysfs appear empty or incomplete.<br>Cause:    Due to the way seq_file works, some tools such as cp or tar<br>          may not correctly copy files from sysfs.<br>Solution: Use ‘cat’ to read .gcda files and ‘cp -d’ to copy links.<br>          Alternatively use the mechanism shown in Appendix B.</p>
+<h1 id="Appendix-A-gather-on-build-sh"><a href="#Appendix-A-gather-on-build-sh" class="headerlink" title="Appendix A: gather_on_build.sh"></a>Appendix A: gather_on_build.sh</h1><p>Sample script to gather coverage meta files on the build machine<br>(see 6a):<br>#!/bin/bash</p>
+<p>KSRC=$1<br>KOBJ=$2<br>DEST=$3</p>
+<p>if [ -z “$KSRC” ] || [ -z “$KOBJ” ] || [ -z “$DEST” ]; then<br>  echo “Usage: $0 <ksrc directory> <kobj directory> &lt;output.tar.gz&gt;” &gt;&amp;2<br>  exit 1<br>fi</p>
+<p>KSRC=$(cd $KSRC; printf “all:\n\t@echo ${CURDIR}\n” | make -f -)<br>KOBJ=$(cd $KOBJ; printf “all:\n\t@echo ${CURDIR}\n” | make -f -)</p>
+<p>find $KSRC $KOBJ ( -name ‘<em>.gcno’ -o -name ‘</em>.[ch]’ -o -type l ) -a <br>                 -perm /u+r,g+r | tar cfz $DEST -P -T -</p>
+<p>if [ $? -eq 0 ] ; then<br>  echo “$DEST successfully created, copy to test system and unpack with:”<br>  echo “  tar xfz $DEST -P”<br>else<br>  echo “Could not create file $DEST”<br>fi</p>
+<h1 id="Appendix-B-gather-on-test-sh"><a href="#Appendix-B-gather-on-test-sh" class="headerlink" title="Appendix B: gather_on_test.sh"></a>Appendix B: gather_on_test.sh</h1><p>Sample script to gather coverage data files on the test machine<br>(see 6b):</p>
+<p>#!/bin/bash -e</p>
+<p>DEST=$1<br>GCDA=/sys/kernel/debug/gcov</p>
+<p>if [ -z “$DEST” ] ; then<br>  echo “Usage: $0 &lt;output.tar.gz&gt;” &gt;&amp;2<br>  exit 1<br>fi</p>
+<p>TEMPDIR=$(mktemp -d)<br>echo Collecting data..<br>find $GCDA -type d -exec mkdir -p $TEMPDIR/{} ;<br>find $GCDA -name ‘<em>.gcda’ -exec sh -c ‘cat &lt; $0 &gt; ‘$TEMPDIR’/$0’ {} ;<br>find $GCDA -name ‘</em>.gcno’ -exec sh -c ‘cp -d $0 ‘$TEMPDIR’/$0’ {} ;<br>tar czf $DEST -C $TEMPDIR sys<br>rm -rf $TEMPDIR</p>
+<p>echo “$DEST successfully created, copy to build system and unpack with:”<br>echo “  tar xfz $DEST”</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/" title="Kernel-2.6.32-573.12.1.el6_gcov" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_gcov/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_gdbmacros/" title="Kernel-2.6.32-573.12.1.el6_gdbmacros"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_gameport-programming/" title="Kernel-2.6.32-573.12.1.el6_gameport-programming"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_sharedsubtree | oosTech.com</title>
+  <meta name="description" content="Shared SubtreesContents:    1) Overview    2) Features    3) Setting mount states    4) Use-case    5) Detailed semantics    6) Quiz    7) FAQ    8) Implementation  Overview   Consider the following s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_sharedsubtree">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Shared SubtreesContents:    1) Overview    2) Features    3) Setting mount states    4) Use-case    5) Detailed semantics    6) Quiz    7) FAQ    8) Implementation  Overview   Consider the following s">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Shared-Subtrees"><span class="toc-number">1.</span> <span class="toc-text">Shared Subtrees</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_sharedsubtree" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_sharedsubtree
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="Shared-Subtrees"><a href="#Shared-Subtrees" class="headerlink" title="Shared Subtrees"></a>Shared Subtrees</h2><p>Contents:<br>    1) Overview<br>    2) Features<br>    3) Setting mount states<br>    4) Use-case<br>    5) Detailed semantics<br>    6) Quiz<br>    7) FAQ<br>    8) Implementation</p>
+<ol>
+<li>Overview</li>
+</ol>
+<hr>
+<p>Consider the following situation:</p>
+<p>A process wants to clone its own namespace, but still wants to access the CD<br>that got mounted recently.  Shared subtree semantics provide the necessary<br>mechanism to accomplish the above.</p>
+<p>It provides the necessary building blocks for features like per-user-namespace<br>and versioned filesystem.</p>
+<ol start="2">
+<li>Features</li>
+</ol>
+<hr>
+<p>Shared subtree provides four different flavors of mounts; struct vfsmount to be<br>precise</p>
+<pre><code>a. shared mount
+b. slave mount
+c. private mount
+d. unbindable mount
+</code></pre>
+<p>2a) A shared mount can be replicated to as many mountpoints and all the<br>replicas continue to be exactly same.</p>
+<pre><code>Here is an example:
+
+Let&#39;s say /mnt has a mount that is shared.
+mount --make-shared /mnt
+
+Note: mount(8) command now supports the --make-shared flag,
+so the sample &#39;smount&#39; program is no longer needed and has been
+removed.
+
+# mount --bind /mnt /tmp
+The above command replicates the mount at /mnt to the mountpoint /tmp
+and the contents of both the mounts remain identical.
+
+#ls /mnt
+a b c
+
+#ls /tmp
+a b c
+
+Now let&#39;s say we mount a device at /tmp/a
+# mount /dev/sd0  /tmp/a
+
+#ls /tmp/a
+t1 t2 t2
+
+#ls /mnt/a
+t1 t2 t2
+
+Note that the mount has propagated to the mount at /mnt as well.
+
+And the same is true even when /dev/sd0 is mounted on /mnt/a. The
+contents will be visible under /tmp/a too.
+</code></pre>
+<p>2b) A slave mount is like a shared mount except that mount and umount events<br>    only propagate towards it.</p>
+<pre><code>All slave mounts have a master mount which is a shared.
+
+Here is an example:
+
+Let&#39;s say /mnt has a mount which is shared.
+# mount --make-shared /mnt
+
+Let&#39;s bind mount /mnt to /tmp
+# mount --bind /mnt /tmp
+
+the new mount at /tmp becomes a shared mount and it is a replica of
+the mount at /mnt.
+
+Now let&#39;s make the mount at /tmp; a slave of /mnt
+# mount --make-slave /tmp
+
+let&#39;s mount /dev/sd0 on /mnt/a
+# mount /dev/sd0 /mnt/a
+
+#ls /mnt/a
+t1 t2 t3
+
+#ls /tmp/a
+t1 t2 t3
+
+Note the mount event has propagated to the mount at /tmp
+
+However let&#39;s see what happens if we mount something on the mount at /tmp
+
+# mount /dev/sd1 /tmp/b
+
+#ls /tmp/b
+s1 s2 s3
+
+#ls /mnt/b
+
+Note how the mount event has not propagated to the mount at
+/mnt
+</code></pre>
+<p>2c) A private mount does not forward or receive propagation.</p>
+<pre><code>This is the mount we are familiar with. Its the default type.
+</code></pre>
+<p>2d) A unbindable mount is a unbindable private mount</p>
+<pre><code>let&#39;s say we have a mount at /mnt and we make is unbindable
+
+# mount --make-unbindable /mnt
+
+ Let&#39;s try to bind mount this mount somewhere else.
+ # mount --bind /mnt /tmp
+ mount: wrong fs type, bad option, bad superblock on /mnt,
+        or too many mounted file systems
+
+Binding a unbindable mount is a invalid operation.
+</code></pre>
+<ol start="3">
+<li><p>Setting mount states</p>
+<p> The mount command (util-linux package) can be used to set mount<br> states:</p>
+<p> mount –make-shared mountpoint<br> mount –make-slave mountpoint<br> mount –make-private mountpoint<br> mount –make-unbindable mountpoint</p>
+</li>
+</ol>
+<ol start="4">
+<li>Use cases</li>
+</ol>
+<hr>
+<pre><code>A) A process wants to clone its own namespace, but still wants to
+   access the CD that got mounted recently.
+
+   Solution:
+
+    The system administrator can make the mount at /cdrom shared
+    mount --bind /cdrom /cdrom
+    mount --make-shared /cdrom
+
+    Now any process that clones off a new namespace will have a
+    mount at /cdrom which is a replica of the same mount in the
+    parent namespace.
+
+    So when a CD is inserted and mounted at /cdrom that mount gets
+    propagated to the other mount at /cdrom in all the other clone
+    namespaces.
+
+B) A process wants its mounts invisible to any other process, but
+still be able to see the other system mounts.
+
+   Solution:
+
+    To begin with, the administrator can mark the entire mount tree
+    as shareable.
+
+    mount --make-rshared /
+
+    A new process can clone off a new namespace. And mark some part
+    of its namespace as slave
+
+    mount --make-rslave /myprivatetree
+
+    Hence forth any mounts within the /myprivatetree done by the
+    process will not show up in any other namespace. However mounts
+    done in the parent namespace under /myprivatetree still shows
+    up in the process&#39;s namespace.
+
+
+Apart from the above semantics this feature provides the
+building blocks to solve the following problems:
+
+C)  Per-user namespace
+
+    The above semantics allows a way to share mounts across
+    namespaces.  But namespaces are associated with processes. If
+    namespaces are made first class objects with user API to
+    associate/disassociate a namespace with userid, then each user
+    could have his/her own namespace and tailor it to his/her
+    requirements. Offcourse its needs support from PAM.
+
+D)  Versioned files
+
+    If the entire mount tree is visible at multiple locations, then
+    a underlying versioning file system can return different
+    version of the file depending on the path used to access that
+    file.
+
+    An example is:
+
+    mount --make-shared /
+    mount --rbind / /view/v1
+    mount --rbind / /view/v2
+    mount --rbind / /view/v3
+    mount --rbind / /view/v4
+
+    and if /usr has a versioning filesystem mounted, then that
+    mount appears at /view/v1/usr, /view/v2/usr, /view/v3/usr and
+    /view/v4/usr too
+
+    A user can request v3 version of the file /usr/fs/namespace.c
+    by accessing /view/v3/usr/fs/namespace.c . The underlying
+    versioning filesystem can then decipher that v3 version of the
+    filesystem is being requested and return the corresponding
+    inode.
+</code></pre>
+<ol start="5">
+<li>Detailed semantics:</li>
+</ol>
+<hr>
+<pre><code>The section below explains the detailed semantics of
+bind, rbind, move, mount, umount and clone-namespace operations.
+
+Note: the word &#39;vfsmount&#39; and the noun &#39;mount&#39; have been used
+to mean the same thing, throughout this document.
+</code></pre>
+<p>5a) Mount states</p>
+<pre><code>A given mount can be in one of the following states
+1) shared
+2) slave
+3) shared and slave
+4) private
+5) unbindable
+
+A &#39;propagation event&#39; is defined as event generated on a vfsmount
+that leads to mount or unmount actions in other vfsmounts.
+
+A &#39;peer group&#39; is defined as a group of vfsmounts that propagate
+events to each other.
+
+(1) Shared mounts
+
+    A &#39;shared mount&#39; is defined as a vfsmount that belongs to a
+    &#39;peer group&#39;.
+
+    For example:
+        mount --make-shared /mnt
+        mount --bind /mnt /tmp
+
+    The mount at /mnt and that at /tmp are both shared and belong
+    to the same peer group. Anything mounted or unmounted under
+    /mnt or /tmp reflect in all the other mounts of its peer
+    group.
+
+
+(2) Slave mounts
+
+    A &#39;slave mount&#39; is defined as a vfsmount that receives
+    propagation events and does not forward propagation events.
+
+    A slave mount as the name implies has a master mount from which
+    mount/unmount events are received. Events do not propagate from
+    the slave mount to the master.  Only a shared mount can be made
+    a slave by executing the following command
+
+        mount --make-slave mount
+
+    A shared mount that is made as a slave is no more shared unless
+    modified to become shared.
+
+(3) Shared and Slave
+
+    A vfsmount can be both shared as well as slave.  This state
+    indicates that the mount is a slave of some vfsmount, and
+    has its own peer group too.  This vfsmount receives propagation
+    events from its master vfsmount, and also forwards propagation
+    events to its &#39;peer group&#39; and to its slave vfsmounts.
+
+    Strictly speaking, the vfsmount is shared having its own
+    peer group, and this peer-group is a slave of some other
+    peer group.
+
+    Only a slave vfsmount can be made as &#39;shared and slave&#39; by
+    either executing the following command
+        mount --make-shared mount
+    or by moving the slave vfsmount under a shared vfsmount.
+
+(4) Private mount
+
+    A &#39;private mount&#39; is defined as vfsmount that does not
+    receive or forward any propagation events.
+
+(5) Unbindable mount
+
+    A &#39;unbindable mount&#39; is defined as vfsmount that does not
+    receive or forward any propagation events and cannot
+    be bind mounted.
+
+
+   State diagram:
+   The state diagram below explains the state transition of a mount,
+in response to various commands.
+------------------------------------------------------------------------
+|             |make-shared |  make-slave  | make-private |make-unbindab|
+--------------|------------|--------------|--------------|-------------|
+|shared          |shared       |*slave/private|   private     | unbindable  |
+|             |            |              |              |             |
+|-------------|------------|--------------|--------------|-------------|
+|slave          |shared      |    **slave      |    private   | unbindable  |
+|             |and slave   |              |              |             |
+|-------------|------------|--------------|--------------|-------------|
+|shared          |shared      |    slave      |    private   | unbindable  |
+|and slave    |and slave   |              |              |             |
+|-------------|------------|--------------|--------------|-------------|
+|private      |shared       |  **private      |    private   | unbindable  |
+|-------------|------------|--------------|--------------|-------------|
+|unbindable   |shared       |**unbindable  |    private   | unbindable  |
+------------------------------------------------------------------------
+
+* if the shared mount is the only mount in its peer group, making it
+slave, makes it private automatically. Note that there is no master to
+which it can be slaved to.
+
+** slaving a non-shared mount has no effect on the mount.
+
+Apart from the commands listed below, the &#39;move&#39; operation also changes
+the state of a mount depending on type of the destination mount. Its
+explained in section 5d.
+</code></pre>
+<p>5b) Bind semantics</p>
+<pre><code>Consider the following command
+
+mount --bind A/a  B/b
+
+where &#39;A&#39; is the source mount, &#39;a&#39; is the dentry in the mount &#39;A&#39;, &#39;B&#39;
+is the destination mount and &#39;b&#39; is the dentry in the destination mount.
+
+The outcome depends on the type of mount of &#39;A&#39; and &#39;B&#39;. The table
+below contains quick reference.
+</code></pre>
+<hr>
+<p>   |         BIND MOUNT OPERATION                                            |<br>   |<strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>**</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong><br>   |source(A)-&gt;| shared       |       private  |       slave    | unbindable |<br>   | dest(B)  |               |                |                |            |<br>   |   |      |               |                |                |            |<br>   |   v      |               |                |                |            |<br>   |<strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>**</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong><br>   |  shared  | shared        |     shared     | shared &amp; slave |  invalid   |<br>   |          |               |                |                |            |<br>   |non-shared| shared        |      private   |      slave     |  invalid   |</p>
+<hr>
+<pre><code>     Details:
+
+1. &#39;A&#39; is a shared mount and &#39;B&#39; is a shared mount. A new mount &#39;C&#39;
+which is clone of &#39;A&#39;, is created. Its root dentry is &#39;a&#39; . &#39;C&#39; is
+mounted on mount &#39;B&#39; at dentry &#39;b&#39;. Also new mount &#39;C1&#39;, &#39;C2&#39;, &#39;C3&#39; ...
+are created and mounted at the dentry &#39;b&#39; on all mounts where &#39;B&#39;
+propagates to. A new propagation tree containing &#39;C1&#39;,..,&#39;Cn&#39; is
+created. This propagation tree is identical to the propagation tree of
+&#39;B&#39;.  And finally the peer-group of &#39;C&#39; is merged with the peer group
+of &#39;A&#39;.
+
+2. &#39;A&#39; is a private mount and &#39;B&#39; is a shared mount. A new mount &#39;C&#39;
+which is clone of &#39;A&#39;, is created. Its root dentry is &#39;a&#39;. &#39;C&#39; is
+mounted on mount &#39;B&#39; at dentry &#39;b&#39;. Also new mount &#39;C1&#39;, &#39;C2&#39;, &#39;C3&#39; ...
+are created and mounted at the dentry &#39;b&#39; on all mounts where &#39;B&#39;
+propagates to. A new propagation tree is set containing all new mounts
+&#39;C&#39;, &#39;C1&#39;, .., &#39;Cn&#39; with exactly the same configuration as the
+propagation tree for &#39;B&#39;.
+
+3. &#39;A&#39; is a slave mount of mount &#39;Z&#39; and &#39;B&#39; is a shared mount. A new
+mount &#39;C&#39; which is clone of &#39;A&#39;, is created. Its root dentry is &#39;a&#39; .
+&#39;C&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;. Also new mounts &#39;C1&#39;, &#39;C2&#39;,
+&#39;C3&#39; ... are created and mounted at the dentry &#39;b&#39; on all mounts where
+&#39;B&#39; propagates to. A new propagation tree containing the new mounts
+&#39;C&#39;,&#39;C1&#39;,..  &#39;Cn&#39; is created. This propagation tree is identical to the
+propagation tree for &#39;B&#39;. And finally the mount &#39;C&#39; and its peer group
+is made the slave of mount &#39;Z&#39;.  In other words, mount &#39;C&#39; is in the
+state &#39;slave and shared&#39;.
+
+4. &#39;A&#39; is a unbindable mount and &#39;B&#39; is a shared mount. This is a
+invalid operation.
+
+5. &#39;A&#39; is a private mount and &#39;B&#39; is a non-shared(private or slave or
+unbindable) mount. A new mount &#39;C&#39; which is clone of &#39;A&#39;, is created.
+Its root dentry is &#39;a&#39;. &#39;C&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;.
+
+6. &#39;A&#39; is a shared mount and &#39;B&#39; is a non-shared mount. A new mount &#39;C&#39;
+which is a clone of &#39;A&#39; is created. Its root dentry is &#39;a&#39;. &#39;C&#39; is
+mounted on mount &#39;B&#39; at dentry &#39;b&#39;.  &#39;C&#39; is made a member of the
+peer-group of &#39;A&#39;.
+
+7. &#39;A&#39; is a slave mount of mount &#39;Z&#39; and &#39;B&#39; is a non-shared mount. A
+new mount &#39;C&#39; which is a clone of &#39;A&#39; is created. Its root dentry is
+&#39;a&#39;.  &#39;C&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;. Also &#39;C&#39; is set as a
+slave mount of &#39;Z&#39;. In other words &#39;A&#39; and &#39;C&#39; are both slave mounts of
+&#39;Z&#39;.  All mount/unmount events on &#39;Z&#39; propagates to &#39;A&#39; and &#39;C&#39;. But
+mount/unmount on &#39;A&#39; do not propagate anywhere else. Similarly
+mount/unmount on &#39;C&#39; do not propagate anywhere else.
+
+8. &#39;A&#39; is a unbindable mount and &#39;B&#39; is a non-shared mount. This is a
+invalid operation. A unbindable mount cannot be bind mounted.
+</code></pre>
+<p>5c) Rbind semantics</p>
+<pre><code>rbind is same as bind. Bind replicates the specified mount.  Rbind
+replicates all the mounts in the tree belonging to the specified mount.
+Rbind mount is bind mount applied to all the mounts in the tree.
+
+If the source tree that is rbind has some unbindable mounts,
+then the subtree under the unbindable mount is pruned in the new
+location.
+
+eg: let&#39;s say we have the following mount tree.
+
+    A
+      /   \
+      B   C
+     / \ / \
+     D E F G
+
+     Let&#39;s say all the mount except the mount C in the tree are
+     of a type other than unbindable.
+
+     If this tree is rbound to say Z
+
+     We will have the following tree at the new location.
+
+    Z
+    |
+    A&#39;
+       /
+      B&#39;        Note how the tree under C is pruned
+     / \         in the new location.
+    D&#39; E&#39;
+</code></pre>
+<p>5d) Move semantics</p>
+<pre><code>Consider the following command
+
+mount --move A  B/b
+
+where &#39;A&#39; is the source mount, &#39;B&#39; is the destination mount and &#39;b&#39; is
+the dentry in the destination mount.
+
+The outcome depends on the type of the mount of &#39;A&#39; and &#39;B&#39;. The table
+below is a quick reference.
+</code></pre>
+<hr>
+<p>   |                 MOVE MOUNT OPERATION                                 |<br>   |<strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>**</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong><br>   | source(A)-&gt;| shared      |       private  |       slave    | unbindable |<br>   | dest(B)  |               |                |                |            |<br>   |   |      |               |                |                |            |<br>   |   v      |               |                |                |            |<br>   |<strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>**</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong><br>   |  shared  | shared        |     shared     |shared and slave|  invalid   |<br>   |          |               |                |                |            |<br>   |non-shared| shared        |      private   |    slave       | unbindable |</p>
+<hr>
+<pre><code>NOTE: moving a mount residing under a shared mount is invalid.
+
+  Details follow:
+
+1. &#39;A&#39; is a shared mount and &#39;B&#39; is a shared mount.  The mount &#39;A&#39; is
+mounted on mount &#39;B&#39; at dentry &#39;b&#39;.  Also new mounts &#39;A1&#39;, &#39;A2&#39;...&#39;An&#39;
+are created and mounted at dentry &#39;b&#39; on all mounts that receive
+propagation from mount &#39;B&#39;. A new propagation tree is created in the
+exact same configuration as that of &#39;B&#39;. This new propagation tree
+contains all the new mounts &#39;A1&#39;, &#39;A2&#39;...  &#39;An&#39;.  And this new
+propagation tree is appended to the already existing propagation tree
+of &#39;A&#39;.
+
+2. &#39;A&#39; is a private mount and &#39;B&#39; is a shared mount. The mount &#39;A&#39; is
+mounted on mount &#39;B&#39; at dentry &#39;b&#39;. Also new mount &#39;A1&#39;, &#39;A2&#39;... &#39;An&#39;
+are created and mounted at dentry &#39;b&#39; on all mounts that receive
+propagation from mount &#39;B&#39;. The mount &#39;A&#39; becomes a shared mount and a
+propagation tree is created which is identical to that of
+&#39;B&#39;. This new propagation tree contains all the new mounts &#39;A1&#39;,
+&#39;A2&#39;...  &#39;An&#39;.
+
+3. &#39;A&#39; is a slave mount of mount &#39;Z&#39; and &#39;B&#39; is a shared mount.  The
+mount &#39;A&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;.  Also new mounts &#39;A1&#39;,
+&#39;A2&#39;... &#39;An&#39; are created and mounted at dentry &#39;b&#39; on all mounts that
+receive propagation from mount &#39;B&#39;. A new propagation tree is created
+in the exact same configuration as that of &#39;B&#39;. This new propagation
+tree contains all the new mounts &#39;A1&#39;, &#39;A2&#39;...  &#39;An&#39;.  And this new
+propagation tree is appended to the already existing propagation tree of
+&#39;A&#39;.  Mount &#39;A&#39; continues to be the slave mount of &#39;Z&#39; but it also
+becomes &#39;shared&#39;.
+
+4. &#39;A&#39; is a unbindable mount and &#39;B&#39; is a shared mount. The operation
+is invalid. Because mounting anything on the shared mount &#39;B&#39; can
+create new mounts that get mounted on the mounts that receive
+propagation from &#39;B&#39;.  And since the mount &#39;A&#39; is unbindable, cloning
+it to mount at other mountpoints is not possible.
+
+5. &#39;A&#39; is a private mount and &#39;B&#39; is a non-shared(private or slave or
+unbindable) mount. The mount &#39;A&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;.
+
+6. &#39;A&#39; is a shared mount and &#39;B&#39; is a non-shared mount.  The mount &#39;A&#39;
+is mounted on mount &#39;B&#39; at dentry &#39;b&#39;.  Mount &#39;A&#39; continues to be a
+shared mount.
+
+7. &#39;A&#39; is a slave mount of mount &#39;Z&#39; and &#39;B&#39; is a non-shared mount.
+The mount &#39;A&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;.  Mount &#39;A&#39;
+continues to be a slave mount of mount &#39;Z&#39;.
+
+8. &#39;A&#39; is a unbindable mount and &#39;B&#39; is a non-shared mount. The mount
+&#39;A&#39; is mounted on mount &#39;B&#39; at dentry &#39;b&#39;. Mount &#39;A&#39; continues to be a
+unbindable mount.
+</code></pre>
+<p>5e) Mount semantics</p>
+<pre><code>Consider the following command
+
+mount device  B/b
+
+&#39;B&#39; is the destination mount and &#39;b&#39; is the dentry in the destination
+mount.
+
+The above operation is the same as bind operation with the exception
+that the source mount is always a private mount.
+</code></pre>
+<p>5f) Unmount semantics</p>
+<pre><code>Consider the following command
+
+umount A
+
+where &#39;A&#39; is a mount mounted on mount &#39;B&#39; at dentry &#39;b&#39;.
+
+If mount &#39;B&#39; is shared, then all most-recently-mounted mounts at dentry
+&#39;b&#39; on mounts that receive propagation from mount &#39;B&#39; and does not have
+sub-mounts within them are unmounted.
+
+Example: Let&#39;s say &#39;B1&#39;, &#39;B2&#39;, &#39;B3&#39; are shared mounts that propagate to
+each other.
+
+let&#39;s say &#39;A1&#39;, &#39;A2&#39;, &#39;A3&#39; are first mounted at dentry &#39;b&#39; on mount
+&#39;B1&#39;, &#39;B2&#39; and &#39;B3&#39; respectively.
+
+let&#39;s say &#39;C1&#39;, &#39;C2&#39;, &#39;C3&#39; are next mounted at the same dentry &#39;b&#39; on
+mount &#39;B1&#39;, &#39;B2&#39; and &#39;B3&#39; respectively.
+
+if &#39;C1&#39; is unmounted, all the mounts that are most-recently-mounted on
+&#39;B1&#39; and on the mounts that &#39;B1&#39; propagates-to are unmounted.
+
+&#39;B1&#39; propagates to &#39;B2&#39; and &#39;B3&#39;. And the most recently mounted mount
+on &#39;B2&#39; at dentry &#39;b&#39; is &#39;C2&#39;, and that of mount &#39;B3&#39; is &#39;C3&#39;.
+
+So all &#39;C1&#39;, &#39;C2&#39; and &#39;C3&#39; should be unmounted.
+
+If any of &#39;C2&#39; or &#39;C3&#39; has some child mounts, then that mount is not
+unmounted, but all other mounts are unmounted. However if &#39;C1&#39; is told
+to be unmounted and &#39;C1&#39; has some sub-mounts, the umount operation is
+failed entirely.
+</code></pre>
+<p>5g) Clone Namespace</p>
+<pre><code>A cloned namespace contains all the mounts as that of the parent
+namespace.
+
+Let&#39;s say &#39;A&#39; and &#39;B&#39; are the corresponding mounts in the parent and the
+child namespace.
+
+If &#39;A&#39; is shared, then &#39;B&#39; is also shared and &#39;A&#39; and &#39;B&#39; propagate to
+each other.
+
+If &#39;A&#39; is a slave mount of &#39;Z&#39;, then &#39;B&#39; is also the slave mount of
+&#39;Z&#39;.
+
+If &#39;A&#39; is a private mount, then &#39;B&#39; is a private mount too.
+
+If &#39;A&#39; is unbindable mount, then &#39;B&#39; is a unbindable mount too.
+</code></pre>
+<ol start="6">
+<li><p>Quiz</p>
+<p> A. What is the result of the following command sequence?</p>
+<pre><code> mount --bind /mnt /mnt
+ mount --make-shared /mnt
+ mount --bind /mnt /tmp
+ mount --move /tmp /mnt/1
+
+ what should be the contents of /mnt /mnt/1 /mnt/1/1 should be?
+ Should they all be identical? or should /mnt and /mnt/1 be
+ identical only?
+</code></pre>
+</li>
+</ol>
+<pre><code>B. What is the result of the following command sequence?
+
+    mount --make-rshared /
+    mkdir -p /v/1
+    mount --rbind / /v/1
+
+    what should be the content of /v/1/v/1 be?
+
+
+C. What is the result of the following command sequence?
+
+    mount --bind /mnt /mnt
+    mount --make-shared /mnt
+    mkdir -p /mnt/1/2/3 /mnt/1/test
+    mount --bind /mnt/1 /tmp
+    mount --make-slave /mnt
+    mount --make-shared /mnt
+    mount --bind /mnt/1/2 /tmp1
+    mount --make-slave /mnt
+
+    At this point we have the first mount at /tmp and
+    its root dentry is 1. Let&#39;s call this mount &#39;A&#39;
+    And then we have a second mount at /tmp1 with root
+    dentry 2. Let&#39;s call this mount &#39;B&#39;
+    Next we have a third mount at /mnt with root dentry
+    mnt. Let&#39;s call this mount &#39;C&#39;
+
+    &#39;B&#39; is the slave of &#39;A&#39; and &#39;C&#39; is a slave of &#39;B&#39;
+    A -&gt; B -&gt; C
+
+    at this point if we execute the following command
+
+    mount --bind /bin /tmp/test
+
+    The mount is attempted on &#39;A&#39;
+
+    will the mount propagate to &#39;B&#39; and &#39;C&#39; ?
+
+    what would be the contents of
+    /mnt/1/test be?
+</code></pre>
+<ol start="7">
+<li><p>FAQ</p>
+<p> Q1. Why is bind mount needed? How is it different from symbolic links?</p>
+<pre><code> symbolic links can get stale if the destination mount gets
+ unmounted or moved. Bind mounts continue to exist even if the
+ other mount is unmounted or moved.
+</code></pre>
+<p> Q2. Why can’t the shared subtree be implemented using exportfs?</p>
+<pre><code> exportfs is a heavyweight way of accomplishing part of what
+ shared subtree can do. I cannot imagine a way to implement the
+ semantics of slave mount using exportfs?
+</code></pre>
+<p> Q3 Why is unbindable mount needed?</p>
+<pre><code> Let&#39;s say we want to replicate the mount tree at multiple
+ locations within the same subtree.
+
+ if one rbind mounts a tree within the same subtree &#39;n&#39; times
+ the number of mounts created is an exponential function of &#39;n&#39;.
+ Having unbindable mount can help prune the unneeded bind
+ mounts. Here is a example.
+
+ step 1:
+    let&#39;s say the root tree has just two directories with
+    one vfsmount.
+             root
+            /    \
+           tmp    usr
+
+     And we want to replicate the tree at multiple
+     mountpoints under /root/tmp
+
+ step2:
+       mount --make-shared /root
+
+       mkdir -p /tmp/m1
+
+       mount --rbind /root /tmp/m1
+
+       the new tree now looks like this:
+
+             root
+            /    \
+          tmp    usr
+         /
+            m1
+           /  \
+          tmp  usr
+          /
+         m1
+
+       it has two vfsmounts
+
+ step3:
+         mkdir -p /tmp/m2
+         mount --rbind /root /tmp/m2
+
+     the new tree now looks like this:
+
+               root
+              /    \
+            tmp     usr
+           /    \
+         m1       m2
+            / \       /  \
+          tmp  usr   tmp  usr
+          / \          /
+         m1  m2      m1
+         / \     /  \
+           tmp usr  tmp   usr
+           /        / \
+          m1       m1  m2
+         /  \
+       tmp   usr
+       /  \
+      m1   m2
+
+        it has 6 vfsmounts
+
+ step 4:
+       mkdir -p /tmp/m3
+       mount --rbind /root /tmp/m3
+
+       I wont&#39; draw the tree..but it has 24 vfsmounts
+</code></pre>
+</li>
+</ol>
+<pre><code>    at step i the number of vfsmounts is V[i] = i*V[i-1].
+    This is an exponential function. And this tree has way more
+    mounts than what we really needed in the first place.
+
+    One could use a series of umount at each step to prune
+    out the unneeded mounts. But there is a better solution.
+    Unclonable mounts come in handy here.
+
+    step 1:
+       let&#39;s say the root tree has just two directories with
+       one vfsmount.
+                root
+               /    \
+              tmp    usr
+
+        How do we set up the same tree at multiple locations under
+        /root/tmp
+
+    step2:
+          mount --bind /root/tmp /root/tmp
+
+          mount --make-rshared /root
+          mount --make-unbindable /root/tmp
+
+          mkdir -p /tmp/m1
+
+          mount --rbind /root /tmp/m1
+
+          the new tree now looks like this:
+
+                root
+               /    \
+             tmp    usr
+            /
+               m1
+              /  \
+             tmp  usr
+
+    step3:
+            mkdir -p /tmp/m2
+            mount --rbind /root /tmp/m2
+
+          the new tree now looks like this:
+
+                root
+               /    \
+             tmp    usr
+            /   \
+               m1     m2
+              /  \     / \
+             tmp  usr tmp usr
+
+    step4:
+
+            mkdir -p /tmp/m3
+            mount --rbind /root /tmp/m3
+
+          the new tree now looks like this:
+
+                      root
+                  /          \
+                 tmp           usr
+                 /    \    \
+               m1     m2     m3
+              /  \     / \    /  \
+             tmp  usr tmp usr tmp usr
+</code></pre>
+<ol start="8">
+<li>Implementation</li>
+</ol>
+<p>8A) Datastructure</p>
+<pre><code>4 new fields are introduced to struct vfsmount
+-&gt;mnt_share
+-&gt;mnt_slave_list
+-&gt;mnt_slave
+-&gt;mnt_master
+
+-&gt;mnt_share links together all the mount to/from which this vfsmount
+    send/receives propagation events.
+
+-&gt;mnt_slave_list links all the mounts to which this vfsmount propagates
+    to.
+
+-&gt;mnt_slave links together all the slaves that its master vfsmount
+    propagates to.
+
+-&gt;mnt_master points to the master vfsmount from which this vfsmount
+    receives propagation.
+
+-&gt;mnt_flags takes two more flags to indicate the propagation status of
+    the vfsmount.  MNT_SHARE indicates that the vfsmount is a shared
+    vfsmount.  MNT_UNCLONABLE indicates that the vfsmount cannot be
+    replicated.
+
+All the shared vfsmounts in a peer group form a cyclic list through
+-&gt;mnt_share.
+
+All vfsmounts with the same -&gt;mnt_master form on a cyclic list anchored
+in -&gt;mnt_master-&gt;mnt_slave_list and going through -&gt;mnt_slave.
+
+ -&gt;mnt_master can point to arbitrary (and possibly different) members
+ of master peer group.  To find all immediate slaves of a peer group
+ you need to go through _all_ -&gt;mnt_slave_list of its members.
+ Conceptually it&#39;s just a single set - distribution among the
+ individual lists does not affect propagation or the way propagation
+ tree is modified by operations.
+
+A example propagation tree looks as shown in the figure below.
+[ NOTE: Though it looks like a forest, if we consider all the shared
+mounts as a conceptual entity called &#39;pnode&#39;, it becomes a tree]
+
+
+            A &lt;--&gt; B &lt;--&gt; C &lt;---&gt; D
+           /|\          /|      |\
+          / F G         J K      H I
+         /
+        E&lt;--&gt;K
+        /|\
+           M L N
+
+In the above figure  A,B,C and D all are shared and propagate to each
+other.   &#39;A&#39; has got 3 slave mounts &#39;E&#39; &#39;F&#39; and &#39;G&#39; &#39;C&#39; has got 2 slave
+mounts &#39;J&#39; and &#39;K&#39;  and  &#39;D&#39; has got two slave mounts &#39;H&#39; and &#39;I&#39;.
+&#39;E&#39; is also shared with &#39;K&#39; and they propagate to each other.  And
+&#39;K&#39; has 3 slaves &#39;M&#39;, &#39;L&#39; and &#39;N&#39;
+
+A&#39;s -&gt;mnt_share links with the -&gt;mnt_share of &#39;B&#39; &#39;C&#39; and &#39;D&#39;
+
+A&#39;s -&gt;mnt_slave_list links with -&gt;mnt_slave of &#39;E&#39;, &#39;K&#39;, &#39;F&#39; and &#39;G&#39;
+
+E&#39;s -&gt;mnt_share links with -&gt;mnt_share of K
+&#39;E&#39;, &#39;K&#39;, &#39;F&#39;, &#39;G&#39; have their -&gt;mnt_master point to struct
+            vfsmount of &#39;A&#39;
+&#39;M&#39;, &#39;L&#39;, &#39;N&#39; have their -&gt;mnt_master point to struct vfsmount of &#39;K&#39;
+K&#39;s -&gt;mnt_slave_list links with -&gt;mnt_slave of &#39;M&#39;, &#39;L&#39; and &#39;N&#39;
+
+C&#39;s -&gt;mnt_slave_list links with -&gt;mnt_slave of &#39;J&#39; and &#39;K&#39;
+J and K&#39;s -&gt;mnt_master points to struct vfsmount of C
+and finally D&#39;s -&gt;mnt_slave_list links with -&gt;mnt_slave of &#39;H&#39; and &#39;I&#39;
+&#39;H&#39; and &#39;I&#39; have their -&gt;mnt_master pointing to struct vfsmount of &#39;D&#39;.
+
+
+NOTE: The propagation tree is orthogonal to the mount tree.
+</code></pre>
+<p>8B Algorithm:</p>
+<pre><code>The crux of the implementation resides in rbind/move operation.
+
+The overall algorithm breaks the operation into 3 phases: (look at
+attach_recursive_mnt() and propagate_mnt())
+
+1. prepare phase.
+2. commit phases.
+3. abort phases.
+
+Prepare phase:
+
+for each mount in the source tree:
+       a) Create the necessary number of mount trees to
+           be attached to each of the mounts that receive
+        propagation from the destination mount.
+       b) Do not attach any of the trees to its destination.
+          However note down its -&gt;mnt_parent and -&gt;mnt_mountpoint
+       c) Link all the new mounts to form a propagation tree that
+          is identical to the propagation tree of the destination
+          mount.
+
+       If this phase is successful, there should be &#39;n&#39; new
+       propagation trees; where &#39;n&#39; is the number of mounts in the
+       source tree.  Go to the commit phase
+
+       Also there should be &#39;m&#39; new mount trees, where &#39;m&#39; is
+       the number of mounts to which the destination mount
+       propagates to.
+
+       if any memory allocations fail, go to the abort phase.
+
+Commit phase
+    attach each of the mount trees to their corresponding
+    destination mounts.
+
+Abort phase
+    delete all the newly created trees.
+
+NOTE: all the propagation related functionality resides in the file
+pnode.c
+</code></pre>
+<hr>
+<p>version 0.1  (created the initial document, Ram Pai <a href="mailto:&#108;&#x69;&#110;&#x75;&#120;&#114;&#97;&#x6d;&#x40;&#x75;&#115;&#x2e;&#x69;&#x62;&#109;&#46;&#99;&#x6f;&#109;">&#108;&#x69;&#110;&#x75;&#120;&#114;&#97;&#x6d;&#x40;&#x75;&#115;&#x2e;&#x69;&#x62;&#109;&#46;&#99;&#x6f;&#109;</a>)<br>version 0.2  (Incorporated comments from Al Viro)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/" title="Kernel-2.6.32-573.12.1.el6_sharedsubtree" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_sharedsubtree/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sn9c102/" title="Kernel-2.6.32-573.12.1.el6_sn9c102"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_sentelic/" title="Kernel-2.6.32-573.12.1.el6_sentelic"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

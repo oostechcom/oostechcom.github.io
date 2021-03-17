@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_spinlocks | oosTech.com</title>
+  <meta name="description" content="SPIN_LOCK_UNLOCKED and RW_LOCK_UNLOCKED defeat lockdep state tracking andare hence deprecated. Please use DEFINE_SPINLOCK()&#x2F;DEFINE_RWLOCK() or__SPIN_LOCK_UNLOCKED()&#x2F;__RW_LOCK_UNLOCKED() as appropriate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_spinlocks">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="SPIN_LOCK_UNLOCKED and RW_LOCK_UNLOCKED defeat lockdep state tracking andare hence deprecated. Please use DEFINE_SPINLOCK()&#x2F;DEFINE_RWLOCK() or__SPIN_LOCK_UNLOCKED()&#x2F;__RW_LOCK_UNLOCKED() as appropriate">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_spinlocks" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_spinlocks
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>SPIN_LOCK_UNLOCKED and RW_LOCK_UNLOCKED defeat lockdep state tracking and<br>are hence deprecated.</p>
+<p>Please use DEFINE_SPINLOCK()/DEFINE_RWLOCK() or<br>__SPIN_LOCK_UNLOCKED()/__RW_LOCK_UNLOCKED() as appropriate for static<br>initialization.</p>
+<p>Most of the time, you can simply turn:</p>
+<pre><code>static spinlock_t xxx_lock = SPIN_LOCK_UNLOCKED;
+</code></pre>
+<p>into:</p>
+<pre><code>static DEFINE_SPINLOCK(xxx_lock);
+</code></pre>
+<p>Static structure member variables go from:</p>
+<pre><code>struct foo bar &#123;
+    .lock    =    SPIN_LOCK_UNLOCKED;
+&#125;;
+</code></pre>
+<p>to:</p>
+<pre><code>struct foo bar &#123;
+    .lock    =    __SPIN_LOCK_UNLOCKED(bar.lock);
+&#125;;
+</code></pre>
+<p>Declaration of static rw_locks undergo a similar transformation.</p>
+<p>Dynamic initialization, when necessary, may be performed as<br>demonstrated below.</p>
+<p>   spinlock_t xxx_lock;<br>   rwlock_t xxx_rw_lock;</p>
+<p>   static int __init xxx_init(void)<br>   {<br>       spin_lock_init(&amp;xxx_lock);<br>    rwlock_init(&amp;xxx_rw_lock);<br>    …<br>   }</p>
+<p>   module_init(xxx_init);</p>
+<p>The following discussion is still valid, however, with the dynamic<br>initialization of spinlocks or with DEFINE_SPINLOCK, etc., used<br>instead of SPIN_LOCK_UNLOCKED.</p>
+<hr>
+<p>On Fri, 2 Jan 1998, Doug Ledford wrote:</p>
+<blockquote>
+<p>I’m working on making the aic7xxx driver more SMP friendly (as well as<br>importing the latest FreeBSD sequencer code to have 7895 support) and wanted<br>to get some info from you.  The goal here is to make the various routines<br>SMP safe as well as UP safe during interrupts and other manipulating<br>routines.  So far, I’ve added a spin_lock variable to things like my queue<br>structs.  Now, from what I recall, there are some spin lock functions I can<br>use to lock these spin locks from other use as opposed to a (nasty)<br>save_flags(); cli(); stuff; restore_flags(); construct.  Where do I find<br>these routines and go about making use of them?  Do they only lock on a<br>per-processor basis or can they also lock say an interrupt routine from<br>mucking with a queue if the queue routine was manipulating it when the<br>interrupt occurred, or should I still use a cli(); based construct on that<br>one?</p>
+</blockquote>
+<p>See &lt;asm/spinlock.h&gt;. The basic version is:</p>
+<p>   spinlock_t xxx_lock = SPIN_LOCK_UNLOCKED;</p>
+<pre><code>unsigned long flags;
+
+spin_lock_irqsave(&amp;xxx_lock, flags);
+... critical section here ..
+spin_unlock_irqrestore(&amp;xxx_lock, flags);
+</code></pre>
+<p>and the above is always safe. It will disable interrupts <em>locally</em>, but the<br>spinlock itself will guarantee the global lock, so it will guarantee that<br>there is only one thread-of-control within the region(s) protected by that<br>lock. </p>
+<p>Note that it works well even under UP - the above sequence under UP<br>essentially is just the same as doing a</p>
+<pre><code>unsigned long flags;
+
+save_flags(flags); cli();
+ ... critical section ...
+restore_flags(flags);
+</code></pre>
+<p>so the code does <em>not</em> need to worry about UP vs SMP issues: the spinlocks<br>work correctly under both (and spinlocks are actually more efficient on<br>architectures that allow doing the “save_flags + cli” in one go because I<br>don’t export that interface normally).</p>
+<p>NOTE NOTE NOTE! The reason the spinlock is so much faster than a global<br>interrupt lock under SMP is exactly because it disables interrupts only on<br>the local CPU. The spin-lock is safe only when you <em>also</em> use the lock<br>itself to do locking across CPU’s, which implies that EVERYTHING that<br>touches a shared variable has to agree about the spinlock they want to<br>use.</p>
+<p>The above is usually pretty simple (you usually need and want only one<br>spinlock for most things - using more than one spinlock can make things a<br>lot more complex and even slower and is usually worth it only for<br>sequences that you <em>know</em> need to be split up: avoid it at all cost if you<br>aren’t sure). HOWEVER, it <em>does</em> mean that if you have some code that does</p>
+<pre><code>cli();
+.. critical section ..
+sti();
+</code></pre>
+<p>and another sequence that does</p>
+<pre><code>spin_lock_irqsave(flags);
+.. critical section ..
+spin_unlock_irqrestore(flags);
+</code></pre>
+<p>then they are NOT mutually exclusive, and the critical regions can happen<br>at the same time on two different CPU’s. That’s fine per se, but the<br>critical regions had better be critical for different things (ie they<br>can’t stomp on each other). </p>
+<p>The above is a problem mainly if you end up mixing code - for example the<br>routines in ll_rw_block() tend to use cli/sti to protect the atomicity of<br>their actions, and if a driver uses spinlocks instead then you should<br>think about issues like the above..</p>
+<p>This is really the only really hard part about spinlocks: once you start<br>using spinlocks they tend to expand to areas you might not have noticed<br>before, because you have to make sure the spinlocks correctly protect the<br>shared data structures <em>everywhere</em> they are used. The spinlocks are most<br>easily added to places that are completely independent of other code (ie<br>internal driver data structures that nobody else ever touches, for<br>example). </p>
+<hr>
+<p>Lesson 2: reader-writer spinlocks.</p>
+<p>If your data accesses have a very natural pattern where you usually tend<br>to mostly read from the shared variables, the reader-writer locks<br>(rw_lock) versions of the spinlocks are often nicer. They allow multiple<br>readers to be in the same critical region at once, but if somebody wants<br>to change the variables it has to get an exclusive write lock. The<br>routines look the same as above:</p>
+<p>   rwlock_t xxx_lock = RW_LOCK_UNLOCKED;</p>
+<pre><code>unsigned long flags;
+
+read_lock_irqsave(&amp;xxx_lock, flags);
+.. critical section that only reads the info ...
+read_unlock_irqrestore(&amp;xxx_lock, flags);
+
+write_lock_irqsave(&amp;xxx_lock, flags);
+.. read and write exclusive access to the info ...
+write_unlock_irqrestore(&amp;xxx_lock, flags);
+</code></pre>
+<p>The above kind of lock is useful for complex data structures like linked<br>lists etc, especially when you know that most of the work is to just<br>traverse the list searching for entries without changing the list itself,<br>for example. Then you can use the read lock for that kind of list<br>traversal, which allows many concurrent readers. Anything that <em>changes</em><br>the list will have to get the write lock. </p>
+<p>Note: you cannot “upgrade” a read-lock to a write-lock, so if you at <em>any</em><br>time need to do any changes (even if you don’t do it every time), you have<br>to get the write-lock at the very beginning. I could fairly easily add a<br>primitive to create a “upgradeable” read-lock, but it hasn’t been an issue<br>yet. Tell me if you’d want one. </p>
+<hr>
+<p>Lesson 3: spinlocks revisited.</p>
+<p>The single spin-lock primitives above are by no means the only ones. They<br>are the most safe ones, and the ones that work under all circumstances,<br>but partly <em>because</em> they are safe they are also fairly slow. They are<br>much faster than a generic global cli/sti pair, but slower than they’d<br>need to be, because they do have to disable interrupts (which is just a<br>single instruction on a x86, but it’s an expensive one - and on other<br>architectures it can be worse).</p>
+<p>If you have a case where you have to protect a data structure across<br>several CPU’s and you want to use spinlocks you can potentially use<br>cheaper versions of the spinlocks. IFF you know that the spinlocks are<br>never used in interrupt handlers, you can use the non-irq versions:</p>
+<pre><code>spin_lock(&amp;lock);
+...
+spin_unlock(&amp;lock);
+</code></pre>
+<p>(and the equivalent read-write versions too, of course). The spinlock will<br>guarantee the same kind of exclusive access, and it will be much faster.<br>This is useful if you know that the data in question is only ever<br>manipulated from a “process context”, ie no interrupts involved. </p>
+<p>The reasons you mustn’t use these versions if you have interrupts that<br>play with the spinlock is that you can get deadlocks:</p>
+<pre><code>spin_lock(&amp;lock);
+...
+    &lt;- interrupt comes in:
+        spin_lock(&amp;lock);
+</code></pre>
+<p>where an interrupt tries to lock an already locked variable. This is ok if<br>the other interrupt happens on another CPU, but it is <em>not</em> ok if the<br>interrupt happens on the same CPU that already holds the lock, because the<br>lock will obviously never be released (because the interrupt is waiting<br>for the lock, and the lock-holder is interrupted by the interrupt and will<br>not continue until the interrupt has been processed). </p>
+<p>(This is also the reason why the irq-versions of the spinlocks only need<br>to disable the <em>local</em> interrupts - it’s ok to use spinlocks in interrupts<br>on other CPU’s, because an interrupt on another CPU doesn’t interrupt the<br>CPU that holds the lock, so the lock-holder can continue and eventually<br>releases the lock). </p>
+<p>Note that you can be clever with read-write locks and interrupts. For<br>example, if you know that the interrupt only ever gets a read-lock, then<br>you can use a non-irq version of read locks everywhere - because they<br>don’t block on each other (and thus there is no dead-lock wrt interrupts.<br>But when you do the write-lock, you have to use the irq-safe version. </p>
+<p>For an example of being clever with rw-locks, see the “waitqueue_lock”<br>handling in kernel/sched.c - nothing ever <em>changes</em> a wait-queue from<br>within an interrupt, they only read the queue in order to know whom to<br>wake up. So read-locks are safe (which is good: they are very common<br>indeed), while write-locks need to protect themselves against interrupts.</p>
+<pre><code>    Linus
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/" title="Kernel-2.6.32-573.12.1.el6_spinlocks" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_spinlocks/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_squashfs/" title="Kernel-2.6.32-573.12.1.el6_squashfs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_spider_net/" title="Kernel-2.6.32-573.12.1.el6_spider_net"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

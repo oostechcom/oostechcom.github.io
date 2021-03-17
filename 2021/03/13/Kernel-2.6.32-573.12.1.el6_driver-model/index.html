@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_driver-model | oosTech.com</title>
+  <meta name="description" content="S&#x2F;390 driver model interfaces CCW devices   All devices which can be addressed by means of ccws are called ‘CCW devices’ -even if they aren’t actually driven by ccws. All ccw devices are accessed via">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_driver-model">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="S&#x2F;390 driver model interfaces CCW devices   All devices which can be addressed by means of ccws are called ‘CCW devices’ -even if they aren’t actually driven by ccws. All ccw devices are accessed via">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#S-390-driver-model-interfaces"><span class="toc-number">1.</span> <span class="toc-text">S&#x2F;390 driver model interfaces</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-Bringing-up-a-ccw-device"><span class="toc-number">2.</span> <span class="toc-text">1.1 Bringing up a ccw device</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-Writing-a-driver-for-ccw-devices"><span class="toc-number">3.</span> <span class="toc-text">1.2 Writing a driver for ccw devices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-ccwgroup-devices"><span class="toc-number">4.</span> <span class="toc-text">1.3 ccwgroup devices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-xpram"><span class="toc-number">5.</span> <span class="toc-text">3.1 xpram </span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-cpus"><span class="toc-number">6.</span> <span class="toc-text">3.2 cpus</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-Netiucv"><span class="toc-number">7.</span> <span class="toc-text">4.1 Netiucv</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_driver-model" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_driver-model
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="S-390-driver-model-interfaces"><a href="#S-390-driver-model-interfaces" class="headerlink" title="S/390 driver model interfaces"></a>S/390 driver model interfaces</h2><ol>
+<li>CCW devices</li>
+</ol>
+<hr>
+<p>All devices which can be addressed by means of ccws are called ‘CCW devices’ -<br>even if they aren’t actually driven by ccws.</p>
+<p>All ccw devices are accessed via a subchannel, this is reflected in the<br>structures under devices/:</p>
+<p>devices/<br>     - system/<br>     - css0/<br>           - 0.0.0000/0.0.0815/<br>       - 0.0.0001/0.0.4711/<br>       - 0.0.0002/<br>       - 0.1.0000/0.1.1234/<br>       …<br>       - defunct/</p>
+<p>In this example, device 0815 is accessed via subchannel 0 in subchannel set 0,<br>device 4711 via subchannel 1 in subchannel set 0, and subchannel 2 is a non-I/O<br>subchannel. Device 1234 is accessed via subchannel 0 in subchannel set 1.</p>
+<p>The subchannel named ‘defunct’ does not represent any real subchannel on the<br>system; it is a pseudo subchannel where disconnected ccw devices are moved to<br>if they are displaced by another ccw device becoming operational on their<br>former subchannel. The ccw devices will be moved again to a proper subchannel<br>if they become operational again on that subchannel.</p>
+<p>You should address a ccw device via its bus id (e.g. 0.0.4711); the device can<br>be found under bus/ccw/devices/.</p>
+<p>All ccw devices export some data via sysfs.</p>
+<p>cutype:        The control unit type / model.</p>
+<p>devtype:    The device type / model, if applicable.</p>
+<p>availability: Can be ‘good’ or ‘boxed’; ‘no path’ or ‘no device’ for<br>          disconnected devices.</p>
+<p>online:     An interface to set the device online and offline.<br>        In the special case of the device being disconnected (see the<br>        notify function under 1.2), piping 0 to online will forcibly delete<br>        the device.</p>
+<p>The device drivers can add entries to export per-device data and interfaces.</p>
+<p>There is also some data exported on a per-subchannel basis (see under<br>bus/css/devices/):</p>
+<p>chpids:        Via which chpids the device is connected.</p>
+<p>pimpampom:  The path installed, path available and path operational masks.</p>
+<p>There also might be additional data, for example for block devices.</p>
+<h2 id="1-1-Bringing-up-a-ccw-device"><a href="#1-1-Bringing-up-a-ccw-device" class="headerlink" title="1.1 Bringing up a ccw device"></a>1.1 Bringing up a ccw device</h2><p>This is done in several steps.</p>
+<p>a. Each driver can provide one or more parameter interfaces where parameters can<br>   be specified. These interfaces are also in the driver’s responsibility.<br>b. After a. has been performed, if necessary, the device is finally brought up<br>   via the ‘online’ interface.</p>
+<h2 id="1-2-Writing-a-driver-for-ccw-devices"><a href="#1-2-Writing-a-driver-for-ccw-devices" class="headerlink" title="1.2 Writing a driver for ccw devices"></a>1.2 Writing a driver for ccw devices</h2><p>The basic struct ccw_device and struct ccw_driver data structures can be found<br>under include/asm/ccwdev.h.</p>
+<p>struct ccw_device {<br>        spinlock_t *ccwlock;<br>        struct ccw_device_private *private;<br>    struct ccw_device_id id;    </p>
+<pre><code>struct ccw_driver *drv;        
+struct device dev;        
+int online;
+
+void (*handler) (struct ccw_device *dev, unsigned long intparm,
+                     struct irb *irb);
+</code></pre>
+<p>};</p>
+<p>struct ccw_driver {<br>    struct module *owner;<br>    struct ccw_device_id *ids;<br>    int (*probe) (struct ccw_device *);<br>    int (*remove) (struct ccw_device *);<br>    int (*set_online) (struct ccw_device *);<br>    int (*set_offline) (struct ccw_device *);<br>    int (*notify) (struct ccw_device *, int);<br>    struct device_driver driver;<br>    char *name;<br>};</p>
+<p>The ‘private’ field contains data needed for internal i/o operation only, and<br>is not available to the device driver.</p>
+<p>Each driver should declare in a MODULE_DEVICE_TABLE into which CU types/models<br>and/or device types/models it is interested. This information can later be found<br>in the struct ccw_device_id fields:</p>
+<p>struct ccw_device_id {<br>    __u16    match_flags;    </p>
+<pre><code>__u16    cu_type;    
+__u16    dev_type;    
+__u8    cu_model;    
+__u8    dev_model;    
+
+unsigned long driver_info;
+</code></pre>
+<p>};</p>
+<p>The functions in ccw_driver should be used in the following way:<br>probe:   This function is called by the device layer for each device the driver<br>     is interested in. The driver should only allocate private structures<br>     to put in dev-&gt;driver_data and create attributes (if needed). Also,<br>     the interrupt handler (see below) should be set here.</p>
+<p>int (*probe) (struct ccw_device *cdev); </p>
+<p>Parameters:  cdev     - the device to be probed.</p>
+<p>remove:  This function is called by the device layer upon removal of the driver,<br>     the device or the module. The driver should perform cleanups here.</p>
+<p>int (*remove) (struct ccw_device *cdev);</p>
+<p>Parameters:   cdev    - the device to be removed.</p>
+<p>set_online: This function is called by the common I/O layer when the device is<br>        activated via the ‘online’ attribute. The driver should finally<br>        setup and activate the device here.</p>
+<p>int (*set_online) (struct ccw_device *);</p>
+<p>Parameters:   cdev    - the device to be activated. The common layer has<br>              verified that the device is not already online.</p>
+<p>set_offline: This function is called by the common I/O layer when the device is<br>         de-activated via the ‘online’ attribute. The driver should shut<br>         down the device, but not de-allocate its private data.</p>
+<p>int (*set_offline) (struct ccw_device *);</p>
+<p>Parameters:   cdev       - the device to be deactivated. The common layer has<br>               verified that the device is online.</p>
+<p>notify: This function is called by the common I/O layer for some state changes<br>    of the device.<br>    Signalled to the driver are:<br>    * In online state, device detached (CIO_GONE) or last path gone<br>      (CIO_NO_PATH). The driver must return !0 to keep the device; for<br>      return code 0, the device will be deleted as usual (also when no<br>      notify function is registered). If the driver wants to keep the<br>      device, it is moved into disconnected state.<br>    * In disconnected state, device operational again (CIO_OPER). The<br>      common I/O layer performs some sanity checks on device number and<br>      Device / CU to be reasonably sure if it is still the same device.<br>      If not, the old device is removed and a new one registered. By the<br>      return code of the notify function the device driver signals if it<br>      wants the device back: !0 for keeping, 0 to make the device being<br>      removed and re-registered.</p>
+<p>int (*notify) (struct ccw_device *, int);</p>
+<p>Parameters:   cdev    - the device whose state changed.<br>          event   - the event that happened. This can be one of CIO_GONE,<br>                CIO_NO_PATH or CIO_OPER.</p>
+<p>The handler field of the struct ccw_device is meant to be set to the interrupt<br>handler for the device. In order to accommodate drivers which use several<br>distinct handlers (e.g. multi subchannel devices), this is a member of ccw_device<br>instead of ccw_driver.<br>The handler is registered with the common layer during set_online() processing<br>before the driver is called, and is deregistered during set_offline() after the<br>driver has been called. Also, after registering / before deregistering, path<br>grouping resp. disbanding of the path group (if applicable) are performed.</p>
+<p>void (*handler) (struct ccw_device *dev, unsigned long intparm, struct irb *irb);</p>
+<p>Parameters:    dev    - the device the handler is called for<br>        intparm - the intparm which allows the device driver to identify<br>                          the i/o the interrupt is associated with, or to recognize<br>                          the interrupt as unsolicited.<br>                irb     - interruption response block which contains the accumulated<br>                          status.</p>
+<p>The device driver is called from the common ccw_device layer and can retrieve<br>information about the interrupt from the irb parameter.</p>
+<h2 id="1-3-ccwgroup-devices"><a href="#1-3-ccwgroup-devices" class="headerlink" title="1.3 ccwgroup devices"></a>1.3 ccwgroup devices</h2><p>The ccwgroup mechanism is designed to handle devices consisting of multiple ccw<br>devices, like lcs or ctc.</p>
+<p>The ccw driver provides a ‘group’ attribute. Piping bus ids of ccw devices to<br>this attributes creates a ccwgroup device consisting of these ccw devices (if<br>possible). This ccwgroup device can be set online or offline just like a normal<br>ccw device.</p>
+<p>Each ccwgroup device also provides an ‘ungroup’ attribute to destroy the device<br>again (only when offline). This is a generic ccwgroup mechanism (the driver does<br>not need to implement anything beyond normal removal routines).</p>
+<p>A ccw device which is a member of a ccwgroup device carries a pointer to the<br>ccwgroup device in the driver_data of its device struct. This field must not be<br>touched by the driver - it should use the ccwgroup device’s driver_data for its<br>private data.</p>
+<p>To implement a ccwgroup driver, please refer to include/asm/ccwgroup.h. Keep in<br>mind that most drivers will need to implement both a ccwgroup and a ccw driver<br>(unless you have a meta ccw driver, like cu3088 for lcs and ctc).</p>
+<ol start="2">
+<li>Channel paths</li>
+</ol>
+<hr>
+<p>Channel paths show up, like subchannels, under the channel subsystem root (css0)<br>and are called ‘chp0.<chpid>‘. They have no driver and do not belong to any bus.<br>Please note, that unlike /proc/chpids in 2.4, the channel path objects reflect<br>only the logical state and not the physical state, since we cannot track the<br>latter consistently due to lacking machine support (we don’t need to be aware<br>of it anyway).</p>
+<p>status - Can be ‘online’ or ‘offline’.<br>     Piping ‘on’ or ‘off’ sets the chpid logically online/offline.<br>     Piping ‘on’ to an online chpid triggers path reprobing for all devices<br>     the chpid connects to. This can be used to force the kernel to re-use<br>     a channel path the user knows to be online, but the machine hasn’t<br>     created a machine check for.</p>
+<p>type - The physical type of the channel path.</p>
+<p>shared - Whether the channel path is shared.</p>
+<p>cmg - The channel measurement group.</p>
+<ol start="3">
+<li>System devices</li>
+</ol>
+<hr>
+<h2 id="3-1-xpram"><a href="#3-1-xpram" class="headerlink" title="3.1 xpram "></a>3.1 xpram </h2><p>xpram shows up under devices/system/ as ‘xpram’.</p>
+<h2 id="3-2-cpus"><a href="#3-2-cpus" class="headerlink" title="3.2 cpus"></a>3.2 cpus</h2><p>For each cpu, a directory is created under devices/system/cpu/. Each cpu has an<br>attribute ‘online’ which can be 0 or 1.</p>
+<ol start="4">
+<li>Other devices</li>
+</ol>
+<hr>
+<h2 id="4-1-Netiucv"><a href="#4-1-Netiucv" class="headerlink" title="4.1 Netiucv"></a>4.1 Netiucv</h2><p>The netiucv driver creates an attribute ‘connection’ under<br>bus/iucv/drivers/netiucv. Piping to this attribute creates a new netiucv<br>connection to the specified host.</p>
+<p>Netiucv connections show up under devices/iucv/ as “netiucv<ifnum>“. The interface<br>number is assigned sequentially to the connections defined via the ‘connection’<br>attribute.</p>
+<p>user              - shows the connection partner.</p>
+<p>buffer              - maximum buffer size.<br>                Pipe to it to change buffer size.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/" title="Kernel-2.6.32-573.12.1.el6_driver-model" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-model/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver/" title="Kernel-2.6.32-573.12.1.el6_driver"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_driver-changes/" title="Kernel-2.6.32-573.12.1.el6_driver-changes"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

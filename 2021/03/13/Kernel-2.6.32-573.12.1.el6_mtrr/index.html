@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_mtrr | oosTech.com</title>
+  <meta name="description" content="MTRR (Memory Type Range Register) control3 Jun 1999Richard Gooch&amp;#x72;&amp;#x67;&amp;#x6f;&amp;#x6f;&amp;#99;&amp;#x68;&amp;#64;&amp;#97;&amp;#116;&amp;#110;&amp;#x66;&amp;#x2e;&amp;#x63;&amp;#x73;&amp;#105;&amp;#114;&amp;#111;&amp;#46;&amp;#97;&amp;#117;   On Intel P6 family">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_mtrr">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="MTRR (Memory Type Range Register) control3 Jun 1999Richard Gooch&amp;#x72;&amp;#x67;&amp;#x6f;&amp;#x6f;&amp;#99;&amp;#x68;&amp;#64;&amp;#97;&amp;#116;&amp;#110;&amp;#x66;&amp;#x2e;&amp;#x63;&amp;#x73;&amp;#105;&amp;#114;&amp;#111;&amp;#46;&amp;#97;&amp;#117;   On Intel P6 family">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-%E2%80%9Cbase-0xf8000000-size-0x400000-type-write-combining%E2%80%9D-gt-proc-mtrr"><span class="toc-number">1.</span> <span class="toc-text">echo “base&#x3D;0xf8000000 size&#x3D;0x400000 type&#x3D;write-combining” &gt;! &#x2F;proc&#x2F;mtrr</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-%E2%80%9Cbase-0xf8000000-size-0x400000-type-write-combining%E2%80%9D-gt-proc-mtrr-1"><span class="toc-number">2.</span> <span class="toc-text">echo “base&#x3D;0xf8000000 size&#x3D;0x400000 type&#x3D;write-combining” &gt;| &#x2F;proc&#x2F;mtrr</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#End-Function-main"><span class="toc-number">3.</span> <span class="toc-text">}   &#x2F;*  End Function main  *&#x2F;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#End-Function-main-1"><span class="toc-number">4.</span> <span class="toc-text">}   &#x2F;*  End Function main  *&#x2F;</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_mtrr" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_mtrr
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>MTRR (Memory Type Range Register) control<br>3 Jun 1999<br>Richard Gooch<br><a href="mailto:&#x72;&#x67;&#x6f;&#x6f;&#99;&#x68;&#64;&#97;&#116;&#110;&#x66;&#x2e;&#x63;&#x73;&#105;&#114;&#111;&#46;&#97;&#117;">&#x72;&#x67;&#x6f;&#x6f;&#99;&#x68;&#64;&#97;&#116;&#110;&#x66;&#x2e;&#x63;&#x73;&#105;&#114;&#111;&#46;&#97;&#117;</a></p>
+<p>  On Intel P6 family processors (Pentium Pro, Pentium II and later)<br>  the Memory Type Range Registers (MTRRs) may be used to control<br>  processor access to memory ranges. This is most useful when you have<br>  a video (VGA) card on a PCI or AGP bus. Enabling write-combining<br>  allows bus write transfers to be combined into a larger transfer<br>  before bursting over the PCI/AGP bus. This can increase performance<br>  of image write operations 2.5 times or more.</p>
+<p>  The Cyrix 6x86, 6x86MX and M II processors have Address Range<br>  Registers (ARRs) which provide a similar functionality to MTRRs. For<br>  these, the ARRs are used to emulate the MTRRs.</p>
+<p>  The AMD K6-2 (stepping 8 and above) and K6-3 processors have two<br>  MTRRs. These are supported.  The AMD Athlon family provide 8 Intel<br>  style MTRRs.</p>
+<p>  The Centaur C6 (WinChip) has 8 MCRs, allowing write-combining. These<br>  are supported.</p>
+<p>  The VIA Cyrix III and VIA C3 CPUs offer 8 Intel style MTRRs.</p>
+<p>  The CONFIG_MTRR option creates a /proc/mtrr file which may be used<br>  to manipulate your MTRRs. Typically the X server should use<br>  this. This should have a reasonably generic interface so that<br>  similar control registers on other processors can be easily<br>  supported.</p>
+<p>There are two interfaces to /proc/mtrr: one is an ASCII interface<br>which allows you to read and write. The other is an ioctl()<br>interface. The ASCII interface is meant for administration. The<br>ioctl() interface is meant for C programs (i.e. the X server). The<br>interfaces are described below, with sample commands and C code.</p>
+<p>===============================================================================<br>Reading MTRRs from the shell:</p>
+<p>% cat /proc/mtrr<br>reg00: base=0x00000000 (   0MB), size= 128MB: write-back, count=1<br>reg01: base=0x08000000 ( 128MB), size=  64MB: write-back, count=1<br>===============================================================================<br>Creating MTRRs from the C-shell:</p>
+<h1 id="echo-“base-0xf8000000-size-0x400000-type-write-combining”-gt-proc-mtrr"><a href="#echo-“base-0xf8000000-size-0x400000-type-write-combining”-gt-proc-mtrr" class="headerlink" title="echo “base=0xf8000000 size=0x400000 type=write-combining” &gt;! /proc/mtrr"></a>echo “base=0xf8000000 size=0x400000 type=write-combining” &gt;! /proc/mtrr</h1><p>or if you use bash:</p>
+<h1 id="echo-“base-0xf8000000-size-0x400000-type-write-combining”-gt-proc-mtrr-1"><a href="#echo-“base-0xf8000000-size-0x400000-type-write-combining”-gt-proc-mtrr-1" class="headerlink" title="echo “base=0xf8000000 size=0x400000 type=write-combining” &gt;| /proc/mtrr"></a>echo “base=0xf8000000 size=0x400000 type=write-combining” &gt;| /proc/mtrr</h1><p>And the result thereof:<br>% cat /proc/mtrr<br>reg00: base=0x00000000 (   0MB), size= 128MB: write-back, count=1<br>reg01: base=0x08000000 ( 128MB), size=  64MB: write-back, count=1<br>reg02: base=0xf8000000 (3968MB), size=   4MB: write-combining, count=1</p>
+<p>This is for video RAM at base address 0xf8000000 and size 4 megabytes. To<br>find out your base address, you need to look at the output of your X<br>server, which tells you where the linear framebuffer address is. A<br>typical line that you may get is:</p>
+<p>(–) S3: PCI: 968 rev 0, Linear FB @ 0xf8000000</p>
+<p>Note that you should only use the value from the X server, as it may<br>move the framebuffer base address, so the only value you can trust is<br>that reported by the X server.</p>
+<p>To find out the size of your framebuffer (what, you don’t actually<br>know?), the following line will tell you:</p>
+<p>(–) S3: videoram:  4096k</p>
+<p>That’s 4 megabytes, which is 0x400000 bytes (in hexadecimal).<br>A patch is being written for XFree86 which will make this automatic:<br>in other words the X server will manipulate /proc/mtrr using the<br>ioctl() interface, so users won’t have to do anything. If you use a<br>commercial X server, lobby your vendor to add support for MTRRs.<br>===============================================================================<br>Creating overlapping MTRRs:</p>
+<p>%echo “base=0xfb000000 size=0x1000000 type=write-combining” &gt;/proc/mtrr<br>%echo “base=0xfb000000 size=0x1000 type=uncachable” &gt;/proc/mtrr</p>
+<p>And the results: cat /proc/mtrr<br>reg00: base=0x00000000 (   0MB), size=  64MB: write-back, count=1<br>reg01: base=0xfb000000 (4016MB), size=  16MB: write-combining, count=1<br>reg02: base=0xfb000000 (4016MB), size=   4kB: uncachable, count=1</p>
+<p>Some cards (especially Voodoo Graphics boards) need this 4 kB area<br>excluded from the beginning of the region because it is used for<br>registers.</p>
+<p>NOTE: You can only create type=uncachable region, if the first<br>region that you created is type=write-combining.<br>===============================================================================<br>Removing MTRRs from the C-shell:<br>% echo “disable=2” &gt;! /proc/mtrr<br>or using bash:<br>% echo “disable=2” &gt;| /proc/mtrr<br>===============================================================================<br>Reading MTRRs from a C program using ioctl()’s:</p>
+<p>/*  mtrr-show.c</p>
+<pre><code>Source file for mtrr-show (example program to show MTRRs using ioctl()&#39;s)
+
+Copyright (C) 1997-1998  Richard Gooch
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Richard Gooch may be reached by email at  rgooch@atnf.csiro.au
+The postal address is:
+  Richard Gooch, c/o ATNF, P. O. Box 76, Epping, N.S.W., 2121, Australia.
+</code></pre>
+<p>*/</p>
+<p>/*<br>    This program will use an ioctl() on /proc/mtrr to show the current MTRR<br>    settings. This is an alternative to reading /proc/mtrr.</p>
+<pre><code>Written by      Richard Gooch   17-DEC-1997
+
+Last updated by Richard Gooch   2-MAY-1998
+</code></pre>
+<p>*/<br>#include &lt;stdio.h&gt;<br>#include &lt;stdlib.h&gt;<br>#include &lt;string.h&gt;<br>#include &lt;sys/types.h&gt;<br>#include &lt;sys/stat.h&gt;<br>#include &lt;fcntl.h&gt;<br>#include &lt;sys/ioctl.h&gt;<br>#include &lt;errno.h&gt;<br>#include &lt;asm/mtrr.h&gt;</p>
+<p>#define TRUE 1<br>#define FALSE 0<br>#define ERRSTRING strerror (errno)</p>
+<p>static char <em>mtrr_strings[MTRR_NUM_TYPES] =<br>{<br>    “uncachable”,               /</em> 0 <em>/<br>    “write-combining”,          /</em> 1 <em>/<br>    “?”,                        /</em> 2 <em>/<br>    “?”,                        /</em> 3 <em>/<br>    “write-through”,            /</em> 4 <em>/<br>    “write-protect”,            /</em> 5 <em>/<br>    “write-back”,               /</em> 6 */<br>};</p>
+<p>int main ()<br>{<br>    int fd;<br>    struct mtrr_gentry gentry;</p>
+<pre><code>if ( ( fd = open (&quot;/proc/mtrr&quot;, O_RDONLY, 0) ) == -1 )
+&#123;
+if (errno == ENOENT)
+&#123;
+    fputs (&quot;/proc/mtrr not found: not supported or you don&#39;t have a PPro?\n&quot;,
+       stderr);
+    exit (1);
+&#125;
+fprintf (stderr, &quot;Error opening /proc/mtrr\t%s\n&quot;, ERRSTRING);
+exit (2);
+&#125;
+for (gentry.regnum = 0; ioctl (fd, MTRRIOC_GET_ENTRY, &amp;gentry) == 0;
+ ++gentry.regnum)
+&#123;
+if (gentry.size &lt; 1)
+&#123;
+    fprintf (stderr, &quot;Register: %u disabled\n&quot;, gentry.regnum);
+    continue;
+&#125;
+fprintf (stderr, &quot;Register: %u base: 0x%lx size: 0x%lx type: %s\n&quot;,
+     gentry.regnum, gentry.base, gentry.size,
+     mtrr_strings[gentry.type]);
+&#125;
+if (errno == EINVAL) exit (0);
+fprintf (stderr, &quot;Error doing ioctl(2) on /dev/mtrr\t%s\n&quot;, ERRSTRING);
+exit (3);
+</code></pre>
+<h1 id="End-Function-main"><a href="#End-Function-main" class="headerlink" title="}   /*  End Function main  */"></a>}   /*  End Function main  */</h1><p>Creating MTRRs from a C programme using ioctl()’s:</p>
+<p>/*  mtrr-add.c</p>
+<pre><code>Source file for mtrr-add (example programme to add an MTRRs using ioctl())
+
+Copyright (C) 1997-1998  Richard Gooch
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Richard Gooch may be reached by email at  rgooch@atnf.csiro.au
+The postal address is:
+  Richard Gooch, c/o ATNF, P. O. Box 76, Epping, N.S.W., 2121, Australia.
+</code></pre>
+<p>*/</p>
+<p>/*<br>    This programme will use an ioctl() on /proc/mtrr to add an entry. The first<br>    available mtrr is used. This is an alternative to writing /proc/mtrr.</p>
+<pre><code>Written by      Richard Gooch   17-DEC-1997
+
+Last updated by Richard Gooch   2-MAY-1998
+</code></pre>
+<p>*/<br>#include &lt;stdio.h&gt;<br>#include &lt;string.h&gt;<br>#include &lt;stdlib.h&gt;<br>#include &lt;unistd.h&gt;<br>#include &lt;sys/types.h&gt;<br>#include &lt;sys/stat.h&gt;<br>#include &lt;fcntl.h&gt;<br>#include &lt;sys/ioctl.h&gt;<br>#include &lt;errno.h&gt;<br>#include &lt;asm/mtrr.h&gt;</p>
+<p>#define TRUE 1<br>#define FALSE 0<br>#define ERRSTRING strerror (errno)</p>
+<p>static char <em>mtrr_strings[MTRR_NUM_TYPES] =<br>{<br>    “uncachable”,               /</em> 0 <em>/<br>    “write-combining”,          /</em> 1 <em>/<br>    “?”,                        /</em> 2 <em>/<br>    “?”,                        /</em> 3 <em>/<br>    “write-through”,            /</em> 4 <em>/<br>    “write-protect”,            /</em> 5 <em>/<br>    “write-back”,               /</em> 6 */<br>};</p>
+<p>int main (int argc, char **argv)<br>{<br>    int fd;<br>    struct mtrr_sentry sentry;</p>
+<pre><code>if (argc != 4)
+&#123;
+fprintf (stderr, &quot;Usage:\tmtrr-add base size type\n&quot;);
+exit (1);
+&#125;
+sentry.base = strtoul (argv[1], NULL, 0);
+sentry.size = strtoul (argv[2], NULL, 0);
+for (sentry.type = 0; sentry.type &lt; MTRR_NUM_TYPES; ++sentry.type)
+&#123;
+if (strcmp (argv[3], mtrr_strings[sentry.type]) == 0) break;
+&#125;
+if (sentry.type &gt;= MTRR_NUM_TYPES)
+&#123;
+fprintf (stderr, &quot;Illegal type: \&quot;%s\&quot;\n&quot;, argv[3]);
+exit (2);
+&#125;
+if ( ( fd = open (&quot;/proc/mtrr&quot;, O_WRONLY, 0) ) == -1 )
+&#123;
+if (errno == ENOENT)
+&#123;
+    fputs (&quot;/proc/mtrr not found: not supported or you don&#39;t have a PPro?\n&quot;,
+       stderr);
+    exit (3);
+&#125;
+fprintf (stderr, &quot;Error opening /proc/mtrr\t%s\n&quot;, ERRSTRING);
+exit (4);
+&#125;
+if (ioctl (fd, MTRRIOC_ADD_ENTRY, &amp;sentry) == -1)
+&#123;
+fprintf (stderr, &quot;Error doing ioctl(2) on /dev/mtrr\t%s\n&quot;, ERRSTRING);
+exit (5);
+&#125;
+fprintf (stderr, &quot;Sleeping for 5 seconds so you can see the new entry\n&quot;);
+sleep (5);
+close (fd);
+fputs (&quot;I&#39;ve just closed /proc/mtrr so now the new entry should be gone\n&quot;,
+   stderr);
+</code></pre>
+<h1 id="End-Function-main-1"><a href="#End-Function-main-1" class="headerlink" title="}   /*  End Function main  */"></a>}   /*  End Function main  */</h1>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/" title="Kernel-2.6.32-573.12.1.el6_mtrr" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtrr/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_multicast/" title="Kernel-2.6.32-573.12.1.el6_multicast"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_mtouchusb/" title="Kernel-2.6.32-573.12.1.el6_mtouchusb"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

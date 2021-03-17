@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-2.6.32-573.12.1.el6_cachetlb | oosTech.com</title>
+  <meta name="description" content="Cache and TLB Flushing          Under Linux      David S. Miller &lt;davem@redhat.com&gt;  This document describes the cache&#x2F;tlb flushing interfaces calledby the Linux VM subsystem.  It enumerates">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-2.6.32-573.12.1.el6_cachetlb">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Cache and TLB Flushing          Under Linux      David S. Miller &lt;davem@redhat.com&gt;  This document describes the cache&#x2F;tlb flushing interfaces calledby the Linux VM subsystem.  It enumerates">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a><span class="category-list-count">830</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_devices/" class="title">Kernel-2.6.32-573.12.1.el6_devices</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3c509/" class="title">Kernel-3.10.0-957.el7_3c509</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-2.6.32-573.12.1.el6_cachetlb" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-2.6.32-573.12.1.el6_cachetlb
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-2-6-32-573-12-1-el6-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_2.6.32-573.12.1.el6_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Cache and TLB Flushing
+         Under Linux
+
+    David S. Miller &lt;davem@redhat.com&gt;
+</code></pre>
+<p>This document describes the cache/tlb flushing interfaces called<br>by the Linux VM subsystem.  It enumerates over each interface,<br>describes it’s intended purpose, and what side effect is expected<br>after the interface is invoked.</p>
+<p>The side effects described below are stated for a uniprocessor<br>implementation, and what is to happen on that single processor.  The<br>SMP cases are a simple extension, in that you just extend the<br>definition such that the side effect for a particular interface occurs<br>on all processors in the system.  Don’t let this scare you into<br>thinking SMP cache/tlb flushing must be so inefficient, this is in<br>fact an area where many optimizations are possible.  For example,<br>if it can be proven that a user address space has never executed<br>on a cpu (see vma-&gt;cpu_vm_mask), one need not perform a flush<br>for this address space on that cpu.</p>
+<p>First, the TLB flushing interfaces, since they are the simplest.  The<br>“TLB” is abstracted under Linux as something the cpu uses to cache<br>virtual–&gt;physical address translations obtained from the software<br>page tables.  Meaning that if the software page tables change, it is<br>possible for stale translations to exist in this “TLB” cache.<br>Therefore when software page table changes occur, the kernel will<br>invoke one of the following flush methods <em>after</em> the page table<br>changes occur:</p>
+<ol>
+<li><p>void flush_tlb_all(void)</p>
+<p> The most severe flush of all.  After this interface runs,<br> any previous page table modification whatsoever will be<br> visible to the cpu.</p>
+<p> This is usually invoked when the kernel page tables are<br> changed, since such translations are “global” in nature.</p>
+</li>
+<li><p>void flush_tlb_mm(struct mm_struct *mm)</p>
+<p> This interface flushes an entire user address space from<br> the TLB.  After running, this interface must make sure that<br> any previous page table modifications for the address space<br> ‘mm’ will be visible to the cpu.  That is, after running,<br> there will be no entries in the TLB for ‘mm’.</p>
+<p> This interface is used to handle whole address space<br> page table operations such as what happens during<br> fork, and exec.</p>
+</li>
+<li><p>void flush_tlb_range(struct vm_area_struct *vma,</p>
+<pre><code>     unsigned long start, unsigned long end)
+</code></pre>
+<p> Here we are flushing a specific range of (user) virtual<br> address translations from the TLB.  After running, this<br> interface must make sure that any previous page table<br> modifications for the address space ‘vma-&gt;vm_mm’ in the range<br> ‘start’ to ‘end-1’ will be visible to the cpu.  That is, after<br> running, here will be no entries in the TLB for ‘mm’ for<br> virtual addresses in the range ‘start’ to ‘end-1’.</p>
+<p> The “vma” is the backing store being used for the region.<br> Primarily, this is used for munmap() type operations.</p>
+<p> The interface is provided in hopes that the port can find<br> a suitably efficient method for removing multiple page<br> sized translations from the TLB, instead of having the kernel<br> call flush_tlb_page (see below) for each entry which may be<br> modified.</p>
+</li>
+<li><p>void flush_tlb_page(struct vm_area_struct *vma, unsigned long addr)</p>
+<p> This time we need to remove the PAGE_SIZE sized translation<br> from the TLB.  The ‘vma’ is the backing structure used by<br> Linux to keep track of mmap’d regions for a process, the<br> address space is available via vma-&gt;vm_mm.  Also, one may<br> test (vma-&gt;vm_flags &amp; VM_EXEC) to see if this region is<br> executable (and thus could be in the ‘instruction TLB’ in<br> split-tlb type setups).</p>
+<p> After running, this interface must make sure that any previous<br> page table modification for address space ‘vma-&gt;vm_mm’ for<br> user virtual address ‘addr’ will be visible to the cpu.  That<br> is, after running, there will be no entries in the TLB for<br> ‘vma-&gt;vm_mm’ for virtual address ‘addr’.</p>
+<p> This is used primarily during fault processing.</p>
+</li>
+<li><p>void update_mmu_cache(struct vm_area_struct *vma,</p>
+<pre><code>      unsigned long address, pte_t pte)
+</code></pre>
+<p> At the end of every page fault, this routine is invoked to<br> tell the architecture specific code that a translation<br> described by “pte” now exists at virtual address “address”<br> for address space “vma-&gt;vm_mm”, in the software page tables.</p>
+<p> A port may use this information in any way it so chooses.<br> For example, it could use this event to pre-load TLB<br> translations for software managed TLB configurations.<br> The sparc64 port currently does this.</p>
+</li>
+<li><p>void tlb_migrate_finish(struct mm_struct *mm)</p>
+<p> This interface is called at the end of an explicit<br> process migration. This interface provides a hook<br> to allow a platform to update TLB or context-specific<br> information for the address space.</p>
+<p> The ia64 sn2 platform is one example of a platform<br> that uses this interface.</p>
+</li>
+</ol>
+<p>Next, we have the cache flushing interfaces.  In general, when Linux<br>is changing an existing virtual–&gt;physical mapping to a new value,<br>the sequence will be in one of the following forms:</p>
+<pre><code>1) flush_cache_mm(mm);
+   change_all_page_tables_of(mm);
+   flush_tlb_mm(mm);
+
+2) flush_cache_range(vma, start, end);
+   change_range_of_page_tables(mm, start, end);
+   flush_tlb_range(vma, start, end);
+
+3) flush_cache_page(vma, addr, pfn);
+   set_pte(pte_pointer, new_pte_val);
+   flush_tlb_page(vma, addr);
+</code></pre>
+<p>The cache level flush will always be first, because this allows<br>us to properly handle systems whose caches are strict and require<br>a virtual–&gt;physical translation to exist for a virtual address<br>when that virtual address is flushed from the cache.  The HyperSparc<br>cpu is one such cpu with this attribute.</p>
+<p>The cache flushing routines below need only deal with cache flushing<br>to the extent that it is necessary for a particular cpu.  Mostly,<br>these routines must be implemented for cpus which have virtually<br>indexed caches which must be flushed when virtual–&gt;physical<br>translations are changed or removed.  So, for example, the physically<br>indexed physically tagged caches of IA32 processors have no need to<br>implement these interfaces since the caches are fully synchronized<br>and have no dependency on translation information.</p>
+<p>Here are the routines, one by one:</p>
+<ol>
+<li><p>void flush_cache_mm(struct mm_struct *mm)</p>
+<p> This interface flushes an entire user address space from<br> the caches.  That is, after running, there will be no cache<br> lines associated with ‘mm’.</p>
+<p> This interface is used to handle whole address space<br> page table operations such as what happens during exit and exec.</p>
+</li>
+<li><p>void flush_cache_dup_mm(struct mm_struct *mm)</p>
+<p> This interface flushes an entire user address space from<br> the caches.  That is, after running, there will be no cache<br> lines associated with ‘mm’.</p>
+<p> This interface is used to handle whole address space<br> page table operations such as what happens during fork.</p>
+<p> This option is separate from flush_cache_mm to allow some<br> optimizations for VIPT caches.</p>
+</li>
+<li><p>void flush_cache_range(struct vm_area_struct *vma,</p>
+<pre><code>       unsigned long start, unsigned long end)
+</code></pre>
+<p> Here we are flushing a specific range of (user) virtual<br> addresses from the cache.  After running, there will be no<br> entries in the cache for ‘vma-&gt;vm_mm’ for virtual addresses in<br> the range ‘start’ to ‘end-1’.</p>
+<p> The “vma” is the backing store being used for the region.<br> Primarily, this is used for munmap() type operations.</p>
+<p> The interface is provided in hopes that the port can find<br> a suitably efficient method for removing multiple page<br> sized regions from the cache, instead of having the kernel<br> call flush_cache_page (see below) for each entry which may be<br> modified.</p>
+</li>
+<li><p>void flush_cache_page(struct vm_area_struct *vma, unsigned long addr, unsigned long pfn)</p>
+<p> This time we need to remove a PAGE_SIZE sized range<br> from the cache.  The ‘vma’ is the backing structure used by<br> Linux to keep track of mmap’d regions for a process, the<br> address space is available via vma-&gt;vm_mm.  Also, one may<br> test (vma-&gt;vm_flags &amp; VM_EXEC) to see if this region is<br> executable (and thus could be in the ‘instruction cache’ in<br> “Harvard” type cache layouts).</p>
+<p> The ‘pfn’ indicates the physical page frame (shift this value<br> left by PAGE_SHIFT to get the physical address) that ‘addr’<br> translates to.  It is this mapping which should be removed from<br> the cache.</p>
+<p> After running, there will be no entries in the cache for<br> ‘vma-&gt;vm_mm’ for virtual address ‘addr’ which translates<br> to ‘pfn’.</p>
+<p> This is used primarily during fault processing.</p>
+</li>
+<li><p>void flush_cache_kmaps(void)</p>
+<p> This routine need only be implemented if the platform utilizes<br> highmem.  It will be called right before all of the kmaps<br> are invalidated.</p>
+<p> After running, there will be no entries in the cache for<br> the kernel virtual address range PKMAP_ADDR(0) to<br> PKMAP_ADDR(LAST_PKMAP).</p>
+<p> This routing should be implemented in asm/highmem.h</p>
+</li>
+<li><p>void flush_cache_vmap(unsigned long start, unsigned long end)<br>void flush_cache_vunmap(unsigned long start, unsigned long end)</p>
+<p> Here in these two interfaces we are flushing a specific range<br> of (kernel) virtual addresses from the cache.  After running,<br> there will be no entries in the cache for the kernel address<br> space for virtual addresses in the range ‘start’ to ‘end-1’.</p>
+<p> The first of these two routines is invoked after map_vm_area()<br> has installed the page table entries.  The second is invoked<br> before unmap_kernel_range() deletes the page table entries.</p>
+</li>
+</ol>
+<p>There exists another whole class of cpu cache issues which currently<br>require a whole different set of interfaces to handle properly.<br>The biggest problem is that of virtual aliasing in the data cache<br>of a processor.</p>
+<p>Is your port susceptible to virtual aliasing in it’s D-cache?<br>Well, if your D-cache is virtually indexed, is larger in size than<br>PAGE_SIZE, and does not prevent multiple cache lines for the same<br>physical address from existing at once, you have this problem.</p>
+<p>If your D-cache has this problem, first define asm/shmparam.h SHMLBA<br>properly, it should essentially be the size of your virtually<br>addressed D-cache (or if the size is variable, the largest possible<br>size).  This setting will force the SYSv IPC layer to only allow user<br>processes to mmap shared memory at address which are a multiple of<br>this value.</p>
+<p>NOTE: This does not fix shared mmaps, check out the sparc64 port for<br>one way to solve this (in particular SPARC_FLAG_MMAPSHARED).</p>
+<p>Next, you have to solve the D-cache aliasing issue for all<br>other cases.  Please keep in mind that fact that, for a given page<br>mapped into some user address space, there is always at least one more<br>mapping, that of the kernel in it’s linear mapping starting at<br>PAGE_OFFSET.  So immediately, once the first user maps a given<br>physical page into its address space, by implication the D-cache<br>aliasing problem has the potential to exist since the kernel already<br>maps this page at its virtual address.</p>
+<p>  void copy_user_page(void *to, void *from, unsigned long addr, struct page *page)<br>  void clear_user_page(void *to, unsigned long addr, struct page *page)</p>
+<pre><code>These two routines store data in user anonymous or COW
+pages.  It allows a port to efficiently avoid D-cache alias
+issues between userspace and the kernel.
+
+For example, a port may temporarily map &#39;from&#39; and &#39;to&#39; to
+kernel virtual addresses during the copy.  The virtual address
+for these two pages is chosen in such a way that the kernel
+load/store instructions happen to virtual addresses which are
+of the same &quot;color&quot; as the user mapping of the page.  Sparc64
+for example, uses this technique.
+
+The &#39;addr&#39; parameter tells the virtual address where the
+user will ultimately have this page mapped, and the &#39;page&#39;
+parameter gives a pointer to the struct page of the target.
+
+If D-cache aliasing is not an issue, these two routines may
+simply call memcpy/memset directly and do nothing more.
+</code></pre>
+<p>  void flush_dcache_page(struct page *page)</p>
+<pre><code>Any time the kernel writes to a page cache page, _OR_
+the kernel is about to read from a page cache page and
+user space shared/writable mappings of this page potentially
+exist, this routine is called.
+
+NOTE: This routine need only be called for page cache pages
+      which can potentially ever be mapped into the address
+      space of a user process.  So for example, VFS layer code
+      handling vfs symlinks in the page cache need not call
+      this interface at all.
+
+The phrase &quot;kernel writes to a page cache page&quot; means,
+specifically, that the kernel executes store instructions
+that dirty data in that page at the page-&gt;virtual mapping
+of that page.  It is important to flush here to handle
+D-cache aliasing, to make sure these kernel stores are
+visible to user space mappings of that page.
+
+The corollary case is just as important, if there are users
+which have shared+writable mappings of this file, we must make
+sure that kernel reads of these pages will see the most recent
+stores done by the user.
+
+If D-cache aliasing is not an issue, this routine may
+simply be defined as a nop on that architecture.
+
+    There is a bit set aside in page-&gt;flags (PG_arch_1) as
+&quot;architecture private&quot;.  The kernel guarantees that,
+for pagecache pages, it will clear this bit when such
+a page first enters the pagecache.
+
+This allows these interfaces to be implemented much more
+efficiently.  It allows one to &quot;defer&quot; (perhaps indefinitely)
+the actual flush if there are currently no user processes
+mapping this page.  See sparc64&#39;s flush_dcache_page and
+update_mmu_cache implementations for an example of how to go
+about doing this.
+
+The idea is, first at flush_dcache_page() time, if
+page-&gt;mapping-&gt;i_mmap is an empty tree and -&gt;i_mmap_nonlinear
+an empty list, just mark the architecture private page flag bit.
+Later, in update_mmu_cache(), a check is made of this flag bit,
+and if set the flush is done and the flag bit is cleared.
+
+IMPORTANT NOTE: It is often important, if you defer the flush,
+        that the actual flush occurs on the same CPU
+        as did the cpu stores into the page to make it
+        dirty.  Again, see sparc64 for examples of how
+        to deal with this.
+</code></pre>
+<p>  void copy_to_user_page(struct vm_area_struct *vma, struct page *page,<br>                         unsigned long user_vaddr,<br>                         void *dst, void *src, int len)<br>  void copy_from_user_page(struct vm_area_struct *vma, struct page *page,<br>                           unsigned long user_vaddr,<br>                           void *dst, void *src, int len)<br>    When the kernel needs to copy arbitrary data in and out<br>    of arbitrary user pages (f.e. for ptrace()) it will use<br>    these two routines.</p>
+<pre><code>Any necessary cache flushing or other coherency operations
+that need to occur should happen here.  If the processor&#39;s
+instruction cache does not snoop cpu stores, it is very
+likely that you will need to flush the instruction cache
+for copy_to_user_page().
+</code></pre>
+<p>  void flush_anon_page(struct vm_area_struct *vma, struct page *page,<br>                       unsigned long vmaddr)<br>      When the kernel needs to access the contents of an anonymous<br>    page, it calls this function (currently only<br>    get_user_pages()).  Note: flush_dcache_page() deliberately<br>    doesn’t work for an anonymous page.  The default<br>    implementation is a nop (and should remain so for all coherent<br>    architectures).  For incoherent architectures, it should flush<br>    the cache of the page at vmaddr.</p>
+<p>  void flush_kernel_dcache_page(struct page *page)<br>    When the kernel needs to modify a user page is has obtained<br>    with kmap, it calls this function after all modifications are<br>    complete (but before kunmapping it) to bring the underlying<br>    page up to date.  It is assumed here that the user has no<br>    incoherent cached copies (i.e. the original page was obtained<br>    from a mechanism like get_user_pages()).  The default<br>    implementation is a nop and should remain so on all coherent<br>    architectures.  On incoherent architectures, this should flush<br>    the kernel cache for page (using page_address(page)).</p>
+<p>  void flush_icache_range(unsigned long start, unsigned long end)<br>      When the kernel stores into addresses that it will execute<br>    out of (eg when loading modules), this function is called.</p>
+<pre><code>If the icache does not snoop stores then this routine will need
+to flush it.
+</code></pre>
+<p>  void flush_icache_page(struct vm_area_struct *vma, struct page *page)<br>    All the functionality of flush_icache_page can be implemented in<br>    flush_dcache_page and update_mmu_cache. In 2.7 the hope is to<br>    remove this interface completely.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/" title="Kernel-2.6.32-573.12.1.el6_cachetlb" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachetlb/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cdrom/" title="Kernel-2.6.32-573.12.1.el6_cdro"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-2.6.32-573.12.1.el6_cachefiles/" title="Kernel-2.6.32-573.12.1.el6_cachefiles"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
