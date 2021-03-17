@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_btt | oosTech.com</title>
+  <meta name="description" content="BTT - Block Translation Table Introduction   Persistent memory based storage is able to perform IO at byte (or moreaccurately, cache line) granularity. However, we often want to expose suchstorage as">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_btt">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_btt/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="BTT - Block Translation Table Introduction   Persistent memory based storage is able to perform IO at byte (or moreaccurately, cache line) granularity. However, we often want to expose suchstorage as">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_btt/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#BTT-Block-Translation-Table"><span class="toc-number">1.</span> <span class="toc-text">BTT - Block Translation Table</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#a-The-BTT-Map"><span class="toc-number">1.1.</span> <span class="toc-text">a. The BTT Map</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#b-The-BTT-Flog"><span class="toc-number">1.2.</span> <span class="toc-text">b. The BTT Flog</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-The-concept-of-lanes"><span class="toc-number">1.3.</span> <span class="toc-text">c. The concept of lanes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#d-In-memory-data-structure-Read-Tracking-Table-RTT"><span class="toc-number">1.4.</span> <span class="toc-text">d. In-memory data structure: Read Tracking Table (RTT)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e-In-memory-data-structure-map-locks"><span class="toc-number">1.5.</span> <span class="toc-text">e. In-memory data structure: map locks</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#f-Reconstruction-from-the-Flog"><span class="toc-number">1.6.</span> <span class="toc-text">f. Reconstruction from the Flog</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#g-Summarizing-Read-and-Write-flows"><span class="toc-number">1.7.</span> <span class="toc-text">g. Summarizing - Read and Write flows</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Error-Handling"><span class="toc-number">2.</span> <span class="toc-text">Error Handling</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#In-kernel-usage"><span class="toc-number">3.</span> <span class="toc-text">In-kernel usage</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_btt" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_btt
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_btt/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_btt/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_btt/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="BTT-Block-Translation-Table"><a href="#BTT-Block-Translation-Table" class="headerlink" title="BTT - Block Translation Table"></a>BTT - Block Translation Table</h1><ol>
+<li>Introduction</li>
+</ol>
+<hr>
+<p>Persistent memory based storage is able to perform IO at byte (or more<br>accurately, cache line) granularity. However, we often want to expose such<br>storage as traditional block devices. The block drivers for persistent memory<br>will do exactly this. However, they do not provide any atomicity guarantees.<br>Traditional SSDs typically provide protection against torn sectors in hardware,<br>using stored energy in capacitors to complete in-flight block writes, or perhaps<br>in firmware. We don’t have this luxury with persistent memory - if a write is in<br>progress, and we experience a power failure, the block will contain a mix of old<br>and new data. Applications may not be prepared to handle such a scenario.</p>
+<p>The Block Translation Table (BTT) provides atomic sector update semantics for<br>persistent memory devices, so that applications that rely on sector writes not<br>being torn can continue to do so. The BTT manifests itself as a stacked block<br>device, and reserves a portion of the underlying storage for its metadata. At<br>the heart of it, is an indirection table that re-maps all the blocks on the<br>volume. It can be thought of as an extremely simple file system that only<br>provides atomic sector updates.</p>
+<ol start="2">
+<li>Static Layout</li>
+</ol>
+<hr>
+<p>The underlying storage on which a BTT can be laid out is not limited in any way.<br>The BTT, however, splits the available space into chunks of up to 512 GiB,<br>called “Arenas”.</p>
+<p>Each arena follows the same layout for its metadata, and all references in an<br>arena are internal to it (with the exception of one field that points to the<br>next arena). The following depicts the “On-disk” metadata layout:</p>
+<p>  Backing Store     +——-&gt;  Arena<br>+—————+   |   +——————+<br>|               |   |   | Arena info block |<br>|    Arena 0    +—+   |       4K         |<br>|     512G      |       +——————+<br>|               |       |                  |<br>+—————+       |                  |<br>|               |       |                  |<br>|    Arena 1    |       |   Data Blocks    |<br>|     512G      |       |                  |<br>|               |       |                  |<br>+—————+       |                  |<br>|       .       |       |                  |<br>|       .       |       |                  |<br>|       .       |       |                  |<br>|               |       |                  |<br>|               |       |                  |<br>+—————+       +——————+<br>                        |                  |<br>                        |     BTT Map      |<br>                        |                  |<br>                        |                  |<br>                        +——————+<br>                        |                  |<br>                        |     BTT Flog     |<br>                        |                  |<br>                        +——————+<br>                        | Info block copy  |<br>                        |       4K         |<br>                        +——————+</p>
+<ol start="3">
+<li>Theory of Operation</li>
+</ol>
+<hr>
+<h2 id="a-The-BTT-Map"><a href="#a-The-BTT-Map" class="headerlink" title="a. The BTT Map"></a>a. The BTT Map</h2><p>The map is a simple lookup/indirection table that maps an LBA to an internal<br>block. Each map entry is 32 bits. The two most significant bits are special<br>flags, and the remaining form the internal block number.</p>
+<p>Bit      Description<br>31 - 30    : Error and Zero flags - Used in the following way:<br>     Bit              Description<br>    31 30<br>    ———————————————————————–<br>     00    Initial state. Reads return zeroes; Premap = Postmap<br>     01    Zero state: Reads return zeroes<br>     10    Error state: Reads fail; Writes clear ‘E’ bit<br>     11    Normal Block â has valid postmap</p>
+<p>29 - 0    : Mappings to internal ‘postmap’ blocks</p>
+<p>Some of the terminology that will be subsequently used:</p>
+<p>External LBA  : LBA as made visible to upper layers.<br>ABA           : Arena Block Address - Block offset/number within an arena<br>Premap ABA    : The block offset into an arena, which was decided upon by range<br>        checking the External LBA<br>Postmap ABA   : The block number in the “Data Blocks” area obtained after<br>        indirection from the map<br>nfree          : The number of free blocks that are maintained at any given time.<br>        This is the number of concurrent writes that can happen to the<br>        arena.</p>
+<p>For example, after adding a BTT, we surface a disk of 1024G. We get a read for<br>the external LBA at 768G. This falls into the second arena, and of the 512G<br>worth of blocks that this arena contributes, this block is at 256G. Thus, the<br>premap ABA is 256G. We now refer to the map, and find out the mapping for block<br>‘X’ (256G) points to block ‘Y’, say ‘64’. Thus the postmap ABA is 64.</p>
+<h2 id="b-The-BTT-Flog"><a href="#b-The-BTT-Flog" class="headerlink" title="b. The BTT Flog"></a>b. The BTT Flog</h2><p>The BTT provides sector atomicity by making every write an “allocating write”,<br>i.e. Every write goes to a “free” block. A running list of free blocks is<br>maintained in the form of the BTT flog. ‘Flog’ is a combination of the words<br>“free list” and “log”. The flog contains ‘nfree’ entries, and an entry contains:</p>
+<p>lba     : The premap ABA that is being written to<br>old_map : The old postmap ABA - after ‘this’ write completes, this will be a<br>      free block.<br>new_map : The new postmap ABA. The map will up updated to reflect this<br>      lba-&gt;postmap_aba mapping, but we log it here in case we have to<br>      recover.<br>seq    : Sequence number to mark which of the 2 sections of this flog entry is<br>      valid/newest. It cycles between 01-&gt;10-&gt;11-&gt;01 (binary) under normal<br>      operation, with 00 indicating an uninitialized state.<br>lba’    : alternate lba entry<br>old_map’: alternate old postmap entry<br>new_map’: alternate new postmap entry<br>seq’    : alternate sequence number.</p>
+<p>Each of the above fields is 32-bit, making one entry 32 bytes. Entries are also<br>padded to 64 bytes to avoid cache line sharing or aliasing. Flog updates are<br>done such that for any entry being written, it:<br>a. overwrites the ‘old’ section in the entry based on sequence numbers<br>b. writes the ‘new’ section such that the sequence number is written last.</p>
+<h2 id="c-The-concept-of-lanes"><a href="#c-The-concept-of-lanes" class="headerlink" title="c. The concept of lanes"></a>c. The concept of lanes</h2><p>While ‘nfree’ describes the number of concurrent IOs an arena can process<br>concurrently, ‘nlanes’ is the number of IOs the BTT device as a whole can<br>process.<br> nlanes = min(nfree, num_cpus)<br>A lane number is obtained at the start of any IO, and is used for indexing into<br>all the on-disk and in-memory data structures for the duration of the IO. If<br>there are more CPUs than the max number of available lanes, than lanes are<br>protected by spinlocks.</p>
+<h2 id="d-In-memory-data-structure-Read-Tracking-Table-RTT"><a href="#d-In-memory-data-structure-Read-Tracking-Table-RTT" class="headerlink" title="d. In-memory data structure: Read Tracking Table (RTT)"></a>d. In-memory data structure: Read Tracking Table (RTT)</h2><p>Consider a case where we have two threads, one doing reads and the other,<br>writes. We can hit a condition where the writer thread grabs a free block to do<br>a new IO, but the (slow) reader thread is still reading from it. In other words,<br>the reader consulted a map entry, and started reading the corresponding block. A<br>writer started writing to the same external LBA, and finished the write updating<br>the map for that external LBA to point to its new postmap ABA. At this point the<br>internal, postmap block that the reader is (still) reading has been inserted<br>into the list of free blocks. If another write comes in for the same LBA, it can<br>grab this free block, and start writing to it, causing the reader to read<br>incorrect data. To prevent this, we introduce the RTT.</p>
+<p>The RTT is a simple, per arena table with ‘nfree’ entries. Every reader inserts<br>into rtt[lane_number], the postmap ABA it is reading, and clears it after the<br>read is complete. Every writer thread, after grabbing a free block, checks the<br>RTT for its presence. If the postmap free block is in the RTT, it waits till the<br>reader clears the RTT entry, and only then starts writing to it.</p>
+<h2 id="e-In-memory-data-structure-map-locks"><a href="#e-In-memory-data-structure-map-locks" class="headerlink" title="e. In-memory data structure: map locks"></a>e. In-memory data structure: map locks</h2><p>Consider a case where two writer threads are writing to the same LBA. There can<br>be a race in the following sequence of steps:</p>
+<p>free[lane] = map[premap_aba]<br>map[premap_aba] = postmap_aba</p>
+<p>Both threads can update their respective free[lane] with the same old, freed<br>postmap_aba. This has made the layout inconsistent by losing a free entry, and<br>at the same time, duplicating another free entry for two lanes.</p>
+<p>To solve this, we could have a single map lock (per arena) that has to be taken<br>before performing the above sequence, but we feel that could be too contentious.<br>Instead we use an array of (nfree) map_locks that is indexed by<br>(premap_aba modulo nfree).</p>
+<h2 id="f-Reconstruction-from-the-Flog"><a href="#f-Reconstruction-from-the-Flog" class="headerlink" title="f. Reconstruction from the Flog"></a>f. Reconstruction from the Flog</h2><p>On startup, we analyze the BTT flog to create our list of free blocks. We walk<br>through all the entries, and for each lane, of the set of two possible<br>‘sections’, we always look at the most recent one only (based on the sequence<br>number). The reconstruction rules/steps are simple:</p>
+<ul>
+<li>Read map[log_entry.lba].</li>
+<li>If log_entry.new matches the map entry, then log_entry.old is free.</li>
+<li>If log_entry.new does not match the map entry, then log_entry.new is free.<br>(This case can only be caused by power-fails/unsafe shutdowns)</li>
+</ul>
+<h2 id="g-Summarizing-Read-and-Write-flows"><a href="#g-Summarizing-Read-and-Write-flows" class="headerlink" title="g. Summarizing - Read and Write flows"></a>g. Summarizing - Read and Write flows</h2><p>Read:</p>
+<ol>
+<li> Convert external LBA to arena number + pre-map ABA</li>
+<li> Get a lane (and take lane_lock)</li>
+<li> Read map to get the entry for this pre-map ABA</li>
+<li> Enter post-map ABA into RTT[lane]</li>
+<li> If TRIM flag set in map, return zeroes, and end IO (go to step 8)</li>
+<li> If ERROR flag set in map, end IO with EIO (go to step 8)</li>
+<li> Read data from this block</li>
+<li> Remove post-map ABA entry from RTT[lane]</li>
+<li> Release lane (and lane_lock)</li>
+</ol>
+<p>Write:</p>
+<ol>
+<li> Convert external LBA to Arena number + pre-map ABA</li>
+<li> Get a lane (and take lane_lock)</li>
+<li>Use lane to index into in-memory free list and obtain a new block, next flog<pre><code> index, next sequence number
+</code></pre>
+</li>
+<li> Scan the RTT to check if free block is present, and spin/wait if it is.</li>
+<li> Write data to this free block</li>
+<li> Read map to get the existing post-map ABA entry for this pre-map ABA</li>
+<li> Write flog entry: [premap_aba / old postmap_aba / new postmap_aba / seq_num]</li>
+<li> Write new post-map ABA into map.</li>
+<li> Write old post-map entry into the free list</li>
+<li>Calculate next sequence number and write into the free list entry</li>
+<li>Release lane (and lane_lock)</li>
+</ol>
+<ol start="4">
+<li><h1 id="Error-Handling"><a href="#Error-Handling" class="headerlink" title="Error Handling"></a>Error Handling</h1></li>
+</ol>
+<p>An arena would be in an error state if any of the metadata is corrupted<br>irrecoverably, either due to a bug or a media error. The following conditions<br>indicate an error:</p>
+<ul>
+<li>Info block checksum does not match (and recovering from the copy also fails)</li>
+<li>All internal available blocks are not uniquely and entirely addressed by the<br>sum of mapped blocks and free blocks (from the BTT flog).</li>
+<li>Rebuilding free list from the flog reveals missing/duplicate/impossible<br>entries</li>
+<li>A map entry is out of bounds</li>
+</ul>
+<p>If any of these error conditions are encountered, the arena is put into a read<br>only state using a flag in the info block.</p>
+<ol start="5">
+<li><h1 id="In-kernel-usage"><a href="#In-kernel-usage" class="headerlink" title="In-kernel usage"></a>In-kernel usage</h1></li>
+</ol>
+<p>Any block driver that supports byte granularity IO to the storage may register<br>with the BTT. It will have to provide the rw_bytes interface in its<br>block_device_operations struct:</p>
+<pre><code>int (*rw_bytes)(struct gendisk *, void *, size_t, off_t, int rw);
+</code></pre>
+<p>It may register with the BTT after it adds its own gendisk, using btt_init:</p>
+<pre><code>struct btt *btt_init(struct gendisk *disk, unsigned long long rawsize,
+        u32 lbasize, u8 uuid[], int maxlane);
+</code></pre>
+<p>note that maxlane is the maximum amount of concurrency the driver wishes to<br>allow the BTT to use.</p>
+<p>The BTT ‘disk’ appears as a stacked block device that grabs the underlying block<br>device in the O_EXCL mode.</p>
+<p>When the driver wishes to remove the backing disk, it should similarly call<br>btt_fini using the same struct btt* handle that was provided to it by btt_init.</p>
+<pre><code>void btt_fini(struct btt *btt);
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_btt/" title="Kernel-3.10.0-957.el7_btt" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_btt/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_btrfs/" title="Kernel-3.10.0-957.el7_btrfs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_bu21013/" title="Kernel-3.10.0-957.el7_bu21013"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

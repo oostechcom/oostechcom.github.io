@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_pinctrl | oosTech.com</title>
+  <meta name="description" content="PINCTRL (PIN CONTROL) subsystemThis document outlines the pin control subsystem in Linux This subsystem deals with:  Enumerating and naming controllable pins  Multiplexing of pins, pads, fingers (etc)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_pinctrl">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="PINCTRL (PIN CONTROL) subsystemThis document outlines the pin control subsystem in Linux This subsystem deals with:  Enumerating and naming controllable pins  Multiplexing of pins, pads, fingers (etc)">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Top-level-interface"><span class="toc-number">1.</span> <span class="toc-text">Top-level interface</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pin-groups"><span class="toc-number">2.</span> <span class="toc-text">Pin groups</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pin-configuration"><span class="toc-number">3.</span> <span class="toc-text">Pin configuration</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Interaction-with-the-GPIO-subsystem"><span class="toc-number">4.</span> <span class="toc-text">Interaction with the GPIO subsystem</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PINMUX-interfaces"><span class="toc-number">5.</span> <span class="toc-text">PINMUX interfaces</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#What-is-pinmuxing"><span class="toc-number">6.</span> <span class="toc-text">What is pinmuxing?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pinmux-conventions"><span class="toc-number">7.</span> <span class="toc-text">Pinmux conventions</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pinmux-drivers"><span class="toc-number">8.</span> <span class="toc-text">Pinmux drivers</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pin-control-interaction-with-the-GPIO-subsystem"><span class="toc-number">9.</span> <span class="toc-text">Pin control interaction with the GPIO subsystem</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GPIO-mode-pitfalls"><span class="toc-number">10.</span> <span class="toc-text">GPIO mode pitfalls</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#And-your-machine-configuration-may-look-like-this"><span class="toc-number">10.1.</span> <span class="toc-text">And your machine configuration may look like this:</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Board-machine-configuration"><span class="toc-number">11.</span> <span class="toc-text">Board&#x2F;machine configuration</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Complex-mappings"><span class="toc-number">12.</span> <span class="toc-text">Complex mappings</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pin-control-requests-from-drivers"><span class="toc-number">13.</span> <span class="toc-text">Pin control requests from drivers</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Drivers-needing-both-pin-control-and-GPIOs"><span class="toc-number">14.</span> <span class="toc-text">Drivers needing both pin control and GPIOs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#System-pin-control-hogging"><span class="toc-number">15.</span> <span class="toc-text">System pin control hogging</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Runtime-pinmuxing"><span class="toc-number">16.</span> <span class="toc-text">Runtime pinmuxing</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_pinctrl" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_pinctrl
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>PINCTRL (PIN CONTROL) subsystem<br>This document outlines the pin control subsystem in Linux</p>
+<p>This subsystem deals with:</p>
+<ul>
+<li><p>Enumerating and naming controllable pins</p>
+</li>
+<li><p>Multiplexing of pins, pads, fingers (etc) see below for details</p>
+</li>
+<li><p>Configuration of pins, pads, fingers (etc), such as software-controlled<br>biasing and driving mode specific pins, such as pull-up/down, open drain,<br>load capacitance etc.</p>
+</li>
+</ul>
+<h1 id="Top-level-interface"><a href="#Top-level-interface" class="headerlink" title="Top-level interface"></a>Top-level interface</h1><p>Definition of PIN CONTROLLER:</p>
+<ul>
+<li>A pin controller is a piece of hardware, usually a set of registers, that<br>can control PINs. It may be able to multiplex, bias, set load capacitance,<br>set drive strength etc for individual pins or groups of pins.</li>
+</ul>
+<p>Definition of PIN:</p>
+<ul>
+<li>PINS are equal to pads, fingers, balls or whatever packaging input or<br>output line you want to control and these are denoted by unsigned integers<br>in the range 0..maxpin. This numberspace is local to each PIN CONTROLLER, so<br>there may be several such number spaces in a system. This pin space may<br>be sparse - i.e. there may be gaps in the space with numbers where no<br>pin exists.</li>
+</ul>
+<p>When a PIN CONTROLLER is instantiated, it will register a descriptor to the<br>pin control framework, and this descriptor contains an array of pin descriptors<br>describing the pins handled by this specific pin controller.</p>
+<p>Here is an example of a PGA (Pin Grid Array) chip seen from underneath:</p>
+<pre><code>    A   B   C   D   E   F   G   H
+</code></pre>
+<p>   8    o   o   o   o   o   o   o   o</p>
+<p>   7    o   o   o   o   o   o   o   o</p>
+<p>   6    o   o   o   o   o   o   o   o</p>
+<p>   5    o   o   o   o   o   o   o   o</p>
+<p>   4    o   o   o   o   o   o   o   o</p>
+<p>   3    o   o   o   o   o   o   o   o</p>
+<p>   2    o   o   o   o   o   o   o   o</p>
+<p>   1    o   o   o   o   o   o   o   o</p>
+<p>To register a pin controller and name all the pins on this package we can do<br>this in our driver:</p>
+<p>#include &lt;linux/pinctrl/pinctrl.h&gt;</p>
+<p>const struct pinctrl_pin_desc foo_pins[] = {<br>      PINCTRL_PIN(0, “A8”),<br>      PINCTRL_PIN(1, “B8”),<br>      PINCTRL_PIN(2, “C8”),<br>      …<br>      PINCTRL_PIN(61, “F1”),<br>      PINCTRL_PIN(62, “G1”),<br>      PINCTRL_PIN(63, “H1”),<br>};</p>
+<p>static struct pinctrl_desc foo_desc = {<br>    .name = “foo”,<br>    .pins = foo_pins,<br>    .npins = ARRAY_SIZE(foo_pins),<br>    .maxpin = 63,<br>    .owner = THIS_MODULE,<br>};</p>
+<p>int __init foo_probe(void)<br>{<br>    struct pinctrl_dev *pctl;</p>
+<pre><code>pctl = pinctrl_register(&amp;foo_desc, &lt;PARENT&gt;, NULL);
+if (IS_ERR(pctl))
+    pr_err(&quot;could not register foo pin driver\n&quot;);
+</code></pre>
+<p>}</p>
+<p>To enable the pinctrl subsystem and the subgroups for PINMUX and PINCONF and<br>selected drivers, you need to select them from your machine’s Kconfig entry,<br>since these are so tightly integrated with the machines they are used on.<br>See for example arch/arm/mach-u300/Kconfig for an example.</p>
+<p>Pins usually have fancier names than this. You can find these in the dataheet<br>for your chip. Notice that the core pinctrl.h file provides a fancy macro<br>called PINCTRL_PIN() to create the struct entries. As you can see I enumerated<br>the pins from 0 in the upper left corner to 63 in the lower right corner.<br>This enumeration was arbitrarily chosen, in practice you need to think<br>through your numbering system so that it matches the layout of registers<br>and such things in your driver, or the code may become complicated. You must<br>also consider matching of offsets to the GPIO ranges that may be handled by<br>the pin controller.</p>
+<p>For a padring with 467 pads, as opposed to actual pins, I used an enumeration<br>like this, walking around the edge of the chip, which seems to be industry<br>standard too (all these pads had names, too):</p>
+<pre><code> 0 ..... 104
+</code></pre>
+<p>   466        105<br>     .        .<br>     .        .<br>   358        224<br>    357 …. 225</p>
+<h1 id="Pin-groups"><a href="#Pin-groups" class="headerlink" title="Pin groups"></a>Pin groups</h1><p>Many controllers need to deal with groups of pins, so the pin controller<br>subsystem has a mechanism for enumerating groups of pins and retrieving the<br>actual enumerated pins that are part of a certain group.</p>
+<p>For example, say that we have a group of pins dealing with an SPI interface<br>on { 0, 8, 16, 24 }, and a group of pins dealing with an I2C interface on pins<br>on { 24, 25 }.</p>
+<p>These two groups are presented to the pin control subsystem by implementing<br>some generic pinctrl_ops like this:</p>
+<p>#include &lt;linux/pinctrl/pinctrl.h&gt;</p>
+<p>struct foo_group {<br>    const char *name;<br>    const unsigned int *pins;<br>    const unsigned num_pins;<br>};</p>
+<p>static const unsigned int spi0_pins[] = { 0, 8, 16, 24 };<br>static const unsigned int i2c0_pins[] = { 24, 25 };</p>
+<p>static const struct foo_group foo_groups[] = {<br>    {<br>        .name = “spi0_grp”,<br>        .pins = spi0_pins,<br>        .num_pins = ARRAY_SIZE(spi0_pins),<br>    },<br>    {<br>        .name = “i2c0_grp”,<br>        .pins = i2c0_pins,<br>        .num_pins = ARRAY_SIZE(i2c0_pins),<br>    },<br>};</p>
+<p>static int foo_get_groups_count(struct pinctrl_dev *pctldev)<br>{<br>    return ARRAY_SIZE(foo_groups);<br>}</p>
+<p>static const char *foo_get_group_name(struct pinctrl_dev *pctldev,<br>                       unsigned selector)<br>{<br>    return foo_groups[selector].name;<br>}</p>
+<p>static int foo_get_group_pins(struct pinctrl_dev *pctldev, unsigned selector,<br>                   unsigned ** const pins,<br>                   unsigned * const num_pins)<br>{<br>    *pins = (unsigned *) foo_groups[selector].pins;<br>    *num_pins = foo_groups[selector].num_pins;<br>    return 0;<br>}</p>
+<p>static struct pinctrl_ops foo_pctrl_ops = {<br>    .get_groups_count = foo_get_groups_count,<br>    .get_group_name = foo_get_group_name,<br>    .get_group_pins = foo_get_group_pins,<br>};</p>
+<p>static struct pinctrl_desc foo_desc = {<br>       …<br>       .pctlops = &amp;foo_pctrl_ops,<br>};</p>
+<p>The pin control subsystem will call the .get_groups_count() function to<br>determine total number of legal selectors, then it will call the other functions<br>to retrieve the name and pins of the group. Maintaining the data structure of<br>the groups is up to the driver, this is just a simple example - in practice you<br>may need more entries in your group structure, for example specific register<br>ranges associated with each group and so on.</p>
+<h1 id="Pin-configuration"><a href="#Pin-configuration" class="headerlink" title="Pin configuration"></a>Pin configuration</h1><p>Pins can sometimes be software-configured in an various ways, mostly related<br>to their electronic properties when used as inputs or outputs. For example you<br>may be able to make an output pin high impedance, or “tristate” meaning it is<br>effectively disconnected. You may be able to connect an input pin to VDD or GND<br>using a certain resistor value - pull up and pull down - so that the pin has a<br>stable value when nothing is driving the rail it is connected to, or when it’s<br>unconnected.</p>
+<p>Pin configuration can be programmed by adding configuration entries into the<br>mapping table; see section “Board/machine configuration” below.</p>
+<p>The format and meaning of the configuration parameter, PLATFORM_X_PULL_UP<br>above, is entirely defined by the pin controller driver.</p>
+<p>The pin configuration driver implements callbacks for changing pin<br>configuration in the pin controller ops like this:</p>
+<p>#include &lt;linux/pinctrl/pinctrl.h&gt;<br>#include &lt;linux/pinctrl/pinconf.h&gt;<br>#include “platform_x_pindefs.h”</p>
+<p>static int foo_pin_config_get(struct pinctrl_dev *pctldev,<br>            unsigned offset,<br>            unsigned long *config)<br>{<br>    struct my_conftype conf;</p>
+<pre><code>... Find setting for pin @ offset ...
+
+*config = (unsigned long) conf;
+</code></pre>
+<p>}</p>
+<p>static int foo_pin_config_set(struct pinctrl_dev *pctldev,<br>            unsigned offset,<br>            unsigned long config)<br>{<br>    struct my_conftype *conf = (struct my_conftype *) config;</p>
+<pre><code>switch (conf) &#123;
+    case PLATFORM_X_PULL_UP:
+    ...
+    &#125;
+&#125;
+</code></pre>
+<p>}</p>
+<p>static int foo_pin_config_group_get (struct pinctrl_dev *pctldev,<br>            unsigned selector,<br>            unsigned long *config)<br>{<br>    …<br>}</p>
+<p>static int foo_pin_config_group_set (struct pinctrl_dev *pctldev,<br>            unsigned selector,<br>            unsigned long config)<br>{<br>    …<br>}</p>
+<p>static struct pinconf_ops foo_pconf_ops = {<br>    .pin_config_get = foo_pin_config_get,<br>    .pin_config_set = foo_pin_config_set,<br>    .pin_config_group_get = foo_pin_config_group_get,<br>    .pin_config_group_set = foo_pin_config_group_set,<br>};</p>
+<p>/* Pin config operations are handled by some pin controller */<br>static struct pinctrl_desc foo_desc = {<br>    …<br>    .confops = &amp;foo_pconf_ops,<br>};</p>
+<p>Since some controllers have special logic for handling entire groups of pins<br>they can exploit the special whole-group pin control function. The<br>pin_config_group_set() callback is allowed to return the error code -EAGAIN,<br>for groups it does not want to handle, or if it just wants to do some<br>group-level handling and then fall through to iterate over all pins, in which<br>case each individual pin will be treated by separate pin_config_set() calls as<br>well.</p>
+<h1 id="Interaction-with-the-GPIO-subsystem"><a href="#Interaction-with-the-GPIO-subsystem" class="headerlink" title="Interaction with the GPIO subsystem"></a>Interaction with the GPIO subsystem</h1><p>The GPIO drivers may want to perform operations of various types on the same<br>physical pins that are also registered as pin controller pins.</p>
+<p>First and foremost, the two subsystems can be used as completely orthogonal,<br>see the section named “pin control requests from drivers” and<br>“drivers needing both pin control and GPIOs” below for details. But in some<br>situations a cross-subsystem mapping between pins and GPIOs is needed.</p>
+<p>Since the pin controller subsystem have its pinspace local to the pin<br>controller we need a mapping so that the pin control subsystem can figure out<br>which pin controller handles control of a certain GPIO pin. Since a single<br>pin controller may be muxing several GPIO ranges (typically SoCs that have<br>one set of pins but internally several GPIO silicon blocks, each modeled as<br>a struct gpio_chip) any number of GPIO ranges can be added to a pin controller<br>instance like this:</p>
+<p>struct gpio_chip chip_a;<br>struct gpio_chip chip_b;</p>
+<p>static struct pinctrl_gpio_range gpio_range_a = {<br>    .name = “chip a”,<br>    .id = 0,<br>    .base = 32,<br>    .pin_base = 32,<br>    .npins = 16,<br>    .gc = &chip_a;<br>};</p>
+<p>static struct pinctrl_gpio_range gpio_range_b = {<br>    .name = “chip b”,<br>    .id = 0,<br>    .base = 48,<br>    .pin_base = 64,<br>    .npins = 8,<br>    .gc = &chip_b;<br>};</p>
+<p>{<br>    struct pinctrl_dev *pctl;<br>    …<br>    pinctrl_add_gpio_range(pctl, &amp;gpio_range_a);<br>    pinctrl_add_gpio_range(pctl, &amp;gpio_range_b);<br>}</p>
+<p>So this complex system has one pin controller handling two different<br>GPIO chips. “chip a” has 16 pins and “chip b” has 8 pins. The “chip a” and<br>“chip b” have different .pin_base, which means a start pin number of the<br>GPIO range.</p>
+<p>The GPIO range of “chip a” starts from the GPIO base of 32 and actual<br>pin range also starts from 32. However “chip b” has different starting<br>offset for the GPIO range and pin range. The GPIO range of “chip b” starts<br>from GPIO number 48, while the pin range of “chip b” starts from 64.</p>
+<p>We can convert a gpio number to actual pin number using this “pin_base”.<br>They are mapped in the global GPIO pin space at:</p>
+<p>chip a:</p>
+<ul>
+<li>GPIO range : [32 .. 47]</li>
+<li>pin range  : [32 .. 47]<br>chip b:</li>
+<li>GPIO range : [48 .. 55]</li>
+<li>pin range  : [64 .. 71]</li>
+</ul>
+<p>When GPIO-specific functions in the pin control subsystem are called, these<br>ranges will be used to look up the appropriate pin controller by inspecting<br>and matching the pin to the pin ranges across all controllers. When a<br>pin controller handling the matching range is found, GPIO-specific functions<br>will be called on that specific pin controller.</p>
+<p>For all functionalities dealing with pin biasing, pin muxing etc, the pin<br>controller subsystem will subtract the range’s .base offset from the passed<br>in gpio number, and add the ranges’s .pin_base offset to retrive a pin number.<br>After that, the subsystem passes it on to the pin control driver, so the driver<br>will get an pin number into its handled number range. Further it is also passed<br>the range ID value, so that the pin controller knows which range it should<br>deal with.</p>
+<p>Calling pinctrl_add_gpio_range from pinctrl driver is DEPRECATED. Please see<br>section 2.1 of Documentation/devicetree/bindings/gpio/gpio.txt on how to bind<br>pinctrl and gpio drivers.</p>
+<h1 id="PINMUX-interfaces"><a href="#PINMUX-interfaces" class="headerlink" title="PINMUX interfaces"></a>PINMUX interfaces</h1><p>These calls use the pinmux_* naming prefix.  No other calls should use that<br>prefix.</p>
+<h1 id="What-is-pinmuxing"><a href="#What-is-pinmuxing" class="headerlink" title="What is pinmuxing?"></a>What is pinmuxing?</h1><p>PINMUX, also known as padmux, ballmux, alternate functions or mission modes<br>is a way for chip vendors producing some kind of electrical packages to use<br>a certain physical pin (ball, pad, finger, etc) for multiple mutually exclusive<br>functions, depending on the application. By “application” in this context<br>we usually mean a way of soldering or wiring the package into an electronic<br>system, even though the framework makes it possible to also change the function<br>at runtime.</p>
+<p>Here is an example of a PGA (Pin Grid Array) chip seen from underneath:</p>
+<pre><code>    A   B   C   D   E   F   G   H
+  +---+
+</code></pre>
+<p>   8  | o | o   o   o   o   o   o   o<br>      |   |<br>   7  | o | o   o   o   o   o   o   o<br>      |   |<br>   6  | o | o   o   o   o   o   o   o<br>      +—+—+<br>   5  | o | o | o   o   o   o   o   o<br>      +—+—+               +—+<br>   4    o   o   o   o   o   o | o | o<br>                              |   |<br>   3    o   o   o   o   o   o | o | o<br>                              |   |<br>   2    o   o   o   o   o   o | o | o<br>      +——-+——-+——-+—+—+<br>   1  | o   o | o   o | o   o | o | o |<br>      +——-+——-+——-+—+—+</p>
+<p>This is not tetris. The game to think of is chess. Not all PGA/BGA packages<br>are chessboard-like, big ones have “holes” in some arrangement according to<br>different design patterns, but we’re using this as a simple example. Of the<br>pins you see some will be taken by things like a few VCC and GND to feed power<br>to the chip, and quite a few will be taken by large ports like an external<br>memory interface. The remaining pins will often be subject to pin multiplexing.</p>
+<p>The example 8x8 PGA package above will have pin numbers 0 thru 63 assigned to<br>its physical pins. It will name the pins { A1, A2, A3 … H6, H7, H8 } using<br>pinctrl_register_pins() and a suitable data set as shown earlier.</p>
+<p>In this 8x8 BGA package the pins { A8, A7, A6, A5 } can be used as an SPI port<br>(these are four pins: CLK, RXD, TXD, FRM). In that case, pin B5 can be used as<br>some general-purpose GPIO pin. However, in another setting, pins { A5, B5 } can<br>be used as an I2C port (these are just two pins: SCL, SDA). Needless to say,<br>we cannot use the SPI port and I2C port at the same time. However in the inside<br>of the package the silicon performing the SPI logic can alternatively be routed<br>out on pins { G4, G3, G2, G1 }.</p>
+<p>On the botton row at { A1, B1, C1, D1, E1, F1, G1, H1 } we have something<br>special - it’s an external MMC bus that can be 2, 4 or 8 bits wide, and it will<br>consume 2, 4 or 8 pins respectively, so either { A1, B1 } are taken or<br>{ A1, B1, C1, D1 } or all of them. If we use all 8 bits, we cannot use the SPI<br>port on pins { G4, G3, G2, G1 } of course.</p>
+<p>This way the silicon blocks present inside the chip can be multiplexed “muxed”<br>out on different pin ranges. Often contemporary SoC (systems on chip) will<br>contain several I2C, SPI, SDIO/MMC, etc silicon blocks that can be routed to<br>different pins by pinmux settings.</p>
+<p>Since general-purpose I/O pins (GPIO) are typically always in shortage, it is<br>common to be able to use almost any pin as a GPIO pin if it is not currently<br>in use by some other I/O port.</p>
+<h1 id="Pinmux-conventions"><a href="#Pinmux-conventions" class="headerlink" title="Pinmux conventions"></a>Pinmux conventions</h1><p>The purpose of the pinmux functionality in the pin controller subsystem is to<br>abstract and provide pinmux settings to the devices you choose to instantiate<br>in your machine configuration. It is inspired by the clk, GPIO and regulator<br>subsystems, so devices will request their mux setting, but it’s also possible<br>to request a single pin for e.g. GPIO.</p>
+<p>Definitions:</p>
+<ul>
+<li><p>FUNCTIONS can be switched in and out by a driver residing with the pin<br>control subsystem in the drivers/pinctrl/* directory of the kernel. The<br>pin control driver knows the possible functions. In the example above you can<br>identify three pinmux functions, one for spi, one for i2c and one for mmc.</p>
+</li>
+<li><p>FUNCTIONS are assumed to be enumerable from zero in a one-dimensional array.<br>In this case the array could be something like: { spi0, i2c0, mmc0 }<br>for the three available functions.</p>
+</li>
+<li><p>FUNCTIONS have PIN GROUPS as defined on the generic level - so a certain<br>function is <em>always</em> associated with a certain set of pin groups, could<br>be just a single one, but could also be many. In the example above the<br>function i2c is associated with the pins { A5, B5 }, enumerated as<br>{ 24, 25 } in the controller pin space.</p>
+<p>The Function spi is associated with pin groups { A8, A7, A6, A5 }<br>and { G4, G3, G2, G1 }, which are enumerated as { 0, 8, 16, 24 } and<br>{ 38, 46, 54, 62 } respectively.</p>
+<p>Group names must be unique per pin controller, no two groups on the same<br>controller may have the same name.</p>
+</li>
+<li><p>The combination of a FUNCTION and a PIN GROUP determine a certain function<br>for a certain set of pins. The knowledge of the functions and pin groups<br>and their machine-specific particulars are kept inside the pinmux driver,<br>from the outside only the enumerators are known, and the driver core can:</p>
+<ul>
+<li>Request the name of a function with a certain selector (&gt;= 0)</li>
+<li>A list of groups associated with a certain function</li>
+<li>Request that a certain group in that list to be activated for a certain<br>function</li>
+</ul>
+<p>As already described above, pin groups are in turn self-descriptive, so<br>the core will retrieve the actual pin range in a certain group from the<br>driver.</p>
+</li>
+<li><p>FUNCTIONS and GROUPS on a certain PIN CONTROLLER are MAPPED to a certain<br>device by the board file, device tree or similar machine setup configuration<br>mechanism, similar to how regulators are connected to devices, usually by<br>name. Defining a pin controller, function and group thus uniquely identify<br>the set of pins to be used by a certain device. (If only one possible group<br>of pins is available for the function, no group name need to be supplied -<br>the core will simply select the first and only group available.)</p>
+<p>In the example case we can define that this particular machine shall<br>use device spi0 with pinmux function fspi0 group gspi0 and i2c0 on function<br>fi2c0 group gi2c0, on the primary pin controller, we get mappings<br>like these:</p>
+<p>{<br>  {“map-spi0”, spi0, pinctrl0, fspi0, gspi0},<br>  {“map-i2c0”, i2c0, pinctrl0, fi2c0, gi2c0}<br>}</p>
+<p>Every map must be assigned a state name, pin controller, device and<br>function. The group is not compulsory - if it is omitted the first group<br>presented by the driver as applicable for the function will be selected,<br>which is useful for simple cases.</p>
+<p>It is possible to map several groups to the same combination of device,<br>pin controller and function. This is for cases where a certain function on<br>a certain pin controller may use different sets of pins in different<br>configurations.</p>
+</li>
+<li><p>PINS for a certain FUNCTION using a certain PIN GROUP on a certain<br>PIN CONTROLLER are provided on a first-come first-serve basis, so if some<br>other device mux setting or GPIO pin request has already taken your physical<br>pin, you will be denied the use of it. To get (activate) a new setting, the<br>old one has to be put (deactivated) first.</p>
+</li>
+</ul>
+<p>Sometimes the documentation and hardware registers will be oriented around<br>pads (or “fingers”) rather than pins - these are the soldering surfaces on the<br>silicon inside the package, and may or may not match the actual number of<br>pins/balls underneath the capsule. Pick some enumeration that makes sense to<br>you. Define enumerators only for the pins you can control if that makes sense.</p>
+<p>Assumptions:</p>
+<p>We assume that the number of possible function maps to pin groups is limited by<br>the hardware. I.e. we assume that there is no system where any function can be<br>mapped to any pin, like in a phone exchange. So the available pins groups for<br>a certain function will be limited to a few choices (say up to eight or so),<br>not hundreds or any amount of choices. This is the characteristic we have found<br>by inspecting available pinmux hardware, and a necessary assumption since we<br>expect pinmux drivers to present <em>all</em> possible function vs pin group mappings<br>to the subsystem.</p>
+<h1 id="Pinmux-drivers"><a href="#Pinmux-drivers" class="headerlink" title="Pinmux drivers"></a>Pinmux drivers</h1><p>The pinmux core takes care of preventing conflicts on pins and calling<br>the pin controller driver to execute different settings.</p>
+<p>It is the responsibility of the pinmux driver to impose further restrictions<br>(say for example infer electronic limitations due to load etc) to determine<br>whether or not the requested function can actually be allowed, and in case it<br>is possible to perform the requested mux setting, poke the hardware so that<br>this happens.</p>
+<p>Pinmux drivers are required to supply a few callback functions, some are<br>optional. Usually the enable() and disable() functions are implemented,<br>writing values into some certain registers to activate a certain mux setting<br>for a certain pin.</p>
+<p>A simple driver for the above example will work by setting bits 0, 1, 2, 3 or 4<br>into some register named MUX to select a certain function with a certain<br>group of pins would work something like this:</p>
+<p>#include &lt;linux/pinctrl/pinctrl.h&gt;<br>#include &lt;linux/pinctrl/pinmux.h&gt;</p>
+<p>struct foo_group {<br>    const char *name;<br>    const unsigned int *pins;<br>    const unsigned num_pins;<br>};</p>
+<p>static const unsigned spi0_0_pins[] = { 0, 8, 16, 24 };<br>static const unsigned spi0_1_pins[] = { 38, 46, 54, 62 };<br>static const unsigned i2c0_pins[] = { 24, 25 };<br>static const unsigned mmc0_1_pins[] = { 56, 57 };<br>static const unsigned mmc0_2_pins[] = { 58, 59 };<br>static const unsigned mmc0_3_pins[] = { 60, 61, 62, 63 };</p>
+<p>static const struct foo_group foo_groups[] = {<br>    {<br>        .name = “spi0_0_grp”,<br>        .pins = spi0_0_pins,<br>        .num_pins = ARRAY_SIZE(spi0_0_pins),<br>    },<br>    {<br>        .name = “spi0_1_grp”,<br>        .pins = spi0_1_pins,<br>        .num_pins = ARRAY_SIZE(spi0_1_pins),<br>    },<br>    {<br>        .name = “i2c0_grp”,<br>        .pins = i2c0_pins,<br>        .num_pins = ARRAY_SIZE(i2c0_pins),<br>    },<br>    {<br>        .name = “mmc0_1_grp”,<br>        .pins = mmc0_1_pins,<br>        .num_pins = ARRAY_SIZE(mmc0_1_pins),<br>    },<br>    {<br>        .name = “mmc0_2_grp”,<br>        .pins = mmc0_2_pins,<br>        .num_pins = ARRAY_SIZE(mmc0_2_pins),<br>    },<br>    {<br>        .name = “mmc0_3_grp”,<br>        .pins = mmc0_3_pins,<br>        .num_pins = ARRAY_SIZE(mmc0_3_pins),<br>    },<br>};</p>
+<p>static int foo_get_groups_count(struct pinctrl_dev *pctldev)<br>{<br>    return ARRAY_SIZE(foo_groups);<br>}</p>
+<p>static const char *foo_get_group_name(struct pinctrl_dev *pctldev,<br>                       unsigned selector)<br>{<br>    return foo_groups[selector].name;<br>}</p>
+<p>static int foo_get_group_pins(struct pinctrl_dev *pctldev, unsigned selector,<br>                   unsigned ** const pins,<br>                   unsigned * const num_pins)<br>{<br>    *pins = (unsigned *) foo_groups[selector].pins;<br>    *num_pins = foo_groups[selector].num_pins;<br>    return 0;<br>}</p>
+<p>static struct pinctrl_ops foo_pctrl_ops = {<br>    .get_groups_count = foo_get_groups_count,<br>    .get_group_name = foo_get_group_name,<br>    .get_group_pins = foo_get_group_pins,<br>};</p>
+<p>struct foo_pmx_func {<br>    const char *name;<br>    const char * const *groups;<br>    const unsigned num_groups;<br>};</p>
+<p>static const char * const spi0_groups[] = { “spi0_0_grp”, “spi0_1_grp” };<br>static const char * const i2c0_groups[] = { “i2c0_grp” };<br>static const char * const mmc0_groups[] = { “mmc0_1_grp”, “mmc0_2_grp”,<br>                    “mmc0_3_grp” };</p>
+<p>static const struct foo_pmx_func foo_functions[] = {<br>    {<br>        .name = “spi0”,<br>        .groups = spi0_groups,<br>        .num_groups = ARRAY_SIZE(spi0_groups),<br>    },<br>    {<br>        .name = “i2c0”,<br>        .groups = i2c0_groups,<br>        .num_groups = ARRAY_SIZE(i2c0_groups),<br>    },<br>    {<br>        .name = “mmc0”,<br>        .groups = mmc0_groups,<br>        .num_groups = ARRAY_SIZE(mmc0_groups),<br>    },<br>};</p>
+<p>int foo_get_functions_count(struct pinctrl_dev *pctldev)<br>{<br>    return ARRAY_SIZE(foo_functions);<br>}</p>
+<p>const char *foo_get_fname(struct pinctrl_dev *pctldev, unsigned selector)<br>{<br>    return foo_functions[selector].name;<br>}</p>
+<p>static int foo_get_groups(struct pinctrl_dev <em>pctldev, unsigned selector,<br>              const char * const *</em>groups,<br>              unsigned * const num_groups)<br>{<br>    *groups = foo_functions[selector].groups;<br>    *num_groups = foo_functions[selector].num_groups;<br>    return 0;<br>}</p>
+<p>int foo_enable(struct pinctrl_dev *pctldev, unsigned selector,<br>        unsigned group)<br>{<br>    u8 regbit = (1 &lt;&lt; selector + group);</p>
+<pre><code>writeb((readb(MUX)|regbit), MUX)
+return 0;
+</code></pre>
+<p>}</p>
+<p>void foo_disable(struct pinctrl_dev *pctldev, unsigned selector,<br>        unsigned group)<br>{<br>    u8 regbit = (1 &lt;&lt; selector + group);</p>
+<pre><code>writeb((readb(MUX) &amp; ~(regbit)), MUX)
+return 0;
+</code></pre>
+<p>}</p>
+<p>struct pinmux_ops foo_pmxops = {<br>    .get_functions_count = foo_get_functions_count,<br>    .get_function_name = foo_get_fname,<br>    .get_function_groups = foo_get_groups,<br>    .enable = foo_enable,<br>    .disable = foo_disable,<br>};</p>
+<p>/* Pinmux operations are handled by some pin controller */<br>static struct pinctrl_desc foo_desc = {<br>    …<br>    .pctlops = &amp;foo_pctrl_ops,<br>    .pmxops = &amp;foo_pmxops,<br>};</p>
+<p>In the example activating muxing 0 and 1 at the same time setting bits<br>0 and 1, uses one pin in common so they would collide.</p>
+<p>The beauty of the pinmux subsystem is that since it keeps track of all<br>pins and who is using them, it will already have denied an impossible<br>request like that, so the driver does not need to worry about such<br>things - when it gets a selector passed in, the pinmux subsystem makes<br>sure no other device or GPIO assignment is already using the selected<br>pins. Thus bits 0 and 1 in the control register will never be set at the<br>same time.</p>
+<p>All the above functions are mandatory to implement for a pinmux driver.</p>
+<h1 id="Pin-control-interaction-with-the-GPIO-subsystem"><a href="#Pin-control-interaction-with-the-GPIO-subsystem" class="headerlink" title="Pin control interaction with the GPIO subsystem"></a>Pin control interaction with the GPIO subsystem</h1><p>Note that the following implies that the use case is to use a certain pin<br>from the Linux kernel using the API in &lt;linux/gpio.h&gt; with gpio_request()<br>and similar functions. There are cases where you may be using something<br>that your datasheet calls “GPIO mode” but actually is just an electrical<br>configuration for a certain device. See the section below named<br>“GPIO mode pitfalls” for more details on this scenario.</p>
+<p>The public pinmux API contains two functions named pinctrl_request_gpio()<br>and pinctrl_free_gpio(). These two functions shall <em>ONLY</em> be called from<br>gpiolib-based drivers as part of their gpio_request() and<br>gpio_free() semantics. Likewise the pinctrl_gpio_direction_[input|output]<br>shall only be called from within respective gpio_direction_[input|output]<br>gpiolib implementation.</p>
+<p>NOTE that platforms and individual drivers shall <em>NOT</em> request GPIO pins to be<br>controlled e.g. muxed in. Instead, implement a proper gpiolib driver and have<br>that driver request proper muxing and other control for its pins.</p>
+<p>The function list could become long, especially if you can convert every<br>individual pin into a GPIO pin independent of any other pins, and then try<br>the approach to define every pin as a function.</p>
+<p>In this case, the function array would become 64 entries for each GPIO<br>setting and then the device functions.</p>
+<p>For this reason there are two functions a pin control driver can implement<br>to enable only GPIO on an individual pin: .gpio_request_enable() and<br>.gpio_disable_free().</p>
+<p>This function will pass in the affected GPIO range identified by the pin<br>controller core, so you know which GPIO pins are being affected by the request<br>operation.</p>
+<p>If your driver needs to have an indication from the framework of whether the<br>GPIO pin shall be used for input or output you can implement the<br>.gpio_set_direction() function. As described this shall be called from the<br>gpiolib driver and the affected GPIO range, pin offset and desired direction<br>will be passed along to this function.</p>
+<p>Alternatively to using these special functions, it is fully allowed to use<br>named functions for each GPIO pin, the pinctrl_request_gpio() will attempt to<br>obtain the function “gpioN” where “N” is the global GPIO pin number if no<br>special GPIO-handler is registered.</p>
+<h1 id="GPIO-mode-pitfalls"><a href="#GPIO-mode-pitfalls" class="headerlink" title="GPIO mode pitfalls"></a>GPIO mode pitfalls</h1><p>Sometime the developer may be confused by a datasheet talking about a pin<br>being possible to set into “GPIO mode”. It appears that what hardware<br>engineers mean with “GPIO mode” is not necessarily the use case that is<br>implied in the kernel interface &lt;linux/gpio.h&gt;: a pin that you grab from<br>kernel code and then either listen for input or drive high/low to<br>assert/deassert some external line.</p>
+<p>Rather hardware engineers think that “GPIO mode” means that you can<br>software-control a few electrical properties of the pin that you would<br>not be able to control if the pin was in some other mode, such as muxed in<br>for a device.</p>
+<p>Example: a pin is usually muxed in to be used as a UART TX line. But during<br>system sleep, we need to put this pin into “GPIO mode” and ground it.</p>
+<p>If you make a 1-to-1 map to the GPIO subsystem for this pin, you may start<br>to think that you need to come up with something real complex, that the<br>pin shall be used for UART TX and GPIO at the same time, that you will grab<br>a pin control handle and set it to a certain state to enable UART TX to be<br>muxed in, then twist it over to GPIO mode and use gpio_direction_output()<br>to drive it low during sleep, then mux it over to UART TX again when you<br>wake up and maybe even gpio_request/gpio_free as part of this cycle. This<br>all gets very complicated.</p>
+<p>The solution is to not think that what the datasheet calls “GPIO mode”<br>has to be handled by the &lt;linux/gpio.h&gt; interface. Instead view this as<br>a certain pin config setting. Look in e.g. &lt;linux/pinctrl/pinconf-generic.h&gt;<br>and you find this in the documentation:</p>
+<p>  PIN_CONFIG_OUTPUT: this will configure the pin in output, use argument<br>     1 to indicate high level, argument 0 to indicate low level.</p>
+<p>So it is perfectly possible to push a pin into “GPIO mode” and drive the<br>line low as part of the usual pin control map. So for example your UART<br>driver may look like this:</p>
+<p>#include &lt;linux/pinctrl/consumer.h&gt;</p>
+<p>struct pinctrl          *pinctrl;<br>struct pinctrl_state    *pins_default;<br>struct pinctrl_state    *pins_sleep;</p>
+<p>pins_default = pinctrl_lookup_state(uap-&gt;pinctrl, PINCTRL_STATE_DEFAULT);<br>pins_sleep = pinctrl_lookup_state(uap-&gt;pinctrl, PINCTRL_STATE_SLEEP);</p>
+<p>/* Normal mode <em>/<br>retval = pinctrl_select_state(pinctrl, pins_default);<br>/</em> Sleep mode */<br>retval = pinctrl_select_state(pinctrl, pins_sleep);</p>
+<h2 id="And-your-machine-configuration-may-look-like-this"><a href="#And-your-machine-configuration-may-look-like-this" class="headerlink" title="And your machine configuration may look like this:"></a>And your machine configuration may look like this:</h2><p>static unsigned long uart_default_mode[] = {<br>    PIN_CONF_PACKED(PIN_CONFIG_DRIVE_PUSH_PULL, 0),<br>};</p>
+<p>static unsigned long uart_sleep_mode[] = {<br>    PIN_CONF_PACKED(PIN_CONFIG_OUTPUT, 0),<br>};</p>
+<p>static struct pinctrl_map __initdata pinmap[] = {<br>    PIN_MAP_MUX_GROUP(“uart”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”,<br>                      “u0_group”, “u0”),<br>    PIN_MAP_CONFIGS_PIN(“uart”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”,<br>                        “UART_TX_PIN”, uart_default_mode),<br>    PIN_MAP_MUX_GROUP(“uart”, PINCTRL_STATE_SLEEP, “pinctrl-foo”,<br>                      “u0_group”, “gpio-mode”),<br>    PIN_MAP_CONFIGS_PIN(“uart”, PINCTRL_STATE_SLEEP, “pinctrl-foo”,<br>                        “UART_TX_PIN”, uart_sleep_mode),<br>};</p>
+<p>foo_init(void) {<br>    pinctrl_register_mappings(pinmap, ARRAY_SIZE(pinmap));<br>}</p>
+<p>Here the pins we want to control are in the “u0_group” and there is some<br>function called “u0” that can be enabled on this group of pins, and then<br>everything is UART business as usual. But there is also some function<br>named “gpio-mode” that can be mapped onto the same pins to move them into<br>GPIO mode.</p>
+<p>This will give the desired effect without any bogus interaction with the<br>GPIO subsystem. It is just an electrical configuration used by that device<br>when going to sleep, it might imply that the pin is set into something the<br>datasheet calls “GPIO mode” but that is not the point: it is still used<br>by that UART device to control the pins that pertain to that very UART<br>driver, putting them into modes needed by the UART. GPIO in the Linux<br>kernel sense are just some 1-bit line, and is a different use case.</p>
+<p>How the registers are poked to attain the push/pull and output low<br>configuration and the muxing of the “u0” or “gpio-mode” group onto these<br>pins is a question for the driver.</p>
+<p>Some datasheets will be more helpful and refer to the “GPIO mode” as<br>“low power mode” rather than anything to do with GPIO. This often means<br>the same thing electrically speaking, but in this latter case the<br>software engineers will usually quickly identify that this is some<br>specific muxing/configuration rather than anything related to the GPIO<br>API.</p>
+<h1 id="Board-machine-configuration"><a href="#Board-machine-configuration" class="headerlink" title="Board/machine configuration"></a>Board/machine configuration</h1><p>Boards and machines define how a certain complete running system is put<br>together, including how GPIOs and devices are muxed, how regulators are<br>constrained and how the clock tree looks. Of course pinmux settings are also<br>part of this.</p>
+<p>A pin controller configuration for a machine looks pretty much like a simple<br>regulator configuration, so for the example array above we want to enable i2c<br>and spi on the second function mapping:</p>
+<p>#include &lt;linux/pinctrl/machine.h&gt;</p>
+<p>static const struct pinctrl_map mapping[] __initconst = {<br>    {<br>        .dev_name = “foo-spi.0”,<br>        .name = PINCTRL_STATE_DEFAULT,<br>        .type = PIN_MAP_TYPE_MUX_GROUP,<br>        .ctrl_dev_name = “pinctrl-foo”,<br>        .data.mux.function = “spi0”,<br>    },<br>    {<br>        .dev_name = “foo-i2c.0”,<br>        .name = PINCTRL_STATE_DEFAULT,<br>        .type = PIN_MAP_TYPE_MUX_GROUP,<br>        .ctrl_dev_name = “pinctrl-foo”,<br>        .data.mux.function = “i2c0”,<br>    },<br>    {<br>        .dev_name = “foo-mmc.0”,<br>        .name = PINCTRL_STATE_DEFAULT,<br>        .type = PIN_MAP_TYPE_MUX_GROUP,<br>        .ctrl_dev_name = “pinctrl-foo”,<br>        .data.mux.function = “mmc0”,<br>    },<br>};</p>
+<p>The dev_name here matches to the unique device name that can be used to look<br>up the device struct (just like with clockdev or regulators). The function name<br>must match a function provided by the pinmux driver handling this pin range.</p>
+<p>As you can see we may have several pin controllers on the system and thus<br>we need to specify which one of them that contain the functions we wish<br>to map.</p>
+<p>You register this pinmux mapping to the pinmux subsystem by simply:</p>
+<pre><code>   ret = pinctrl_register_mappings(mapping, ARRAY_SIZE(mapping));
+</code></pre>
+<p>Since the above construct is pretty common there is a helper macro to make<br>it even more compact which assumes you want to use pinctrl-foo and position<br>0 for mapping, for example:</p>
+<p>static struct pinctrl_map __initdata mapping[] = {<br>    PIN_MAP_MUX_GROUP(“foo-i2c.o”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”, NULL, “i2c0”),<br>};</p>
+<p>The mapping table may also contain pin configuration entries. It’s common for<br>each pin/group to have a number of configuration entries that affect it, so<br>the table entries for configuration reference an array of config parameters<br>and values. An example using the convenience macros is shown below:</p>
+<p>static unsigned long i2c_grp_configs[] = {<br>    FOO_PIN_DRIVEN,<br>    FOO_PIN_PULLUP,<br>};</p>
+<p>static unsigned long i2c_pin_configs[] = {<br>    FOO_OPEN_COLLECTOR,<br>    FOO_SLEW_RATE_SLOW,<br>};</p>
+<p>static struct pinctrl_map __initdata mapping[] = {<br>    PIN_MAP_MUX_GROUP(“foo-i2c.0”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”, “i2c0”, “i2c0”),<br>    PIN_MAP_CONFIGS_GROUP(“foo-i2c.0”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”, “i2c0”, i2c_grp_configs),<br>    PIN_MAP_CONFIGS_PIN(“foo-i2c.0”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”, “i2c0scl”, i2c_pin_configs),<br>    PIN_MAP_CONFIGS_PIN(“foo-i2c.0”, PINCTRL_STATE_DEFAULT, “pinctrl-foo”, “i2c0sda”, i2c_pin_configs),<br>};</p>
+<p>Finally, some devices expect the mapping table to contain certain specific<br>named states. When running on hardware that doesn’t need any pin controller<br>configuration, the mapping table must still contain those named states, in<br>order to explicitly indicate that the states were provided and intended to<br>be empty. Table entry macro PIN_MAP_DUMMY_STATE serves the purpose of defining<br>a named state without causing any pin controller to be programmed:</p>
+<p>static struct pinctrl_map __initdata mapping[] = {<br>    PIN_MAP_DUMMY_STATE(“foo-i2c.0”, PINCTRL_STATE_DEFAULT),<br>};</p>
+<h1 id="Complex-mappings"><a href="#Complex-mappings" class="headerlink" title="Complex mappings"></a>Complex mappings</h1><p>As it is possible to map a function to different groups of pins an optional<br>.group can be specified like this:</p>
+<p>…<br>{<br>    .dev_name = “foo-spi.0”,<br>    .name = “spi0-pos-A”,<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “spi0”,<br>    .group = “spi0_0_grp”,<br>},<br>{<br>    .dev_name = “foo-spi.0”,<br>    .name = “spi0-pos-B”,<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “spi0”,<br>    .group = “spi0_1_grp”,<br>},<br>…</p>
+<p>This example mapping is used to switch between two positions for spi0 at<br>runtime, as described further below under the heading “Runtime pinmuxing”.</p>
+<p>Further it is possible for one named state to affect the muxing of several<br>groups of pins, say for example in the mmc0 example above, where you can<br>additively expand the mmc0 bus from 2 to 4 to 8 pins. If we want to use all<br>three groups for a total of 2+2+4 = 8 pins (for an 8-bit MMC bus as is the<br>case), we define a mapping like this:</p>
+<p>…<br>{<br>    .dev_name = “foo-mmc.0”,<br>    .name = “2bit”<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “mmc0”,<br>    .group = “mmc0_1_grp”,<br>},<br>{<br>    .dev_name = “foo-mmc.0”,<br>    .name = “4bit”<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “mmc0”,<br>    .group = “mmc0_1_grp”,<br>},<br>{<br>    .dev_name = “foo-mmc.0”,<br>    .name = “4bit”<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “mmc0”,<br>    .group = “mmc0_2_grp”,<br>},<br>{<br>    .dev_name = “foo-mmc.0”,<br>    .name = “8bit”<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “mmc0”,<br>    .group = “mmc0_1_grp”,<br>},<br>{<br>    .dev_name = “foo-mmc.0”,<br>    .name = “8bit”<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “mmc0”,<br>    .group = “mmc0_2_grp”,<br>},<br>{<br>    .dev_name = “foo-mmc.0”,<br>    .name = “8bit”<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “mmc0”,<br>    .group = “mmc0_3_grp”,<br>},<br>…</p>
+<p>The result of grabbing this mapping from the device with something like<br>this (see next paragraph):</p>
+<pre><code>p = devm_pinctrl_get(dev);
+s = pinctrl_lookup_state(p, &quot;8bit&quot;);
+ret = pinctrl_select_state(p, s);
+</code></pre>
+<p>or more simply:</p>
+<pre><code>p = devm_pinctrl_get_select(dev, &quot;8bit&quot;);
+</code></pre>
+<p>Will be that you activate all the three bottom records in the mapping at<br>once. Since they share the same name, pin controller device, function and<br>device, and since we allow multiple groups to match to a single device, they<br>all get selected, and they all get enabled and disable simultaneously by the<br>pinmux core.</p>
+<h1 id="Pin-control-requests-from-drivers"><a href="#Pin-control-requests-from-drivers" class="headerlink" title="Pin control requests from drivers"></a>Pin control requests from drivers</h1><p>When a device driver is about to probe the device core will automatically<br>attempt to issue pinctrl_get_select_default() on these devices.<br>This way driver writers do not need to add any of the boilerplate code<br>of the type found below. However when doing fine-grained state selection<br>and not using the “default” state, you may have to do some device driver<br>handling of the pinctrl handles and states.</p>
+<p>So if you just want to put the pins for a certain device into the default<br>state and be done with it, there is nothing you need to do besides<br>providing the proper mapping table. The device core will take care of<br>the rest.</p>
+<p>Generally it is discouraged to let individual drivers get and enable pin<br>control. So if possible, handle the pin control in platform code or some other<br>place where you have access to all the affected struct device * pointers. In<br>some cases where a driver needs to e.g. switch between different mux mappings<br>at runtime this is not possible.</p>
+<p>A typical case is if a driver needs to switch bias of pins from normal<br>operation and going to sleep, moving from the PINCTRL_STATE_DEFAULT to<br>PINCTRL_STATE_SLEEP at runtime, re-biasing or even re-muxing pins to save<br>current in sleep mode.</p>
+<p>A driver may request a certain control state to be activated, usually just the<br>default state like this:</p>
+<p>#include &lt;linux/pinctrl/consumer.h&gt;</p>
+<p>struct foo_state {<br>       struct pinctrl *p;<br>       struct pinctrl_state *s;<br>       …<br>};</p>
+<p>foo_probe()<br>{<br>    /* Allocate a state holder named “foo” etc */<br>    struct foo_state *foo = …;</p>
+<pre><code>foo-&gt;p = devm_pinctrl_get(&amp;device);
+if (IS_ERR(foo-&gt;p)) &#123;
+    /* FIXME: clean up &quot;foo&quot; here */
+    return PTR_ERR(foo-&gt;p);
+&#125;
+
+foo-&gt;s = pinctrl_lookup_state(foo-&gt;p, PINCTRL_STATE_DEFAULT);
+if (IS_ERR(foo-&gt;s)) &#123;
+    /* FIXME: clean up &quot;foo&quot; here */
+    return PTR_ERR(s);
+&#125;
+
+ret = pinctrl_select_state(foo-&gt;s);
+if (ret &lt; 0) &#123;
+    /* FIXME: clean up &quot;foo&quot; here */
+    return ret;
+&#125;
+</code></pre>
+<p>}</p>
+<p>This get/lookup/select/put sequence can just as well be handled by bus drivers<br>if you don’t want each and every driver to handle it and you know the<br>arrangement on your bus.</p>
+<p>The semantics of the pinctrl APIs are:</p>
+<ul>
+<li><p>pinctrl_get() is called in process context to obtain a handle to all pinctrl<br>information for a given client device. It will allocate a struct from the<br>kernel memory to hold the pinmux state. All mapping table parsing or similar<br>slow operations take place within this API.</p>
+</li>
+<li><p>devm_pinctrl_get() is a variant of pinctrl_get() that causes pinctrl_put()<br>to be called automatically on the retrieved pointer when the associated<br>device is removed. It is recommended to use this function over plain<br>pinctrl_get().</p>
+</li>
+<li><p>pinctrl_lookup_state() is called in process context to obtain a handle to a<br>specific state for a the client device. This operation may be slow too.</p>
+</li>
+<li><p>pinctrl_select_state() programs pin controller hardware according to the<br>definition of the state as given by the mapping table. In theory this is a<br>fast-path operation, since it only involved blasting some register settings<br>into hardware. However, note that some pin controllers may have their<br>registers on a slow/IRQ-based bus, so client devices should not assume they<br>can call pinctrl_select_state() from non-blocking contexts.</p>
+</li>
+<li><p>pinctrl_put() frees all information associated with a pinctrl handle.</p>
+</li>
+<li><p>devm_pinctrl_put() is a variant of pinctrl_put() that may be used to<br>explicitly destroy a pinctrl object returned by devm_pinctrl_get().<br>However, use of this function will be rare, due to the automatic cleanup<br>that will occur even without calling it.</p>
+<p>pinctrl_get() must be paired with a plain pinctrl_put().<br>pinctrl_get() may not be paired with devm_pinctrl_put().<br>devm_pinctrl_get() can optionally be paired with devm_pinctrl_put().<br>devm_pinctrl_get() may not be paired with plain pinctrl_put().</p>
+</li>
+</ul>
+<p>Usually the pin control core handled the get/put pair and call out to the<br>device drivers bookkeeping operations, like checking available functions and<br>the associated pins, whereas the enable/disable pass on to the pin controller<br>driver which takes care of activating and/or deactivating the mux setting by<br>quickly poking some registers.</p>
+<p>The pins are allocated for your device when you issue the devm_pinctrl_get()<br>call, after this you should be able to see this in the debugfs listing of all<br>pins.</p>
+<p>NOTE: the pinctrl system will return -EPROBE_DEFER if it cannot find the<br>requested pinctrl handles, for example if the pinctrl driver has not yet<br>registered. Thus make sure that the error path in your driver gracefully<br>cleans up and is ready to retry the probing later in the startup process.</p>
+<h1 id="Drivers-needing-both-pin-control-and-GPIOs"><a href="#Drivers-needing-both-pin-control-and-GPIOs" class="headerlink" title="Drivers needing both pin control and GPIOs"></a>Drivers needing both pin control and GPIOs</h1><p>Again, it is discouraged to let drivers lookup and select pin control states<br>themselves, but again sometimes this is unavoidable.</p>
+<p>So say that your driver is fetching its resources like this:</p>
+<p>#include &lt;linux/pinctrl/consumer.h&gt;<br>#include &lt;linux/gpio.h&gt;</p>
+<p>struct pinctrl *pinctrl;<br>int gpio;</p>
+<p>pinctrl = devm_pinctrl_get_select_default(&amp;dev);<br>gpio = devm_gpio_request(&amp;dev, 14, “foo”);</p>
+<p>Here we first request a certain pin state and then request GPIO 14 to be<br>used. If you’re using the subsystems orthogonally like this, you should<br>nominally always get your pinctrl handle and select the desired pinctrl<br>state BEFORE requesting the GPIO. This is a semantic convention to avoid<br>situations that can be electrically unpleasant, you will certainly want to<br>mux in and bias pins in a certain way before the GPIO subsystems starts to<br>deal with them.</p>
+<p>The above can be hidden: using the device core, the pinctrl core may be<br>setting up the config and muxing for the pins right before the device is<br>probing, nevertheless orthogonal to the GPIO subsystem.</p>
+<p>But there are also situations where it makes sense for the GPIO subsystem<br>to communicate directly with with the pinctrl subsystem, using the latter<br>as a back-end. This is when the GPIO driver may call out to the functions<br>described in the section “Pin control interaction with the GPIO subsystem”<br>above. This only involves per-pin multiplexing, and will be completely<br>hidden behind the gpio_*() function namespace. In this case, the driver<br>need not interact with the pin control subsystem at all.</p>
+<p>If a pin control driver and a GPIO driver is dealing with the same pins<br>and the use cases involve multiplexing, you MUST implement the pin controller<br>as a back-end for the GPIO driver like this, unless your hardware design<br>is such that the GPIO controller can override the pin controller’s<br>multiplexing state through hardware without the need to interact with the<br>pin control system.</p>
+<h1 id="System-pin-control-hogging"><a href="#System-pin-control-hogging" class="headerlink" title="System pin control hogging"></a>System pin control hogging</h1><p>Pin control map entries can be hogged by the core when the pin controller<br>is registered. This means that the core will attempt to call pinctrl_get(),<br>lookup_state() and select_state() on it immediately after the pin control<br>device has been registered.</p>
+<p>This occurs for mapping table entries where the client device name is equal<br>to the pin controller device name, and the state name is PINCTRL_STATE_DEFAULT.</p>
+<p>{<br>    .dev_name = “pinctrl-foo”,<br>    .name = PINCTRL_STATE_DEFAULT,<br>    .type = PIN_MAP_TYPE_MUX_GROUP,<br>    .ctrl_dev_name = “pinctrl-foo”,<br>    .function = “power_func”,<br>},</p>
+<p>Since it may be common to request the core to hog a few always-applicable<br>mux settings on the primary pin controller, there is a convenience macro for<br>this:</p>
+<p>PIN_MAP_MUX_GROUP_HOG_DEFAULT(“pinctrl-foo”, NULL /* group */, “power_func”)</p>
+<p>This gives the exact same result as the above construction.</p>
+<h1 id="Runtime-pinmuxing"><a href="#Runtime-pinmuxing" class="headerlink" title="Runtime pinmuxing"></a>Runtime pinmuxing</h1><p>It is possible to mux a certain function in and out at runtime, say to move<br>an SPI port from one set of pins to another set of pins. Say for example for<br>spi0 in the example above, we expose two different groups of pins for the same<br>function, but with different named in the mapping as described under<br>“Advanced mapping” above. So that for an SPI device, we have two states named<br>“pos-A” and “pos-B”.</p>
+<p>This snippet first muxes the function in the pins defined by group A, enables<br>it, disables and releases it, and muxes it in on the pins defined by group B:</p>
+<p>#include &lt;linux/pinctrl/consumer.h&gt;</p>
+<p>struct pinctrl *p;<br>struct pinctrl_state *s1, *s2;</p>
+<p>foo_probe()<br>{<br>    /* Setup */<br>    p = devm_pinctrl_get(&amp;device);<br>    if (IS_ERR(p))<br>        …</p>
+<pre><code>s1 = pinctrl_lookup_state(foo-&gt;p, &quot;pos-A&quot;);
+if (IS_ERR(s1))
+    ...
+
+s2 = pinctrl_lookup_state(foo-&gt;p, &quot;pos-B&quot;);
+if (IS_ERR(s2))
+    ...
+</code></pre>
+<p>}</p>
+<p>foo_switch()<br>{<br>    /* Enable on position A */<br>    ret = pinctrl_select_state(s1);<br>    if (ret &lt; 0)<br>        …</p>
+<pre><code>...
+
+/* Enable on position B */
+ret = pinctrl_select_state(s2);
+if (ret &lt; 0)
+    ...
+
+...
+</code></pre>
+<p>}</p>
+<p>The above has to be done from process context. The reservation of the pins<br>will be done when the state is activated, so in effect one specific pin<br>can be used by different functions at different times on a running system.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/" title="Kernel-3.10.0-957.el7_pinctrl" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pinctrl/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_parport-lowlevel/" title="Kernel-3.10.0-957.el7_parport-lowlevel"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_rt-mutex-design/" title="Kernel-3.10.0-957.el7_rt-mutex-design"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

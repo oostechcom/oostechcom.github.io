@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_firmware-assisted-dump | oosTech.com</title>
+  <meta name="description" content="Firmware-Assisted Dump                ------------------------                    July 2011  The goal of firmware-assisted dump is to enable the dump ofa crashed system, and to do so fr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_firmware-assisted-dump">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Firmware-Assisted Dump                ------------------------                    July 2011  The goal of firmware-assisted dump is to enable the dump ofa crashed system, and to do so fr">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Implementation-details"><span class="toc-number">1.</span> <span class="toc-text">Implementation details:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-to-enable-firmware-assisted-dump-fadump"><span class="toc-number">2.</span> <span class="toc-text">How to enable firmware-assisted dump (fadump):</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sysfs-debugfs-files"><span class="toc-number">3.</span> <span class="toc-text">Sysfs&#x2F;debugfs files:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TODO"><span class="toc-number">4.</span> <span class="toc-text">TODO:</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_firmware-assisted-dump" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_firmware-assisted-dump
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>               Firmware-Assisted Dump
+               ------------------------
+                   July 2011
+</code></pre>
+<p>The goal of firmware-assisted dump is to enable the dump of<br>a crashed system, and to do so from a fully-reset system, and<br>to minimize the total elapsed time until the system is back<br>in production use.</p>
+<ul>
+<li>Firmware assisted dump (fadump) infrastructure is intended to replace<br>the existing phyp assisted dump.</li>
+<li>Fadump uses the same firmware interfaces and memory reservation model<br>as phyp assisted dump.</li>
+<li>Unlike phyp dump, fadump exports the memory dump through /proc/vmcore<br>in the ELF format in the same way as kdump. This helps us reuse the<br>kdump infrastructure for dump capture and filtering.</li>
+<li>Unlike phyp dump, userspace tool does not need to refer any sysfs<br>interface while reading /proc/vmcore.</li>
+<li>Unlike phyp dump, fadump allows user to release all the memory reserved<br>for dump, with a single operation of echo 1 &gt; /sys/kernel/fadump_release_mem.</li>
+<li>Once enabled through kernel boot parameter, fadump can be<br>started/stopped through /sys/kernel/fadump_registered interface (see<br>sysfs files section below) and can be easily integrated with kdump<br>service start/stop init scripts.</li>
+</ul>
+<p>Comparing with kdump or other strategies, firmware-assisted<br>dump offers several strong, practical advantages:</p>
+<p>– Unlike kdump, the system has been reset, and loaded<br>   with a fresh copy of the kernel.  In particular,<br>   PCI and I/O devices have been reinitialized and are<br>   in a clean, consistent state.<br>– Once the dump is copied out, the memory that held the dump<br>   is immediately available to the running kernel. And therefore,<br>   unlike kdump, fadump doesn’t need a 2nd reboot to get back<br>   the system to the production configuration.</p>
+<p>The above can only be accomplished by coordination with,<br>and assistance from the Power firmware. The procedure is<br>as follows:</p>
+<p>– The first kernel registers the sections of memory with the<br>   Power firmware for dump preservation during OS initialization.<br>   These registered sections of memory are reserved by the first<br>   kernel during early boot.</p>
+<p>– When a system crashes, the Power firmware will save<br>   the low memory (boot memory of size larger of 5% of system RAM<br>   or 256MB) of RAM to the previous registered region. It will<br>   also save system registers, and hardware PTE’s.</p>
+<p>   NOTE: The term ‘boot memory’ means size of the low memory chunk<br>         that is required for a kernel to boot successfully when<br>         booted with restricted memory. By default, the boot memory<br>         size will be the larger of 5% of system RAM or 256MB.<br>         Alternatively, user can also specify boot memory size<br>         through boot parameter ‘crashkernel=’ which will override<br>         the default calculated size. Use this option if default<br>         boot memory size is not sufficient for second kernel to<br>         boot successfully. For syntax of crashkernel= parameter,<br>         refer to Documentation/kdump/kdump.txt. If any offset is<br>         provided in crashkernel= parameter, it will be ignored<br>         as fadump uses a predefined offset to reserve memory<br>         for boot memory dump preservation in case of a crash.</p>
+<p>– After the low memory (boot memory) area has been saved, the<br>   firmware will reset PCI and other hardware state.  It will<br>   <em>not</em> clear the RAM. It will then launch the bootloader, as<br>   normal.</p>
+<p>– The freshly booted kernel will notice that there is a new<br>   node (ibm,dump-kernel) in the device tree, indicating that<br>   there is crash data available from a previous boot. During<br>   the early boot OS will reserve rest of the memory above<br>   boot memory size effectively booting with restricted memory<br>   size. This will make sure that the second kernel will not<br>   touch any of the dump memory area.</p>
+<p>– User-space tools will read /proc/vmcore to obtain the contents<br>   of memory, which holds the previous crashed kernel dump in ELF<br>   format. The userspace tools may copy this info to disk, or<br>   network, nas, san, iscsi, etc. as desired.</p>
+<p>– Once the userspace tool is done saving dump, it will echo<br>   ‘1’ to /sys/kernel/fadump_release_mem to release the reserved<br>   memory back to general use, except the memory required for<br>   next firmware-assisted dump registration.</p>
+<p>   e.g.<br>     # echo 1 &gt; /sys/kernel/fadump_release_mem</p>
+<p>Please note that the firmware-assisted dump feature<br>is only available on Power6 and above systems with recent<br>firmware versions.</p>
+<h2 id="Implementation-details"><a href="#Implementation-details" class="headerlink" title="Implementation details:"></a>Implementation details:</h2><p>During boot, a check is made to see if firmware supports<br>this feature on that particular machine. If it does, then<br>we check to see if an active dump is waiting for us. If yes<br>then everything but boot memory size of RAM is reserved during<br>early boot (See Fig. 2). This area is released once we finish<br>collecting the dump from user land scripts (e.g. kdump scripts)<br>that are run. If there is dump data, then the<br>/sys/kernel/fadump_release_mem file is created, and the reserved<br>memory is held.</p>
+<p>If there is no waiting dump data, then only the memory required<br>to hold CPU state, HPTE region, boot memory dump and elfcore<br>header, is usually reserved at an offset greater than boot memory<br>size (see Fig. 1). This area is <em>not</em> released: this region will<br>be kept permanently reserved, so that it can act as a receptacle<br>for a copy of the boot memory content in addition to CPU state<br>and HPTE region, in the case a crash does occur.</p>
+<p>  o Memory Reservation during first kernel</p>
+<p>  Low memory                                         Top of memory<br>  0      boot memory size                                       |<br>  |           |                |&lt;–Reserved dump area –&gt;|      |<br>  V           V                |   Permanent Reservation |      V<br>  +———–+———-/ /—+—+—-+———–+—-+——+<br>  |           |                |CPU|HPTE|  DUMP     |ELF |      |<br>  +———–+———-/ /—+—+—-+———–+—-+——+<br>        |                                           ^<br>        |                                           |<br>        \                                           /<br>         ——————————————-<br>          Boot memory content gets transferred to<br>          reserved area by firmware at the time of<br>          crash<br>                   Fig. 1</p>
+<p>  o Memory Reservation during second kernel after crash</p>
+<p>  Low memory                                        Top of memory<br>  0      boot memory size                                       |<br>  |           |&lt;————- Reserved dump area ———– –&gt;|<br>  V           V                                                 V<br>  +———–+———-/ /—+—+—-+———–+—-+——+<br>  |           |                |CPU|HPTE|  DUMP     |ELF |      |<br>  +———–+———-/ /—+—+—-+———–+—-+——+<br>        |                                              |<br>        V                                              V<br>   Used by second                                /proc/vmcore<br>   kernel to boot<br>                   Fig. 2</p>
+<p>Currently the dump will be copied from /proc/vmcore to a<br>a new file upon user intervention. The dump data available through<br>/proc/vmcore will be in ELF format. Hence the existing kdump<br>infrastructure (kdump scripts) to save the dump works fine with<br>minor modifications.</p>
+<p>The tools to examine the dump will be same as the ones<br>used for kdump.</p>
+<h2 id="How-to-enable-firmware-assisted-dump-fadump"><a href="#How-to-enable-firmware-assisted-dump-fadump" class="headerlink" title="How to enable firmware-assisted dump (fadump):"></a>How to enable firmware-assisted dump (fadump):</h2><ol>
+<li>Set config option CONFIG_FA_DUMP=y and build kernel.</li>
+<li>Boot into linux kernel with ‘fadump=on’ kernel cmdline option.</li>
+<li>Optionally, user can also set ‘crashkernel=’ kernel cmdline<br>to specify size of the memory to reserve for boot memory dump<br>preservation.</li>
+</ol>
+<p>NOTE: 1. ‘fadump_reserve_mem=’ parameter has been deprecated. Instead<br>         use ‘crashkernel=’ to specify size of the memory to reserve<br>         for boot memory dump preservation.<br>      2. If firmware-assisted dump fails to reserve memory then it<br>         will fallback to existing kdump mechanism if ‘crashkernel=’<br>         option is set at kernel cmdline.</p>
+<h2 id="Sysfs-debugfs-files"><a href="#Sysfs-debugfs-files" class="headerlink" title="Sysfs/debugfs files:"></a>Sysfs/debugfs files:</h2><p>Firmware-assisted dump feature uses sysfs file system to hold<br>the control files and debugfs file to display memory reserved region.</p>
+<p>Here is the list of files under kernel sysfs:</p>
+<p> /sys/kernel/fadump_enabled</p>
+<pre><code>This is used to display the fadump status.
+0 = fadump is disabled
+1 = fadump is enabled
+
+This interface can be used by kdump init scripts to identify if
+fadump is enabled in the kernel and act accordingly.
+</code></pre>
+<p> /sys/kernel/fadump_registered</p>
+<pre><code>This is used to display the fadump registration status as well
+as to control (start/stop) the fadump registration.
+0 = fadump is not registered.
+1 = fadump is registered and ready to handle system crash.
+
+To register fadump echo 1 &gt; /sys/kernel/fadump_registered and
+echo 0 &gt; /sys/kernel/fadump_registered for un-register and stop the
+fadump. Once the fadump is un-registered, the system crash will not
+be handled and vmcore will not be captured. This interface can be
+easily integrated with kdump service start/stop.
+</code></pre>
+<p> /sys/kernel/fadump_release_mem</p>
+<pre><code>This file is available only when fadump is active during
+second kernel. This is used to release the reserved memory
+region that are held for saving crash dump. To release the
+reserved memory echo 1 to it:
+
+echo 1  &gt; /sys/kernel/fadump_release_mem
+
+After echo 1, the content of the /sys/kernel/debug/powerpc/fadump_region
+file will change to reflect the new memory reservations.
+
+The existing userspace tools (kdump infrastructure) can be easily
+enhanced to use this interface to release the memory reserved for
+dump and continue without 2nd reboot.
+</code></pre>
+<p>Here is the list of files under powerpc debugfs:<br>(Assuming debugfs is mounted on /sys/kernel/debug directory.)</p>
+<p> /sys/kernel/debug/powerpc/fadump_region</p>
+<pre><code>This file shows the reserved memory regions if fadump is
+enabled otherwise this file is empty. The output format
+is:
+&lt;region&gt;: [&lt;start&gt;-&lt;end&gt;] &lt;reserved-size&gt; bytes, Dumped: &lt;dump-size&gt;
+
+e.g.
+Contents when fadump is registered during first kernel
+
+# cat /sys/kernel/debug/powerpc/fadump_region
+CPU : [0x0000006ffb0000-0x0000006fff001f] 0x40020 bytes, Dumped: 0x0
+HPTE: [0x0000006fff0020-0x0000006fff101f] 0x1000 bytes, Dumped: 0x0
+DUMP: [0x0000006fff1020-0x0000007fff101f] 0x10000000 bytes, Dumped: 0x0
+
+Contents when fadump is active during second kernel
+
+# cat /sys/kernel/debug/powerpc/fadump_region
+CPU : [0x0000006ffb0000-0x0000006fff001f] 0x40020 bytes, Dumped: 0x40020
+HPTE: [0x0000006fff0020-0x0000006fff101f] 0x1000 bytes, Dumped: 0x1000
+DUMP: [0x0000006fff1020-0x0000007fff101f] 0x10000000 bytes, Dumped: 0x10000000
+    : [0x00000010000000-0x0000006ffaffff] 0x5ffb0000 bytes, Dumped: 0x5ffb0000
+</code></pre>
+<p>NOTE: Please refer to Documentation/filesystems/debugfs.txt on<br>      how to mount the debugfs filesystem.</p>
+<h2 id="TODO"><a href="#TODO" class="headerlink" title="TODO:"></a>TODO:</h2><p> o Need to come up with the better approach to find out more<br>   accurate boot memory size that is required for a kernel to<br>   boot successfully when booted with restricted memory.<br> o The fadump implementation introduces a fadump crash info structure<br>   in the scratch area before the ELF core header. The idea of introducing<br>   this structure is to pass some important crash info data to the second<br>   kernel which will help second kernel to populate ELF core header with<br>   correct data before it gets exported through /proc/vmcore. The current<br>   design implementation does not address a possibility of introducing<br>   additional fields (in future) to this structure without affecting<br>   compatibility. Need to come up with the better approach to address this.<br>   The possible approaches are:<br>    1. Introduce version field for version tracking, bump up the version<br>    whenever a new field is added to the structure in future. The version<br>    field can be used to find out what fields are valid for the current<br>    version of the structure.<br>    2. Reserve the area of predefined size (say PAGE_SIZE) for this<br>    structure and have unused area as reserved (initialized to zero)<br>    for future field additions.<br>   The advantage of approach 1 over 2 is we don’t need to reserve extra space.</p>
+<hr>
+<p>Author: Mahesh Salgaonkar <a href="mailto:&#109;&#x61;&#x68;&#101;&#115;&#104;&#x40;&#x6c;&#x69;&#x6e;&#117;&#x78;&#46;&#118;&#110;&#x65;&#x74;&#46;&#105;&#98;&#109;&#x2e;&#99;&#x6f;&#x6d;">&#109;&#x61;&#x68;&#101;&#115;&#104;&#x40;&#x6c;&#x69;&#x6e;&#117;&#x78;&#46;&#118;&#110;&#x65;&#x74;&#46;&#105;&#98;&#109;&#x2e;&#99;&#x6f;&#x6d;</a><br>This document is based on the original documentation written for phyp<br>assisted dump by Linas Vepstas and Manish Ahuja.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/" title="Kernel-4.18.0-80.el8_firmware-assisted-dump" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_firmware-assisted-dump/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_files/" title="Kernel-4.18.0-80.el8_files"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_firmware/" title="Kernel-4.18.0-80.el8_firmware"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

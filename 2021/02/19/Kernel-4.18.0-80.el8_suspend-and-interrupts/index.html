@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_suspend-and-interrupts | oosTech.com</title>
+  <meta name="description" content="System Suspend and Device Interrupts Copyright (C) 2014 Intel Corp.Author: Rafael J. Wysocki &amp;#x72;&amp;#97;&amp;#102;&amp;#x61;&amp;#x65;&amp;#x6c;&amp;#x2e;&amp;#106;&amp;#46;&amp;#119;&amp;#x79;&amp;#115;&amp;#111;&amp;#x63;&amp;#x6b;&amp;#x69;&amp;#64;&amp;#x69;&amp;#">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_suspend-and-interrupts">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="System Suspend and Device Interrupts Copyright (C) 2014 Intel Corp.Author: Rafael J. Wysocki &amp;#x72;&amp;#97;&amp;#102;&amp;#x61;&amp;#x65;&amp;#x6c;&amp;#x2e;&amp;#106;&amp;#46;&amp;#119;&amp;#x79;&amp;#115;&amp;#111;&amp;#x63;&amp;#x6b;&amp;#x69;&amp;#64;&amp;#x69;&amp;#">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Suspending-and-Resuming-Device-IRQs"><span class="toc-number">1.</span> <span class="toc-text">Suspending and Resuming Device IRQs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-IRQF-NO-SUSPEND-Flag"><span class="toc-number">2.</span> <span class="toc-text">The IRQF_NO_SUSPEND Flag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#System-Wakeup-Interrupts-enable-irq-wake-and-disable-irq-wake"><span class="toc-number">3.</span> <span class="toc-text">System Wakeup Interrupts, enable_irq_wake() and disable_irq_wake()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Interrupts-and-Suspend-to-Idle"><span class="toc-number">4.</span> <span class="toc-text">Interrupts and Suspend-to-Idle</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IRQF-NO-SUSPEND-and-enable-irq-wake"><span class="toc-number">5.</span> <span class="toc-text">IRQF_NO_SUSPEND and enable_irq_wake()</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_suspend-and-interrupts" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_suspend-and-interrupts
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>System Suspend and Device Interrupts</p>
+<p>Copyright (C) 2014 Intel Corp.<br>Author: Rafael J. Wysocki <a href="mailto:&#x72;&#97;&#102;&#x61;&#x65;&#x6c;&#x2e;&#106;&#46;&#119;&#x79;&#115;&#111;&#x63;&#x6b;&#x69;&#64;&#x69;&#x6e;&#x74;&#x65;&#108;&#46;&#x63;&#x6f;&#x6d;">&#x72;&#97;&#102;&#x61;&#x65;&#x6c;&#x2e;&#106;&#46;&#119;&#x79;&#115;&#111;&#x63;&#x6b;&#x69;&#64;&#x69;&#x6e;&#x74;&#x65;&#108;&#46;&#x63;&#x6f;&#x6d;</a></p>
+<h2 id="Suspending-and-Resuming-Device-IRQs"><a href="#Suspending-and-Resuming-Device-IRQs" class="headerlink" title="Suspending and Resuming Device IRQs"></a>Suspending and Resuming Device IRQs</h2><p>Device interrupt request lines (IRQs) are generally disabled during system<br>suspend after the “late” phase of suspending devices (that is, after all of the<br>-&gt;prepare, -&gt;suspend and -&gt;suspend_late callbacks have been executed for all<br>devices).  That is done by suspend_device_irqs().</p>
+<p>The rationale for doing so is that after the “late” phase of device suspend<br>there is no legitimate reason why any interrupts from suspended devices should<br>trigger and if any devices have not been suspended properly yet, it is better to<br>block interrupts from them anyway.  Also, in the past we had problems with<br>interrupt handlers for shared IRQs that device drivers implementing them were<br>not prepared for interrupts triggering after their devices had been suspended.<br>In some cases they would attempt to access, for example, memory address spaces<br>of suspended devices and cause unpredictable behavior to ensue as a result.<br>Unfortunately, such problems are very difficult to debug and the introduction<br>of suspend_device_irqs(), along with the “noirq” phase of device suspend and<br>resume, was the only practical way to mitigate them.</p>
+<p>Device IRQs are re-enabled during system resume, right before the “early” phase<br>of resuming devices (that is, before starting to execute -&gt;resume_early<br>callbacks for devices).  The function doing that is resume_device_irqs().</p>
+<h2 id="The-IRQF-NO-SUSPEND-Flag"><a href="#The-IRQF-NO-SUSPEND-Flag" class="headerlink" title="The IRQF_NO_SUSPEND Flag"></a>The IRQF_NO_SUSPEND Flag</h2><p>There are interrupts that can legitimately trigger during the entire system<br>suspend-resume cycle, including the “noirq” phases of suspending and resuming<br>devices as well as during the time when nonboot CPUs are taken offline and<br>brought back online.  That applies to timer interrupts in the first place,<br>but also to IPIs and to some other special-purpose interrupts.</p>
+<p>The IRQF_NO_SUSPEND flag is used to indicate that to the IRQ subsystem when<br>requesting a special-purpose interrupt.  It causes suspend_device_irqs() to<br>leave the corresponding IRQ enabled so as to allow the interrupt to work as<br>expected during the suspend-resume cycle, but does not guarantee that the<br>interrupt will wake the system from a suspended state – for such cases it is<br>necessary to use enable_irq_wake().</p>
+<p>Note that the IRQF_NO_SUSPEND flag affects the entire IRQ and not just one<br>user of it.  Thus, if the IRQ is shared, all of the interrupt handlers installed<br>for it will be executed as usual after suspend_device_irqs(), even if the<br>IRQF_NO_SUSPEND flag was not passed to request_irq() (or equivalent) by some of<br>the IRQ’s users.  For this reason, using IRQF_NO_SUSPEND and IRQF_SHARED at the<br>same time should be avoided.</p>
+<h2 id="System-Wakeup-Interrupts-enable-irq-wake-and-disable-irq-wake"><a href="#System-Wakeup-Interrupts-enable-irq-wake-and-disable-irq-wake" class="headerlink" title="System Wakeup Interrupts, enable_irq_wake() and disable_irq_wake()"></a>System Wakeup Interrupts, enable_irq_wake() and disable_irq_wake()</h2><p>System wakeup interrupts generally need to be configured to wake up the system<br>from sleep states, especially if they are used for different purposes (e.g. as<br>I/O interrupts) in the working state.</p>
+<p>That may involve turning on a special signal handling logic within the platform<br>(such as an SoC) so that signals from a given line are routed in a different way<br>during system sleep so as to trigger a system wakeup when needed.  For example,<br>the platform may include a dedicated interrupt controller used specifically for<br>handling system wakeup events.  Then, if a given interrupt line is supposed to<br>wake up the system from sleep sates, the corresponding input of that interrupt<br>controller needs to be enabled to receive signals from the line in question.<br>After wakeup, it generally is better to disable that input to prevent the<br>dedicated controller from triggering interrupts unnecessarily.</p>
+<p>The IRQ subsystem provides two helper functions to be used by device drivers for<br>those purposes.  Namely, enable_irq_wake() turns on the platform’s logic for<br>handling the given IRQ as a system wakeup interrupt line and disable_irq_wake()<br>turns that logic off.</p>
+<p>Calling enable_irq_wake() causes suspend_device_irqs() to treat the given IRQ<br>in a special way.  Namely, the IRQ remains enabled, by on the first interrupt<br>it will be disabled, marked as pending and “suspended” so that it will be<br>re-enabled by resume_device_irqs() during the subsequent system resume.  Also<br>the PM core is notified about the event which causes the system suspend in<br>progress to be aborted (that doesn’t have to happen immediately, but at one<br>of the points where the suspend thread looks for pending wakeup events).</p>
+<p>This way every interrupt from a wakeup interrupt source will either cause the<br>system suspend currently in progress to be aborted or wake up the system if<br>already suspended.  However, after suspend_device_irqs() interrupt handlers are<br>not executed for system wakeup IRQs.  They are only executed for IRQF_NO_SUSPEND<br>IRQs at that time, but those IRQs should not be configured for system wakeup<br>using enable_irq_wake().</p>
+<h2 id="Interrupts-and-Suspend-to-Idle"><a href="#Interrupts-and-Suspend-to-Idle" class="headerlink" title="Interrupts and Suspend-to-Idle"></a>Interrupts and Suspend-to-Idle</h2><p>Suspend-to-idle (also known as the “freeze” sleep state) is a relatively new<br>system sleep state that works by idling all of the processors and waiting for<br>interrupts right after the “noirq” phase of suspending devices.</p>
+<p>Of course, this means that all of the interrupts with the IRQF_NO_SUSPEND flag<br>set will bring CPUs out of idle while in that state, but they will not cause the<br>IRQ subsystem to trigger a system wakeup.</p>
+<p>System wakeup interrupts, in turn, will trigger wakeup from suspend-to-idle in<br>analogy with what they do in the full system suspend case.  The only difference<br>is that the wakeup from suspend-to-idle is signaled using the usual working<br>state interrupt delivery mechanisms and doesn’t require the platform to use<br>any special interrupt handling logic for it to work.</p>
+<h2 id="IRQF-NO-SUSPEND-and-enable-irq-wake"><a href="#IRQF-NO-SUSPEND-and-enable-irq-wake" class="headerlink" title="IRQF_NO_SUSPEND and enable_irq_wake()"></a>IRQF_NO_SUSPEND and enable_irq_wake()</h2><p>There are very few valid reasons to use both enable_irq_wake() and the<br>IRQF_NO_SUSPEND flag on the same IRQ, and it is never valid to use both for the<br>same device.</p>
+<p>First of all, if the IRQ is not shared, the rules for handling IRQF_NO_SUSPEND<br>interrupts (interrupt handlers are invoked after suspend_device_irqs()) are<br>directly at odds with the rules for handling system wakeup interrupts (interrupt<br>handlers are not invoked after suspend_device_irqs()).</p>
+<p>Second, both enable_irq_wake() and IRQF_NO_SUSPEND apply to entire IRQs and not<br>to individual interrupt handlers, so sharing an IRQ between a system wakeup<br>interrupt source and an IRQF_NO_SUSPEND interrupt source does not generally<br>make sense.</p>
+<p>In rare cases an IRQ can be shared between a wakeup device driver and an<br>IRQF_NO_SUSPEND user. In order for this to be safe, the wakeup device driver<br>must be able to discern spurious IRQs from genuine wakeup events (signalling<br>the latter to the core with pm_system_wakeup()), must use enable_irq_wake() to<br>ensure that the IRQ will function as a wakeup source, and must request the IRQ<br>with IRQF_COND_SUSPEND to tell the core that it meets these requirements. If<br>these requirements are not met, it is not valid to use IRQF_COND_SUSPEND.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/" title="Kernel-4.18.0-80.el8_suspend-and-interrupts" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-interrupts/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_suspend-and-cpuhotplug/" title="Kernel-4.18.0-80.el8_suspend-and-cpuhotplug"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_swir/" title="Kernel-4.18.0-80.el8_swir"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

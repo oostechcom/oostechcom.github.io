@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_dmaengine | oosTech.com</title>
+  <meta name="description" content="DMA Engine API Guide         &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;       Vinod Koul &lt;vinod dot koul at intel.com&gt;  NOTE: For DMA Engine usage in async_tx please see:    Documentation&#x2F;crypto&#x2F;async-tx-api.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_dmaengine">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="DMA Engine API Guide         &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;       Vinod Koul &lt;vinod dot koul at intel.com&gt;  NOTE: For DMA Engine usage in async_tx please see:    Documentation&#x2F;crypto&#x2F;async-tx-api.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_dmaengine" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_dmaengine
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>        DMA Engine API Guide
+        ====================
+
+     Vinod Koul &lt;vinod dot koul at intel.com&gt;
+</code></pre>
+<p>NOTE: For DMA Engine usage in async_tx please see:<br>    Documentation/crypto/async-tx-api.txt</p>
+<p>Below is a guide to device driver writers on how to use the Slave-DMA API of the<br>DMA Engine. This is applicable only for slave DMA usage only.</p>
+<p>The slave DMA usage consists of following steps:</p>
+<ol>
+<li><p>Allocate a DMA slave channel</p>
+</li>
+<li><p>Set slave and controller specific parameters</p>
+</li>
+<li><p>Get a descriptor for transaction</p>
+</li>
+<li><p>Submit the transaction</p>
+</li>
+<li><p>Issue pending requests and wait for callback notification</p>
+</li>
+<li><p>Allocate a DMA slave channel</p>
+<p>Channel allocation is slightly different in the slave DMA context,<br>client drivers typically need a channel from a particular DMA<br>controller only and even in some cases a specific channel is desired.<br>To request a channel dma_request_channel() API is used.</p>
+<p>Interface:<br> struct dma_chan *dma_request_channel(dma_cap_mask_t mask,</p>
+<pre><code>     dma_filter_fn filter_fn,
+     void *filter_param);
+</code></pre>
+<p>where dma_filter_fn is defined as:<br> typedef bool (*dma_filter_fn)(struct dma_chan *chan, void *filter_param);</p>
+<p>The ‘filter_fn’ parameter is optional, but highly recommended for<br>slave and cyclic channels as they typically need to obtain a specific<br>DMA channel.</p>
+<p>When the optional ‘filter_fn’ parameter is NULL, dma_request_channel()<br>simply returns the first channel that satisfies the capability mask.</p>
+<p>Otherwise, the ‘filter_fn’ routine will be called once for each free<br>channel which has a capability in ‘mask’.  ‘filter_fn’ is expected to<br>return ‘true’ when the desired DMA channel is found.</p>
+<p>A channel allocated via this interface is exclusive to the caller,<br>until dma_release_channel() is called.</p>
+</li>
+<li><p>Set slave and controller specific parameters</p>
+<p>Next step is always to pass some specific information to the DMA<br>driver.  Most of the generic information which a slave DMA can use<br>is in struct dma_slave_config.  This allows the clients to specify<br>DMA direction, DMA addresses, bus widths, DMA burst lengths etc<br>for the peripheral.</p>
+<p>If some DMA controllers have more parameters to be sent then they<br>should try to embed struct dma_slave_config in their controller<br>specific structure. That gives flexibility to client to pass more<br>parameters, if required.</p>
+<p>Interface:<br> int dmaengine_slave_config(struct dma_chan *chan,</p>
+<pre><code>           struct dma_slave_config *config)
+</code></pre>
+<p>Please see the dma_slave_config structure definition in dmaengine.h<br>for a detailed explanation of the struct members.  Please note<br>that the ‘direction’ member will be going away as it duplicates the<br>direction given in the prepare call.</p>
+</li>
+<li><p>Get a descriptor for transaction</p>
+<p>For slave usage the various modes of slave transfers supported by the<br>DMA-engine are:</p>
+<p>slave_sg    - DMA a list of scatter gather buffers from/to a peripheral<br>dma_cyclic    - Perform a cyclic DMA operation from/to a peripheral till the</p>
+<pre><code>   operation is explicitly stopped.
+</code></pre>
+<p>interleaved_dma - This is common to Slave as well as M2M clients. For slave</p>
+<pre><code>  address of devices&#39; fifo could be already known to the driver.
+  Various types of operations could be expressed by setting
+  appropriate values to the &#39;dma_interleaved_template&#39; members.
+</code></pre>
+<p>A non-NULL return of this transfer API represents a “descriptor” for<br>the given transaction.</p>
+<p>Interface:<br> struct dma_async_tx_descriptor *(*chan-&gt;device-&gt;device_prep_slave_sg)(</p>
+<pre><code> struct dma_chan *chan, struct scatterlist *sgl,
+ unsigned int sg_len, enum dma_data_direction direction,
+ unsigned long flags);
+</code></pre>
+<p> struct dma_async_tx_descriptor *(*chan-&gt;device-&gt;device_prep_dma_cyclic)(</p>
+<pre><code> struct dma_chan *chan, dma_addr_t buf_addr, size_t buf_len,
+ size_t period_len, enum dma_data_direction direction);
+</code></pre>
+<p> struct dma_async_tx_descriptor *(*device_prep_interleaved_dma)(</p>
+<pre><code> struct dma_chan *chan, struct dma_interleaved_template *xt,
+ unsigned long flags);
+</code></pre>
+<p>The peripheral driver is expected to have mapped the scatterlist for<br>the DMA operation prior to calling device_prep_slave_sg, and must<br>keep the scatterlist mapped until the DMA operation has completed.<br>The scatterlist must be mapped using the DMA struct device.  So,<br>normal setup should look like this:</p>
+<p> nr_sg = dma_map_sg(chan-&gt;device-&gt;dev, sgl, sg_len);<br> if (nr_sg == 0)</p>
+<pre><code> /* error */
+</code></pre>
+<p> desc = chan-&gt;device-&gt;device_prep_slave_sg(chan, sgl, nr_sg,</p>
+<pre><code>     direction, flags);
+</code></pre>
+<p>Once a descriptor has been obtained, the callback information can be<br>added and the descriptor must then be submitted.  Some DMA engine<br>drivers may hold a spinlock between a successful preparation and<br>submission so it is important that these two operations are closely<br>paired.</p>
+<p>Note:<br> Although the async_tx API specifies that completion callback<br> routines cannot submit any new operations, this is not the<br> case for slave/cyclic DMA.</p>
+<p> For slave DMA, the subsequent transaction may not be available<br> for submission prior to callback function being invoked, so<br> slave DMA callbacks are permitted to prepare and submit a new<br> transaction.</p>
+<p> For cyclic DMA, a callback function may wish to terminate the<br> DMA via dmaengine_terminate_all().</p>
+<p> Therefore, it is important that DMA engine drivers drop any<br> locks before calling the callback function which may cause a<br> deadlock.</p>
+<p> Note that callbacks will always be invoked from the DMA<br> engines tasklet, never from interrupt context.</p>
+</li>
+<li><p>Submit the transaction</p>
+<p>Once the descriptor has been prepared and the callback information<br>added, it must be placed on the DMA engine drivers pending queue.</p>
+<p>Interface:<br> dma_cookie_t dmaengine_submit(struct dma_async_tx_descriptor *desc)</p>
+<p>This returns a cookie can be used to check the progress of DMA engine<br>activity via other DMA engine calls not covered in this document.</p>
+<p>dmaengine_submit() will not start the DMA operation, it merely adds<br>it to the pending queue.  For this, see step 5, dma_async_issue_pending.</p>
+</li>
+<li><p>Issue pending DMA requests and wait for callback notification</p>
+<p>The transactions in the pending queue can be activated by calling the<br>issue_pending API. If channel is idle then the first transaction in<br>queue is started and subsequent ones queued up.</p>
+<p>On completion of each DMA operation, the next in queue is started and<br>a tasklet triggered. The tasklet will then call the client driver<br>completion callback routine for notification, if set.</p>
+<p>Interface:<br> void dma_async_issue_pending(struct dma_chan *chan);</p>
+</li>
+</ol>
+<p>Further APIs:</p>
+<ol>
+<li><p>int dmaengine_terminate_all(struct dma_chan *chan)</p>
+<p>This causes all activity for the DMA channel to be stopped, and may<br>discard data in the DMA FIFO which hasn’t been fully transferred.<br>No callback functions will be called for any incomplete transfers.</p>
+</li>
+<li><p>int dmaengine_pause(struct dma_chan *chan)</p>
+<p>This pauses activity on the DMA channel without data loss.</p>
+</li>
+<li><p>int dmaengine_resume(struct dma_chan *chan)</p>
+<p>Resume a previously paused DMA channel.  It is invalid to resume a<br>channel which is not currently paused.</p>
+</li>
+<li><p>enum dma_status dma_async_is_tx_complete(struct dma_chan *chan,</p>
+<pre><code> dma_cookie_t cookie, dma_cookie_t *last, dma_cookie_t *used)
+</code></pre>
+<p>This can be used to check the status of the channel.  Please see<br>the documentation in include/linux/dmaengine.h for a more complete<br>description of this API.</p>
+<p>This can be used in conjunction with dma_async_is_complete() and<br>the cookie returned from ‘descriptor-&gt;submit()’ to check for<br>completion of a specific DMA transaction.</p>
+<p>Note:<br> Not all DMA engine drivers can return reliable information for<br> a running DMA channel.  It is recommended that DMA engine users<br> pause or stop (via dmaengine_terminate_all) the channel before<br> using this API.</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/" title="Kernel-3.10.0-957.el7_dmaengine" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dmaengine/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_dma/" title="Kernel-3.10.0-957.el7_dma"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_dmatest/" title="Kernel-3.10.0-957.el7_dmatest"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

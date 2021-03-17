@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_mutex-design | oosTech.com</title>
+  <meta name="description" content="Generic Mutex Subsystem started by Ingo Molnar &amp;#109;&amp;#105;&amp;#110;&amp;#x67;&amp;#x6f;&amp;#64;&amp;#114;&amp;#x65;&amp;#100;&amp;#x68;&amp;#97;&amp;#116;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;updated by Davidlohr Bueso &amp;#100;&amp;#x61;&amp;#118;&amp;#x69;&amp;#x64;&amp;#x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_mutex-design">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Generic Mutex Subsystem started by Ingo Molnar &amp;#109;&amp;#105;&amp;#110;&amp;#x67;&amp;#x6f;&amp;#64;&amp;#114;&amp;#x65;&amp;#100;&amp;#x68;&amp;#97;&amp;#116;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;updated by Davidlohr Bueso &amp;#100;&amp;#x61;&amp;#118;&amp;#x69;&amp;#x64;&amp;#x">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-are-mutexes"><span class="toc-number">1.</span> <span class="toc-text">What are mutexes?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implementation"><span class="toc-number">2.</span> <span class="toc-text">Implementation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Semantics"><span class="toc-number">3.</span> <span class="toc-text">Semantics</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Interfaces"><span class="toc-number">4.</span> <span class="toc-text">Interfaces</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Disadvantages"><span class="toc-number">5.</span> <span class="toc-text">Disadvantages</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#When-to-use-mutexes"><span class="toc-number">6.</span> <span class="toc-text">When to use mutexes</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_mutex-design" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_mutex-design
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Generic Mutex Subsystem</p>
+<p>started by Ingo Molnar <a href="mailto:&#109;&#105;&#110;&#x67;&#x6f;&#64;&#114;&#x65;&#100;&#x68;&#97;&#116;&#46;&#x63;&#111;&#x6d;">&#109;&#105;&#110;&#x67;&#x6f;&#64;&#114;&#x65;&#100;&#x68;&#97;&#116;&#46;&#x63;&#111;&#x6d;</a><br>updated by Davidlohr Bueso <a href="mailto:&#100;&#x61;&#118;&#x69;&#x64;&#x6c;&#x6f;&#x68;&#114;&#64;&#x68;&#112;&#46;&#x63;&#111;&#x6d;">&#100;&#x61;&#118;&#x69;&#x64;&#x6c;&#x6f;&#x68;&#114;&#64;&#x68;&#112;&#46;&#x63;&#111;&#x6d;</a></p>
+<h2 id="What-are-mutexes"><a href="#What-are-mutexes" class="headerlink" title="What are mutexes?"></a>What are mutexes?</h2><p>In the Linux kernel, mutexes refer to a particular locking primitive<br>that enforces serialization on shared memory systems, and not only to<br>the generic term referring to ‘mutual exclusion’ found in academia<br>or similar theoretical text books. Mutexes are sleeping locks which<br>behave similarly to binary semaphores, and were introduced in 2006[1]<br>as an alternative to these. This new data structure provided a number<br>of advantages, including simpler interfaces, and at that time smaller<br>code (see Disadvantages).</p>
+<p>[1] <a target="_blank" rel="noopener" href="http://lwn.net/Articles/164802/">http://lwn.net/Articles/164802/</a></p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>Mutexes are represented by ‘struct mutex’, defined in include/linux/mutex.h<br>and implemented in kernel/locking/mutex.c. These locks use an atomic variable<br>(-&gt;owner) to keep track of the lock state during its lifetime.  Field owner<br>actually contains ‘struct task_struct *’ to the current lock owner and it is<br>therefore NULL if not currently owned. Since task_struct pointers are aligned<br>at at least L1_CACHE_BYTES, low bits (3) are used to store extra state (e.g.,<br>if waiter list is non-empty).  In its most basic form it also includes a<br>wait-queue and a spinlock that serializes access to it. Furthermore,<br>CONFIG_MUTEX_SPIN_ON_OWNER=y systems use a spinner MCS lock (-&gt;osq), described<br>below in (ii).</p>
+<p>When acquiring a mutex, there are three possible paths that can be<br>taken, depending on the state of the lock:</p>
+<p>(i) fastpath: tries to atomically acquire the lock by cmpxchg()ing the owner with<br>    the current task. This only works in the uncontended case (cmpxchg() checks<br>    against 0UL, so all 3 state bits above have to be 0). If the lock is<br>    contended it goes to the next possible path.</p>
+<p>(ii) midpath: aka optimistic spinning, tries to spin for acquisition<br>     while the lock owner is running and there are no other tasks ready<br>     to run that have higher priority (need_resched). The rationale is<br>     that if the lock owner is running, it is likely to release the lock<br>     soon. The mutex spinners are queued up using MCS lock so that only<br>     one spinner can compete for the mutex.</p>
+<pre><code> The MCS lock (proposed by Mellor-Crummey and Scott) is a simple spinlock
+ with the desirable properties of being fair and with each cpu trying
+ to acquire the lock spinning on a local variable. It avoids expensive
+ cacheline bouncing that common test-and-set spinlock implementations
+ incur. An MCS-like lock is specially tailored for optimistic spinning
+ for sleeping lock implementation. An important feature of the customized
+ MCS lock is that it has the extra property that spinners are able to exit
+ the MCS spinlock queue when they need to reschedule. This further helps
+ avoid situations where MCS spinners that need to reschedule would continue
+ waiting to spin on mutex owner, only to go directly to slowpath upon
+ obtaining the MCS lock.
+</code></pre>
+<p>(iii) slowpath: last resort, if the lock is still unable to be acquired,<br>      the task is added to the wait-queue and sleeps until woken up by the<br>      unlock path. Under normal circumstances it blocks as TASK_UNINTERRUPTIBLE.</p>
+<p>While formally kernel mutexes are sleepable locks, it is path (ii) that<br>makes them more practically a hybrid type. By simply not interrupting a<br>task and busy-waiting for a few cycles instead of immediately sleeping,<br>the performance of this lock has been seen to significantly improve a<br>number of workloads. Note that this technique is also used for rw-semaphores.</p>
+<h2 id="Semantics"><a href="#Semantics" class="headerlink" title="Semantics"></a>Semantics</h2><p>The mutex subsystem checks and enforces the following rules:</p>
+<pre><code>- Only one task can hold the mutex at a time.
+- Only the owner can unlock the mutex.
+- Multiple unlocks are not permitted.
+- Recursive locking/unlocking is not permitted.
+- A mutex must only be initialized via the API (see below).
+- A task may not exit with a mutex held.
+- Memory areas where held locks reside must not be freed.
+- Held mutexes must not be reinitialized.
+- Mutexes may not be used in hardware or software interrupt
+  contexts such as tasklets and timers.
+</code></pre>
+<p>These semantics are fully enforced when CONFIG DEBUG_MUTEXES is enabled.<br>In addition, the mutex debugging code also implements a number of other<br>features that make lock debugging easier and faster:</p>
+<pre><code>- Uses symbolic names of mutexes, whenever they are printed
+  in debug output.
+- Point-of-acquire tracking, symbolic lookup of function names,
+  list of all locks held in the system, printout of them.
+- Owner tracking.
+- Detects self-recursing locks and prints out all relevant info.
+- Detects multi-task circular deadlocks and prints out all affected
+  locks and tasks (and only those tasks).
+</code></pre>
+<h2 id="Interfaces"><a href="#Interfaces" class="headerlink" title="Interfaces"></a>Interfaces</h2><p>Statically define the mutex:<br>   DEFINE_MUTEX(name);</p>
+<p>Dynamically initialize the mutex:<br>   mutex_init(mutex);</p>
+<p>Acquire the mutex, uninterruptible:<br>   void mutex_lock(struct mutex *lock);<br>   void mutex_lock_nested(struct mutex *lock, unsigned int subclass);<br>   int  mutex_trylock(struct mutex *lock);</p>
+<p>Acquire the mutex, interruptible:<br>   int mutex_lock_interruptible_nested(struct mutex *lock,<br>                       unsigned int subclass);<br>   int mutex_lock_interruptible(struct mutex *lock);</p>
+<p>Acquire the mutex, interruptible, if dec to 0:<br>   int atomic_dec_and_mutex_lock(atomic_t *cnt, struct mutex *lock);</p>
+<p>Unlock the mutex:<br>   void mutex_unlock(struct mutex *lock);</p>
+<p>Test if the mutex is taken:<br>   int mutex_is_locked(struct mutex *lock);</p>
+<h2 id="Disadvantages"><a href="#Disadvantages" class="headerlink" title="Disadvantages"></a>Disadvantages</h2><p>Unlike its original design and purpose, ‘struct mutex’ is among the largest<br>locks in the kernel. E.g: on x86-64 it is 32 bytes, where ‘struct semaphore’<br>is 24 bytes and rw_semaphore is 40 bytes. Larger structure sizes mean more CPU<br>cache and memory footprint.</p>
+<h2 id="When-to-use-mutexes"><a href="#When-to-use-mutexes" class="headerlink" title="When to use mutexes"></a>When to use mutexes</h2><p>Unless the strict semantics of mutexes are unsuitable and/or the critical<br>region prevents the lock from being shared, always prefer them to any other<br>locking primitive.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/" title="Kernel-4.18.0-80.el8_mutex-design" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_mutex-design/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_multiqueue/" title="Kernel-4.18.0-80.el8_multiqueue"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_mux-controller/" title="Kernel-4.18.0-80.el8_mux-controller"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

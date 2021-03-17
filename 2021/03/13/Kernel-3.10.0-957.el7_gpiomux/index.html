@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_gpiomux | oosTech.com</title>
+  <meta name="description" content="This document provides an overview of the msm_gpiomux interface, whichis used to provide gpio pin multiplexing and configuration on mach-msmtargets. HistoryThe first-generation API for gpio configurat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_gpiomux">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="This document provides an overview of the msm_gpiomux interface, whichis used to provide gpio pin multiplexing and configuration on mach-msmtargets. HistoryThe first-generation API for gpio configurat">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#History"><span class="toc-number">1.</span> <span class="toc-text">History</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Key-Features-of-gpiomux"><span class="toc-number">2.</span> <span class="toc-text">Key Features of gpiomux</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Usage"><span class="toc-number">3.</span> <span class="toc-text">Usage</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Static-Configurations"><span class="toc-number">4.</span> <span class="toc-text">Static Configurations</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#gpiomux-and-gpiolib"><span class="toc-number">5.</span> <span class="toc-text">gpiomux and gpiolib</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#About-Output-Enable-Settings"><span class="toc-number">6.</span> <span class="toc-text">About Output-Enable Settings</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_gpiomux" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_gpiomux
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>This document provides an overview of the msm_gpiomux interface, which<br>is used to provide gpio pin multiplexing and configuration on mach-msm<br>targets.</p>
+<h1 id="History"><a href="#History" class="headerlink" title="History"></a>History</h1><p>The first-generation API for gpio configuration &amp; multiplexing on msm<br>is the function gpio_tlmm_config().  This function has a few notable<br>shortcomings, which led to its deprecation and replacement by gpiomux:</p>
+<p>The ‘disable’ parameter:  Setting the second parameter to<br>gpio_tlmm_config to GPIO_CFG_DISABLE tells the peripheral<br>processor in charge of the subsystem to perform a look-up into a<br>low-power table and apply the low-power/sleep setting for the pin.<br>As the msm family evolved this became problematic. Not all pins<br>have sleep settings, not all peripheral processors will accept requests<br>to apply said sleep settings, and not all msm targets have their gpio<br>subsystems managed by a peripheral processor. In order to get consistent<br>behavior on all targets, drivers are forced to ignore this parameter,<br>rendering it useless.</p>
+<p>The ‘direction’ flag: for all mux-settings other than raw-gpio (0),<br>the output-enable bit of a gpio is hard-wired to a known<br>input (usually VDD or ground).  For those settings, the direction flag<br>is meaningless at best, and deceptive at worst.  In addition, using the<br>direction flag to change output-enable (OE) directly can cause trouble in<br>gpiolib, which has no visibility into gpio direction changes made<br>in this way.  Direction control in gpio mode should be made through gpiolib.</p>
+<h1 id="Key-Features-of-gpiomux"><a href="#Key-Features-of-gpiomux" class="headerlink" title="Key Features of gpiomux"></a>Key Features of gpiomux</h1><ul>
+<li>A consistent interface across all generations of msm.  Drivers can expect<br>the same results on every target.</li>
+<li>gpiomux plays nicely with gpiolib.  Functions that should belong to gpiolib<br>are left to gpiolib and not duplicated here.  gpiomux is written with the<br>intent that gpio_chips will call gpiomux reference-counting methods<br>from their request() and free() hooks, providing full integration.</li>
+<li>Tabular configuration.  Instead of having to call gpio_tlmm_config<br>hundreds of times, gpio configuration is placed in a single table.</li>
+<li>Per-gpio sleep.  Each gpio is individually reference counted, allowing only<br>those lines which are in use to be put in high-power states.</li>
+<li>0 means ‘do nothing’: all flags are designed so that the default memset-zero<br>equates to a sensible default of ‘no configuration’, preventing users<br>from having to provide hundreds of ‘no-op’ configs for unused or<br>unwanted lines.</li>
+</ul>
+<h1 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h1><p>To use gpiomux, provide configuration information for relevant gpio lines<br>in the msm_gpiomux_configs table.  Since a 0 equates to “unconfigured”,<br>only those lines to be managed by gpiomux need to be specified.  Here<br>is a completely fictional example:</p>
+<p>struct msm_gpiomux_config msm_gpiomux_configs[GPIOMUX_NGPIOS] = {<br>    [12] = {<br>        .active = GPIOMUX_VALID | GPIOMUX_DRV_8MA | GPIOMUX_FUNC_1,<br>        .suspended = GPIOMUX_VALID | GPIOMUX_PULL_DOWN,<br>    },<br>    [34] = {<br>        .suspended = GPIOMUX_VALID | GPIOMUX_PULL_DOWN,<br>    },<br>};</p>
+<p>To indicate that a gpio is in use, call msm_gpiomux_get() to increase<br>its reference count.  To decrease the reference count, call msm_gpiomux_put().</p>
+<p>The effect of this configuration is as follows:</p>
+<p>When the system boots, gpios 12 and 34 will be initialized with their<br>‘suspended’ configurations.  All other gpios, which were left unconfigured,<br>will not be touched.</p>
+<p>When msm_gpiomux_get() is called on gpio 12 to raise its reference count<br>above 0, its active configuration will be applied.  Since no other gpio<br>line has a valid active configuration, msm_gpiomux_get() will have no<br>effect on any other line.</p>
+<p>When msm_gpiomux_put() is called on gpio 12 or 34 to drop their reference<br>count to 0, their suspended configurations will be applied.<br>Since no other gpio line has a valid suspended configuration, no other<br>gpio line will be effected by msm_gpiomux_put().  Since gpio 34 has no valid<br>active configuration, this is effectively a no-op for gpio 34 as well,<br>with one small caveat, see the section “About Output-Enable Settings”.</p>
+<p>All of the GPIOMUX_VALID flags may seem like unnecessary overhead, but<br>they address some important issues.  As unused entries (all those<br>except 12 and 34) are zero-filled, gpiomux needs a way to distinguish<br>the used fields from the unused.  In addition, the all-zero pattern<br>is a valid configuration!  Therefore, gpiomux defines an additional bit<br>which is used to indicate when a field is used.  This has the pleasant<br>side-effect of allowing calls to msm_gpiomux_write to use ‘0’ to indicate<br>that a value should not be changed:</p>
+<p>  msm_gpiomux_write(0, GPIOMUX_VALID, 0);</p>
+<p>replaces the active configuration of gpio 0 with an all-zero configuration,<br>but leaves the suspended configuration as it was.</p>
+<h1 id="Static-Configurations"><a href="#Static-Configurations" class="headerlink" title="Static Configurations"></a>Static Configurations</h1><p>To install a static configuration, which is applied at boot and does<br>not change after that, install a configuration with a suspended component<br>but no active component, as in the previous example:</p>
+<pre><code>[34] = &#123;
+    .suspended = GPIOMUX_VALID | GPIOMUX_PULL_DOWN,
+&#125;,
+</code></pre>
+<p>The suspended setting is applied during boot, and the lack of any valid<br>active setting prevents any other setting from being applied at runtime.<br>If other subsystems attempting to access the line is a concern, one could<br><em>really</em> anchor the configuration down by calling msm_gpiomux_get on the<br>line at initialization to move the line into active mode.  With the line<br>held, it will never be re-suspended, and with no valid active configuration,<br>no new configurations will be applied.</p>
+<p>But then, if having other subsystems grabbing for the line is truly a concern,<br>it should be reserved with gpio_request instead, which carries an implicit<br>msm_gpiomux_get.</p>
+<h1 id="gpiomux-and-gpiolib"><a href="#gpiomux-and-gpiolib" class="headerlink" title="gpiomux and gpiolib"></a>gpiomux and gpiolib</h1><p>It is expected that msm gpio_chips will call msm_gpiomux_get() and<br>msm_gpiomux_put() from their request and free hooks, like this fictional<br>example:</p>
+<p>static int request(struct gpio_chip *chip, unsigned offset)<br>{<br>        return msm_gpiomux_get(chip-&gt;base + offset);<br>}</p>
+<p>static void free(struct gpio_chip *chip, unsigned offset)<br>{<br>        msm_gpiomux_put(chip-&gt;base + offset);<br>}</p>
+<pre><code>...somewhere in a gpio_chip declaration...
+.request = request,
+.free    = free,
+</code></pre>
+<p>This provides important functionality:</p>
+<ul>
+<li>It guarantees that a gpio line will have its ‘active’ config applied<br>when the line is requested, and will not be suspended while the line<br>remains requested; and</li>
+<li>It guarantees that gpio-direction settings from gpiolib behave sensibly.<br>See “About Output-Enable Settings.”</li>
+</ul>
+<p>This mechanism allows for “auto-request” of gpiomux lines via gpiolib<br>when it is suitable.  Drivers wishing more exact control are, of course,<br>free to also use msm_gpiomux_set and msm_gpiomux_get.</p>
+<h1 id="About-Output-Enable-Settings"><a href="#About-Output-Enable-Settings" class="headerlink" title="About Output-Enable Settings"></a>About Output-Enable Settings</h1><p>Some msm targets do not have the ability to query the current gpio<br>configuration setting.  This means that changes made to the output-enable<br>(OE) bit by gpiolib cannot be consistently detected and preserved by gpiomux.<br>Therefore, when gpiomux applies a configuration setting, any direction<br>settings which may have been applied by gpiolib are lost and the default<br>input settings are re-applied.</p>
+<p>For this reason, drivers should not assume that gpio direction settings<br>continue to hold if they free and then re-request a gpio.  This seems like<br>common sense - after all, anybody could have obtained the line in the<br>meantime - but it needs saying.</p>
+<p>This also means that calls to msm_gpiomux_write will reset the OE bit,<br>which means that if the gpio line is held by a client of gpiolib and<br>msm_gpiomux_write is called, the direction setting has been lost and<br>gpiolib’s internal state has been broken.<br>Release gpio lines before reconfiguring them.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/" title="Kernel-3.10.0-957.el7_gpiomux" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_gpiomux/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_gpio_lpc32xx/" title="Kernel-3.10.0-957.el7_gpio_lpc32xx"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_gpmc-eth/" title="Kernel-3.10.0-957.el7_gpmc-eth"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api | oosTech.com</title>
+  <meta name="description" content="Converting old watchdog drivers to the watchdog frameworkby Wolfram Sang &amp;#119;&amp;#x2e;&amp;#x73;&amp;#97;&amp;#110;&amp;#x67;&amp;#x40;&amp;#x70;&amp;#x65;&amp;#110;&amp;#103;&amp;#x75;&amp;#116;&amp;#114;&amp;#x6f;&amp;#x6e;&amp;#x69;&amp;#x78;&amp;#46;&amp;#x64;&amp;#101;&#x3D;&#x3D;&#x3D;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Converting old watchdog drivers to the watchdog frameworkby Wolfram Sang &amp;#119;&amp;#x2e;&amp;#x73;&amp;#97;&amp;#110;&amp;#x67;&amp;#x40;&amp;#x70;&amp;#x65;&amp;#110;&amp;#103;&amp;#x75;&amp;#116;&amp;#114;&amp;#x6f;&amp;#x6e;&amp;#x69;&amp;#x78;&amp;#46;&amp;#x64;&amp;#101;&#x3D;&#x3D;&#x3D;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Remove-the-file-operations-struct"><span class="toc-number">1.</span> <span class="toc-text">Remove the file_operations struct</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Remove-the-miscdevice"><span class="toc-number">2.</span> <span class="toc-text">Remove the miscdevice</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Remove-obsolete-includes-and-defines"><span class="toc-number">3.</span> <span class="toc-text">Remove obsolete includes and defines</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Add-the-watchdog-operations"><span class="toc-number">4.</span> <span class="toc-text">Add the watchdog operations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Add-the-watchdog-device"><span class="toc-number">5.</span> <span class="toc-text">Add the watchdog device</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Handle-the-%E2%80%98nowayout%E2%80%99-feature"><span class="toc-number">6.</span> <span class="toc-text">Handle the ‘nowayout’ feature</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Register-the-watchdog-device"><span class="toc-number">7.</span> <span class="toc-text">Register the watchdog device</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Update-the-Kconfig-entry"><span class="toc-number">8.</span> <span class="toc-text">Update the Kconfig-entry</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Create-a-patch-and-send-it-to-upstream"><span class="toc-number">9.</span> <span class="toc-text">Create a patch and send it to upstream</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Converting old watchdog drivers to the watchdog framework<br>by Wolfram Sang <a href="mailto:&#119;&#x2e;&#x73;&#97;&#110;&#x67;&#x40;&#x70;&#x65;&#110;&#103;&#x75;&#116;&#114;&#x6f;&#x6e;&#x69;&#x78;&#46;&#x64;&#101;">&#119;&#x2e;&#x73;&#97;&#110;&#x67;&#x40;&#x70;&#x65;&#110;&#103;&#x75;&#116;&#114;&#x6f;&#x6e;&#x69;&#x78;&#46;&#x64;&#101;</a><br>=========================================================</p>
+<p>Before the watchdog framework came into the kernel, every driver had to<br>implement the API on its own. Now, as the framework factored out the common<br>components, those drivers can be lightened making it a user of the framework.<br>This document shall guide you for this task. The necessary steps are described<br>as well as things to look out for.</p>
+<h2 id="Remove-the-file-operations-struct"><a href="#Remove-the-file-operations-struct" class="headerlink" title="Remove the file_operations struct"></a>Remove the file_operations struct</h2><p>Old drivers define their own file_operations for actions like open(), write(),<br>etc… These are now handled by the framework and just call the driver when<br>needed. So, in general, the ‘file_operations’ struct and assorted functions can<br>go. Only very few driver-specific details have to be moved to other functions.<br>Here is a overview of the functions and probably needed actions:</p>
+<ul>
+<li><p>open: Everything dealing with resource management (file-open checks, magic<br>close preparations) can simply go. Device specific stuff needs to go to the<br>driver specific start-function. Note that for some drivers, the start-function<br>also serves as the ping-function. If that is the case and you need start/stop<br>to be balanced (clocks!), you are better off refactoring a separate start-function.</p>
+</li>
+<li><p>close: Same hints as for open apply.</p>
+</li>
+<li><p>write: Can simply go, all defined behaviour is taken care of by the framework,<br>i.e. ping on write and magic char (‘V’) handling.</p>
+</li>
+<li><p>ioctl: While the driver is allowed to have extensions to the IOCTL interface,<br>the most common ones are handled by the framework, supported by some assistance<br>from the driver:</p>
+<p>  WDIOC_GETSUPPORT:</p>
+<pre><code>  Returns the mandatory watchdog_info struct from the driver
+</code></pre>
+<p>  WDIOC_GETSTATUS:</p>
+<pre><code>  Needs the status-callback defined, otherwise returns 0
+</code></pre>
+<p>  WDIOC_GETBOOTSTATUS:</p>
+<pre><code>  Needs the bootstatus member properly set. Make sure it is 0 if you
+  don&#39;t have further support!
+</code></pre>
+<p>  WDIOC_SETOPTIONS:</p>
+<pre><code>  No preparations needed
+</code></pre>
+<p>  WDIOC_KEEPALIVE:</p>
+<pre><code>  If wanted, options in watchdog_info need to have WDIOF_KEEPALIVEPING
+  set
+</code></pre>
+<p>  WDIOC_SETTIMEOUT:</p>
+<pre><code>  Options in watchdog_info need to have WDIOF_SETTIMEOUT set
+  and a set_timeout-callback has to be defined. The core will also
+  do limit-checking, if min_timeout and max_timeout in the watchdog
+  device are set. All is optional.
+</code></pre>
+<p>  WDIOC_GETTIMEOUT:</p>
+<pre><code>  No preparations needed
+</code></pre>
+<p>  WDIOC_GETTIMELEFT:</p>
+<pre><code>  It needs get_timeleft() callback to be defined. Otherwise it
+  will return EOPNOTSUPP
+</code></pre>
+<p>Other IOCTLs can be served using the ioctl-callback. Note that this is mainly<br>intended for porting old drivers; new drivers should not invent private IOCTLs.<br>Private IOCTLs are processed first. When the callback returns with<br>-ENOIOCTLCMD, the IOCTLs of the framework will be tried, too. Any other error<br>is directly given to the user.</p>
+</li>
+</ul>
+<p>Example conversion:</p>
+<p>-static const struct file_operations s3c2410wdt_fops = {</p>
+<ul>
+<li><pre><code>  .owner          = THIS_MODULE,
+</code></pre>
+</li>
+<li><pre><code>  .llseek         = no_llseek,
+</code></pre>
+</li>
+<li><pre><code>  .write          = s3c2410wdt_write,
+</code></pre>
+</li>
+<li><pre><code>  .unlocked_ioctl = s3c2410wdt_ioctl,
+</code></pre>
+</li>
+<li><pre><code>  .open           = s3c2410wdt_open,
+</code></pre>
+</li>
+<li><pre><code>  .release        = s3c2410wdt_release,
+</code></pre>
+</li>
+<li>};</li>
+</ul>
+<p>Check the functions for device-specific stuff and keep it for later<br>refactoring. The rest can go.</p>
+<h2 id="Remove-the-miscdevice"><a href="#Remove-the-miscdevice" class="headerlink" title="Remove the miscdevice"></a>Remove the miscdevice</h2><p>Since the file_operations are gone now, you can also remove the ‘struct<br>miscdevice’. The framework will create it on watchdog_dev_register() called by<br>watchdog_register_device().</p>
+<p>-static struct miscdevice s3c2410wdt_miscdev = {</p>
+<ul>
+<li><pre><code>  .minor          = WATCHDOG_MINOR,
+</code></pre>
+</li>
+<li><pre><code>  .name           = &quot;watchdog&quot;,
+</code></pre>
+</li>
+<li><pre><code>  .fops           = &amp;s3c2410wdt_fops,
+</code></pre>
+</li>
+<li>};</li>
+</ul>
+<h2 id="Remove-obsolete-includes-and-defines"><a href="#Remove-obsolete-includes-and-defines" class="headerlink" title="Remove obsolete includes and defines"></a>Remove obsolete includes and defines</h2><p>Because of the simplifications, a few defines are probably unused now. Remove<br>them. Includes can be removed, too. For example:</p>
+<ul>
+<li>#include &lt;linux/fs.h&gt;</li>
+<li>#include &lt;linux/miscdevice.h&gt; (if MODULE_ALIAS_MISCDEV is not used)</li>
+<li>#include &lt;linux/uaccess.h&gt; (if no custom IOCTLs are used)</li>
+</ul>
+<h2 id="Add-the-watchdog-operations"><a href="#Add-the-watchdog-operations" class="headerlink" title="Add the watchdog operations"></a>Add the watchdog operations</h2><p>All possible callbacks are defined in ‘struct watchdog_ops’. You can find it<br>explained in ‘watchdog-kernel-api.txt’ in this directory. start(), stop() and<br>owner must be set, the rest are optional. You will easily find corresponding<br>functions in the old driver. Note that you will now get a pointer to the<br>watchdog_device as a parameter to these functions, so you probably have to<br>change the function header. Other changes are most likely not needed, because<br>here simply happens the direct hardware access. If you have device-specific<br>code left from the above steps, it should be refactored into these callbacks.</p>
+<p>Here is a simple example:</p>
+<p>+static struct watchdog_ops s3c2410wdt_ops = {</p>
+<ul>
+<li><pre><code>  .owner = THIS_MODULE,
+</code></pre>
+</li>
+<li><pre><code>  .start = s3c2410wdt_start,
+</code></pre>
+</li>
+<li><pre><code>  .stop = s3c2410wdt_stop,
+</code></pre>
+</li>
+<li><pre><code>  .ping = s3c2410wdt_keepalive,
+</code></pre>
+</li>
+<li><pre><code>  .set_timeout = s3c2410wdt_set_heartbeat,
+</code></pre>
+</li>
+<li>};</li>
+</ul>
+<p>A typical function-header change looks like:</p>
+<p>-static void s3c2410wdt_keepalive(void)<br>+static int s3c2410wdt_keepalive(struct watchdog_device *wdd)<br> {<br>…<br>+</p>
+<ul>
+<li><pre><code>return 0;
+</code></pre>
+}</li>
+</ul>
+<p>…</p>
+<ul>
+<li><pre><code>  s3c2410wdt_keepalive();
+</code></pre>
+</li>
+</ul>
+<ul>
+<li><pre><code>  s3c2410wdt_keepalive(&amp;s3c2410_wdd);
+</code></pre>
+</li>
+</ul>
+<h2 id="Add-the-watchdog-device"><a href="#Add-the-watchdog-device" class="headerlink" title="Add the watchdog device"></a>Add the watchdog device</h2><p>Now we need to create a ‘struct watchdog_device’ and populate it with the<br>necessary information for the framework. The struct is also explained in detail<br>in ‘watchdog-kernel-api.txt’ in this directory. We pass it the mandatory<br>watchdog_info struct and the newly created watchdog_ops. Often, old drivers<br>have their own record-keeping for things like bootstatus and timeout using<br>static variables. Those have to be converted to use the members in<br>watchdog_device. Note that the timeout values are unsigned int. Some drivers<br>use signed int, so this has to be converted, too.</p>
+<p>Here is a simple example for a watchdog device:</p>
+<p>+static struct watchdog_device s3c2410_wdd = {</p>
+<ul>
+<li><pre><code>  .info = &amp;s3c2410_wdt_ident,
+</code></pre>
+</li>
+<li><pre><code>  .ops = &amp;s3c2410wdt_ops,
+</code></pre>
+</li>
+<li>};</li>
+</ul>
+<h2 id="Handle-the-‘nowayout’-feature"><a href="#Handle-the-‘nowayout’-feature" class="headerlink" title="Handle the ‘nowayout’ feature"></a>Handle the ‘nowayout’ feature</h2><p>A few drivers use nowayout statically, i.e. there is no module parameter for it<br>and only CONFIG_WATCHDOG_NOWAYOUT determines if the feature is going to be<br>used. This needs to be converted by initializing the status variable of the<br>watchdog_device like this:</p>
+<pre><code>    .status = WATCHDOG_NOWAYOUT_INIT_STATUS,
+</code></pre>
+<p>Most drivers, however, also allow runtime configuration of nowayout, usually<br>by adding a module parameter. The conversion for this would be something like:</p>
+<pre><code>watchdog_set_nowayout(&amp;s3c2410_wdd, nowayout);
+</code></pre>
+<p>The module parameter itself needs to stay, everything else related to nowayout<br>can go, though. This will likely be some code in open(), close() or write().</p>
+<h2 id="Register-the-watchdog-device"><a href="#Register-the-watchdog-device" class="headerlink" title="Register the watchdog device"></a>Register the watchdog device</h2><p>Replace misc_register(&amp;miscdev) with watchdog_register_device(&amp;watchdog_dev).<br>Make sure the return value gets checked and the error message, if present,<br>still fits. Also convert the unregister case.</p>
+<ul>
+<li><pre><code>  ret = misc_register(&amp;s3c2410wdt_miscdev);
+</code></pre>
+</li>
+</ul>
+<ul>
+<li><pre><code>  ret = watchdog_register_device(&amp;s3c2410_wdd);
+</code></pre>
+</li>
+</ul>
+<p>…</p>
+<ul>
+<li><pre><code>  misc_deregister(&amp;s3c2410wdt_miscdev);
+</code></pre>
+</li>
+</ul>
+<ul>
+<li><pre><code>  watchdog_unregister_device(&amp;s3c2410_wdd);
+</code></pre>
+</li>
+</ul>
+<h2 id="Update-the-Kconfig-entry"><a href="#Update-the-Kconfig-entry" class="headerlink" title="Update the Kconfig-entry"></a>Update the Kconfig-entry</h2><p>The entry for the driver now needs to select WATCHDOG_CORE:</p>
+<ul>
+<li><pre><code>  select WATCHDOG_CORE
+</code></pre>
+</li>
+</ul>
+<h2 id="Create-a-patch-and-send-it-to-upstream"><a href="#Create-a-patch-and-send-it-to-upstream" class="headerlink" title="Create a patch and send it to upstream"></a>Create a patch and send it to upstream</h2><p>Make sure you understood Documentation/process/submitting-patches.rst and send your patch to<br><a href="mailto:&#108;&#x69;&#x6e;&#117;&#x78;&#x2d;&#x77;&#x61;&#x74;&#99;&#104;&#100;&#x6f;&#x67;&#x40;&#x76;&#x67;&#101;&#114;&#x2e;&#x6b;&#101;&#x72;&#x6e;&#x65;&#x6c;&#46;&#x6f;&#114;&#103;">&#108;&#x69;&#x6e;&#117;&#x78;&#x2d;&#x77;&#x61;&#x74;&#99;&#104;&#100;&#x6f;&#x67;&#x40;&#x76;&#x67;&#101;&#114;&#x2e;&#x6b;&#101;&#x72;&#x6e;&#x65;&#x6c;&#46;&#x6f;&#114;&#103;</a>. We are looking forward to it :)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/" title="Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_convert_drivers_to_kernel_api/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_coreboot/" title="Kernel-4.18.0-80.el8_coreboot"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_coresight-cpu-debug/" title="Kernel-4.18.0-80.el8_coresight-cpu-debug"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

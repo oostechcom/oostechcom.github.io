@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_unevictable-lru | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;         UNEVICTABLE LRU INFRASTRUCTURE         &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;CONTENTS&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  (*) The Unevictable LRU  - The unevictable page list.  -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_unevictable-lru">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;         UNEVICTABLE LRU INFRASTRUCTURE         &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;CONTENTS&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  (*) The Unevictable LRU  - The unevictable page list.  -">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#THE-UNEVICTABLE-PAGE-LIST"><span class="toc-number">1.</span> <span class="toc-text">THE UNEVICTABLE PAGE LIST</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MEMORY-CONTROL-GROUP-INTERACTION"><span class="toc-number">2.</span> <span class="toc-text">MEMORY CONTROL GROUP INTERACTION</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MARKING-ADDRESS-SPACES-UNEVICTABLE"><span class="toc-number">3.</span> <span class="toc-text">MARKING ADDRESS SPACES UNEVICTABLE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DETECTING-UNEVICTABLE-PAGES"><span class="toc-number">4.</span> <span class="toc-text">DETECTING UNEVICTABLE PAGES</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#VMSCAN%E2%80%99S-HANDLING-OF-UNEVICTABLE-PAGES"><span class="toc-number">5.</span> <span class="toc-text">VMSCAN’S HANDLING OF UNEVICTABLE PAGES</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HISTORY"><span class="toc-number">6.</span> <span class="toc-text">HISTORY</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BASIC-MANAGEMENT"><span class="toc-number">7.</span> <span class="toc-text">BASIC MANAGEMENT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mlock-mlockall-SYSTEM-CALL-HANDLING"><span class="toc-number">8.</span> <span class="toc-text">mlock()&#x2F;mlockall() SYSTEM CALL HANDLING</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FILTERING-SPECIAL-VMAS"><span class="toc-number">9.</span> <span class="toc-text">FILTERING SPECIAL VMAS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#munlock-munlockall-SYSTEM-CALL-HANDLING"><span class="toc-number">10.</span> <span class="toc-text">munlock()&#x2F;munlockall() SYSTEM CALL HANDLING</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MIGRATING-MLOCKED-PAGES"><span class="toc-number">11.</span> <span class="toc-text">MIGRATING MLOCKED PAGES</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mmap-MAP-LOCKED-SYSTEM-CALL-HANDLING"><span class="toc-number">12.</span> <span class="toc-text">mmap(MAP_LOCKED) SYSTEM CALL HANDLING</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#munmap-exit-exec-SYSTEM-CALL-HANDLING"><span class="toc-number">13.</span> <span class="toc-text">munmap()&#x2F;exit()&#x2F;exec() SYSTEM CALL HANDLING</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#try-to-unmap"><span class="toc-number">14.</span> <span class="toc-text">try_to_unmap()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#try-to-munlock-REVERSE-MAP-SCAN"><span class="toc-number">15.</span> <span class="toc-text">try_to_munlock() REVERSE MAP SCAN</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PAGE-RECLAIM-IN-shrink-list"><span class="toc-number">16.</span> <span class="toc-text">PAGE RECLAIM IN shrink_*_list()</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_unevictable-lru" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_unevictable-lru
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>        ==============================
+        UNEVICTABLE LRU INFRASTRUCTURE
+        ==============================
+</code></pre>
+<p>========<br>CONTENTS<br>========</p>
+<p> (*) The Unevictable LRU</p>
+<pre><code> - The unevictable page list.
+ - Memory control group interaction.
+ - Marking address spaces unevictable.
+ - Detecting Unevictable Pages.
+ - vmscan&#39;s handling of unevictable pages.
+</code></pre>
+<p> (*) mlock()’d pages.</p>
+<pre><code> - History.
+ - Basic management.
+ - mlock()/mlockall() system call handling.
+ - Filtering special vmas.
+ - munlock()/munlockall() system call handling.
+ - Migrating mlocked pages.
+ - mmap(MAP_LOCKED) system call handling.
+ - munmap()/exit()/exec() system call handling.
+ - try_to_unmap().
+ - try_to_munlock() reverse map scan.
+ - Page reclaim in shrink_*_list().
+</code></pre>
+<p>============<br>INTRODUCTION<br>============</p>
+<p>This document describes the Linux memory manager’s “Unevictable LRU”<br>infrastructure and the use of this to manage several types of “unevictable”<br>pages.</p>
+<p>The document attempts to provide the overall rationale behind this mechanism<br>and the rationale for some of the design decisions that drove the<br>implementation.  The latter design rationale is discussed in the context of an<br>implementation description.  Admittedly, one can obtain the implementation<br>details - the “what does it do?” - by reading the code.  One hopes that the<br>descriptions below add value by provide the answer to “why does it do that?”.</p>
+<p>===================<br>THE UNEVICTABLE LRU<br>===================</p>
+<p>The Unevictable LRU facility adds an additional LRU list to track unevictable<br>pages and to hide these pages from vmscan.  This mechanism is based on a patch<br>by Larry Woodman of Red Hat to address several scalability problems with page<br>reclaim in Linux.  The problems have been observed at customer sites on large<br>memory x86_64 systems.</p>
+<p>To illustrate this with an example, a non-NUMA x86_64 platform with 128GB of<br>main memory will have over 32 million 4k pages in a single zone.  When a large<br>fraction of these pages are not evictable for any reason [see below], vmscan<br>will spend a lot of time scanning the LRU lists looking for the small fraction<br>of pages that are evictable.  This can result in a situation where all CPUs are<br>spending 100% of their time in vmscan for hours or days on end, with the system<br>completely unresponsive.</p>
+<p>The unevictable list addresses the following classes of unevictable pages:</p>
+<p> (*) Those owned by ramfs.</p>
+<p> (*) Those mapped into SHM_LOCK’d shared memory regions.</p>
+<p> (*) Those mapped into VM_LOCKED [mlock()ed] VMAs.</p>
+<p>The infrastructure may also be able to handle other conditions that make pages<br>unevictable, either by definition or by circumstance, in the future.</p>
+<h2 id="THE-UNEVICTABLE-PAGE-LIST"><a href="#THE-UNEVICTABLE-PAGE-LIST" class="headerlink" title="THE UNEVICTABLE PAGE LIST"></a>THE UNEVICTABLE PAGE LIST</h2><p>The Unevictable LRU infrastructure consists of an additional, per-zone, LRU list<br>called the “unevictable” list and an associated page flag, PG_unevictable, to<br>indicate that the page is being managed on the unevictable list.</p>
+<p>The PG_unevictable flag is analogous to, and mutually exclusive with, the<br>PG_active flag in that it indicates on which LRU list a page resides when<br>PG_lru is set.</p>
+<p>The Unevictable LRU infrastructure maintains unevictable pages on an additional<br>LRU list for a few reasons:</p>
+<p> (1) We get to “treat unevictable pages just like we treat other pages in the<br>     system - which means we get to use the same code to manipulate them, the<br>     same code to isolate them (for migrate, etc.), the same code to keep track<br>     of the statistics, etc…” [Rik van Riel]</p>
+<p> (2) We want to be able to migrate unevictable pages between nodes for memory<br>     defragmentation, workload management and memory hotplug.  The linux kernel<br>     can only migrate pages that it can successfully isolate from the LRU<br>     lists.  If we were to maintain pages elsewhere than on an LRU-like list,<br>     where they can be found by isolate_lru_page(), we would prevent their<br>     migration, unless we reworked migration code to find the unevictable pages<br>     itself.</p>
+<p>The unevictable list does not differentiate between file-backed and anonymous,<br>swap-backed pages.  This differentiation is only important while the pages are,<br>in fact, evictable.</p>
+<p>The unevictable list benefits from the “arrayification” of the per-zone LRU<br>lists and statistics originally proposed and posted by Christoph Lameter.</p>
+<p>The unevictable list does not use the LRU pagevec mechanism. Rather,<br>unevictable pages are placed directly on the page’s zone’s unevictable list<br>under the zone lru_lock.  This allows us to prevent the stranding of pages on<br>the unevictable list when one task has the page isolated from the LRU and other<br>tasks are changing the “evictability” state of the page.</p>
+<h2 id="MEMORY-CONTROL-GROUP-INTERACTION"><a href="#MEMORY-CONTROL-GROUP-INTERACTION" class="headerlink" title="MEMORY CONTROL GROUP INTERACTION"></a>MEMORY CONTROL GROUP INTERACTION</h2><p>The unevictable LRU facility interacts with the memory control group [aka<br>memory controller; see Documentation/cgroups/memory.txt] by extending the<br>lru_list enum.</p>
+<p>The memory controller data structure automatically gets a per-zone unevictable<br>list as a result of the “arrayification” of the per-zone LRU lists (one per<br>lru_list enum element).  The memory controller tracks the movement of pages to<br>and from the unevictable list.</p>
+<p>When a memory control group comes under memory pressure, the controller will<br>not attempt to reclaim pages on the unevictable list.  This has a couple of<br>effects:</p>
+<p> (1) Because the pages are “hidden” from reclaim on the unevictable list, the<br>     reclaim process can be more efficient, dealing only with pages that have a<br>     chance of being reclaimed.</p>
+<p> (2) On the other hand, if too many of the pages charged to the control group<br>     are unevictable, the evictable portion of the working set of the tasks in<br>     the control group may not fit into the available memory.  This can cause<br>     the control group to thrash or to OOM-kill tasks.</p>
+<h2 id="MARKING-ADDRESS-SPACES-UNEVICTABLE"><a href="#MARKING-ADDRESS-SPACES-UNEVICTABLE" class="headerlink" title="MARKING ADDRESS SPACES UNEVICTABLE"></a>MARKING ADDRESS SPACES UNEVICTABLE</h2><p>For facilities such as ramfs none of the pages attached to the address space<br>may be evicted.  To prevent eviction of any such pages, the AS_UNEVICTABLE<br>address space flag is provided, and this can be manipulated by a filesystem<br>using a number of wrapper functions:</p>
+<p> (*) void mapping_set_unevictable(struct address_space *mapping);</p>
+<pre><code>Mark the address space as being completely unevictable.
+</code></pre>
+<p> (*) void mapping_clear_unevictable(struct address_space *mapping);</p>
+<pre><code>Mark the address space as being evictable.
+</code></pre>
+<p> (*) int mapping_unevictable(struct address_space *mapping);</p>
+<pre><code>Query the address space, and return true if it is completely
+unevictable.
+</code></pre>
+<p>These are currently used in two places in the kernel:</p>
+<p> (1) By ramfs to mark the address spaces of its inodes when they are created,<br>     and this mark remains for the life of the inode.</p>
+<p> (2) By SYSV SHM to mark SHM_LOCK’d address spaces until SHM_UNLOCK is called.</p>
+<pre><code> Note that SHM_LOCK is not required to page in the locked pages if they&#39;re
+ swapped out; the application must touch the pages manually if it wants to
+ ensure they&#39;re in memory.
+</code></pre>
+<h2 id="DETECTING-UNEVICTABLE-PAGES"><a href="#DETECTING-UNEVICTABLE-PAGES" class="headerlink" title="DETECTING UNEVICTABLE PAGES"></a>DETECTING UNEVICTABLE PAGES</h2><p>The function page_evictable() in vmscan.c determines whether a page is<br>evictable or not using the query function outlined above [see section “Marking<br>address spaces unevictable”] to check the AS_UNEVICTABLE flag.</p>
+<p>For address spaces that are so marked after being populated (as SHM regions<br>might be), the lock action (eg: SHM_LOCK) can be lazy, and need not populate<br>the page tables for the region as does, for example, mlock(), nor need it make<br>any special effort to push any pages in the SHM_LOCK’d area to the unevictable<br>list.  Instead, vmscan will do this if and when it encounters the pages during<br>a reclamation scan.</p>
+<p>On an unlock action (such as SHM_UNLOCK), the unlocker (eg: shmctl()) must scan<br>the pages in the region and “rescue” them from the unevictable list if no other<br>condition is keeping them unevictable.  If an unevictable region is destroyed,<br>the pages are also “rescued” from the unevictable list in the process of<br>freeing them.</p>
+<p>page_evictable() also checks for mlocked pages by testing an additional page<br>flag, PG_mlocked (as wrapped by PageMlocked()), which is set when a page is<br>faulted into a VM_LOCKED vma, or found in a vma being VM_LOCKED.</p>
+<h2 id="VMSCAN’S-HANDLING-OF-UNEVICTABLE-PAGES"><a href="#VMSCAN’S-HANDLING-OF-UNEVICTABLE-PAGES" class="headerlink" title="VMSCAN’S HANDLING OF UNEVICTABLE PAGES"></a>VMSCAN’S HANDLING OF UNEVICTABLE PAGES</h2><p>If unevictable pages are culled in the fault path, or moved to the unevictable<br>list at mlock() or mmap() time, vmscan will not encounter the pages until they<br>have become evictable again (via munlock() for example) and have been “rescued”<br>from the unevictable list.  However, there may be situations where we decide,<br>for the sake of expediency, to leave a unevictable page on one of the regular<br>active/inactive LRU lists for vmscan to deal with.  vmscan checks for such<br>pages in all of the shrink_{active|inactive|page}_list() functions and will<br>“cull” such pages that it encounters: that is, it diverts those pages to the<br>unevictable list for the zone being scanned.</p>
+<p>There may be situations where a page is mapped into a VM_LOCKED VMA, but the<br>page is not marked as PG_mlocked.  Such pages will make it all the way to<br>shrink_page_list() where they will be detected when vmscan walks the reverse<br>map in try_to_unmap().  If try_to_unmap() returns SWAP_MLOCK,<br>shrink_page_list() will cull the page at that point.</p>
+<p>To “cull” an unevictable page, vmscan simply puts the page back on the LRU list<br>using putback_lru_page() - the inverse operation to isolate_lru_page() - after<br>dropping the page lock.  Because the condition which makes the page unevictable<br>may change once the page is unlocked, putback_lru_page() will recheck the<br>unevictable state of a page that it places on the unevictable list.  If the<br>page has become unevictable, putback_lru_page() removes it from the list and<br>retries, including the page_unevictable() test.  Because such a race is a rare<br>event and movement of pages onto the unevictable list should be rare, these<br>extra evictabilty checks should not occur in the majority of calls to<br>putback_lru_page().</p>
+<p>=============<br>MLOCKED PAGES<br>=============</p>
+<p>The unevictable page list is also useful for mlock(), in addition to ramfs and<br>SYSV SHM.  Note that mlock() is only available in CONFIG_MMU=y situations; in<br>NOMMU situations, all mappings are effectively mlocked.</p>
+<h2 id="HISTORY"><a href="#HISTORY" class="headerlink" title="HISTORY"></a>HISTORY</h2><p>The “Unevictable mlocked Pages” infrastructure is based on work originally<br>posted by Nick Piggin in an RFC patch entitled “mm: mlocked pages off LRU”.<br>Nick posted his patch as an alternative to a patch posted by Christoph Lameter<br>to achieve the same objective: hiding mlocked pages from vmscan.</p>
+<p>In Nick’s patch, he used one of the struct page LRU list link fields as a count<br>of VM_LOCKED VMAs that map the page.  This use of the link field for a count<br>prevented the management of the pages on an LRU list, and thus mlocked pages<br>were not migratable as isolate_lru_page() could not find them, and the LRU list<br>link field was not available to the migration subsystem.</p>
+<p>Nick resolved this by putting mlocked pages back on the lru list before<br>attempting to isolate them, thus abandoning the count of VM_LOCKED VMAs.  When<br>Nick’s patch was integrated with the Unevictable LRU work, the count was<br>replaced by walking the reverse map to determine whether any VM_LOCKED VMAs<br>mapped the page.  More on this below.</p>
+<h2 id="BASIC-MANAGEMENT"><a href="#BASIC-MANAGEMENT" class="headerlink" title="BASIC MANAGEMENT"></a>BASIC MANAGEMENT</h2><p>mlocked pages - pages mapped into a VM_LOCKED VMA - are a class of unevictable<br>pages.  When such a page has been “noticed” by the memory management subsystem,<br>the page is marked with the PG_mlocked flag.  This can be manipulated using the<br>PageMlocked() functions.</p>
+<p>A PG_mlocked page will be placed on the unevictable list when it is added to<br>the LRU.  Such pages can be “noticed” by memory management in several places:</p>
+<p> (1) in the mlock()/mlockall() system call handlers;</p>
+<p> (2) in the mmap() system call handler when mmapping a region with the<br>     MAP_LOCKED flag;</p>
+<p> (3) mmapping a region in a task that has called mlockall() with the MCL_FUTURE<br>     flag</p>
+<p> (4) in the fault path, if mlocked pages are “culled” in the fault path,<br>     and when a VM_LOCKED stack segment is expanded; or</p>
+<p> (5) as mentioned above, in vmscan:shrink_page_list() when attempting to<br>     reclaim a page in a VM_LOCKED VMA via try_to_unmap()</p>
+<p>all of which result in the VM_LOCKED flag being set for the VMA if it doesn’t<br>already have it set.</p>
+<p>mlocked pages become unlocked and rescued from the unevictable list when:</p>
+<p> (1) mapped in a range unlocked via the munlock()/munlockall() system calls;</p>
+<p> (2) munmap()’d out of the last VM_LOCKED VMA that maps the page, including<br>     unmapping at task exit;</p>
+<p> (3) when the page is truncated from the last VM_LOCKED VMA of an mmapped file;<br>     or</p>
+<p> (4) before a page is COW’d in a VM_LOCKED VMA.</p>
+<h2 id="mlock-mlockall-SYSTEM-CALL-HANDLING"><a href="#mlock-mlockall-SYSTEM-CALL-HANDLING" class="headerlink" title="mlock()/mlockall() SYSTEM CALL HANDLING"></a>mlock()/mlockall() SYSTEM CALL HANDLING</h2><p>Both [do_]mlock() and [do_]mlockall() system call handlers call mlock_fixup()<br>for each VMA in the range specified by the call.  In the case of mlockall(),<br>this is the entire active address space of the task.  Note that mlock_fixup()<br>is used for both mlocking and munlocking a range of memory.  A call to mlock()<br>an already VM_LOCKED VMA, or to munlock() a VMA that is not VM_LOCKED is<br>treated as a no-op, and mlock_fixup() simply returns.</p>
+<p>If the VMA passes some filtering as described in “Filtering Special Vmas”<br>below, mlock_fixup() will attempt to merge the VMA with its neighbors or split<br>off a subset of the VMA if the range does not cover the entire VMA.  Once the<br>VMA has been merged or split or neither, mlock_fixup() will call<br>populate_vma_page_range() to fault in the pages via get_user_pages() and to<br>mark the pages as mlocked via mlock_vma_page().</p>
+<p>Note that the VMA being mlocked might be mapped with PROT_NONE.  In this case,<br>get_user_pages() will be unable to fault in the pages.  That’s okay.  If pages<br>do end up getting faulted into this VM_LOCKED VMA, we’ll handle them in the<br>fault path or in vmscan.</p>
+<p>Also note that a page returned by get_user_pages() could be truncated or<br>migrated out from under us, while we’re trying to mlock it.  To detect this,<br>populate_vma_page_range() checks page_mapping() after acquiring the page lock.<br>If the page is still associated with its mapping, we’ll go ahead and call<br>mlock_vma_page().  If the mapping is gone, we just unlock the page and move on.<br>In the worst case, this will result in a page mapped in a VM_LOCKED VMA<br>remaining on a normal LRU list without being PageMlocked().  Again, vmscan will<br>detect and cull such pages.</p>
+<p>mlock_vma_page() will call TestSetPageMlocked() for each page returned by<br>get_user_pages().  We use TestSetPageMlocked() because the page might already<br>be mlocked by another task/VMA and we don’t want to do extra work.  We<br>especially do not want to count an mlocked page more than once in the<br>statistics.  If the page was already mlocked, mlock_vma_page() need do nothing<br>more.</p>
+<p>If the page was NOT already mlocked, mlock_vma_page() attempts to isolate the<br>page from the LRU, as it is likely on the appropriate active or inactive list<br>at that time.  If the isolate_lru_page() succeeds, mlock_vma_page() will put<br>back the page - by calling putback_lru_page() - which will notice that the page<br>is now mlocked and divert the page to the zone’s unevictable list.  If<br>mlock_vma_page() is unable to isolate the page from the LRU, vmscan will handle<br>it later if and when it attempts to reclaim the page.</p>
+<h2 id="FILTERING-SPECIAL-VMAS"><a href="#FILTERING-SPECIAL-VMAS" class="headerlink" title="FILTERING SPECIAL VMAS"></a>FILTERING SPECIAL VMAS</h2><p>mlock_fixup() filters several classes of “special” VMAs:</p>
+<ol>
+<li><p>VMAs with VM_IO or VM_PFNMAP set are skipped entirely.  The pages behind<br>these mappings are inherently pinned, so we don’t need to mark them as<br>mlocked.  In any case, most of the pages have no struct page in which to so<br>mark the page.  Because of this, get_user_pages() will fail for these VMAs,<br>so there is no sense in attempting to visit them.</p>
+</li>
+<li><p>VMAs mapping hugetlbfs page are already effectively pinned into memory.  We<br>neither need nor want to mlock() these pages.  However, to preserve the<br>prior behavior of mlock() - before the unevictable/mlock changes -<br>mlock_fixup() will call make_pages_present() in the hugetlbfs VMA range to<br>allocate the huge pages and populate the ptes.</p>
+</li>
+<li><p>VMAs with VM_DONTEXPAND are generally userspace mappings of kernel pages,<br>such as the VDSO page, relay channel pages, etc. These pages<br>are inherently unevictable and are not managed on the LRU lists.<br>mlock_fixup() treats these VMAs the same as hugetlbfs VMAs.  It calls<br>make_pages_present() to populate the ptes.</p>
+</li>
+</ol>
+<p>Note that for all of these special VMAs, mlock_fixup() does not set the<br>VM_LOCKED flag.  Therefore, we won’t have to deal with them later during<br>munlock(), munmap() or task exit.  Neither does mlock_fixup() account these<br>VMAs against the task’s “locked_vm”.</p>
+<h2 id="munlock-munlockall-SYSTEM-CALL-HANDLING"><a href="#munlock-munlockall-SYSTEM-CALL-HANDLING" class="headerlink" title="munlock()/munlockall() SYSTEM CALL HANDLING"></a>munlock()/munlockall() SYSTEM CALL HANDLING</h2><p>The munlock() and munlockall() system calls are handled by the same functions -<br>do_mlock<a href="">all</a> - as the mlock() and mlockall() system calls with the unlock vs<br>lock operation indicated by an argument.  So, these system calls are also<br>handled by mlock_fixup().  Again, if called for an already munlocked VMA,<br>mlock_fixup() simply returns.  Because of the VMA filtering discussed above,<br>VM_LOCKED will not be set in any “special” VMAs.  So, these VMAs will be<br>ignored for munlock.</p>
+<p>If the VMA is VM_LOCKED, mlock_fixup() again attempts to merge or split off the<br>specified range.  The range is then munlocked via the function<br>populate_vma_page_range() - the same function used to mlock a VMA range -<br>passing a flag to indicate that munlock() is being performed.</p>
+<p>Because the VMA access protections could have been changed to PROT_NONE after<br>faulting in and mlocking pages, get_user_pages() was unreliable for visiting<br>these pages for munlocking.  Because we don’t want to leave pages mlocked,<br>get_user_pages() was enhanced to accept a flag to ignore the permissions when<br>fetching the pages - all of which should be resident as a result of previous<br>mlocking.</p>
+<p>For munlock(), populate_vma_page_range() unlocks individual pages by calling<br>munlock_vma_page().  munlock_vma_page() unconditionally clears the PG_mlocked<br>flag using TestClearPageMlocked().  As with mlock_vma_page(),<br>munlock_vma_page() use the Test*PageMlocked() function to handle the case where<br>the page might have already been unlocked by another task.  If the page was<br>mlocked, munlock_vma_page() updates that zone statistics for the number of<br>mlocked pages.  Note, however, that at this point we haven’t checked whether<br>the page is mapped by other VM_LOCKED VMAs.</p>
+<p>We can’t call try_to_munlock(), the function that walks the reverse map to<br>check for other VM_LOCKED VMAs, without first isolating the page from the LRU.<br>try_to_munlock() is a variant of try_to_unmap() and thus requires that the page<br>not be on an LRU list [more on these below].  However, the call to<br>isolate_lru_page() could fail, in which case we couldn’t try_to_munlock().  So,<br>we go ahead and clear PG_mlocked up front, as this might be the only chance we<br>have.  If we can successfully isolate the page, we go ahead and<br>try_to_munlock(), which will restore the PG_mlocked flag and update the zone<br>page statistics if it finds another VMA holding the page mlocked.  If we fail<br>to isolate the page, we’ll have left a potentially mlocked page on the LRU.<br>This is fine, because we’ll catch it later if and if vmscan tries to reclaim<br>the page.  This should be relatively rare.</p>
+<h2 id="MIGRATING-MLOCKED-PAGES"><a href="#MIGRATING-MLOCKED-PAGES" class="headerlink" title="MIGRATING MLOCKED PAGES"></a>MIGRATING MLOCKED PAGES</h2><p>A page that is being migrated has been isolated from the LRU lists and is held<br>locked across unmapping of the page, updating the page’s address space entry<br>and copying the contents and state, until the page table entry has been<br>replaced with an entry that refers to the new page.  Linux supports migration<br>of mlocked pages and other unevictable pages.  This involves simply moving the<br>PG_mlocked and PG_unevictable states from the old page to the new page.</p>
+<p>Note that page migration can race with mlocking or munlocking of the same page.<br>This has been discussed from the mlock/munlock perspective in the respective<br>sections above.  Both processes (migration and m[un]locking) hold the page<br>locked.  This provides the first level of synchronization.  Page migration<br>zeros out the page_mapping of the old page before unlocking it, so m[un]lock<br>can skip these pages by testing the page mapping under page lock.</p>
+<p>To complete page migration, we place the new and old pages back onto the LRU<br>after dropping the page lock.  The “unneeded” page - old page on success, new<br>page on failure - will be freed when the reference count held by the migration<br>process is released.  To ensure that we don’t strand pages on the unevictable<br>list because of a race between munlock and migration, page migration uses the<br>putback_lru_page() function to add migrated pages back to the LRU.</p>
+<h2 id="mmap-MAP-LOCKED-SYSTEM-CALL-HANDLING"><a href="#mmap-MAP-LOCKED-SYSTEM-CALL-HANDLING" class="headerlink" title="mmap(MAP_LOCKED) SYSTEM CALL HANDLING"></a>mmap(MAP_LOCKED) SYSTEM CALL HANDLING</h2><p>In addition the the mlock()/mlockall() system calls, an application can request<br>that a region of memory be mlocked supplying the MAP_LOCKED flag to the mmap()<br>call.  Furthermore, any mmap() call or brk() call that expands the heap by a<br>task that has previously called mlockall() with the MCL_FUTURE flag will result<br>in the newly mapped memory being mlocked.  Before the unevictable/mlock<br>changes, the kernel simply called make_pages_present() to allocate pages and<br>populate the page table.</p>
+<p>To mlock a range of memory under the unevictable/mlock infrastructure, the<br>mmap() handler and task address space expansion functions call<br>populate_vma_page_range() specifying the vma and the address range to mlock.</p>
+<p>The callers of populate_vma_page_range() will have already added the memory range<br>to be mlocked to the task’s “locked_vm”.  To account for filtered VMAs,<br>populate_vma_page_range() returns the number of pages NOT mlocked.  All of the<br>callers then subtract a non-negative return value from the task’s locked_vm.  A<br>negative return value represent an error - for example, from get_user_pages()<br>attempting to fault in a VMA with PROT_NONE access.  In this case, we leave the<br>memory range accounted as locked_vm, as the protections could be changed later<br>and pages allocated into that region.</p>
+<h2 id="munmap-exit-exec-SYSTEM-CALL-HANDLING"><a href="#munmap-exit-exec-SYSTEM-CALL-HANDLING" class="headerlink" title="munmap()/exit()/exec() SYSTEM CALL HANDLING"></a>munmap()/exit()/exec() SYSTEM CALL HANDLING</h2><p>When unmapping an mlocked region of memory, whether by an explicit call to<br>munmap() or via an internal unmap from exit() or exec() processing, we must<br>munlock the pages if we’re removing the last VM_LOCKED VMA that maps the pages.<br>Before the unevictable/mlock changes, mlocking did not mark the pages in any<br>way, so unmapping them required no processing.</p>
+<p>To munlock a range of memory under the unevictable/mlock infrastructure, the<br>munmap() handler and task address space call tear down function<br>munlock_vma_pages_all().  The name reflects the observation that one always<br>specifies the entire VMA range when munlock()ing during unmap of a region.<br>Because of the VMA filtering when mlocking() regions, only “normal” VMAs that<br>actually contain mlocked pages will be passed to munlock_vma_pages_all().</p>
+<p>munlock_vma_pages_all() clears the VM_LOCKED VMA flag and, like mlock_fixup()<br>for the munlock case, calls __munlock_vma_pages_range() to walk the page table<br>for the VMA’s memory range and munlock_vma_page() each resident page mapped by<br>the VMA.  This effectively munlocks the page, only if this is the last<br>VM_LOCKED VMA that maps the page.</p>
+<h2 id="try-to-unmap"><a href="#try-to-unmap" class="headerlink" title="try_to_unmap()"></a>try_to_unmap()</h2><p>Pages can, of course, be mapped into multiple VMAs.  Some of these VMAs may<br>have VM_LOCKED flag set.  It is possible for a page mapped into one or more<br>VM_LOCKED VMAs not to have the PG_mlocked flag set and therefore reside on one<br>of the active or inactive LRU lists.  This could happen if, for example, a task<br>in the process of munlocking the page could not isolate the page from the LRU.<br>As a result, vmscan/shrink_page_list() might encounter such a page as described<br>in section “vmscan’s handling of unevictable pages”.  To handle this situation,<br>try_to_unmap() checks for VM_LOCKED VMAs while it is walking a page’s reverse<br>map.</p>
+<p>try_to_unmap() is always called, by either vmscan for reclaim or for page<br>migration, with the argument page locked and isolated from the LRU.  Separate<br>functions handle anonymous and mapped file pages, as these types of pages have<br>different reverse map mechanisms.</p>
+<p> (*) try_to_unmap_anon()</p>
+<pre><code> To unmap anonymous pages, each VMA in the list anchored in the anon_vma
+ must be visited - at least until a VM_LOCKED VMA is encountered.  If the
+ page is being unmapped for migration, VM_LOCKED VMAs do not stop the
+ process because mlocked pages are migratable.  However, for reclaim, if
+ the page is mapped into a VM_LOCKED VMA, the scan stops.
+
+ try_to_unmap_anon() attempts to acquire in read mode the mmap semaphore of
+ the mm_struct to which the VMA belongs.  If this is successful, it will
+ mlock the page via mlock_vma_page() - we wouldn&#39;t have gotten to
+ try_to_unmap_anon() if the page were already mlocked - and will return
+ SWAP_MLOCK, indicating that the page is unevictable.
+
+ If the mmap semaphore cannot be acquired, we are not sure whether the page
+ is really unevictable or not.  In this case, try_to_unmap_anon() will
+ return SWAP_AGAIN.
+</code></pre>
+<p> (*) try_to_unmap_file() - linear mappings</p>
+<pre><code> Unmapping of a mapped file page works the same as for anonymous mappings,
+ except that the scan visits all VMAs that map the page&#39;s index/page offset
+ in the page&#39;s mapping&#39;s reverse map priority search tree.  It also visits
+ each VMA in the page&#39;s mapping&#39;s non-linear list, if the list is
+ non-empty.
+
+ As for anonymous pages, on encountering a VM_LOCKED VMA for a mapped file
+ page, try_to_unmap_file() will attempt to acquire the associated
+ mm_struct&#39;s mmap semaphore to mlock the page, returning SWAP_MLOCK if this
+ is successful, and SWAP_AGAIN, if not.
+</code></pre>
+<p> (*) try_to_unmap_file() - non-linear mappings</p>
+<pre><code> If a page&#39;s mapping contains a non-empty non-linear mapping VMA list, then
+ try_to_un&#123;map|lock&#125;() must also visit each VMA in that list to determine
+ whether the page is mapped in a VM_LOCKED VMA.  Again, the scan must visit
+ all VMAs in the non-linear list to ensure that the pages is not/should not
+ be mlocked.
+
+ If a VM_LOCKED VMA is found in the list, the scan could terminate.
+ However, there is no easy way to determine whether the page is actually
+ mapped in a given VMA - either for unmapping or testing whether the
+ VM_LOCKED VMA actually pins the page.
+
+ try_to_unmap_file() handles non-linear mappings by scanning a certain
+ number of pages - a &quot;cluster&quot; - in each non-linear VMA associated with the
+ page&#39;s mapping, for each file mapped page that vmscan tries to unmap.  If
+ this happens to unmap the page we&#39;re trying to unmap, try_to_unmap() will
+ notice this on return (page_mapcount(page) will be 0) and return
+ SWAP_SUCCESS.  Otherwise, it will return SWAP_AGAIN, causing vmscan to
+ recirculate this page.  We take advantage of the cluster scan in
+ try_to_unmap_cluster() as follows:
+
+For each non-linear VMA, try_to_unmap_cluster() attempts to acquire the
+mmap semaphore of the associated mm_struct for read without blocking.
+
+If this attempt is successful and the VMA is VM_LOCKED,
+try_to_unmap_cluster() will retain the mmap semaphore for the scan;
+otherwise it drops it here.
+
+Then, for each page in the cluster, if we&#39;re holding the mmap semaphore
+for a locked VMA, try_to_unmap_cluster() calls mlock_vma_page() to
+mlock the page.  This call is a no-op if the page is already locked,
+but will mlock any pages in the non-linear mapping that happen to be
+unlocked.
+
+If one of the pages so mlocked is the page passed in to try_to_unmap(),
+try_to_unmap_cluster() will return SWAP_MLOCK, rather than the default
+SWAP_AGAIN.  This will allow vmscan to cull the page, rather than
+recirculating it on the inactive list.
+
+Again, if try_to_unmap_cluster() cannot acquire the VMA&#39;s mmap sem, it
+returns SWAP_AGAIN, indicating that the page is mapped by a VM_LOCKED
+VMA, but couldn&#39;t be mlocked.
+</code></pre>
+<h2 id="try-to-munlock-REVERSE-MAP-SCAN"><a href="#try-to-munlock-REVERSE-MAP-SCAN" class="headerlink" title="try_to_munlock() REVERSE MAP SCAN"></a>try_to_munlock() REVERSE MAP SCAN</h2><p> [!] TODO/FIXME: a better name might be page_mlocked() - analogous to the<br>     page_referenced() reverse map walker.</p>
+<p>When munlock_vma_page() [see section “munlock()/munlockall() System Call<br>Handling” above] tries to munlock a page, it needs to determine whether or not<br>the page is mapped by any VM_LOCKED VMA without actually attempting to unmap<br>all PTEs from the page.  For this purpose, the unevictable/mlock infrastructure<br>introduced a variant of try_to_unmap() called try_to_munlock().</p>
+<p>try_to_munlock() calls the same functions as try_to_unmap() for anonymous and<br>mapped file pages with an additional argument specifying unlock versus unmap<br>processing.  Again, these functions walk the respective reverse maps looking<br>for VM_LOCKED VMAs.  When such a VMA is found for anonymous pages and file<br>pages mapped in linear VMAs, as in the try_to_unmap() case, the functions<br>attempt to acquire the associated mmap semaphore, mlock the page via<br>mlock_vma_page() and return SWAP_MLOCK.  This effectively undoes the<br>pre-clearing of the page’s PG_mlocked done by munlock_vma_page.</p>
+<p>If try_to_unmap() is unable to acquire a VM_LOCKED VMA’s associated mmap<br>semaphore, it will return SWAP_AGAIN.  This will allow shrink_page_list() to<br>recycle the page on the inactive list and hope that it has better luck with the<br>page next time.</p>
+<p>For file pages mapped into non-linear VMAs, the try_to_munlock() logic works<br>slightly differently.  On encountering a VM_LOCKED non-linear VMA that might<br>map the page, try_to_munlock() returns SWAP_AGAIN without actually mlocking the<br>page.  munlock_vma_page() will just leave the page unlocked and let vmscan deal<br>with it - the usual fallback position.</p>
+<p>Note that try_to_munlock()’s reverse map walk must visit every VMA in a page’s<br>reverse map to determine that a page is NOT mapped into any VM_LOCKED VMA.<br>However, the scan can terminate when it encounters a VM_LOCKED VMA and can<br>successfully acquire the VMA’s mmap semaphore for read and mlock the page.<br>Although try_to_munlock() might be called a great many times when munlocking a<br>large region or tearing down a large address space that has been mlocked via<br>mlockall(), overall this is a fairly rare event.</p>
+<h2 id="PAGE-RECLAIM-IN-shrink-list"><a href="#PAGE-RECLAIM-IN-shrink-list" class="headerlink" title="PAGE RECLAIM IN shrink_*_list()"></a>PAGE RECLAIM IN shrink_*_list()</h2><p>shrink_active_list() culls any obviously unevictable pages - i.e.<br>!page_evictable(page) - diverting these to the unevictable list.<br>However, shrink_active_list() only sees unevictable pages that made it onto the<br>active/inactive lru lists.  Note that these pages do not have PageUnevictable<br>set - otherwise they would be on the unevictable list and shrink_active_list<br>would never see them.</p>
+<p>Some examples of these unevictable pages on the LRU lists are:</p>
+<p> (1) ramfs pages that have been placed on the LRU lists when first allocated.</p>
+<p> (2) SHM_LOCK’d shared memory pages.  shmctl(SHM_LOCK) does not attempt to<br>     allocate or fault in the pages in the shared memory region.  This happens<br>     when an application accesses the page the first time after SHM_LOCK’ing<br>     the segment.</p>
+<p> (3) mlocked pages that could not be isolated from the LRU and moved to the<br>     unevictable list in mlock_vma_page().</p>
+<p> (4) Pages mapped into multiple VM_LOCKED VMAs, but try_to_munlock() couldn’t<br>     acquire the VMA’s mmap semaphore to test the flags and set PageMlocked.<br>     munlock_vma_page() was forced to let the page back on to the normal LRU<br>     list for vmscan to handle.</p>
+<p>shrink_inactive_list() also diverts any unevictable pages that it finds on the<br>inactive lists to the appropriate zone’s unevictable list.</p>
+<p>shrink_inactive_list() should only see SHM_LOCK’d pages that became SHM_LOCK’d<br>after shrink_active_list() had moved them to the inactive list, or pages mapped<br>into VM_LOCKED VMAs that munlock_vma_page() couldn’t isolate from the LRU to<br>recheck via try_to_munlock().  shrink_inactive_list() won’t notice the latter,<br>but will pass on to shrink_page_list().</p>
+<p>shrink_page_list() again culls obviously unevictable pages that it could<br>encounter for similar reason to shrink_inactive_list().  Pages mapped into<br>VM_LOCKED VMAs but without PG_mlocked set will make it all the way to<br>try_to_unmap().  shrink_page_list() will divert them to the unevictable list<br>when try_to_unmap() returns SWAP_MLOCK, as discussed above.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/" title="Kernel-3.10.0-957.el7_unevictable-lru" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_sym53c8xx_2/" title="Kernel-3.10.0-957.el7_sym53c8xx_2"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/" title="Kernel-3.10.0-957.el7_whatisRCU"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

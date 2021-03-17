@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_ppc-pv | oosTech.com</title>
+  <meta name="description" content="The PPC KVM paravirtual interfaceThe basic execution principle by which KVM on PowerPC works is to run all kernelspace code in PR&#x3D;1 which is user space. This way we trap all privilegedinstructions and">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_ppc-pv">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The PPC KVM paravirtual interfaceThe basic execution principle by which KVM on PowerPC works is to run all kernelspace code in PR&#x3D;1 which is user space. This way we trap all privilegedinstructions and">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#The-PPC-KVM-paravirtual-interface"><span class="toc-number">1.</span> <span class="toc-text">The PPC KVM paravirtual interface</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Querying-for-existence"><span class="toc-number">2.</span> <span class="toc-text">Querying for existence</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#KVM-hypercalls"><span class="toc-number">3.</span> <span class="toc-text">KVM hypercalls</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-magic-page"><span class="toc-number">4.</span> <span class="toc-text">The magic page</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Magic-page-features"><span class="toc-number">5.</span> <span class="toc-text">Magic page features</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Magic-page-flags"><span class="toc-number">6.</span> <span class="toc-text">Magic page flags</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MSR-bits"><span class="toc-number">7.</span> <span class="toc-text">MSR bits</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Patched-instructions"><span class="toc-number">8.</span> <span class="toc-text">Patched instructions</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Hypercall-ABIs-in-KVM-on-PowerPC"><span class="toc-number">9.</span> <span class="toc-text">Hypercall ABIs in KVM on PowerPC</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_ppc-pv" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_ppc-pv
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="The-PPC-KVM-paravirtual-interface"><a href="#The-PPC-KVM-paravirtual-interface" class="headerlink" title="The PPC KVM paravirtual interface"></a>The PPC KVM paravirtual interface</h1><p>The basic execution principle by which KVM on PowerPC works is to run all kernel<br>space code in PR=1 which is user space. This way we trap all privileged<br>instructions and can emulate them accordingly.</p>
+<p>Unfortunately that is also the downfall. There are quite some privileged<br>instructions that needlessly return us to the hypervisor even though they<br>could be handled differently.</p>
+<p>This is what the PPC PV interface helps with. It takes privileged instructions<br>and transforms them into unprivileged ones with some help from the hypervisor.<br>This cuts down virtualization costs by about 50% on some of my benchmarks.</p>
+<p>The code for that interface can be found in arch/powerpc/kernel/kvm*</p>
+<h1 id="Querying-for-existence"><a href="#Querying-for-existence" class="headerlink" title="Querying for existence"></a>Querying for existence</h1><p>To find out if we’re running on KVM or not, we leverage the device tree. When<br>Linux is running on KVM, a node /hypervisor exists. That node contains a<br>compatible property with the value “linux,kvm”.</p>
+<p>Once you determined you’re running under a PV capable KVM, you can now use<br>hypercalls as described below.</p>
+<h1 id="KVM-hypercalls"><a href="#KVM-hypercalls" class="headerlink" title="KVM hypercalls"></a>KVM hypercalls</h1><p>Inside the device tree’s /hypervisor node there’s a property called<br>‘hypercall-instructions’. This property contains at most 4 opcodes that make<br>up the hypercall. To call a hypercall, just call these instructions.</p>
+<p>The parameters are as follows:</p>
+<pre><code>Register    IN            OUT
+
+r0        -            volatile
+r3        1st parameter        Return code
+r4        2nd parameter        1st output value
+r5        3rd parameter        2nd output value
+r6        4th parameter        3rd output value
+r7        5th parameter        4th output value
+r8        6th parameter        5th output value
+r9        7th parameter        6th output value
+r10        8th parameter        7th output value
+r11        hypercall number    8th output value
+r12        -            volatile
+</code></pre>
+<p>Hypercall definitions are shared in generic code, so the same hypercall numbers<br>apply for x86 and powerpc alike with the exception that each KVM hypercall<br>also needs to be ORed with the KVM vendor code which is (42 &lt;&lt; 16).</p>
+<p>Return codes can be as follows:</p>
+<pre><code>Code        Meaning
+
+0        Success
+12        Hypercall not implemented
+&lt;0        Error
+</code></pre>
+<h1 id="The-magic-page"><a href="#The-magic-page" class="headerlink" title="The magic page"></a>The magic page</h1><p>To enable communication between the hypervisor and guest there is a new shared<br>page that contains parts of supervisor visible register state. The guest can<br>map this shared page using the KVM hypercall KVM_HC_PPC_MAP_MAGIC_PAGE.</p>
+<p>With this hypercall issued the guest always gets the magic page mapped at the<br>desired location. The first parameter indicates the effective address when the<br>MMU is enabled. The second parameter indicates the address in real mode, if<br>applicable to the target. For now, we always map the page to -4096. This way we<br>can access it using absolute load and store functions. The following<br>instruction reads the first field of the magic page:</p>
+<pre><code>ld    rX, -4096(0)
+</code></pre>
+<p>The interface is designed to be extensible should there be need later to add<br>additional registers to the magic page. If you add fields to the magic page,<br>also define a new hypercall feature to indicate that the host can give you more<br>registers. Only if the host supports the additional features, make use of them.</p>
+<p>The magic page layout is described by struct kvm_vcpu_arch_shared<br>in arch/powerpc/include/asm/kvm_para.h.</p>
+<h1 id="Magic-page-features"><a href="#Magic-page-features" class="headerlink" title="Magic page features"></a>Magic page features</h1><p>When mapping the magic page using the KVM hypercall KVM_HC_PPC_MAP_MAGIC_PAGE,<br>a second return value is passed to the guest. This second return value contains<br>a bitmap of available features inside the magic page.</p>
+<p>The following enhancements to the magic page are currently available:</p>
+<p>  KVM_MAGIC_FEAT_SR        Maps SR registers r/w in the magic page<br>  KVM_MAGIC_FEAT_MAS0_TO_SPRG7    Maps MASn, ESR, PIR and high SPRGs</p>
+<p>For enhanced features in the magic page, please check for the existence of the<br>feature before using them!</p>
+<h1 id="Magic-page-flags"><a href="#Magic-page-flags" class="headerlink" title="Magic page flags"></a>Magic page flags</h1><p>In addition to features that indicate whether a host is capable of a particular<br>feature we also have a channel for a guest to tell the guest whether it’s capable<br>of something. This is what we call “flags”.</p>
+<p>Flags are passed to the host in the low 12 bits of the Effective Address.</p>
+<p>The following flags are currently available for a guest to expose:</p>
+<p>  MAGIC_PAGE_FLAG_NOT_MAPPED_NX Guest handles NX bits correctly wrt magic page</p>
+<h1 id="MSR-bits"><a href="#MSR-bits" class="headerlink" title="MSR bits"></a>MSR bits</h1><p>The MSR contains bits that require hypervisor intervention and bits that do<br>not require direct hypervisor intervention because they only get interpreted<br>when entering the guest or don’t have any impact on the hypervisor’s behavior.</p>
+<p>The following bits are safe to be set inside the guest:</p>
+<p>  MSR_EE<br>  MSR_RI</p>
+<p>If any other bit changes in the MSR, please still use mtmsr(d).</p>
+<h1 id="Patched-instructions"><a href="#Patched-instructions" class="headerlink" title="Patched instructions"></a>Patched instructions</h1><p>The “ld” and “std” instructions are transformed to “lwz” and “stw” instructions<br>respectively on 32 bit systems with an added offset of 4 to accommodate for big<br>endianness.</p>
+<p>The following is a list of mapping the Linux kernel performs when running as<br>guest. Implementing any of those mappings is optional, as the instruction traps<br>also act on the shared page. So calling privileged instructions still works as<br>before.</p>
+<p>From            To<br>====            ==</p>
+<p>mfmsr    rX        ld    rX, magic_page-&gt;msr<br>mfsprg    rX, 0        ld    rX, magic_page-&gt;sprg0<br>mfsprg    rX, 1        ld    rX, magic_page-&gt;sprg1<br>mfsprg    rX, 2        ld    rX, magic_page-&gt;sprg2<br>mfsprg    rX, 3        ld    rX, magic_page-&gt;sprg3<br>mfsrr0    rX        ld    rX, magic_page-&gt;srr0<br>mfsrr1    rX        ld    rX, magic_page-&gt;srr1<br>mfdar    rX        ld    rX, magic_page-&gt;dar<br>mfdsisr    rX        lwz    rX, magic_page-&gt;dsisr</p>
+<p>mtmsr    rX        std    rX, magic_page-&gt;msr<br>mtsprg    0, rX        std    rX, magic_page-&gt;sprg0<br>mtsprg    1, rX        std    rX, magic_page-&gt;sprg1<br>mtsprg    2, rX        std    rX, magic_page-&gt;sprg2<br>mtsprg    3, rX        std    rX, magic_page-&gt;sprg3<br>mtsrr0    rX        std    rX, magic_page-&gt;srr0<br>mtsrr1    rX        std    rX, magic_page-&gt;srr1<br>mtdar    rX        std    rX, magic_page-&gt;dar<br>mtdsisr    rX        stw    rX, magic_page-&gt;dsisr</p>
+<p>tlbsync            nop</p>
+<p>mtmsrd    rX, 0        b    <special mtmsr section><br>mtmsr    rX        b    <special mtmsr section></p>
+<p>mtmsrd    rX, 1        b    <special mtmsrd section></p>
+<p>[Book3S only]<br>mtsrin    rX, rY        b    <special mtsrin section></p>
+<p>[BookE only]<br>wrteei    [0|1]        b    <special wrteei section></p>
+<p>Some instructions require more logic to determine what’s going on than a load<br>or store instruction can deliver. To enable patching of those, we keep some<br>RAM around where we can live translate instructions to. What happens is the<br>following:</p>
+<pre><code>1) copy emulation code to memory
+2) patch that code to fit the emulated instruction
+3) patch that code to return to the original pc + 4
+4) patch the original instruction to branch to the new code
+</code></pre>
+<p>That way we can inject an arbitrary amount of code as replacement for a single<br>instruction. This allows us to check for pending interrupts when setting EE=1<br>for example.</p>
+<h1 id="Hypercall-ABIs-in-KVM-on-PowerPC"><a href="#Hypercall-ABIs-in-KVM-on-PowerPC" class="headerlink" title="Hypercall ABIs in KVM on PowerPC"></a>Hypercall ABIs in KVM on PowerPC</h1><ol>
+<li>KVM hypercalls (ePAPR)</li>
+</ol>
+<p>These are ePAPR compliant hypercall implementation (mentioned above). Even<br>generic hypercalls are implemented here, like the ePAPR idle hcall. These are<br>available on all targets.</p>
+<ol start="2">
+<li>PAPR hypercalls</li>
+</ol>
+<p>PAPR hypercalls are needed to run server PowerPC PAPR guests (-M pseries in QEMU).<br>These are the same hypercalls that pHyp, the POWER hypervisor implements. Some of<br>them are handled in the kernel, some are handled in user space. This is only<br>available on book3s_64.</p>
+<ol start="3">
+<li>OSI hypercalls</li>
+</ol>
+<p>Mac-on-Linux is another user of KVM on PowerPC, which has its own hypercall (long<br>before KVM). This is supported to maintain compatibility. All these hypercalls get<br>forwarded to user space. This is only useful on book3s_32, but can be used with<br>book3s_64 as well.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/" title="Kernel-4.18.0-80.el8_ppc-pv" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ppc-pv/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_ppa/" title="Kernel-4.18.0-80.el8_ppa"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_ppc440spe-adma/" title="Kernel-4.18.0-80.el8_ppc440spe-adma"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

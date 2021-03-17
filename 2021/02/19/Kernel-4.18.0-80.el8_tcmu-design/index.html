@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_tcmu-design | oosTech.com</title>
+  <meta name="description" content="Contents:  TCM Userspace Designa) Backgroundb) Benefitsc) Design constraintsd) Implementation overview  i. Mailbox  ii. Command ring  iii. Data Areae) Device discoveryf) Device eventsg) Other continge">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_tcmu-design">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Contents:  TCM Userspace Designa) Backgroundb) Benefitsc) Design constraintsd) Implementation overview  i. Mailbox  ii. Command ring  iii. Data Areae) Device discoveryf) Device eventsg) Other continge">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#TCM-Userspace-Design"><span class="toc-number">1.</span> <span class="toc-text">TCM Userspace Design</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Writing-a-user-pass-through-handler-with-example-code"><span class="toc-number">2.</span> <span class="toc-text">Writing a user pass-through handler (with example code)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#A-final-note"><span class="toc-number">3.</span> <span class="toc-text">A final note</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_tcmu-design" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_tcmu-design
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Contents:</p>
+<ol>
+<li>TCM Userspace Design<br>a) Background<br>b) Benefits<br>c) Design constraints<br>d) Implementation overview<br>  i. Mailbox<br>  ii. Command ring<br>  iii. Data Area<br>e) Device discovery<br>f) Device events<br>g) Other contingencies</li>
+<li>Writing a user pass-through handler<br>a) Discovering and configuring TCMU uio devices<br>b) Waiting for events on the device(s)<br>c) Managing the command ring</li>
+<li>A final note</li>
+</ol>
+<h2 id="TCM-Userspace-Design"><a href="#TCM-Userspace-Design" class="headerlink" title="TCM Userspace Design"></a>TCM Userspace Design</h2><p>TCM is another name for LIO, an in-kernel iSCSI target (server).<br>Existing TCM targets run in the kernel.  TCMU (TCM in Userspace)<br>allows userspace programs to be written which act as iSCSI targets.<br>This document describes the design.</p>
+<p>The existing kernel provides modules for different SCSI transport<br>protocols.  TCM also modularizes the data storage.  There are existing<br>modules for file, block device, RAM or using another SCSI device as<br>storage.  These are called “backstores” or “storage engines”.  These<br>built-in modules are implemented entirely as kernel code.</p>
+<p>Background:</p>
+<p>In addition to modularizing the transport protocol used for carrying<br>SCSI commands (“fabrics”), the Linux kernel target, LIO, also modularizes<br>the actual data storage as well. These are referred to as “backstores”<br>or “storage engines”. The target comes with backstores that allow a<br>file, a block device, RAM, or another SCSI device to be used for the<br>local storage needed for the exported SCSI LUN. Like the rest of LIO,<br>these are implemented entirely as kernel code.</p>
+<p>These backstores cover the most common use cases, but not all. One new<br>use case that other non-kernel target solutions, such as tgt, are able<br>to support is using Gluster’s GLFS or Ceph’s RBD as a backstore. The<br>target then serves as a translator, allowing initiators to store data<br>in these non-traditional networked storage systems, while still only<br>using standard protocols themselves.</p>
+<p>If the target is a userspace process, supporting these is easy. tgt,<br>for example, needs only a small adapter module for each, because the<br>modules just use the available userspace libraries for RBD and GLFS.</p>
+<p>Adding support for these backstores in LIO is considerably more<br>difficult, because LIO is entirely kernel code. Instead of undertaking<br>the significant work to port the GLFS or RBD APIs and protocols to the<br>kernel, another approach is to create a userspace pass-through<br>backstore for LIO, “TCMU”.</p>
+<p>Benefits:</p>
+<p>In addition to allowing relatively easy support for RBD and GLFS, TCMU<br>will also allow easier development of new backstores. TCMU combines<br>with the LIO loopback fabric to become something similar to FUSE<br>(Filesystem in Userspace), but at the SCSI layer instead of the<br>filesystem layer. A SUSE, if you will.</p>
+<p>The disadvantage is there are more distinct components to configure, and<br>potentially to malfunction. This is unavoidable, but hopefully not<br>fatal if we’re careful to keep things as simple as possible.</p>
+<p>Design constraints:</p>
+<ul>
+<li>Good performance: high throughput, low latency</li>
+<li>Cleanly handle if userspace:<ol>
+<li>never attaches</li>
+<li>hangs</li>
+<li>dies</li>
+<li>misbehaves</li>
+</ol>
+</li>
+<li>Allow future flexibility in user &amp; kernel implementations</li>
+<li>Be reasonably memory-efficient</li>
+<li>Simple to configure &amp; run</li>
+<li>Simple to write a userspace backend</li>
+</ul>
+<p>Implementation overview:</p>
+<p>The core of the TCMU interface is a memory region that is shared<br>between kernel and userspace. Within this region is: a control area<br>(mailbox); a lockless producer/consumer circular buffer for commands<br>to be passed up, and status returned; and an in/out data buffer area.</p>
+<p>TCMU uses the pre-existing UIO subsystem. UIO allows device driver<br>development in userspace, and this is conceptually very close to the<br>TCMU use case, except instead of a physical device, TCMU implements a<br>memory-mapped layout designed for SCSI commands. Using UIO also<br>benefits TCMU by handling device introspection (e.g. a way for<br>userspace to determine how large the shared region is) and signaling<br>mechanisms in both directions.</p>
+<p>There are no embedded pointers in the memory region. Everything is<br>expressed as an offset from the region’s starting address. This allows<br>the ring to still work if the user process dies and is restarted with<br>the region mapped at a different virtual address.</p>
+<p>See target_core_user.h for the struct definitions.</p>
+<p>The Mailbox:</p>
+<p>The mailbox is always at the start of the shared memory region, and<br>contains a version, details about the starting offset and size of the<br>command ring, and head and tail pointers to be used by the kernel and<br>userspace (respectively) to put commands on the ring, and indicate<br>when the commands are completed.</p>
+<p>version - 1 (userspace should abort if otherwise)<br>flags:</p>
+<ul>
+<li>TCMU_MAILBOX_FLAG_CAP_OOOC: indicates out-of-order completion is<br>supported.  See “The Command Ring” for details.<br>cmdr_off - The offset of the start of the command ring from the start<br>of the memory region, to account for the mailbox size.<br>cmdr_size - The size of the command ring. This does <em>not</em> need to be a<br>power of two.<br>cmd_head - Modified by the kernel to indicate when a command has been<br>placed on the ring.<br>cmd_tail - Modified by userspace to indicate when it has completed<br>processing of a command.</li>
+</ul>
+<p>The Command Ring:</p>
+<p>Commands are placed on the ring by the kernel incrementing<br>mailbox.cmd_head by the size of the command, modulo cmdr_size, and<br>then signaling userspace via uio_event_notify(). Once the command is<br>completed, userspace updates mailbox.cmd_tail in the same way and<br>signals the kernel via a 4-byte write(). When cmd_head equals<br>cmd_tail, the ring is empty – no commands are currently waiting to be<br>processed by userspace.</p>
+<p>TCMU commands are 8-byte aligned. They start with a common header<br>containing “len_op”, a 32-bit value that stores the length, as well as<br>the opcode in the lowest unused bits. It also contains cmd_id and<br>flags fields for setting by the kernel (kflags) and userspace<br>(uflags).</p>
+<p>Currently only two opcodes are defined, TCMU_OP_CMD and TCMU_OP_PAD.</p>
+<p>When the opcode is CMD, the entry in the command ring is a struct<br>tcmu_cmd_entry. Userspace finds the SCSI CDB (Command Data Block) via<br>tcmu_cmd_entry.req.cdb_off. This is an offset from the start of the<br>overall shared memory region, not the entry. The data in/out buffers<br>are accessible via tht req.iov[] array. iov_cnt contains the number of<br>entries in iov[] needed to describe either the Data-In or Data-Out<br>buffers. For bidirectional commands, iov_cnt specifies how many iovec<br>entries cover the Data-Out area, and iov_bidi_cnt specifies how many<br>iovec entries immediately after that in iov[] cover the Data-In<br>area. Just like other fields, iov.iov_base is an offset from the start<br>of the region.</p>
+<p>When completing a command, userspace sets rsp.scsi_status, and<br>rsp.sense_buffer if necessary. Userspace then increments<br>mailbox.cmd_tail by entry.hdr.length (mod cmdr_size) and signals the<br>kernel via the UIO method, a 4-byte write to the file descriptor.</p>
+<p>If TCMU_MAILBOX_FLAG_CAP_OOOC is set for mailbox-&gt;flags, kernel is<br>capable of handling out-of-order completions. In this case, userspace can<br>handle command in different order other than original. Since kernel would<br>still process the commands in the same order it appeared in the command<br>ring, userspace need to update the cmd-&gt;id when completing the<br>command(a.k.a steal the original command’s entry).</p>
+<p>When the opcode is PAD, userspace only updates cmd_tail as above –<br>it’s a no-op. (The kernel inserts PAD entries to ensure each CMD entry<br>is contiguous within the command ring.)</p>
+<p>More opcodes may be added in the future. If userspace encounters an<br>opcode it does not handle, it must set UNKNOWN_OP bit (bit 0) in<br>hdr.uflags, update cmd_tail, and proceed with processing additional<br>commands, if any.</p>
+<p>The Data Area:</p>
+<p>This is shared-memory space after the command ring. The organization<br>of this area is not defined in the TCMU interface, and userspace<br>should access only the parts referenced by pending iovs.</p>
+<p>Device Discovery:</p>
+<p>Other devices may be using UIO besides TCMU. Unrelated user processes<br>may also be handling different sets of TCMU devices. TCMU userspace<br>processes must find their devices by scanning sysfs<br>class/uio/uio*/name. For TCMU devices, these names will be of the<br>format:</p>
+<p>tcm-user/<hba_num>/<device_name>/<subtype>/<path></p>
+<p>where “tcm-user” is common for all TCMU-backed UIO devices. <hba_num><br>and <device_name> allow userspace to find the device’s path in the<br>kernel target’s configfs tree. Assuming the usual mount point, it is<br>found at:</p>
+<p>/sys/kernel/config/target/core/user_<hba_num>/<device_name></p>
+<p>This location contains attributes such as “hw_block_size”, that<br>userspace needs to know for correct operation.</p>
+<p><subtype> will be a userspace-process-unique string to identify the<br>TCMU device as expecting to be backed by a certain handler, and <path><br>will be an additional handler-specific string for the user process to<br>configure the device, if needed. The name cannot contain ‘:’, due to<br>LIO limitations.</p>
+<p>For all devices so discovered, the user handler opens /dev/uioX and<br>calls mmap():</p>
+<p>mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0)</p>
+<p>where size must be equal to the value read from<br>/sys/class/uio/uioX/maps/map0/size.</p>
+<p>Device Events:</p>
+<p>If a new device is added or removed, a notification will be broadcast<br>over netlink, using a generic netlink family name of “TCM-USER” and a<br>multicast group named “config”. This will include the UIO name as<br>described in the previous section, as well as the UIO minor<br>number. This should allow userspace to identify both the UIO device and<br>the LIO device, so that after determining the device is supported<br>(based on subtype) it can take the appropriate action.</p>
+<p>Other contingencies:</p>
+<p>Userspace handler process never attaches:</p>
+<ul>
+<li>TCMU will post commands, and then abort them after a timeout period<br>(30 seconds.)</li>
+</ul>
+<p>Userspace handler process is killed:</p>
+<ul>
+<li>It is still possible to restart and re-connect to TCMU<br>devices. Command ring is preserved. However, after the timeout period,<br>the kernel will abort pending tasks.</li>
+</ul>
+<p>Userspace handler process hangs:</p>
+<ul>
+<li>The kernel will abort pending tasks after a timeout period.</li>
+</ul>
+<p>Userspace handler process is malicious:</p>
+<ul>
+<li>The process can trivially break the handling of devices it controls,<br>but should not be able to access kernel memory outside its shared<br>memory areas.</li>
+</ul>
+<h2 id="Writing-a-user-pass-through-handler-with-example-code"><a href="#Writing-a-user-pass-through-handler-with-example-code" class="headerlink" title="Writing a user pass-through handler (with example code)"></a>Writing a user pass-through handler (with example code)</h2><p>A user process handing a TCMU device must support the following:</p>
+<p>a) Discovering and configuring TCMU uio devices<br>b) Waiting for events on the device(s)<br>c) Managing the command ring: Parsing operations and commands,<br>   performing work as needed, setting response fields (scsi_status and<br>   possibly sense_buffer), updating cmd_tail, and notifying the kernel<br>   that work has been finished</p>
+<p>First, consider instead writing a plugin for tcmu-runner. tcmu-runner<br>implements all of this, and provides a higher-level API for plugin<br>authors.</p>
+<p>TCMU is designed so that multiple unrelated processes can manage TCMU<br>devices separately. All handlers should make sure to only open their<br>devices, based opon a known subtype string.</p>
+<p>a) Discovering and configuring TCMU UIO devices:</p>
+<p>(error checking omitted for brevity)</p>
+<p>int fd, dev_fd;<br>char buf[256];<br>unsigned long long map_len;<br>void *map;</p>
+<p>fd = open(“/sys/class/uio/uio0/name”, O_RDONLY);<br>ret = read(fd, buf, sizeof(buf));<br>close(fd);<br>buf[ret-1] = ‘\0’; /* null-terminate and chop off the \n */</p>
+<p>/* we only want uio devices whose name is a format we expect */<br>if (strncmp(buf, “tcm-user”, 8))<br>    exit(-1);</p>
+<p>/* Further checking for subtype also needed here */</p>
+<p>fd = open(/sys/class/uio/%s/maps/map0/size, O_RDONLY);<br>ret = read(fd, buf, sizeof(buf));<br>close(fd);<br>str_buf[ret-1] = ‘\0’; /* null-terminate and chop off the \n */</p>
+<p>map_len = strtoull(buf, NULL, 0);</p>
+<p>dev_fd = open(“/dev/uio0”, O_RDWR);<br>map = mmap(NULL, map_len, PROT_READ|PROT_WRITE, MAP_SHARED, dev_fd, 0);</p>
+<p>b) Waiting for events on the device(s)</p>
+<p>while (1) {<br>  char buf[4];</p>
+<p>  int ret = read(dev_fd, buf, 4); /* will block */</p>
+<p>  handle_device_events(dev_fd, map);<br>}</p>
+<p>c) Managing the command ring</p>
+<p>#include &lt;linux/target_core_user.h&gt;</p>
+<p>int handle_device_events(int fd, void *map)<br>{<br>  struct tcmu_mailbox *mb = map;<br>  struct tcmu_cmd_entry *ent = (void *) mb + mb-&gt;cmdr_off + mb-&gt;cmd_tail;<br>  int did_some_work = 0;</p>
+<p>  /* Process events from cmd ring until we catch up with cmd_head */<br>  while (ent != (void *)mb + mb-&gt;cmdr_off + mb-&gt;cmd_head) {</p>
+<pre><code>if (tcmu_hdr_get_op(ent-&gt;hdr.len_op) == TCMU_OP_CMD) &#123;
+  uint8_t *cdb = (void *)mb + ent-&gt;req.cdb_off;
+  bool success = true;
+
+  /* Handle command here. */
+  printf(&quot;SCSI opcode: 0x%x\n&quot;, cdb[0]);
+
+  /* Set response fields */
+  if (success)
+    ent-&gt;rsp.scsi_status = SCSI_NO_SENSE;
+  else &#123;
+    /* Also fill in rsp-&gt;sense_buffer here */
+    ent-&gt;rsp.scsi_status = SCSI_CHECK_CONDITION;
+  &#125;
+&#125;
+else if (tcmu_hdr_get_op(ent-&gt;hdr.len_op) != TCMU_OP_PAD) &#123;
+  /* Tell the kernel we didn&#39;t handle unknown opcodes */
+  ent-&gt;hdr.uflags |= TCMU_UFLAG_UNKNOWN_OP;
+&#125;
+else &#123;
+  /* Do nothing for PAD entries except update cmd_tail */
+&#125;
+
+/* update cmd_tail */
+mb-&gt;cmd_tail = (mb-&gt;cmd_tail + tcmu_hdr_get_len(&amp;ent-&gt;hdr)) % mb-&gt;cmdr_size;
+ent = (void *) mb + mb-&gt;cmdr_off + mb-&gt;cmd_tail;
+did_some_work = 1;
+</code></pre>
+<p>  }</p>
+<p>  /* Notify the kernel that work has been finished */<br>  if (did_some_work) {<br>    uint32_t buf = 0;</p>
+<pre><code>write(fd, &amp;buf, 4);
+</code></pre>
+<p>  }</p>
+<p>  return 0;<br>}</p>
+<h2 id="A-final-note"><a href="#A-final-note" class="headerlink" title="A final note"></a>A final note</h2><p>Please be careful to return codes as defined by the SCSI<br>specifications. These are different than some values defined in the<br>scsi/scsi.h include file. For example, CHECK CONDITION’s status code<br>is 2, not 1.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/" title="Kernel-4.18.0-80.el8_tcmu-design" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_tcmu-design/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_tcm_qla2xxx/" title="Kernel-4.18.0-80.el8_tcm_qla2xxx"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_tcp-thin/" title="Kernel-4.18.0-80.el8_tcp-thin"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

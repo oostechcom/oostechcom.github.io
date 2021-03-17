@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_volatile-considered-harmful | oosTech.com</title>
+  <meta name="description" content="Chinese translated version of Documentation&#x2F;process&#x2F;volatile-considered-harmful.rst If you have any comment or update to the content, please contact theoriginal document maintainer directly.  However,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_volatile-considered-harmful">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Chinese translated version of Documentation&#x2F;process&#x2F;volatile-considered-harmful.rst If you have any comment or update to the content, please contact theoriginal document maintainer directly.  However,">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#a%C2%B8%C2%BAa%C2%BB%C2%80a%C2%B9%C2%88a%C2%B8%C2%8Da%C2%BA%C2%94e%C2%AF%C2%A5a%C2%BD%C2%BFc%C2%94%C2%A8a%C2%80oevolatilea%C2%80%C2%9Dc%C2%B1%C2%BBa%C2%9E%C2%8B"><span class="toc-number">1.</span> <span class="toc-text">ä¸ºä»ä¹ä¸åºè¯¥ä½¿ç¨âvolatileâç±»å</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ae%C2%B3%C2%A8e%C2%87%C2%8A"><span class="toc-number">2.</span> <span class="toc-text">æ³¨é</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%87%C2%B4e%C2%B0%C2%A2"><span class="toc-number">3.</span> <span class="toc-text">è´è°¢</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_volatile-considered-harmful" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_volatile-considered-harmful
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Chinese translated version of Documentation/process/volatile-considered-harmful.rst</p>
+<p>If you have any comment or update to the content, please contact the<br>original document maintainer directly.  However, if you have a problem<br>communicating in English you can also ask the Chinese maintainer for<br>help.  Contact the Chinese maintainer if this translation is outdated<br>or if there is a problem with the translation.</p>
+<p>Maintainer: Jonathan Corbet <a href="mailto:&#x63;&#x6f;&#x72;&#98;&#x65;&#x74;&#64;&#x6c;&#119;&#x6e;&#x2e;&#x6e;&#101;&#116;">&#x63;&#x6f;&#x72;&#98;&#x65;&#x74;&#64;&#x6c;&#119;&#x6e;&#x2e;&#x6e;&#101;&#116;</a><br>Chinese maintainer: Bryan Wu <a href="mailto:&#98;&#x72;&#x79;&#x61;&#110;&#46;&#x77;&#x75;&#64;&#97;&#110;&#97;&#x6c;&#111;&#103;&#x2e;&#99;&#111;&#x6d;">&#98;&#x72;&#x79;&#x61;&#110;&#46;&#x77;&#x75;&#64;&#97;&#110;&#97;&#x6c;&#111;&#103;&#x2e;&#99;&#111;&#x6d;</a></p>
+<hr>
+<p>Documentation/process/volatile-considered-harmful.rst çä¸­æç¿»è¯</p>
+<p>å¦ææ³è¯è®ºææ´æ°æ¬æçåå®¹ï¼è¯·ç´æ¥èç³»åææ¡£çç»´æ¤èãå¦æä½ ä½¿ç¨è±æ<br>äº¤æµæå°é¾çè¯ï¼ä¹å¯ä»¥åä¸­æçç»´æ¤èæ±å©ãå¦ææ¬ç¿»è¯æ´æ°ä¸åæ¶æèç¿»<br>è¯å­å¨é®é¢ï¼è¯·èç³»ä¸­æçç»´æ¤èã</p>
+<p>è±æçç»´æ¤èï¼ Jonathan Corbet <a href="mailto:&#x63;&#x6f;&#x72;&#98;&#101;&#116;&#64;&#x6c;&#x77;&#110;&#46;&#110;&#x65;&#116;">&#x63;&#x6f;&#x72;&#98;&#101;&#116;&#64;&#x6c;&#x77;&#110;&#46;&#110;&#x65;&#116;</a><br>ä¸­æçç»´æ¤èï¼ ä¼é¹  Bryan Wu <a href="mailto:&#x62;&#114;&#x79;&#x61;&#x6e;&#46;&#x77;&#x75;&#x40;&#97;&#110;&#97;&#108;&#111;&#103;&#46;&#99;&#x6f;&#109;">&#x62;&#114;&#x79;&#x61;&#x6e;&#46;&#x77;&#x75;&#x40;&#97;&#110;&#97;&#108;&#111;&#103;&#46;&#99;&#x6f;&#109;</a><br>ä¸­æçç¿»è¯èï¼ ä¼é¹  Bryan Wu <a href="mailto:&#x62;&#x72;&#x79;&#x61;&#110;&#46;&#119;&#117;&#x40;&#x61;&#110;&#97;&#108;&#x6f;&#103;&#x2e;&#99;&#x6f;&#109;">&#x62;&#x72;&#x79;&#x61;&#110;&#46;&#119;&#117;&#x40;&#x61;&#110;&#97;&#108;&#x6f;&#103;&#x2e;&#99;&#x6f;&#109;</a><br>ä¸­æçæ ¡è¯èï¼ å¼ æ±è¾  Eugene Teo <a href="mailto:&#x65;&#117;&#103;&#101;&#110;&#101;&#x74;&#x65;&#111;&#64;&#x6b;&#101;&#114;&#x6e;&#x65;&#x6c;&#46;&#115;&#103;">&#x65;&#117;&#103;&#101;&#110;&#101;&#x74;&#x65;&#111;&#64;&#x6b;&#101;&#114;&#x6e;&#x65;&#x6c;&#46;&#115;&#103;</a><br>               æ¨ç  Dave Young <a href="mailto:&#104;&#105;&#x64;&#x61;&#x76;&#101;&#46;&#100;&#97;&#114;&#107;&#115;&#116;&#x61;&#114;&#x40;&#x67;&#109;&#97;&#105;&#x6c;&#x2e;&#99;&#x6f;&#109;">&#104;&#105;&#x64;&#x61;&#x76;&#101;&#46;&#100;&#97;&#114;&#107;&#115;&#116;&#x61;&#114;&#x40;&#x67;&#109;&#97;&#105;&#x6c;&#x2e;&#99;&#x6f;&#109;</a><br>ä»¥ä¸ä¸ºæ­£æ</p>
+<hr>
+<h2 id="a¸ºa»a¹a¸aºe¯¥a½¿c¨aoevolatileac±»a"><a href="#a¸ºa»a¹a¸aºe¯¥a½¿c¨aoevolatileac±»a" class="headerlink" title="ä¸ºä»ä¹ä¸åºè¯¥ä½¿ç¨âvolatileâç±»å"></a>ä¸ºä»ä¹ä¸åºè¯¥ä½¿ç¨âvolatileâç±»å</h2><p>Cç¨åºåéå¸¸è®¤ä¸ºvolatileè¡¨ç¤ºæä¸ªåéå¯ä»¥å¨å½åæ§è¡ççº¿ç¨ä¹å¤è¢«æ¹åï¼å æ­¤ï¼å¨åæ ¸<br>ä¸­ç¨å°å±äº«æ°æ®ç»ææ¶ï¼å¸¸å¸¸ä¼æCç¨åºååæ¬¢ä½¿ç¨volatileè¿ç±»åéãæ¢å¥è¯è¯´ï¼ä»ä»¬ç»<br>å¸¸ä¼ævolatileç±»åçææç§ç®æçåå­åéï¼å½ç¶å®ä»¬ä¸æ¯ãå¨åæ ¸ä¸­ä½¿ç¨volatileå <br>ä¹æ»æ¯éè¯¯çï¼æ¬ææ¡£å°è§£éä¸ºä»ä¹è¿æ ·ã</p>
+<p>çè§£volatileçå³é®æ¯ç¥éå®çç®çæ¯ç¨æ¥æ¶é¤ä¼åï¼å®éä¸å¾å°æäººçæ­£éè¦è¿æ ·çåº<br>ç¨ãå¨åæ ¸ä¸­ï¼ç¨åºåå¿é¡»é²æ­¢æå¤çå¹¶åè®¿é®ç ´åå±äº«çæ°æ®ç»æï¼è¿å¶å®æ¯ä¸ä¸ªå®å¨<br>ä¸åçä»»å¡ãç¨æ¥é²æ­¢æå¤å¹¶åè®¿é®çä¿æ¤æªæ½ï¼å¯ä»¥æ´å é«æçé¿åå¤§å¤æ°ä¼åç¸å³ç<br>é®é¢ã</p>
+<p>åvolatileä¸æ ·ï¼åæ ¸æä¾äºå¾å¤åè¯­æ¥ä¿è¯å¹¶åè®¿é®æ¶çæ°æ®å®å¨ï¼èªæé, äºæ¥é,å<br>å­å±éç­ç­ï¼ï¼åæ ·å¯ä»¥é²æ­¢æå¤çä¼åãå¦æå¯ä»¥æ­£ç¡®ä½¿ç¨è¿äºåæ ¸åè¯­ï¼é£ä¹å°±æ²¡æ<br>å¿è¦åä½¿ç¨volatileãå¦æä»ç¶å¿é¡»ä½¿ç¨volatileï¼é£ä¹å ä¹å¯ä»¥è¯å®å¨ä»£ç çæå¤æä¸<br>ä¸ªbugãå¨æ­£ç¡®è®¾è®¡çåæ ¸ä»£ç ä¸­ï¼volatileè½å¸¦æ¥çä»ä»æ¯ä½¿äºæåæ¢ã</p>
+<p>æèä¸ä¸è¿æ®µå¸åçåæ ¸ä»£ç ï¼</p>
+<pre><code>spin_lock(&amp;the_lock);
+do_something_on(&amp;shared_data);
+do_something_else_with(&amp;shared_data);
+spin_unlock(&amp;the_lock);
+</code></pre>
+<p>å¦æææçä»£ç é½éµå¾ªå éè§åï¼å½ææthe_lockçæ¶åï¼ä¸å¯è½æå¤çæ¹åshared_dataç<br>å¼ãä»»ä½å¯è½è®¿é®è¯¥æ°æ®çå¶ä»ä»£ç é½ä¼å¨è¿ä¸ªéä¸ç­å¾ãèªæéåè¯­è·åå­å±éä¸æ ·ââ å®<br>ä»¬æ¾å¼çç¨æ¥ä¹¦åæè¿æ · ââ æå³çæ°æ®è®¿é®ä¸ä¼è·¨è¶å®ä»¬èè¢«ä¼åãæä»¥æ¬æ¥ç¼è¯å¨è®¤ä¸º<br>å®ç¥éå¨shared_dataéé¢å°æä»ä¹ï¼ä½æ¯å ä¸ºspin_lock()è°ç¨è·åå­å±éä¸æ ·ï¼ä¼å¼ºå¶ç¼<br>è¯å¨å¿è®°å®æç¥éçä¸åãé£ä¹å¨è®¿é®è¿äºæ°æ®æ¶ä¸ä¼æä¼åçé®é¢ã</p>
+<p>å¦æshared_dataè¢«å£°åä¸ºvolatileï¼éæä½å°ä»ç¶æ¯å¿é¡»çãå°±ç®æä»¬ç¥éæ²¡æå¶ä»äººæ­£å¨<br>ä½¿ç¨å®ï¼ç¼è¯å¨ä¹å°è¢«é»æ­¢ä¼åå¯¹ä¸´çåºåshared_dataçè®¿é®ãå¨éææçåæ¶ï¼<br>shared_dataä¸æ¯volatileçãå¨å¤çå±äº«æ°æ®çæ¶åï¼éå½çéæä½å¯ä»¥ä¸åéè¦<br>volatile ââ å¹¶ä¸æ¯ææ½å¨å±å®³çã</p>
+<p>volatileçå­å¨ç±»åæåæ¯ä¸ºé£äºåå­æ å°çI/Oå¯å­å¨èå®ä¹ãå¨åæ ¸éï¼å¯å­å¨è®¿é®ä¹åº<br>è¯¥è¢«éä¿æ¤ï¼ä½æ¯äººä»¬ä¹ä¸å¸æç¼è¯å¨âä¼åâä¸´çåºåçå¯å­å¨è®¿é®ãåæ ¸éI/Oçåå­è®¿é®<br>æ¯éè¿è®¿é®å½æ°å®æçï¼ä¸èµæéè¿æéå¯¹I/Oåå­çç´æ¥è®¿é®ï¼å¹¶ä¸ä¸æ¯å¨ææä½ç³»æ¶æä¸<br>é½è½å·¥ä½ãé£äºè®¿é®å½æ°æ­£æ¯ä¸ºäºé²æ­¢æå¤ä¼åèåçï¼å æ­¤ï¼åè¯´ä¸æ¬¡ï¼volatileç±»åä¸<br>æ¯å¿éçã</p>
+<p>å¦ä¸ç§å¼èµ·ç¨æ·å¯è½ä½¿ç¨volatileçæåµæ¯å½å¤çå¨æ­£å¿çç­å¾ä¸ä¸ªåéçå¼ãæ­£ç¡®æ§è¡ä¸<br>ä¸ªå¿ç­å¾çæ¹æ³æ¯ï¼</p>
+<pre><code>while (my_variable != what_i_want)
+    cpu_relax();
+</code></pre>
+<p>cpu_relax()è°ç¨ä¼éä½CPUçè½éæ¶èæèè®©ä½äºè¶çº¿ç¨åå¤çå¨ï¼å®ä¹ä½ä¸ºåå­å±éä¸æ ·åº<br>ç°ï¼æä»¥ï¼åä¸æ¬¡ï¼volatileä¸æ¯å¿éçãå½ç¶ï¼å¿ç­å¾ä¸å¼å§å°±æ¯ä¸ç§åå¸¸è§çåæ³ã</p>
+<p>å¨åæ ¸ä¸­ï¼ä¸äºç¨å°çæåµä¸volatileä»ç¶æ¯ææä¹çï¼</p>
+<ul>
+<li><p>å¨ä¸äºä½ç³»æ¶æçç³»ç»ä¸ï¼åè®¸ç´æ¥çI/0åå­è®¿é®ï¼é£ä¹åé¢æå°çè®¿é®å½æ°å¯ä»¥ä½¿ç¨<br>volatileãåºæ¬ä¸ï¼æ¯ä¸ä¸ªè®¿é®å½æ°è°ç¨å®èªå·±é½æ¯ä¸ä¸ªå°çä¸´çåºåå¹¶ä¸ä¿è¯äºæç§<br>ç¨åºåææçé£æ ·åçè®¿é®æä½ã</p>
+</li>
+<li><p>æäºä¼æ¹ååå­çåèæ±ç¼ä»£ç è½ç¶æ²¡æä»ä¹å¶ä»ææ¾çéä½ç¨ï¼ä½æ¯æè¢«GCCå é¤çå¯<br>è½æ§ãå¨æ±ç¼å£°æä¸­å ä¸volatileå³é®å­å¯ä»¥é²æ­¢è¿ç§å é¤æä½ã</p>
+</li>
+<li><p>Jiffiesåéæ¯ä¸ç§ç¹æ®æåµï¼è½ç¶æ¯æ¬¡å¼ç¨å®çæ¶åé½å¯ä»¥æä¸åçå¼ï¼ä½è¯»jiffies<br>åéæ¶ä¸éè¦ä»»ä½ç¹æ®çå éä¿æ¤ãæä»¥jiffiesåéå¯ä»¥ä½¿ç¨volatileï¼ä½æ¯ä¸èµæ<br>å¶ä»è·jiffiesç¸åç±»ååéä½¿ç¨volatileãJiffiesè¢«è®¤ä¸ºæ¯ä¸ç§âæè ¢çéçç©”<br>ï¼Linusçè¯ï¼å ä¸ºè§£å³è¿ä¸ªé®é¢æ¯ä¿æç°ç¶è¦éº»ç¦çå¤ã</p>
+</li>
+<li><p>ç±äºæäºI/0è®¾å¤å¯è½ä¼ä¿®æ¹è¿ç»­ä¸è´çåå­,æä»¥ææ¶,æåè¿ç»­ä¸è´åå­çæ°æ®ç»æ<br>çæééè¦æ­£ç¡®çä½¿ç¨volatileãç½ç»ééå¨ä½¿ç¨çç¯ç¶ç¼å­åºæ­£æ¯è¿ç±»æå½¢çä¸ä¸ªä¾<br>å­ï¼å¶ä¸­ééå¨ç¨æ¹åæéæ¥è¡¨ç¤ºåªäºæè¿°ç¬¦å·²ç»å¤çè¿äºã</p>
+</li>
+</ul>
+<p>å¯¹äºå¤§å¤ä»£ç ï¼ä¸è¿°å ç§å¯ä»¥ä½¿ç¨volatileçæåµé½ä¸éç¨ãæä»¥ï¼ä½¿ç¨volatileæ¯ä¸ç§<br>bugå¹¶ä¸éè¦å¯¹è¿æ ·çä»£ç é¢å¤ä»ç»æ£æ¥ãé£äºè¯å¾ä½¿ç¨volatileçå¼åäººåéè¦éä¸æ­¥æ³æ³<br>ä»ä»¬çæ­£æ³å®ç°çæ¯ä»ä¹ã</p>
+<p>éå¸¸æ¬¢è¿å é¤volatileåéçè¡¥ä¸ ï¼ åªè¦è¯æè¿äºè¡¥ä¸å®æ´çèèäºå¹¶åé®é¢ã</p>
+<h2 id="ae³¨e"><a href="#ae³¨e" class="headerlink" title="æ³¨é"></a>æ³¨é</h2><p>[1] <a target="_blank" rel="noopener" href="http://lwn.net/Articles/233481/">http://lwn.net/Articles/233481/</a><br>[2] <a target="_blank" rel="noopener" href="http://lwn.net/Articles/233482/">http://lwn.net/Articles/233482/</a></p>
+<h2 id="e´e°¢"><a href="#e´e°¢" class="headerlink" title="è´è°¢"></a>è´è°¢</h2><p>æåç±Randy Dunlapæ¨å¨å¹¶ä½åæ­¥ç ç©¶<br>ç±Jonathan Corbetæ°å<br>åèSatyam Sharmaï¼Johannes Stezenbachï¼Jesper Juhlï¼Heikki Orsilaï¼<br>H. Peter Anvinï¼Philipp HahnåStefan Richterçæè§æ¹åäºæ¬æ¡£ã</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/" title="Kernel-4.18.0-80.el8_volatile-considered-harmful" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_volatile-considered-harmful/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_vm/" title="Kernel-4.18.0-80.el8_v"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_voltage-divider/" title="Kernel-4.18.0-80.el8_voltage-divider"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

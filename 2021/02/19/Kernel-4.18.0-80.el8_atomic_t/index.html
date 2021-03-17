@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_atomic_t | oosTech.com</title>
+  <meta name="description" content="On atomic types (atomic_t atomic64_t and atomic_long_t). The atomic type provides an interface to the architecture’s means of atomicRMW operations between CPUs (atomic operations on MMIO are not suppo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_atomic_t">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="On atomic types (atomic_t atomic64_t and atomic_long_t). The atomic type provides an interface to the architecture’s means of atomicRMW operations between CPUs (atomic operations on MMIO are not suppo">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#API"><span class="toc-number">1.</span> <span class="toc-text">API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SEMANTICS"><span class="toc-number">2.</span> <span class="toc-text">SEMANTICS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ORDERING-go-read-memory-barriers-txt-first"><span class="toc-number">3.</span> <span class="toc-text">ORDERING  (go read memory-barriers.txt first)</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_atomic_t" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_atomic_t
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>On atomic types (atomic_t atomic64_t and atomic_long_t).</p>
+<p>The atomic type provides an interface to the architecture’s means of atomic<br>RMW operations between CPUs (atomic operations on MMIO are not supported and<br>can lead to fatal traps on some platforms).</p>
+<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><p>The ‘full’ API consists of (atomic64_ and atomic_long_ prefixes omitted for<br>brevity):</p>
+<p>Non-RMW ops:</p>
+<p>  atomic_read(), atomic_set()<br>  atomic_read_acquire(), atomic_set_release()</p>
+<p>RMW atomic operations:</p>
+<p>Arithmetic:</p>
+<p>  atomic_{add,sub,inc,dec}()<br>  atomic_{add,sub,inc,dec}<em>return{,_relaxed,_acquire,_release}()<br>  atomic_fetch</em>{add,sub,inc,dec}{,_relaxed,_acquire,_release}()</p>
+<p>Bitwise:</p>
+<p>  atomic_{and,or,xor,andnot}()<br>  atomic_fetch_{and,or,xor,andnot}{,_relaxed,_acquire,_release}()</p>
+<p>Swap:</p>
+<p>  atomic_xchg{,_relaxed,_acquire,_release}()<br>  atomic_cmpxchg{,_relaxed,_acquire,_release}()<br>  atomic_try_cmpxchg{,_relaxed,_acquire,_release}()</p>
+<p>Reference count (but please see refcount_t):</p>
+<p>  atomic_add_unless(), atomic_inc_not_zero()<br>  atomic_sub_and_test(), atomic_dec_and_test()</p>
+<p>Misc:</p>
+<p>  atomic_inc_and_test(), atomic_add_negative()<br>  atomic_dec_unless_positive(), atomic_inc_unless_negative()</p>
+<p>Barriers:</p>
+<p>  smp_mb__{before,after}_atomic()</p>
+<h2 id="SEMANTICS"><a href="#SEMANTICS" class="headerlink" title="SEMANTICS"></a>SEMANTICS</h2><p>Non-RMW ops:</p>
+<p>The non-RMW ops are (typically) regular LOADs and STOREs and are canonically<br>implemented using READ_ONCE(), WRITE_ONCE(), smp_load_acquire() and<br>smp_store_release() respectively.</p>
+<p>The one detail to this is that atomic_set{}() should be observable to the RMW<br>ops. That is:</p>
+<p>  C atomic-set</p>
+<p>  {<br>    atomic_set(v, 1);<br>  }</p>
+<p>  P1(atomic_t *v)<br>  {<br>    atomic_add_unless(v, 1, 0);<br>  }</p>
+<p>  P2(atomic_t *v)<br>  {<br>    atomic_set(v, 0);<br>  }</p>
+<p>  exists<br>  (v=2)</p>
+<p>In this case we would expect the atomic_set() from CPU1 to either happen<br>before the atomic_add_unless(), in which case that latter one would no-op, or<br><em>after</em> in which case we’d overwrite its result. In no case is “2” a valid<br>outcome.</p>
+<p>This is typically true on ‘normal’ platforms, where a regular competing STORE<br>will invalidate a LL/SC or fail a CMPXCHG.</p>
+<p>The obvious case where this is not so is when we need to implement atomic ops<br>with a lock:</p>
+<p>  CPU0                        CPU1</p>
+<p>  atomic_add_unless(v, 1, 0);<br>    lock();<br>    ret = READ_ONCE(v-&gt;counter); // == 1<br>                        atomic_set(v, 0);<br>    if (ret != u)                  WRITE_ONCE(v-&gt;counter, 0);<br>      WRITE_ONCE(v-&gt;counter, ret + 1);<br>    unlock();</p>
+<p>the typical solution is to then implement atomic_set{}() with atomic_xchg().</p>
+<p>RMW ops:</p>
+<p>These come in various forms:</p>
+<ul>
+<li><p>plain operations without return value: atomic_{}()</p>
+</li>
+<li><p>operations which return the modified value: atomic_{}_return()</p>
+<p>these are limited to the arithmetic operations because those are<br>reversible. Bitops are irreversible and therefore the modified value<br>is of dubious utility.</p>
+</li>
+<li><p>operations which return the original value: atomic_fetch_{}()</p>
+</li>
+<li><p>swap operations: xchg(), cmpxchg() and try_cmpxchg()</p>
+</li>
+<li><p>misc; the special purpose operations that are commonly used and would,<br>given the interface, normally be implemented using (try_)cmpxchg loops but<br>are time critical and can, (typically) on LL/SC architectures, be more<br>efficiently implemented.</p>
+</li>
+</ul>
+<p>All these operations are SMP atomic; that is, the operations (for a single<br>atomic variable) can be fully ordered and no intermediate state is lost or<br>visible.</p>
+<h2 id="ORDERING-go-read-memory-barriers-txt-first"><a href="#ORDERING-go-read-memory-barriers-txt-first" class="headerlink" title="ORDERING  (go read memory-barriers.txt first)"></a>ORDERING  (go read memory-barriers.txt first)</h2><p>The rule of thumb:</p>
+<ul>
+<li><p>non-RMW operations are unordered;</p>
+</li>
+<li><p>RMW operations that have no return value are unordered;</p>
+</li>
+<li><p>RMW operations that have a return value are fully ordered;</p>
+</li>
+<li><p>RMW operations that are conditional are unordered on FAILURE,<br>otherwise the above rules apply.</p>
+</li>
+</ul>
+<p>Except of course when an operation has an explicit ordering like:</p>
+<p> {}_relaxed: unordered<br> {}_acquire: the R of the RMW (or atomic_read) is an ACQUIRE<br> {}_release: the W of the RMW (or atomic_set)  is a  RELEASE</p>
+<p>Where ‘unordered’ is against other memory locations. Address dependencies are<br>not defeated.</p>
+<p>Fully ordered primitives are ordered against everything prior and everything<br>subsequent. Therefore a fully ordered primitive is like having an smp_mb()<br>before and an smp_mb() after the primitive.</p>
+<p>The barriers:</p>
+<p>  smp_mb__{before,after}_atomic()</p>
+<p>only apply to the RMW ops and can be used to augment/upgrade the ordering<br>inherent to the used atomic op. These barriers provide a full smp_mb().</p>
+<p>These helper barriers exist because architectures have varying implicit<br>ordering on their SMP atomic primitives. For example our TSO architectures<br>provide full ordered atomics and these barriers are no-ops.</p>
+<p>Thus:</p>
+<p>  atomic_fetch_add();</p>
+<p>is equivalent to:</p>
+<p>  smp_mb__before_atomic();<br>  atomic_fetch_add_relaxed();<br>  smp_mb__after_atomic();</p>
+<p>However the atomic_fetch_add() might be implemented more efficiently.</p>
+<p>Further, while something like:</p>
+<p>  smp_mb__before_atomic();<br>  atomic_dec(&amp;X);</p>
+<p>is a ‘typical’ RELEASE pattern, the barrier is strictly stronger than<br>a RELEASE. Similarly for something like:</p>
+<p>  atomic_inc(&amp;X);<br>  smp_mb__after_atomic();</p>
+<p>is an ACQUIRE pattern (though very much not typical), but again the barrier is<br>strictly stronger than ACQUIRE. As illustrated:</p>
+<p>  C strong-acquire</p>
+<p>  {<br>  }</p>
+<p>  P1(int *x, atomic_t *y)<br>  {<br>    r0 = READ_ONCE(*x);<br>    smp_rmb();<br>    r1 = atomic_read(y);<br>  }</p>
+<p>  P2(int *x, atomic_t *y)<br>  {<br>    atomic_inc(y);<br>    smp_mb__after_atomic();<br>    WRITE_ONCE(*x, 1);<br>  }</p>
+<p>  exists<br>  (r0=1 /\ r1=0)</p>
+<p>This should not happen; but a hypothetical atomic_inc_acquire() –<br>(void)atomic_fetch_inc_acquire() for instance – would allow the outcome,<br>since then:</p>
+<p>  P1            P2</p>
+<pre><code>        t = LL.acq *y (0)
+        t++;
+        *x = 1;
+</code></pre>
+<p>  r0 = *x (1)<br>  RMB<br>  r1 = *y (0)<br>            SC *y, t;</p>
+<p>is allowed.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/" title="Kernel-4.18.0-80.el8_atomic_t" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_atomic_t/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_atomic_bitops/" title="Kernel-4.18.0-80.el8_atomic_bitops"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_aty128fb/" title="Kernel-4.18.0-80.el8_aty128fb"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

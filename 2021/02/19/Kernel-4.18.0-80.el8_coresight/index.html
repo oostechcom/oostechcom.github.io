@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_coresight | oosTech.com</title>
+  <meta name="description" content="Coresight - HW Assisted Tracing on ARM     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;     Author:   Mathieu Poirier &amp;#x6d;&amp;#97;&amp;#116;&amp;#x68;&amp;#105;&amp;#x65;&amp;#x75;&amp;#x2e;&amp;#x70;&amp;#111;&amp;#105;&amp;#114;&amp;#x69;&amp;#101;&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_coresight">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_coresight/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Coresight - HW Assisted Tracing on ARM     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;     Author:   Mathieu Poirier &amp;#x6d;&amp;#97;&amp;#116;&amp;#x68;&amp;#105;&amp;#x65;&amp;#x75;&amp;#x2e;&amp;#x70;&amp;#111;&amp;#105;&amp;#114;&amp;#x69;&amp;#101;&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_coresight/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Acronyms-and-Classification"><span class="toc-number">2.</span> <span class="toc-text">Acronyms and Classification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Device-Tree-Bindings"><span class="toc-number">3.</span> <span class="toc-text">Device Tree Bindings</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Framework-and-implementation"><span class="toc-number">4.</span> <span class="toc-text">Framework and implementation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-to-use-the-tracer-modules"><span class="toc-number">5.</span> <span class="toc-text">How to use the tracer modules</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Generating-coverage-files-for-Feedback-Directed-Optimization-AutoFDO"><span class="toc-number">6.</span> <span class="toc-text">Generating coverage files for Feedback Directed Optimization: AutoFDO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-to-use-the-STM-module"><span class="toc-number">7.</span> <span class="toc-text">How to use the STM module</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_coresight" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_coresight
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_coresight/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_coresight/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_coresight/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Coresight - HW Assisted Tracing on ARM
+    ======================================
+</code></pre>
+<p>   Author:   Mathieu Poirier <a href="mailto:&#x6d;&#97;&#116;&#x68;&#105;&#x65;&#x75;&#x2e;&#x70;&#111;&#105;&#114;&#x69;&#101;&#x72;&#x40;&#x6c;&#105;&#110;&#x61;&#x72;&#x6f;&#46;&#111;&#114;&#103;">&#x6d;&#97;&#116;&#x68;&#105;&#x65;&#x75;&#x2e;&#x70;&#111;&#105;&#114;&#x69;&#101;&#x72;&#x40;&#x6c;&#105;&#110;&#x61;&#x72;&#x6f;&#46;&#111;&#114;&#103;</a><br>   Date:     September 11th, 2014</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Coresight is an umbrella of technologies allowing for the debugging of ARM<br>based SoC.  It includes solutions for JTAG and HW assisted tracing.  This<br>document is concerned with the latter.</p>
+<p>HW assisted tracing is becoming increasingly useful when dealing with systems<br>that have many SoCs and other components like GPU and DMA engines.  ARM has<br>developed a HW assisted tracing solution by means of different components, each<br>being added to a design at synthesis time to cater to specific tracing needs.<br>Components are generally categorised as source, link and sinks and are<br>(usually) discovered using the AMBA bus.</p>
+<p>“Sources” generate a compressed stream representing the processor instruction<br>path based on tracing scenarios as configured by users.  From there the stream<br>flows through the coresight system (via ATB bus) using links that are connecting<br>the emanating source to a sink(s).  Sinks serve as endpoints to the coresight<br>implementation, either storing the compressed stream in a memory buffer or<br>creating an interface to the outside world where data can be transferred to a<br>host without fear of filling up the onboard coresight memory buffer.</p>
+<p>At typical coresight system would look like this:</p>
+<hr>
+<p> <strong><strong><strong><strong><strong><strong>****</strong></strong></strong></strong></strong></strong> AMBA AXI  <strong><strong><strong><strong><strong><strong>****</strong></strong></strong></strong></strong></strong>===||<br>  <strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>*    ||<br>        ^                    ^                            |            ||<br>        |                    |                            *            **<br>     0000000    :::::     0000000    :::::    :::::    @@@@@@@    ||||||||||||<br>     0 CPU 0&lt;–&gt;: C :     0 CPU 0&lt;–&gt;: C :    : C :    @ STM @    || System ||<br>  |-&gt;0000000    : T :  |-&gt;0000000    : T :    : T :&lt;—&gt;@@@@@     || Memory ||<br>  |  #######&lt;–&gt;: I :  |  #######&lt;–&gt;: I :    : I :      @@@&lt;-|   ||||||||||||<br>  |  # ETM #    :::::  |  # PTM #    :::::    :::::       @   |<br>  |   #####      ^ ^   |   #####      ^ !      ^ !        .   |   |||||||||<br>  | |-&gt;###       | !   | |-&gt;###       | !      | !        .   |   || DAP ||<br>  | |   #        | !   | |   #        | !      | !        .   |   |||||||||<br>  | |   .        | !   | |   .        | !      | !        .   |      |  |<br>  | |   .        | !   | |   .        | !      | !        .   |      |  *<br>  | |   .        | !   | |   .        | !      | !        .   |      | SWD/<br>  | |   .        | !   | |   .        | !      | !        .   |      | JTAG<br>  *</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong>&lt;-|<br> *<strong><strong><strong><strong><strong><strong>**</strong></strong></strong></strong></strong></strong> AMBA Debug APB <strong><strong><strong><strong><strong>****</strong></strong></strong></strong></strong></p>
+<hr>
+<p>   |    .          !         .          !        !        .    |<br>   |    .          *         .          *        *        .    |</p>
+<hr>
+<p> <strong><strong><strong><strong>****</strong></strong></strong></strong> Cross Trigger Matrix (CTM) *<strong><strong><strong><strong>**</strong></strong></strong></strong></p>
+<hr>
+<p>   |    .     ^              .                            .    |<br>   |    *     !              *                            *    |</p>
+<hr>
+<p> <strong><strong><strong><strong>**</strong></strong></strong></strong> AMBA Advanced Trace Bus (ATB) <strong><strong><strong><strong>**</strong></strong></strong></strong></p>
+<hr>
+<p>   |          !                        ===============         |<br>   |          *                         ===== F =====&lt;———|<br>   |   :::::::::                         ==== U ====<br>   |–&gt;:: CTI ::&lt;!!                       === N ===<br>   |   :::::::::  !                        == N ==<br>   |    ^         *                        == E ==<br>   |    !  &amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;       IIIIIII         == L ==<br>   |——&gt;&amp;&amp; ETB &amp;&amp;&lt;……II     I        =======<br>   |    !  &amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;       II     I           .<br>   |    !                    I     I          .<br>   |    !                    I REP I&lt;……….<br>   |    !                    I     I<br>   |    !!&gt;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;       II     I           *Source: ARM ltd.<br>   |——&gt;&amp; TPIU  &amp;&lt;……II    I            DAP = Debug Access Port<br>           &amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;       IIIIIII            ETM = Embedded Trace Macrocell<br>               ;                              PTM = Program Trace Macrocell<br>               ;                              CTI = Cross Trigger Interface<br>               *                              ETB = Embedded Trace Buffer<br>          To trace port                       TPIU= Trace Port Interface Unit<br>                                              SWD = Serial Wire Debug</p>
+<p>While on target configuration of the components is done via the APB bus,<br>all trace data are carried out-of-band on the ATB bus.  The CTM provides<br>a way to aggregate and distribute signals between CoreSight components.</p>
+<p>The coresight framework provides a central point to represent, configure and<br>manage coresight devices on a platform.  This first implementation centers on<br>the basic tracing functionality, enabling components such ETM/PTM, funnel,<br>replicator, TMC, TPIU and ETB.  Future work will enable more<br>intricate IP blocks such as STM and CTI.</p>
+<h2 id="Acronyms-and-Classification"><a href="#Acronyms-and-Classification" class="headerlink" title="Acronyms and Classification"></a>Acronyms and Classification</h2><p>Acronyms:</p>
+<p>PTM:     Program Trace Macrocell<br>ETM:     Embedded Trace Macrocell<br>STM:     System trace Macrocell<br>ETB:     Embedded Trace Buffer<br>ITM:     Instrumentation Trace Macrocell<br>TPIU:    Trace Port Interface Unit<br>TMC-ETR: Trace Memory Controller, configured as Embedded Trace Router<br>TMC-ETF: Trace Memory Controller, configured as Embedded Trace FIFO<br>CTI:     Cross Trigger Interface</p>
+<p>Classification:</p>
+<p>Source:<br>   ETMv3.x ETMv4, PTMv1.0, PTMv1.1, STM, STM500, ITM<br>Link:<br>   Funnel, replicator (intelligent or not), TMC-ETR<br>Sinks:<br>   ETBv1.0, ETB1.1, TPIU, TMC-ETF<br>Misc:<br>   CTI</p>
+<h2 id="Device-Tree-Bindings"><a href="#Device-Tree-Bindings" class="headerlink" title="Device Tree Bindings"></a>Device Tree Bindings</h2><p>See Documentation/devicetree/bindings/arm/coresight.txt for details.</p>
+<p>As of this writing drivers for ITM, STMs and CTIs are not provided but are<br>expected to be added as the solution matures.</p>
+<h2 id="Framework-and-implementation"><a href="#Framework-and-implementation" class="headerlink" title="Framework and implementation"></a>Framework and implementation</h2><p>The coresight framework provides a central point to represent, configure and<br>manage coresight devices on a platform.  Any coresight compliant device can<br>register with the framework for as long as they use the right APIs:</p>
+<p>struct coresight_device *coresight_register(struct coresight_desc *desc);<br>void coresight_unregister(struct coresight_device *csdev);</p>
+<p>The registering function is taking a “struct coresight_device *csdev” and<br>register the device with the core framework.  The unregister function takes<br>a reference to a “struct coresight_device”, obtained at registration time.</p>
+<p>If everything goes well during the registration process the new devices will<br>show up under /sys/bus/coresight/devices, as showns here for a TC2 platform:</p>
+<p>root:<del># ls /sys/bus/coresight/devices/<br>replicator  20030000.tpiu    2201c000.ptm  2203c000.etm  2203e000.etm<br>20010000.etb         20040000.funnel  2201d000.ptm  2203d000.etm<br>root:</del>#</p>
+<p>The functions take a “struct coresight_device”, which looks like this:</p>
+<p>struct coresight_desc {<br>        enum coresight_dev_type type;<br>        struct coresight_dev_subtype subtype;<br>        const struct coresight_ops *ops;<br>        struct coresight_platform_data <em>pdata;<br>        struct device *dev;<br>        const struct attribute_group *</em>groups;<br>};</p>
+<p>The “coresight_dev_type” identifies what the device is, i.e, source link or<br>sink while the “coresight_dev_subtype” will characterise that type further.</p>
+<p>The “struct coresight_ops” is mandatory and will tell the framework how to<br>perform base operations related to the components, each component having<br>a different set of requirement.  For that “struct coresight_ops_sink”,<br>“struct coresight_ops_link” and “struct coresight_ops_source” have been<br>provided.</p>
+<p>The next field, “struct coresight_platform_data *pdata” is acquired by calling<br>“of_get_coresight_platform_data()”, as part of the driver’s _probe routine and<br>“struct device *dev” gets the device reference embedded in the “amba_device”:</p>
+<p>static int etm_probe(struct amba_device *adev, const struct amba_id *id)<br>{<br> …<br> …<br> drvdata-&gt;dev = &amp;adev-&gt;dev;<br> …<br>}</p>
+<p>Specific class of device (source, link, or sink) have generic operations<br>that can be performed on them (see “struct coresight_ops”).  The<br>“**groups” is a list of sysfs entries pertaining to operations<br>specific to that component only.  “Implementation defined” customisations are<br>expected to be accessed and controlled using those entries.</p>
+<h2 id="How-to-use-the-tracer-modules"><a href="#How-to-use-the-tracer-modules" class="headerlink" title="How to use the tracer modules"></a>How to use the tracer modules</h2><p>There are two ways to use the Coresight framework: 1) using the perf cmd line<br>tools and 2) interacting directly with the Coresight devices using the sysFS<br>interface.  Preference is given to the former as using the sysFS interface<br>requires a deep understanding of the Coresight HW.  The following sections<br>provide details on using both methods.</p>
+<ol>
+<li>Using the sysFS interface:</li>
+</ol>
+<p>Before trace collection can start, a coresight sink needs to be identified.<br>There is no limit on the amount of sinks (nor sources) that can be enabled at<br>any given moment.  As a generic operation, all device pertaining to the sink<br>class will have an “active” entry in sysfs:</p>
+<p>root:/sys/bus/coresight/devices# ls<br>replicator  20030000.tpiu    2201c000.ptm  2203c000.etm  2203e000.etm<br>20010000.etb         20040000.funnel  2201d000.ptm  2203d000.etm<br>root:/sys/bus/coresight/devices# ls 20010000.etb<br>enable_sink  status  trigger_cntr<br>root:/sys/bus/coresight/devices# echo 1 &gt; 20010000.etb/enable_sink<br>root:/sys/bus/coresight/devices# cat 20010000.etb/enable_sink<br>1<br>root:/sys/bus/coresight/devices#</p>
+<p>At boot time the current etm3x driver will configure the first address<br>comparator with “_stext” and “_etext”, essentially tracing any instruction<br>that falls within that range.  As such “enabling” a source will immediately<br>trigger a trace capture:</p>
+<p>root:/sys/bus/coresight/devices# echo 1 &gt; 2201c000.ptm/enable_source<br>root:/sys/bus/coresight/devices# cat 2201c000.ptm/enable_source<br>1<br>root:/sys/bus/coresight/devices# cat 20010000.etb/status<br>Depth:          0x2000<br>Status:         0x1<br>RAM read ptr:   0x0<br>RAM wrt ptr:    0x19d3   &lt;—– The write pointer is moving<br>Trigger cnt:    0x0<br>Control:        0x1<br>Flush status:   0x0<br>Flush ctrl:     0x2001<br>root:/sys/bus/coresight/devices#</p>
+<p>Trace collection is stopped the same way:</p>
+<p>root:/sys/bus/coresight/devices# echo 0 &gt; 2201c000.ptm/enable_source<br>root:/sys/bus/coresight/devices#</p>
+<p>The content of the ETB buffer can be harvested directly from /dev:</p>
+<p>root:/sys/bus/coresight/devices# dd if=/dev/20010000.etb <br>of=~/cstrace.bin</p>
+<p>64+0 records in<br>64+0 records out<br>32768 bytes (33 kB) copied, 0.00125258 s, 26.2 MB/s<br>root:/sys/bus/coresight/devices#</p>
+<p>The file cstrace.bin can be decompressed using “ptm2human”, DS-5 or Trace32.</p>
+<p>Following is a DS-5 output of an experimental loop that increments a variable up<br>to a certain value.  The example is simple and yet provides a glimpse of the<br>wealth of possibilities that coresight provides.</p>
+<p>Info                                    Tracing enabled<br>Instruction     106378866       0x8026B53C      E52DE004        false   PUSH     {lr}<br>Instruction     0       0x8026B540      E24DD00C        false   SUB      sp,sp,#0xc<br>Instruction     0       0x8026B544      E3A03000        false   MOV      r3,#0<br>Instruction     0       0x8026B548      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B54C      E59D3004        false   LDR      r3,[sp,#4]<br>Instruction     0       0x8026B550      E3530004        false   CMP      r3,#4<br>Instruction     0       0x8026B554      E2833001        false   ADD      r3,r3,#1<br>Instruction     0       0x8026B558      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B55C      DAFFFFFA        true    BLE      {pc}-0x10 ; 0x8026b54c<br>Timestamp                                       Timestamp: 17106715833<br>Instruction     319     0x8026B54C      E59D3004        false   LDR      r3,[sp,#4]<br>Instruction     0       0x8026B550      E3530004        false   CMP      r3,#4<br>Instruction     0       0x8026B554      E2833001        false   ADD      r3,r3,#1<br>Instruction     0       0x8026B558      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B55C      DAFFFFFA        true    BLE      {pc}-0x10 ; 0x8026b54c<br>Instruction     9       0x8026B54C      E59D3004        false   LDR      r3,[sp,#4]<br>Instruction     0       0x8026B550      E3530004        false   CMP      r3,#4<br>Instruction     0       0x8026B554      E2833001        false   ADD      r3,r3,#1<br>Instruction     0       0x8026B558      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B55C      DAFFFFFA        true    BLE      {pc}-0x10 ; 0x8026b54c<br>Instruction     7       0x8026B54C      E59D3004        false   LDR      r3,[sp,#4]<br>Instruction     0       0x8026B550      E3530004        false   CMP      r3,#4<br>Instruction     0       0x8026B554      E2833001        false   ADD      r3,r3,#1<br>Instruction     0       0x8026B558      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B55C      DAFFFFFA        true    BLE      {pc}-0x10 ; 0x8026b54c<br>Instruction     7       0x8026B54C      E59D3004        false   LDR      r3,[sp,#4]<br>Instruction     0       0x8026B550      E3530004        false   CMP      r3,#4<br>Instruction     0       0x8026B554      E2833001        false   ADD      r3,r3,#1<br>Instruction     0       0x8026B558      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B55C      DAFFFFFA        true    BLE      {pc}-0x10 ; 0x8026b54c<br>Instruction     10      0x8026B54C      E59D3004        false   LDR      r3,[sp,#4]<br>Instruction     0       0x8026B550      E3530004        false   CMP      r3,#4<br>Instruction     0       0x8026B554      E2833001        false   ADD      r3,r3,#1<br>Instruction     0       0x8026B558      E58D3004        false   STR      r3,[sp,#4]<br>Instruction     0       0x8026B55C      DAFFFFFA        true    BLE      {pc}-0x10 ; 0x8026b54c<br>Instruction     6       0x8026B560      EE1D3F30        false   MRC      p15,#0x0,r3,c13,c0,#1<br>Instruction     0       0x8026B564      E1A0100D        false   MOV      r1,sp<br>Instruction     0       0x8026B568      E3C12D7F        false   BIC      r2,r1,#0x1fc0<br>Instruction     0       0x8026B56C      E3C2203F        false   BIC      r2,r2,#0x3f<br>Instruction     0       0x8026B570      E59D1004        false   LDR      r1,[sp,#4]<br>Instruction     0       0x8026B574      E59F0010        false   LDR      r0,[pc,#16] ; [0x8026B58C] = 0x80550368<br>Instruction     0       0x8026B578      E592200C        false   LDR      r2,[r2,#0xc]<br>Instruction     0       0x8026B57C      E59221D0        false   LDR      r2,[r2,#0x1d0]<br>Instruction     0       0x8026B580      EB07A4CF        true    BL       {pc}+0x1e9344 ; 0x804548c4<br>Info                                    Tracing enabled<br>Instruction     13570831        0x8026B584      E28DD00C        false   ADD      sp,sp,#0xc<br>Instruction     0       0x8026B588      E8BD8000        true    LDM      sp!,{pc}<br>Timestamp                                       Timestamp: 17107041535</p>
+<ol start="2">
+<li>Using perf framework:</li>
+</ol>
+<p>Coresight tracers are represented using the Perf framework’s Performance<br>Monitoring Unit (PMU) abstraction.  As such the perf framework takes charge of<br>controlling when tracing gets enabled based on when the process of interest is<br>scheduled.  When configured in a system, Coresight PMUs will be listed when<br>queried by the perf command line tool:</p>
+<pre><code>linaro@linaro-nano:~$ ./perf list pmu
+
+    List of pre-defined events (to be used in -e):
+
+    cs_etm//                                    [Kernel PMU event]
+
+linaro@linaro-nano:~$
+</code></pre>
+<p>Regardless of the number of tracers available in a system (usually equal to the<br>amount of processor cores), the “cs_etm” PMU will be listed only once.</p>
+<p>A Coresight PMU works the same way as any other PMU, i.e the name of the PMU is<br>listed along with configuration options within forward slashes ‘/‘.  Since a<br>Coresight system will typically have more than one sink, the name of the sink to<br>work with needs to be specified as an event option.  Names for sink to choose<br>from are listed in sysFS under ($SYSFS)/bus/coresight/devices:</p>
+<pre><code>root@linaro-nano:~# ls /sys/bus/coresight/devices/
+    20010000.etf   20040000.funnel  20100000.stm  22040000.etm
+    22140000.etm  230c0000.funnel  23240000.etm 20030000.tpiu
+    20070000.etr     20120000.replicator  220c0000.funnel
+    23040000.etm  23140000.etm     23340000.etm
+
+root@linaro-nano:~# perf record -e cs_etm/@20070000.etr/u --per-thread program
+</code></pre>
+<p>The syntax within the forward slashes ‘/‘ is important.  The ‘@’ character<br>tells the parser that a sink is about to be specified and that this is the sink<br>to use for the trace session.</p>
+<p>More information on the above and other example on how to use Coresight with<br>the perf tools can be found in the “HOWTO.md” file of the openCSD gitHub<br>repository [3].</p>
+<p>2.1) AutoFDO analysis using the perf tools:</p>
+<p>perf can be used to record and analyze trace of programs.</p>
+<p>Execution can be recorded using ‘perf record’ with the cs_etm event,<br>specifying the name of the sink to record to, e.g:</p>
+<pre><code>perf record -e cs_etm/@20070000.etr/u --per-thread
+</code></pre>
+<p>The ‘perf report’ and ‘perf script’ commands can be used to analyze execution,<br>synthesizing instruction and branch events from the instruction trace.<br>‘perf inject’ can be used to replace the trace data with the synthesized events.<br>The –itrace option controls the type and frequency of synthesized events<br>(see perf documentation).</p>
+<p>Note that only 64-bit programs are currently supported - further work is<br>required to support instruction decode of 32-bit Arm programs.</p>
+<h2 id="Generating-coverage-files-for-Feedback-Directed-Optimization-AutoFDO"><a href="#Generating-coverage-files-for-Feedback-Directed-Optimization-AutoFDO" class="headerlink" title="Generating coverage files for Feedback Directed Optimization: AutoFDO"></a>Generating coverage files for Feedback Directed Optimization: AutoFDO</h2><p>‘perf inject’ accepts the –itrace option in which case tracing data is<br>removed and replaced with the synthesized events. e.g.</p>
+<pre><code>perf inject --itrace --strip -i perf.data -o perf.data.new
+</code></pre>
+<p>Below is an example of using ARM ETM for autoFDO.  It requires autofdo<br>(<a target="_blank" rel="noopener" href="https://github.com/google/autofdo">https://github.com/google/autofdo</a>) and gcc version 5.  The bubble<br>sort example is from the AutoFDO tutorial (<a target="_blank" rel="noopener" href="https://gcc.gnu.org/wiki/AutoFDO/Tutorial">https://gcc.gnu.org/wiki/AutoFDO/Tutorial</a>).</p>
+<pre><code>$ gcc-5 -O3 sort.c -o sort
+$ taskset -c 2 ./sort
+Bubble sorting array of 30000 elements
+5910 ms
+
+$ perf record -e cs_etm/@20070000.etr/u --per-thread taskset -c 2 ./sort
+Bubble sorting array of 30000 elements
+12543 ms
+[ perf record: Woken up 35 times to write data ]
+[ perf record: Captured and wrote 69.640 MB perf.data ]
+
+$ perf inject -i perf.data -o inj.data --itrace=il64 --strip
+$ create_gcov --binary=./sort --profile=inj.data --gcov=sort.gcov -gcov_version=1
+$ gcc-5 -O3 -fauto-profile=sort.gcov sort.c -o sort_autofdo
+$ taskset -c 2 ./sort_autofdo
+Bubble sorting array of 30000 elements
+5806 ms
+</code></pre>
+<h2 id="How-to-use-the-STM-module"><a href="#How-to-use-the-STM-module" class="headerlink" title="How to use the STM module"></a>How to use the STM module</h2><p>Using the System Trace Macrocell module is the same as the tracers - the only<br>difference is that clients are driving the trace capture rather<br>than the program flow through the code.</p>
+<p>As with any other CoreSight component, specifics about the STM tracer can be<br>found in sysfs with more information on each entry being found in [1]:</p>
+<p>root@genericarmv8:<del># ls /sys/bus/coresight/devices/20100000.stm<br>enable_source   hwevent_select  port_enable     subsystem       uevent<br>hwevent_enable  mgmt            port_select     traceid<br>root@genericarmv8:</del>#</p>
+<p>Like any other source a sink needs to be identified and the STM enabled before<br>being used:</p>
+<p>root@genericarmv8:<del># echo 1 &gt; /sys/bus/coresight/devices/20010000.etf/enable_sink<br>root@genericarmv8:</del># echo 1 &gt; /sys/bus/coresight/devices/20100000.stm/enable_source</p>
+<p>From there user space applications can request and use channels using the devfs<br>interface provided for that purpose by the generic STM API:</p>
+<p>root@genericarmv8:<del># ls -l /dev/20100000.stm<br>crw——-    1 root     root       10,  61 Jan  3 18:11 /dev/20100000.stm<br>root@genericarmv8:</del>#</p>
+<p>Details on how to use the generic STM API can be found here [2].</p>
+<p>[1]. Documentation/ABI/testing/sysfs-bus-coresight-devices-stm<br>[2]. Documentation/trace/stm.rst<br>[3]. <a target="_blank" rel="noopener" href="https://github.com/Linaro/perf-opencsd">https://github.com/Linaro/perf-opencsd</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_coresight/" title="Kernel-4.18.0-80.el8_coresight" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_coresight/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_configfs/" title="Kernel-4.18.0-80.el8_configfs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_cs89x0/" title="Kernel-4.18.0-80.el8_cs89x0"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

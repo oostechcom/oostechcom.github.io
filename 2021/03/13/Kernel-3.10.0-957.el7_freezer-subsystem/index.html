@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_freezer-subsyste | oosTech.com</title>
+  <meta name="description" content="The cgroup freezer is useful to batch job management system which startand stop sets of tasks in order to schedule the resources of a machineaccording to the desires of a system administrator. This so">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_freezer-subsyste">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The cgroup freezer is useful to batch job management system which startand stop sets of tasks in order to schedule the resources of a machineaccording to the desires of a system administrator. This so">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-sys-fs-cgroup-freezer"><span class="toc-number">1.</span> <span class="toc-text">mkdir &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-t-cgroup-ofreezer-freezer-sys-fs-cgroup-freezer"><span class="toc-number">2.</span> <span class="toc-text">mount -t cgroup -ofreezer freezer &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-sys-fs-cgroup-freezer-0"><span class="toc-number">3.</span> <span class="toc-text">mkdir &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-some-pid-gt-sys-fs-cgroup-freezer-0-tasks"><span class="toc-number">4.</span> <span class="toc-text">echo $some_pid &gt; &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;tasks</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cat-sys-fs-cgroup-freezer-0-freezer-state"><span class="toc-number">5.</span> <span class="toc-text">cat &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;freezer.state</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-FROZEN-gt-sys-fs-cgroup-freezer-0-freezer-state"><span class="toc-number">6.</span> <span class="toc-text">echo FROZEN &gt; &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;freezer.state</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cat-sys-fs-cgroup-freezer-0-freezer-state-1"><span class="toc-number">7.</span> <span class="toc-text">cat &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;freezer.state</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cat-sys-fs-cgroup-freezer-0-freezer-state-2"><span class="toc-number">8.</span> <span class="toc-text">cat &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;freezer.state</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-THAWED-gt-sys-fs-cgroup-freezer-0-freezer-state"><span class="toc-number">9.</span> <span class="toc-text">echo THAWED &gt; &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;freezer.state</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cat-sys-fs-cgroup-freezer-0-freezer-state-3"><span class="toc-number">10.</span> <span class="toc-text">cat &#x2F;sys&#x2F;fs&#x2F;cgroup&#x2F;freezer&#x2F;0&#x2F;freezer.state</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_freezer-subsystem" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_freezer-subsyste
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>The cgroup freezer is useful to batch job management system which start<br>and stop sets of tasks in order to schedule the resources of a machine<br>according to the desires of a system administrator. This sort of program<br>is often used on HPC clusters to schedule access to the cluster as a<br>whole. The cgroup freezer uses cgroups to describe the set of tasks to<br>be started/stopped by the batch job management system. It also provides<br>a means to start and stop the tasks composing the job.</p>
+<p>The cgroup freezer will also be useful for checkpointing running groups<br>of tasks. The freezer allows the checkpoint code to obtain a consistent<br>image of the tasks by attempting to force the tasks in a cgroup into a<br>quiescent state. Once the tasks are quiescent another task can<br>walk /proc or invoke a kernel interface to gather information about the<br>quiesced tasks. Checkpointed tasks can be restarted later should a<br>recoverable error occur. This also allows the checkpointed tasks to be<br>migrated between nodes in a cluster by copying the gathered information<br>to another node and restarting the tasks there.</p>
+<p>Sequences of SIGSTOP and SIGCONT are not always sufficient for stopping<br>and resuming tasks in userspace. Both of these signals are observable<br>from within the tasks we wish to freeze. While SIGSTOP cannot be caught,<br>blocked, or ignored it can be seen by waiting or ptracing parent tasks.<br>SIGCONT is especially unsuitable since it can be caught by the task. Any<br>programs designed to watch for SIGSTOP and SIGCONT could be broken by<br>attempting to use SIGSTOP and SIGCONT to stop and resume tasks. We can<br>demonstrate this problem using nested bash shells:</p>
+<pre><code>$ echo $$
+16644
+$ bash
+$ echo $$
+16690
+
+From a second, unrelated bash shell:
+$ kill -SIGSTOP 16690
+$ kill -SIGCONT 16690
+
+&lt;at this point 16690 exits and causes 16644 to exit too&gt;
+</code></pre>
+<p>This happens because bash can observe both signals and choose how it<br>responds to them.</p>
+<p>Another example of a program which catches and responds to these<br>signals is gdb. In fact any program designed to use ptrace is likely to<br>have a problem with this method of stopping and resuming tasks.</p>
+<p>In contrast, the cgroup freezer uses the kernel freezer code to<br>prevent the freeze/unfreeze cycle from becoming visible to the tasks<br>being frozen. This allows the bash example above and gdb to run as<br>expected.</p>
+<p>The cgroup freezer is hierarchical. Freezing a cgroup freezes all<br>tasks beloning to the cgroup and all its descendant cgroups. Each<br>cgroup has its own state (self-state) and the state inherited from the<br>parent (parent-state). Iff both states are THAWED, the cgroup is<br>THAWED.</p>
+<p>The following cgroupfs files are created by cgroup freezer.</p>
+<ul>
+<li><p>freezer.state: Read-write.</p>
+<p>When read, returns the effective state of the cgroup - “THAWED”,<br>“FREEZING” or “FROZEN”. This is the combined self and parent-states.<br>If any is freezing, the cgroup is freezing (FREEZING or FROZEN).</p>
+<p>FREEZING cgroup transitions into FROZEN state when all tasks<br>belonging to the cgroup and its descendants become frozen. Note that<br>a cgroup reverts to FREEZING from FROZEN after a new task is added<br>to the cgroup or one of its descendant cgroups until the new task is<br>frozen.</p>
+<p>When written, sets the self-state of the cgroup. Two values are<br>allowed - “FROZEN” and “THAWED”. If FROZEN is written, the cgroup,<br>if not already freezing, enters FREEZING state along with all its<br>descendant cgroups.</p>
+<p>If THAWED is written, the self-state of the cgroup is changed to<br>THAWED.  Note that the effective state may not change to THAWED if<br>the parent-state is still freezing. If a cgroup’s effective state<br>becomes THAWED, all its descendants which are freezing because of<br>the cgroup also leave the freezing state.</p>
+</li>
+<li><p>freezer.self_freezing: Read only.</p>
+<p>Shows the self-state. 0 if the self-state is THAWED; otherwise, 1.<br>This value is 1 iff the last write to freezer.state was “FROZEN”.</p>
+</li>
+<li><p>freezer.parent_freezing: Read only.</p>
+<p>Shows the parent-state.  0 if none of the cgroup’s ancestors is<br>frozen; otherwise, 1.</p>
+</li>
+</ul>
+<p>The root cgroup is non-freezable and the above interface files don’t<br>exist.</p>
+<ul>
+<li><p>Examples of usage :</p>
+<h1 id="mkdir-sys-fs-cgroup-freezer"><a href="#mkdir-sys-fs-cgroup-freezer" class="headerlink" title="mkdir /sys/fs/cgroup/freezer"></a>mkdir /sys/fs/cgroup/freezer</h1><h1 id="mount-t-cgroup-ofreezer-freezer-sys-fs-cgroup-freezer"><a href="#mount-t-cgroup-ofreezer-freezer-sys-fs-cgroup-freezer" class="headerlink" title="mount -t cgroup -ofreezer freezer /sys/fs/cgroup/freezer"></a>mount -t cgroup -ofreezer freezer /sys/fs/cgroup/freezer</h1><h1 id="mkdir-sys-fs-cgroup-freezer-0"><a href="#mkdir-sys-fs-cgroup-freezer-0" class="headerlink" title="mkdir /sys/fs/cgroup/freezer/0"></a>mkdir /sys/fs/cgroup/freezer/0</h1><h1 id="echo-some-pid-gt-sys-fs-cgroup-freezer-0-tasks"><a href="#echo-some-pid-gt-sys-fs-cgroup-freezer-0-tasks" class="headerlink" title="echo $some_pid &gt; /sys/fs/cgroup/freezer/0/tasks"></a>echo $some_pid &gt; /sys/fs/cgroup/freezer/0/tasks</h1></li>
+</ul>
+<p>to get status of the freezer subsystem :</p>
+<h1 id="cat-sys-fs-cgroup-freezer-0-freezer-state"><a href="#cat-sys-fs-cgroup-freezer-0-freezer-state" class="headerlink" title="cat /sys/fs/cgroup/freezer/0/freezer.state"></a>cat /sys/fs/cgroup/freezer/0/freezer.state</h1><p>   THAWED</p>
+<p>to freeze all tasks in the container :</p>
+<h1 id="echo-FROZEN-gt-sys-fs-cgroup-freezer-0-freezer-state"><a href="#echo-FROZEN-gt-sys-fs-cgroup-freezer-0-freezer-state" class="headerlink" title="echo FROZEN &gt; /sys/fs/cgroup/freezer/0/freezer.state"></a>echo FROZEN &gt; /sys/fs/cgroup/freezer/0/freezer.state</h1><h1 id="cat-sys-fs-cgroup-freezer-0-freezer-state-1"><a href="#cat-sys-fs-cgroup-freezer-0-freezer-state-1" class="headerlink" title="cat /sys/fs/cgroup/freezer/0/freezer.state"></a>cat /sys/fs/cgroup/freezer/0/freezer.state</h1><p>   FREEZING</p>
+<h1 id="cat-sys-fs-cgroup-freezer-0-freezer-state-2"><a href="#cat-sys-fs-cgroup-freezer-0-freezer-state-2" class="headerlink" title="cat /sys/fs/cgroup/freezer/0/freezer.state"></a>cat /sys/fs/cgroup/freezer/0/freezer.state</h1><p>   FROZEN</p>
+<p>to unfreeze all tasks in the container :</p>
+<h1 id="echo-THAWED-gt-sys-fs-cgroup-freezer-0-freezer-state"><a href="#echo-THAWED-gt-sys-fs-cgroup-freezer-0-freezer-state" class="headerlink" title="echo THAWED &gt; /sys/fs/cgroup/freezer/0/freezer.state"></a>echo THAWED &gt; /sys/fs/cgroup/freezer/0/freezer.state</h1><h1 id="cat-sys-fs-cgroup-freezer-0-freezer-state-3"><a href="#cat-sys-fs-cgroup-freezer-0-freezer-state-3" class="headerlink" title="cat /sys/fs/cgroup/freezer/0/freezer.state"></a>cat /sys/fs/cgroup/freezer/0/freezer.state</h1><p>   THAWED</p>
+<p>This is the basic mechanism which should do the right thing for user space task<br>in a simple scenario.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/" title="Kernel-3.10.0-957.el7_freezer-subsyste" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_freezer-subsystem/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_framerelay/" title="Kernel-3.10.0-957.el7_framerelay"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_freezing-of-tasks/" title="Kernel-3.10.0-957.el7_freezing-of-tasks"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

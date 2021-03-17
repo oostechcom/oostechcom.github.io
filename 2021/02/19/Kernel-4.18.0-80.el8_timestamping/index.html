@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_timestamping | oosTech.com</title>
+  <meta name="description" content="Control Interfaces  The interfaces for receiving network packages timestamps are:  SO_TIMESTAMPGenerates a timestamp for each incoming packet in (not necessarilymonotonic) system time. Reports the ti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_timestamping">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_timestamping/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Control Interfaces  The interfaces for receiving network packages timestamps are:  SO_TIMESTAMPGenerates a timestamp for each incoming packet in (not necessarilymonotonic) system time. Reports the ti">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_timestamping/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_timestamping" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_timestamping
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_timestamping/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_timestamping/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_timestamping/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <ol>
+<li>Control Interfaces</li>
+</ol>
+<p>The interfaces for receiving network packages timestamps are:</p>
+<ul>
+<li><p>SO_TIMESTAMP<br>Generates a timestamp for each incoming packet in (not necessarily<br>monotonic) system time. Reports the timestamp via recvmsg() in a<br>control message as struct timeval (usec resolution).</p>
+</li>
+<li><p>SO_TIMESTAMPNS<br>Same timestamping mechanism as SO_TIMESTAMP, but reports the<br>timestamp as struct timespec (nsec resolution).</p>
+</li>
+<li><p>IP_MULTICAST_LOOP + SO_TIMESTAMP[NS]<br>Only for multicast:approximate transmit timestamp obtained by<br>reading the looped packet receive timestamp.</p>
+</li>
+<li><p>SO_TIMESTAMPING<br>Generates timestamps on reception, transmission or both. Supports<br>multiple timestamp sources, including hardware. Supports generating<br>timestamps for stream sockets.</p>
+</li>
+</ul>
+<p>1.1 SO_TIMESTAMP:</p>
+<p>This socket option enables timestamping of datagrams on the reception<br>path. Because the destination socket, if any, is not known early in<br>the network stack, the feature has to be enabled for all packets. The<br>same is true for all early receive timestamp options.</p>
+<p>For interface details, see <code>man 7 socket</code>.</p>
+<p>1.2 SO_TIMESTAMPNS:</p>
+<p>This option is identical to SO_TIMESTAMP except for the returned data type.<br>Its struct timespec allows for higher resolution (ns) timestamps than the<br>timeval of SO_TIMESTAMP (ms).</p>
+<p>1.3 SO_TIMESTAMPING:</p>
+<p>Supports multiple types of timestamp requests. As a result, this<br>socket option takes a bitmap of flags, not a boolean. In</p>
+<p>  err = setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPING, &amp;val, sizeof(val));</p>
+<p>val is an integer with any of the following bits set. Setting other<br>bit returns EINVAL and does not change the current state.</p>
+<p>The socket option configures timestamp generation for individual<br>sk_buffs (1.3.1), timestamp reporting to the socket’s error<br>queue (1.3.2) and options (1.3.3). Timestamp generation can also<br>be enabled for individual sendmsg calls using cmsg (1.3.4).</p>
+<p>1.3.1 Timestamp Generation</p>
+<p>Some bits are requests to the stack to try to generate timestamps. Any<br>combination of them is valid. Changes to these bits apply to newly<br>created packets, not to packets already in the stack. As a result, it<br>is possible to selectively request timestamps for a subset of packets<br>(e.g., for sampling) by embedding an send() call within two setsockopt<br>calls, one to enable timestamp generation and one to disable it.<br>Timestamps may also be generated for reasons other than being<br>requested by a particular socket, such as when receive timestamping is<br>enabled system wide, as explained earlier.</p>
+<p>SOF_TIMESTAMPING_RX_HARDWARE:<br>  Request rx timestamps generated by the network adapter.</p>
+<p>SOF_TIMESTAMPING_RX_SOFTWARE:<br>  Request rx timestamps when data enters the kernel. These timestamps<br>  are generated just after a device driver hands a packet to the<br>  kernel receive stack.</p>
+<p>SOF_TIMESTAMPING_TX_HARDWARE:<br>  Request tx timestamps generated by the network adapter. This flag<br>  can be enabled via both socket options and control messages.</p>
+<p>SOF_TIMESTAMPING_TX_SOFTWARE:<br>  Request tx timestamps when data leaves the kernel. These timestamps<br>  are generated in the device driver as close as possible, but always<br>  prior to, passing the packet to the network interface. Hence, they<br>  require driver support and may not be available for all devices.<br>  This flag can be enabled via both socket options and control messages.</p>
+<p>SOF_TIMESTAMPING_TX_SCHED:<br>  Request tx timestamps prior to entering the packet scheduler. Kernel<br>  transmit latency is, if long, often dominated by queuing delay. The<br>  difference between this timestamp and one taken at<br>  SOF_TIMESTAMPING_TX_SOFTWARE will expose this latency independent<br>  of protocol processing. The latency incurred in protocol<br>  processing, if any, can be computed by subtracting a userspace<br>  timestamp taken immediately before send() from this timestamp. On<br>  machines with virtual devices where a transmitted packet travels<br>  through multiple devices and, hence, multiple packet schedulers,<br>  a timestamp is generated at each layer. This allows for fine<br>  grained measurement of queuing delay. This flag can be enabled<br>  via both socket options and control messages.</p>
+<p>SOF_TIMESTAMPING_TX_ACK:<br>  Request tx timestamps when all data in the send buffer has been<br>  acknowledged. This only makes sense for reliable protocols. It is<br>  currently only implemented for TCP. For that protocol, it may<br>  over-report measurement, because the timestamp is generated when all<br>  data up to and including the buffer at send() was acknowledged: the<br>  cumulative acknowledgment. The mechanism ignores SACK and FACK.<br>  This flag can be enabled via both socket options and control messages.</p>
+<p>1.3.2 Timestamp Reporting</p>
+<p>The other three bits control which timestamps will be reported in a<br>generated control message. Changes to the bits take immediate<br>effect at the timestamp reporting locations in the stack. Timestamps<br>are only reported for packets that also have the relevant timestamp<br>generation request set.</p>
+<p>SOF_TIMESTAMPING_SOFTWARE:<br>  Report any software timestamps when available.</p>
+<p>SOF_TIMESTAMPING_SYS_HARDWARE:<br>  This option is deprecated and ignored.</p>
+<p>SOF_TIMESTAMPING_RAW_HARDWARE:<br>  Report hardware timestamps as generated by<br>  SOF_TIMESTAMPING_TX_HARDWARE when available.</p>
+<p>1.3.3 Timestamp Options</p>
+<p>The interface supports the options</p>
+<p>SOF_TIMESTAMPING_OPT_ID:</p>
+<p>  Generate a unique identifier along with each packet. A process can<br>  have multiple concurrent timestamping requests outstanding. Packets<br>  can be reordered in the transmit path, for instance in the packet<br>  scheduler. In that case timestamps will be queued onto the error<br>  queue out of order from the original send() calls. It is not always<br>  possible to uniquely match timestamps to the original send() calls<br>  based on timestamp order or payload inspection alone, then.</p>
+<p>  This option associates each packet at send() with a unique<br>  identifier and returns that along with the timestamp. The identifier<br>  is derived from a per-socket u32 counter (that wraps). For datagram<br>  sockets, the counter increments with each sent packet. For stream<br>  sockets, it increments with every byte.</p>
+<p>  The counter starts at zero. It is initialized the first time that<br>  the socket option is enabled. It is reset each time the option is<br>  enabled after having been disabled. Resetting the counter does not<br>  change the identifiers of existing packets in the system.</p>
+<p>  This option is implemented only for transmit timestamps. There, the<br>  timestamp is always looped along with a struct sock_extended_err.<br>  The option modifies field ee_data to pass an id that is unique<br>  among all possibly concurrently outstanding timestamp requests for<br>  that socket.</p>
+<p>SOF_TIMESTAMPING_OPT_CMSG:</p>
+<p>  Support recv() cmsg for all timestamped packets. Control messages<br>  are already supported unconditionally on all packets with receive<br>  timestamps and on IPv6 packets with transmit timestamp. This option<br>  extends them to IPv4 packets with transmit timestamp. One use case<br>  is to correlate packets with their egress device, by enabling socket<br>  option IP_PKTINFO simultaneously.</p>
+<p>SOF_TIMESTAMPING_OPT_TSONLY:</p>
+<p>  Applies to transmit timestamps only. Makes the kernel return the<br>  timestamp as a cmsg alongside an empty packet, as opposed to<br>  alongside the original packet. This reduces the amount of memory<br>  charged to the socket’s receive budget (SO_RCVBUF) and delivers<br>  the timestamp even if sysctl net.core.tstamp_allow_data is 0.<br>  This option disables SOF_TIMESTAMPING_OPT_CMSG.</p>
+<p>SOF_TIMESTAMPING_OPT_STATS:</p>
+<p>  Optional stats that are obtained along with the transmit timestamps.<br>  It must be used together with SOF_TIMESTAMPING_OPT_TSONLY. When the<br>  transmit timestamp is available, the stats are available in a<br>  separate control message of type SCM_TIMESTAMPING_OPT_STATS, as a<br>  list of TLVs (struct nlattr) of types. These stats allow the<br>  application to associate various transport layer stats with<br>  the transmit timestamps, such as how long a certain block of<br>  data was limited by peer’s receiver window.</p>
+<p>SOF_TIMESTAMPING_OPT_PKTINFO:</p>
+<p>  Enable the SCM_TIMESTAMPING_PKTINFO control message for incoming<br>  packets with hardware timestamps. The message contains struct<br>  scm_ts_pktinfo, which supplies the index of the real interface which<br>  received the packet and its length at layer 2. A valid (non-zero)<br>  interface index will be returned only if CONFIG_NET_RX_BUSY_POLL is<br>  enabled and the driver is using NAPI. The struct contains also two<br>  other fields, but they are reserved and undefined.</p>
+<p>SOF_TIMESTAMPING_OPT_TX_SWHW:</p>
+<p>  Request both hardware and software timestamps for outgoing packets<br>  when SOF_TIMESTAMPING_TX_HARDWARE and SOF_TIMESTAMPING_TX_SOFTWARE<br>  are enabled at the same time. If both timestamps are generated,<br>  two separate messages will be looped to the socket’s error queue,<br>  each containing just one timestamp.</p>
+<p>New applications are encouraged to pass SOF_TIMESTAMPING_OPT_ID to<br>disambiguate timestamps and SOF_TIMESTAMPING_OPT_TSONLY to operate<br>regardless of the setting of sysctl net.core.tstamp_allow_data.</p>
+<p>An exception is when a process needs additional cmsg data, for<br>instance SOL_IP/IP_PKTINFO to detect the egress network interface.<br>Then pass option SOF_TIMESTAMPING_OPT_CMSG. This option depends on<br>having access to the contents of the original packet, so cannot be<br>combined with SOF_TIMESTAMPING_OPT_TSONLY.</p>
+<p>1.3.4. Enabling timestamps via control messages</p>
+<p>In addition to socket options, timestamp generation can be requested<br>per write via cmsg, only for SOF_TIMESTAMPING_TX_* (see Section 1.3.1).<br>Using this feature, applications can sample timestamps per sendmsg()<br>without paying the overhead of enabling and disabling timestamps via<br>setsockopt:</p>
+<p>  struct msghdr *msg;<br>  …<br>  cmsg                   = CMSG_FIRSTHDR(msg);<br>  cmsg-&gt;cmsg_level           = SOL_SOCKET;<br>  cmsg-&gt;cmsg_type           = SO_TIMESTAMPING;<br>  cmsg-&gt;cmsg_len           = CMSG_LEN(sizeof(__u32));<br>  *((__u32 *) CMSG_DATA(cmsg)) = SOF_TIMESTAMPING_TX_SCHED |<br>                 SOF_TIMESTAMPING_TX_SOFTWARE |<br>                 SOF_TIMESTAMPING_TX_ACK;<br>  err = sendmsg(fd, msg, 0);</p>
+<p>The SOF_TIMESTAMPING_TX_* flags set via cmsg will override<br>the SOF_TIMESTAMPING_TX_* flags set via setsockopt.</p>
+<p>Moreover, applications must still enable timestamp reporting via<br>setsockopt to receive timestamps:</p>
+<p>  __u32 val = SOF_TIMESTAMPING_SOFTWARE |<br>          SOF_TIMESTAMPING_OPT_ID /* or any other flag */;<br>  err = setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPING, &amp;val, sizeof(val));</p>
+<p>1.4 Bytestream Timestamps</p>
+<p>The SO_TIMESTAMPING interface supports timestamping of bytes in a<br>bytestream. Each request is interpreted as a request for when the<br>entire contents of the buffer has passed a timestamping point. That<br>is, for streams option SOF_TIMESTAMPING_TX_SOFTWARE will record<br>when all bytes have reached the device driver, regardless of how<br>many packets the data has been converted into.</p>
+<p>In general, bytestreams have no natural delimiters and therefore<br>correlating a timestamp with data is non-trivial. A range of bytes<br>may be split across segments, any segments may be merged (possibly<br>coalescing sections of previously segmented buffers associated with<br>independent send() calls). Segments can be reordered and the same<br>byte range can coexist in multiple segments for protocols that<br>implement retransmissions.</p>
+<p>It is essential that all timestamps implement the same semantics,<br>regardless of these possible transformations, as otherwise they are<br>incomparable. Handling “rare” corner cases differently from the<br>simple case (a 1:1 mapping from buffer to skb) is insufficient<br>because performance debugging often needs to focus on such outliers.</p>
+<p>In practice, timestamps can be correlated with segments of a<br>bytestream consistently, if both semantics of the timestamp and the<br>timing of measurement are chosen correctly. This challenge is no<br>different from deciding on a strategy for IP fragmentation. There, the<br>definition is that only the first fragment is timestamped. For<br>bytestreams, we chose that a timestamp is generated only when all<br>bytes have passed a point. SOF_TIMESTAMPING_TX_ACK as defined is easy to<br>implement and reason about. An implementation that has to take into<br>account SACK would be more complex due to possible transmission holes<br>and out of order arrival.</p>
+<p>On the host, TCP can also break the simple 1:1 mapping from buffer to<br>skbuff as a result of Nagle, cork, autocork, segmentation and GSO. The<br>implementation ensures correctness in all cases by tracking the<br>individual last byte passed to send(), even if it is no longer the<br>last byte after an skbuff extend or merge operation. It stores the<br>relevant sequence number in skb_shinfo(skb)-&gt;tskey. Because an skbuff<br>has only one such field, only one timestamp can be generated.</p>
+<p>In rare cases, a timestamp request can be missed if two requests are<br>collapsed onto the same skb. A process can detect this situation by<br>enabling SOF_TIMESTAMPING_OPT_ID and comparing the byte offset at<br>send time with the value returned for each timestamp. It can prevent<br>the situation by always flushing the TCP stack in between requests,<br>for instance by enabling TCP_NODELAY and disabling TCP_CORK and<br>autocork.</p>
+<p>These precautions ensure that the timestamp is generated only when all<br>bytes have passed a timestamp point, assuming that the network stack<br>itself does not reorder the segments. The stack indeed tries to avoid<br>reordering. The one exception is under administrator control: it is<br>possible to construct a packet scheduler configuration that delays<br>segments from the same stream differently. Such a setup would be<br>unusual.</p>
+<p>2 Data Interfaces</p>
+<p>Timestamps are read using the ancillary data feature of recvmsg().<br>See <code>man 3 cmsg</code> for details of this interface. The socket manual<br>page (<code>man 7 socket</code>) describes how timestamps generated with<br>SO_TIMESTAMP and SO_TIMESTAMPNS records can be retrieved.</p>
+<p>2.1 SCM_TIMESTAMPING records</p>
+<p>These timestamps are returned in a control message with cmsg_level<br>SOL_SOCKET, cmsg_type SCM_TIMESTAMPING, and payload of type</p>
+<p>struct scm_timestamping {<br>    struct timespec ts[3];<br>};</p>
+<p>The structure can return up to three timestamps. This is a legacy<br>feature. At least one field is non-zero at any time. Most timestamps<br>are passed in ts[0]. Hardware timestamps are passed in ts[2].</p>
+<p>ts[1] used to hold hardware timestamps converted to system time.<br>Instead, expose the hardware clock device on the NIC directly as<br>a HW PTP clock source, to allow time conversion in userspace and<br>optionally synchronize system time with a userspace PTP stack such<br>as linuxptp. For the PTP clock API, see Documentation/ptp/ptp.txt.</p>
+<p>Note that if the SO_TIMESTAMP or SO_TIMESTAMPNS option is enabled<br>together with SO_TIMESTAMPING using SOF_TIMESTAMPING_SOFTWARE, a false<br>software timestamp will be generated in the recvmsg() call and passed<br>in ts[0] when a real software timestamp is missing. This happens also<br>on hardware transmit timestamps.</p>
+<p>2.1.1 Transmit timestamps with MSG_ERRQUEUE</p>
+<p>For transmit timestamps the outgoing packet is looped back to the<br>socket’s error queue with the send timestamp(s) attached. A process<br>receives the timestamps by calling recvmsg() with flag MSG_ERRQUEUE<br>set and with a msg_control buffer sufficiently large to receive the<br>relevant metadata structures. The recvmsg call returns the original<br>outgoing data packet with two ancillary messages attached.</p>
+<p>A message of cm_level SOL_IP(V6) and cm_type IP(V6)_RECVERR<br>embeds a struct sock_extended_err. This defines the error type. For<br>timestamps, the ee_errno field is ENOMSG. The other ancillary message<br>will have cm_level SOL_SOCKET and cm_type SCM_TIMESTAMPING. This<br>embeds the struct scm_timestamping.</p>
+<p>2.1.1.2 Timestamp types</p>
+<p>The semantics of the three struct timespec are defined by field<br>ee_info in the extended error structure. It contains a value of<br>type SCM_TSTAMP_* to define the actual timestamp passed in<br>scm_timestamping.</p>
+<p>The SCM_TSTAMP_* types are 1:1 matches to the SOF_TIMESTAMPING_*<br>control fields discussed previously, with one exception. For legacy<br>reasons, SCM_TSTAMP_SND is equal to zero and can be set for both<br>SOF_TIMESTAMPING_TX_HARDWARE and SOF_TIMESTAMPING_TX_SOFTWARE. It<br>is the first if ts[2] is non-zero, the second otherwise, in which<br>case the timestamp is stored in ts[0].</p>
+<p>2.1.1.3 Fragmentation</p>
+<p>Fragmentation of outgoing datagrams is rare, but is possible, e.g., by<br>explicitly disabling PMTU discovery. If an outgoing packet is fragmented,<br>then only the first fragment is timestamped and returned to the sending<br>socket.</p>
+<p>2.1.1.4 Packet Payload</p>
+<p>The calling application is often not interested in receiving the whole<br>packet payload that it passed to the stack originally: the socket<br>error queue mechanism is just a method to piggyback the timestamp on.<br>In this case, the application can choose to read datagrams with a<br>smaller buffer, possibly even of length 0. The payload is truncated<br>accordingly. Until the process calls recvmsg() on the error queue,<br>however, the full packet is queued, taking up budget from SO_RCVBUF.</p>
+<p>2.1.1.5 Blocking Read</p>
+<p>Reading from the error queue is always a non-blocking operation. To<br>block waiting on a timestamp, use poll or select. poll() will return<br>POLLERR in pollfd.revents if any data is ready on the error queue.<br>There is no need to pass this flag in pollfd.events. This flag is<br>ignored on request. See also <code>man 2 poll</code>.</p>
+<p>2.1.2 Receive timestamps</p>
+<p>On reception, there is no reason to read from the socket error queue.<br>The SCM_TIMESTAMPING ancillary data is sent along with the packet data<br>on a normal recvmsg(). Since this is not a socket error, it is not<br>accompanied by a message SOL_IP(V6)/IP(V6)_RECVERROR. In this case,<br>the meaning of the three fields in struct scm_timestamping is<br>implicitly defined. ts[0] holds a software timestamp if set, ts[1]<br>is again deprecated and ts[2] holds a hardware timestamp if set.</p>
+<ol start="3">
+<li>Hardware Timestamping configuration: SIOCSHWTSTAMP and SIOCGHWTSTAMP</li>
+</ol>
+<p>Hardware time stamping must also be initialized for each device driver<br>that is expected to do hardware time stamping. The parameter is defined in<br>/include/linux/net_tstamp.h as:</p>
+<p>struct hwtstamp_config {<br>    int flags;    /* no flags defined right now, must be zero <em>/<br>    int tx_type;    /</em> HWTSTAMP_TX_* <em>/<br>    int rx_filter;    /</em> HWTSTAMP_FILTER_* */<br>};</p>
+<p>Desired behavior is passed into the kernel and to a specific device by<br>calling ioctl(SIOCSHWTSTAMP) with a pointer to a struct ifreq whose<br>ifr_data points to a struct hwtstamp_config. The tx_type and<br>rx_filter are hints to the driver what it is expected to do. If<br>the requested fine-grained filtering for incoming packets is not<br>supported, the driver may time stamp more than just the requested types<br>of packets.</p>
+<p>Drivers are free to use a more permissive configuration than the requested<br>configuration. It is expected that drivers should only implement directly the<br>most generic mode that can be supported. For example if the hardware can<br>support HWTSTAMP_FILTER_V2_EVENT, then it should generally always upscale<br>HWTSTAMP_FILTER_V2_L2_SYNC_MESSAGE, and so forth, as HWTSTAMP_FILTER_V2_EVENT<br>is more generic (and more useful to applications).</p>
+<p>A driver which supports hardware time stamping shall update the struct<br>with the actual, possibly more permissive configuration. If the<br>requested packets cannot be time stamped, then nothing should be<br>changed and ERANGE shall be returned (in contrast to EINVAL, which<br>indicates that SIOCSHWTSTAMP is not supported at all).</p>
+<p>Only a processes with admin rights may change the configuration. User<br>space is responsible to ensure that multiple processes don’t interfere<br>with each other and that the settings are reset.</p>
+<p>Any process can read the actual configuration by passing this<br>structure to ioctl(SIOCGHWTSTAMP) in the same way.  However, this has<br>not been implemented in all drivers.</p>
+<p>/* possible values for hwtstamp_config-&gt;tx_type <em>/<br>enum {<br>    /</em><br>     * no outgoing packet will need hardware time stamping;<br>     * should a packet arrive which asks for it, no hardware<br>     * time stamping will be done<br>     */<br>    HWTSTAMP_TX_OFF,</p>
+<pre><code>/*
+ * enables hardware time stamping for outgoing packets;
+ * the sender of the packet decides which are to be
+ * time stamped by setting SOF_TIMESTAMPING_TX_SOFTWARE
+ * before sending the packet
+ */
+HWTSTAMP_TX_ON,
+</code></pre>
+<p>};</p>
+<p>/* possible values for hwtstamp_config-&gt;rx_filter <em>/<br>enum {<br>    /</em> time stamp no incoming packet at all */<br>    HWTSTAMP_FILTER_NONE,</p>
+<pre><code>/* time stamp any incoming packet */
+HWTSTAMP_FILTER_ALL,
+
+/* return value: time stamp all packets requested plus some others */
+HWTSTAMP_FILTER_SOME,
+
+/* PTP v1, UDP, any kind of event packet */
+HWTSTAMP_FILTER_PTP_V1_L4_EVENT,
+
+/* for the complete list of values, please check
+ * the include file /include/linux/net_tstamp.h
+ */
+</code></pre>
+<p>};</p>
+<p>3.1 Hardware Timestamping Implementation: Device Drivers</p>
+<p>A driver which supports hardware time stamping must support the<br>SIOCSHWTSTAMP ioctl and update the supplied struct hwtstamp_config with<br>the actual values as described in the section on SIOCSHWTSTAMP.  It<br>should also support SIOCGHWTSTAMP.</p>
+<p>Time stamps for received packets must be stored in the skb. To get a pointer<br>to the shared time stamp structure of the skb call skb_hwtstamps(). Then<br>set the time stamps in the structure:</p>
+<p>struct skb_shared_hwtstamps {<br>    /* hardware time stamp transformed into duration<br>     * since arbitrary point in time<br>     */<br>    ktime_t    hwtstamp;<br>};</p>
+<p>Time stamps for outgoing packets are to be generated as follows:</p>
+<ul>
+<li><p>In hard_start_xmit(), check if (skb_shinfo(skb)-&gt;tx_flags &amp; SKBTX_HW_TSTAMP)<br>is set no-zero. If yes, then the driver is expected to do hardware time<br>stamping.</p>
+</li>
+<li><p>If this is possible for the skb and requested, then declare<br>that the driver is doing the time stamping by setting the flag<br>SKBTX_IN_PROGRESS in skb_shinfo(skb)-&gt;tx_flags , e.g. with</p>
+<pre><code>skb_shinfo(skb)-&gt;tx_flags |= SKBTX_IN_PROGRESS;
+</code></pre>
+<p>You might want to keep a pointer to the associated skb for the next step<br>and not free the skb. A driver not supporting hardware time stamping doesn’t<br>do that. A driver must never touch sk_buff::tstamp! It is used to store<br>software generated time stamps by the network subsystem.</p>
+</li>
+<li><p>Driver should call skb_tx_timestamp() as close to passing sk_buff to hardware<br>as possible. skb_tx_timestamp() provides a software time stamp if requested<br>and hardware timestamping is not possible (SKBTX_IN_PROGRESS not set).</p>
+</li>
+<li><p>As soon as the driver has sent the packet and/or obtained a<br>hardware time stamp for it, it passes the time stamp back by<br>calling skb_hwtstamp_tx() with the original skb, the raw<br>hardware time stamp. skb_hwtstamp_tx() clones the original skb and<br>adds the timestamps, therefore the original skb has to be freed now.<br>If obtaining the hardware time stamp somehow fails, then the driver<br>should not fall back to software time stamping. The rationale is that<br>this would occur at a later time in the processing pipeline than other<br>software time stamping and therefore could lead to unexpected deltas<br>between time stamps.</p>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_timestamping/" title="Kernel-4.18.0-80.el8_timestamping" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_timestamping/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_timekeeping/" title="Kernel-4.18.0-80.el8_timekeeping"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_usage-model/" title="Kernel-4.18.0-80.el8_usage-model"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

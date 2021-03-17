@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_initr | oosTech.com</title>
+  <meta name="description" content="Using the initial RAM disk (initrd)Written 1996,2000 by Werner Almesberger &amp;#119;&amp;#x65;&amp;#114;&amp;#x6e;&amp;#101;&amp;#114;&amp;#x2e;&amp;#97;&amp;#x6c;&amp;#x6d;&amp;#101;&amp;#x73;&amp;#98;&amp;#101;&amp;#114;&amp;#x67;&amp;#101;&amp;#114;&amp;#x40;&amp;#101;&amp;#112;&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_initr">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_initrd/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Using the initial RAM disk (initrd)Written 1996,2000 by Werner Almesberger &amp;#119;&amp;#x65;&amp;#114;&amp;#x6e;&amp;#101;&amp;#114;&amp;#x2e;&amp;#97;&amp;#x6c;&amp;#x6d;&amp;#101;&amp;#x73;&amp;#98;&amp;#101;&amp;#114;&amp;#x67;&amp;#101;&amp;#114;&amp;#x40;&amp;#101;&amp;#112;&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_initrd/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Using-the-initial-RAM-disk-initrd"><span class="toc-number">1.</span> <span class="toc-text">Using the initial RAM disk (initrd)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Operation"><span class="toc-number">1.1.</span> <span class="toc-text">Operation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Boot-command-line-options"><span class="toc-number">1.2.</span> <span class="toc-text">Boot command-line options</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Compressed-cpio-images"><span class="toc-number">1.3.</span> <span class="toc-text">Compressed cpio images</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Installation"><span class="toc-number">1.4.</span> <span class="toc-text">Installation</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-initrd"><span class="toc-number">2.</span> <span class="toc-text">mkdir &#x2F;initrd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mknod-dev-initrd-b-1-250"><span class="toc-number">3.</span> <span class="toc-text">mknod &#x2F;dev&#x2F;initrd b 1 250</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#chmod-400-dev-initrd"><span class="toc-number">4.</span> <span class="toc-text">chmod 400 &#x2F;dev&#x2F;initrd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dd-if-dev-zero-of-initrd-bs-300k-count-1"><span class="toc-number">5.</span> <span class="toc-text">dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;initrd bs&#x3D;300k count&#x3D;1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mke2fs-F-m0-initrd"><span class="toc-number">6.</span> <span class="toc-text">mke2fs -F -m0 initrd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-t-ext2-o-loop-initrd-mnt"><span class="toc-number">7.</span> <span class="toc-text">mount -t ext2 -o loop initrd &#x2F;mnt</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-mnt-dev"><span class="toc-number">8.</span> <span class="toc-text">mkdir &#x2F;mnt&#x2F;dev</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mknod-mnt-dev-console-c-5-1"><span class="toc-number">9.</span> <span class="toc-text">mknod &#x2F;mnt&#x2F;dev&#x2F;console c 5 1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#chroot-mnt-sbin-init"><span class="toc-number">10.</span> <span class="toc-text">chroot &#x2F;mnt &#x2F;sbin&#x2F;init</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#umount-mnt"><span class="toc-number">11.</span> <span class="toc-text">umount &#x2F;mnt</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#gzip-9-initrd"><span class="toc-number">12.</span> <span class="toc-text">gzip -9 initrd</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Changing-the-root-device"><span class="toc-number">12.1.</span> <span class="toc-text">Changing the root device</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-new-root"><span class="toc-number">13.</span> <span class="toc-text">mkdir &#x2F;new-root</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-o-ro-dev-hda1-new-root"><span class="toc-number">14.</span> <span class="toc-text">mount -o ro &#x2F;dev&#x2F;hda1 &#x2F;new-root</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cd-new-root"><span class="toc-number">15.</span> <span class="toc-text">cd &#x2F;new-root</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-initrd-1"><span class="toc-number">16.</span> <span class="toc-text">mkdir initrd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pivot-root-initrd"><span class="toc-number">17.</span> <span class="toc-text">pivot_root . initrd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#exec-chroot-what-follows-lt-dev-console-gt-dev-console-2-gt-amp-1"><span class="toc-number">18.</span> <span class="toc-text">exec chroot . what-follows &lt;dev&#x2F;console &gt;dev&#x2F;console 2&gt;&amp;1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#umount-initrd"><span class="toc-number">19.</span> <span class="toc-text">umount &#x2F;initrd</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#blockdev-%E2%80%93flushbufs-dev-ram0"><span class="toc-number">20.</span> <span class="toc-text">blockdev –flushbufs &#x2F;dev&#x2F;ram0</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Usage-scenarios"><span class="toc-number">20.1.</span> <span class="toc-text">Usage scenarios</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Obsolete-root-change-mechanism"><span class="toc-number">20.2.</span> <span class="toc-text">Obsolete root change mechanism</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-0x301-gt-proc-sys-kernel-real-root-dev"><span class="toc-number">21.</span> <span class="toc-text">echo 0x301 &gt;&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;real-root-dev</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Mixed-change-root-and-pivot-root-mechanism"><span class="toc-number">21.1.</span> <span class="toc-text">Mixed change_root and pivot_root mechanism</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Resources"><span class="toc-number">21.2.</span> <span class="toc-text">Resources</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_initrd" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_initr
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_initrd/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_initrd/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_initrd/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Using-the-initial-RAM-disk-initrd"><a href="#Using-the-initial-RAM-disk-initrd" class="headerlink" title="Using the initial RAM disk (initrd)"></a>Using the initial RAM disk (initrd)</h1><p>Written 1996,2000 by Werner Almesberger <a href="mailto:&#119;&#x65;&#114;&#x6e;&#101;&#114;&#x2e;&#97;&#x6c;&#x6d;&#101;&#x73;&#98;&#101;&#114;&#x67;&#101;&#114;&#x40;&#101;&#112;&#x66;&#x6c;&#x2e;&#x63;&#x68;">&#119;&#x65;&#114;&#x6e;&#101;&#114;&#x2e;&#97;&#x6c;&#x6d;&#101;&#x73;&#98;&#101;&#114;&#x67;&#101;&#114;&#x40;&#101;&#112;&#x66;&#x6c;&#x2e;&#x63;&#x68;</a> and<br>                     Hans Lermen <a href="mailto:&#x6c;&#101;&#114;&#x6d;&#x65;&#x6e;&#x40;&#102;&#103;&#x61;&#x6e;&#46;&#100;&#101;">&#x6c;&#101;&#114;&#x6d;&#x65;&#x6e;&#x40;&#102;&#103;&#x61;&#x6e;&#46;&#100;&#101;</a></p>
+<p>initrd provides the capability to load a RAM disk by the boot loader.<br>This RAM disk can then be mounted as the root file system and programs<br>can be run from it. Afterwards, a new root file system can be mounted<br>from a different device. The previous root (from initrd) is then moved<br>to a directory and can be subsequently unmounted.</p>
+<p>initrd is mainly designed to allow system startup to occur in two phases,<br>where the kernel comes up with a minimum set of compiled-in drivers, and<br>where additional modules are loaded from initrd.</p>
+<p>This document gives a brief overview of the use of initrd. A more detailed<br>discussion of the boot process can be found in [1].</p>
+<h2 id="Operation"><a href="#Operation" class="headerlink" title="Operation"></a>Operation</h2><p>When using initrd, the system typically boots as follows:</p>
+<ol>
+<li>the boot loader loads the kernel and the initial RAM disk</li>
+<li>the kernel converts initrd into a “normal” RAM disk and<br>frees the memory used by initrd</li>
+<li>if the root device is not /dev/ram0, the old (deprecated)<br>change_root procedure is followed. see the “Obsolete root change<br>mechanism” section below.</li>
+<li>root device is mounted. if it is /dev/ram0, the initrd image is<br>then mounted as root</li>
+<li>/sbin/init is executed (this can be any valid executable, including<br>shell scripts; it is run with uid 0 and can do basically everything<br>init can do).</li>
+<li>init mounts the “real” root file system</li>
+<li>init places the root file system at the root directory using the<br>pivot_root system call</li>
+<li>init execs the /sbin/init on the new root filesystem, performing<br>the usual boot sequence</li>
+<li>the initrd file system is removed</li>
+</ol>
+<p>Note that changing the root directory does not involve unmounting it.<br>It is therefore possible to leave processes running on initrd during that<br>procedure. Also note that file systems mounted under initrd continue to<br>be accessible.</p>
+<h2 id="Boot-command-line-options"><a href="#Boot-command-line-options" class="headerlink" title="Boot command-line options"></a>Boot command-line options</h2><p>initrd adds the following new options:</p>
+<p>  initrd=<path>    (e.g. LOADLIN)</p>
+<pre><code>Loads the specified file as the initial RAM disk. When using LILO, you
+have to specify the RAM disk image file in /etc/lilo.conf, using the
+INITRD configuration variable.
+</code></pre>
+<p>  noinitrd</p>
+<pre><code>initrd data is preserved but it is not converted to a RAM disk and
+the &quot;normal&quot; root file system is mounted. initrd data can be read
+from /dev/initrd. Note that the data in initrd can have any structure
+in this case and doesn&#39;t necessarily have to be a file system image.
+This option is used mainly for debugging.
+
+Note: /dev/initrd is read-only and it can only be used once. As soon
+as the last process has closed it, all data is freed and /dev/initrd
+can&#39;t be opened anymore.
+</code></pre>
+<p>  root=/dev/ram0</p>
+<pre><code>initrd is mounted as root, and the normal boot procedure is followed,
+with the RAM disk mounted as root.
+</code></pre>
+<h2 id="Compressed-cpio-images"><a href="#Compressed-cpio-images" class="headerlink" title="Compressed cpio images"></a>Compressed cpio images</h2><p>Recent kernels have support for populating a ramdisk from a compressed cpio<br>archive. On such systems, the creation of a ramdisk image doesn’t need to<br>involve special block devices or loopbacks; you merely create a directory on<br>disk with the desired initrd content, cd to that directory, and run (as an<br>example):</p>
+<p>find . | cpio –quiet -H newc -o | gzip -9 -n &gt; /boot/imagefile.img</p>
+<p>Examining the contents of an existing image file is just as simple:</p>
+<p>mkdir /tmp/imagefile<br>cd /tmp/imagefile<br>gzip -cd /boot/imagefile.img | cpio -imd –quiet</p>
+<h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><p>First, a directory for the initrd file system has to be created on the<br>“normal” root file system, e.g.</p>
+<h1 id="mkdir-initrd"><a href="#mkdir-initrd" class="headerlink" title="mkdir /initrd"></a>mkdir /initrd</h1><p>The name is not relevant. More details can be found on the pivot_root(2)<br>man page.</p>
+<p>If the root file system is created during the boot procedure (i.e. if<br>you’re building an install floppy), the root file system creation<br>procedure should create the /initrd directory.</p>
+<p>If initrd will not be mounted in some cases, its content is still<br>accessible if the following device has been created:</p>
+<h1 id="mknod-dev-initrd-b-1-250"><a href="#mknod-dev-initrd-b-1-250" class="headerlink" title="mknod /dev/initrd b 1 250"></a>mknod /dev/initrd b 1 250</h1><h1 id="chmod-400-dev-initrd"><a href="#chmod-400-dev-initrd" class="headerlink" title="chmod 400 /dev/initrd"></a>chmod 400 /dev/initrd</h1><p>Second, the kernel has to be compiled with RAM disk support and with<br>support for the initial RAM disk enabled. Also, at least all components<br>needed to execute programs from initrd (e.g. executable format and file<br>system) must be compiled into the kernel.</p>
+<p>Third, you have to create the RAM disk image. This is done by creating a<br>file system on a block device, copying files to it as needed, and then<br>copying the content of the block device to the initrd file. With recent<br>kernels, at least three types of devices are suitable for that:</p>
+<ul>
+<li>a floppy disk (works everywhere but it’s painfully slow)</li>
+<li>a RAM disk (fast, but allocates physical memory)</li>
+<li>a loopback device (the most elegant solution)</li>
+</ul>
+<p>We’ll describe the loopback device method:</p>
+<ol>
+<li>make sure loopback block devices are configured into the kernel</li>
+<li>create an empty file system of the appropriate size, e.g.<h1 id="dd-if-dev-zero-of-initrd-bs-300k-count-1"><a href="#dd-if-dev-zero-of-initrd-bs-300k-count-1" class="headerlink" title="dd if=/dev/zero of=initrd bs=300k count=1"></a>dd if=/dev/zero of=initrd bs=300k count=1</h1><h1 id="mke2fs-F-m0-initrd"><a href="#mke2fs-F-m0-initrd" class="headerlink" title="mke2fs -F -m0 initrd"></a>mke2fs -F -m0 initrd</h1>(if space is critical, you may want to use the Minix FS instead of Ext2)</li>
+<li>mount the file system, e.g.<h1 id="mount-t-ext2-o-loop-initrd-mnt"><a href="#mount-t-ext2-o-loop-initrd-mnt" class="headerlink" title="mount -t ext2 -o loop initrd /mnt"></a>mount -t ext2 -o loop initrd /mnt</h1></li>
+<li>create the console device:<h1 id="mkdir-mnt-dev"><a href="#mkdir-mnt-dev" class="headerlink" title="mkdir /mnt/dev"></a>mkdir /mnt/dev</h1><h1 id="mknod-mnt-dev-console-c-5-1"><a href="#mknod-mnt-dev-console-c-5-1" class="headerlink" title="mknod /mnt/dev/console c 5 1"></a>mknod /mnt/dev/console c 5 1</h1></li>
+<li>copy all the files that are needed to properly use the initrd<br>environment. Don’t forget the most important file, /sbin/init<br>Note that /sbin/init’s permissions must include “x” (execute).</li>
+<li>correct operation the initrd environment can frequently be tested<br>even without rebooting with the command<h1 id="chroot-mnt-sbin-init"><a href="#chroot-mnt-sbin-init" class="headerlink" title="chroot /mnt /sbin/init"></a>chroot /mnt /sbin/init</h1>This is of course limited to initrds that do not interfere with the<br>general system state (e.g. by reconfiguring network interfaces,<br>overwriting mounted devices, trying to start already running demons,<br>etc. Note however that it is usually possible to use pivot_root in<br>such a chroot’ed initrd environment.)</li>
+<li>unmount the file system<h1 id="umount-mnt"><a href="#umount-mnt" class="headerlink" title="umount /mnt"></a>umount /mnt</h1></li>
+<li>the initrd is now in the file “initrd”. Optionally, it can now be<br>compressed<h1 id="gzip-9-initrd"><a href="#gzip-9-initrd" class="headerlink" title="gzip -9 initrd"></a>gzip -9 initrd</h1></li>
+</ol>
+<p>For experimenting with initrd, you may want to take a rescue floppy and<br>only add a symbolic link from /sbin/init to /bin/sh. Alternatively, you<br>can try the experimental newlib environment [2] to create a small<br>initrd.</p>
+<p>Finally, you have to boot the kernel and load initrd. Almost all Linux<br>boot loaders support initrd. Since the boot process is still compatible<br>with an older mechanism, the following boot command line parameters<br>have to be given:</p>
+<p>  root=/dev/ram0 rw</p>
+<p>(rw is only necessary if writing to the initrd file system.)</p>
+<p>With LOADLIN, you simply execute</p>
+<pre><code> LOADLIN &lt;kernel&gt; initrd=&lt;disk_image&gt;
+</code></pre>
+<p>e.g. LOADLIN C:\LINUX\BZIMAGE initrd=C:\LINUX\INITRD.GZ root=/dev/ram0 rw</p>
+<p>With LILO, you add the option INITRD=<path> to either the global section<br>or to the section of the respective kernel in /etc/lilo.conf, and pass<br>the options using APPEND, e.g.</p>
+<p>  image = /bzImage<br>    initrd = /boot/initrd.gz<br>    append = “root=/dev/ram0 rw”</p>
+<p>and run /sbin/lilo</p>
+<p>For other boot loaders, please refer to the respective documentation.</p>
+<p>Now you can boot and enjoy using initrd.</p>
+<h2 id="Changing-the-root-device"><a href="#Changing-the-root-device" class="headerlink" title="Changing the root device"></a>Changing the root device</h2><p>When finished with its duties, init typically changes the root device<br>and proceeds with starting the Linux system on the “real” root device.</p>
+<p>The procedure involves the following steps:</p>
+<ul>
+<li>mounting the new root file system</li>
+<li>turning it into the root file system</li>
+<li>removing all accesses to the old (initrd) root file system</li>
+<li>unmounting the initrd file system and de-allocating the RAM disk</li>
+</ul>
+<p>Mounting the new root file system is easy: it just needs to be mounted on<br>a directory under the current root. Example:</p>
+<h1 id="mkdir-new-root"><a href="#mkdir-new-root" class="headerlink" title="mkdir /new-root"></a>mkdir /new-root</h1><h1 id="mount-o-ro-dev-hda1-new-root"><a href="#mount-o-ro-dev-hda1-new-root" class="headerlink" title="mount -o ro /dev/hda1 /new-root"></a>mount -o ro /dev/hda1 /new-root</h1><p>The root change is accomplished with the pivot_root system call, which<br>is also available via the pivot_root utility (see pivot_root(8) man<br>page; pivot_root is distributed with util-linux version 2.10h or higher<br>[3]). pivot_root moves the current root to a directory under the new<br>root, and puts the new root at its place. The directory for the old root<br>must exist before calling pivot_root. Example:</p>
+<h1 id="cd-new-root"><a href="#cd-new-root" class="headerlink" title="cd /new-root"></a>cd /new-root</h1><h1 id="mkdir-initrd-1"><a href="#mkdir-initrd-1" class="headerlink" title="mkdir initrd"></a>mkdir initrd</h1><h1 id="pivot-root-initrd"><a href="#pivot-root-initrd" class="headerlink" title="pivot_root . initrd"></a>pivot_root . initrd</h1><p>Now, the init process may still access the old root via its<br>executable, shared libraries, standard input/output/error, and its<br>current root directory. All these references are dropped by the<br>following command:</p>
+<h1 id="exec-chroot-what-follows-lt-dev-console-gt-dev-console-2-gt-amp-1"><a href="#exec-chroot-what-follows-lt-dev-console-gt-dev-console-2-gt-amp-1" class="headerlink" title="exec chroot . what-follows &lt;dev/console &gt;dev/console 2&gt;&amp;1"></a>exec chroot . what-follows &lt;dev/console &gt;dev/console 2&gt;&amp;1</h1><p>Where what-follows is a program under the new root, e.g. /sbin/init<br>If the new root file system will be used with udev and has no valid<br>/dev directory, udev must be initialized before invoking chroot in order<br>to provide /dev/console.</p>
+<p>Note: implementation details of pivot_root may change with time. In order<br>to ensure compatibility, the following points should be observed:</p>
+<ul>
+<li>before calling pivot_root, the current directory of the invoking<br>process should point to the new root directory</li>
+<li>use . as the first argument, and the <em>relative</em> path of the directory<br>for the old root as the second argument</li>
+<li>a chroot program must be available under the old and the new root</li>
+<li>chroot to the new root afterwards</li>
+<li>use relative paths for dev/console in the exec command</li>
+</ul>
+<p>Now, the initrd can be unmounted and the memory allocated by the RAM<br>disk can be freed:</p>
+<h1 id="umount-initrd"><a href="#umount-initrd" class="headerlink" title="umount /initrd"></a>umount /initrd</h1><h1 id="blockdev-–flushbufs-dev-ram0"><a href="#blockdev-–flushbufs-dev-ram0" class="headerlink" title="blockdev –flushbufs /dev/ram0"></a>blockdev –flushbufs /dev/ram0</h1><p>It is also possible to use initrd with an NFS-mounted root, see the<br>pivot_root(8) man page for details.</p>
+<h2 id="Usage-scenarios"><a href="#Usage-scenarios" class="headerlink" title="Usage scenarios"></a>Usage scenarios</h2><p>The main motivation for implementing initrd was to allow for modular<br>kernel configuration at system installation. The procedure would work<br>as follows:</p>
+<ol>
+<li>system boots from floppy or other media with a minimal kernel<br>(e.g. support for RAM disks, initrd, a.out, and the Ext2 FS) and<br>loads initrd</li>
+<li>/sbin/init determines what is needed to (1) mount the “real” root FS<br>(i.e. device type, device drivers, file system) and (2) the<br>distribution media (e.g. CD-ROM, network, tape, …). This can be<br>done by asking the user, by auto-probing, or by using a hybrid<br>approach.</li>
+<li>/sbin/init loads the necessary kernel modules</li>
+<li>/sbin/init creates and populates the root file system (this doesn’t<br>have to be a very usable system yet)</li>
+<li>/sbin/init invokes pivot_root to change the root file system and<br>execs - via chroot - a program that continues the installation</li>
+<li>the boot loader is installed</li>
+<li>the boot loader is configured to load an initrd with the set of<br>modules that was used to bring up the system (e.g. /initrd can be<br>modified, then unmounted, and finally, the image is written from<br>/dev/ram0 or /dev/rd/0 to a file)</li>
+<li>now the system is bootable and additional installation tasks can be<br>performed</li>
+</ol>
+<p>The key role of initrd here is to re-use the configuration data during<br>normal system operation without requiring the use of a bloated “generic”<br>kernel or re-compiling or re-linking the kernel.</p>
+<p>A second scenario is for installations where Linux runs on systems with<br>different hardware configurations in a single administrative domain. In<br>such cases, it is desirable to generate only a small set of kernels<br>(ideally only one) and to keep the system-specific part of configuration<br>information as small as possible. In this case, a common initrd could be<br>generated with all the necessary modules. Then, only /sbin/init or a file<br>read by it would have to be different.</p>
+<p>A third scenario is more convenient recovery disks, because information<br>like the location of the root FS partition doesn’t have to be provided at<br>boot time, but the system loaded from initrd can invoke a user-friendly<br>dialog and it can also perform some sanity checks (or even some form of<br>auto-detection).</p>
+<p>Last not least, CD-ROM distributors may use it for better installation<br>from CD, e.g. by using a boot floppy and bootstrapping a bigger RAM disk<br>via initrd from CD; or by booting via a loader like LOADLIN or directly<br>from the CD-ROM, and loading the RAM disk from CD without need of<br>floppies. </p>
+<h2 id="Obsolete-root-change-mechanism"><a href="#Obsolete-root-change-mechanism" class="headerlink" title="Obsolete root change mechanism"></a>Obsolete root change mechanism</h2><p>The following mechanism was used before the introduction of pivot_root.<br>Current kernels still support it, but you should <em>not</em> rely on its<br>continued availability.</p>
+<p>It works by mounting the “real” root device (i.e. the one set with rdev<br>in the kernel image or with root=… at the boot command line) as the<br>root file system when linuxrc exits. The initrd file system is then<br>unmounted, or, if it is still busy, moved to a directory /initrd, if<br>such a directory exists on the new root file system.</p>
+<p>In order to use this mechanism, you do not have to specify the boot<br>command options root, init, or rw. (If specified, they will affect<br>the real root file system, not the initrd environment.)</p>
+<p>If /proc is mounted, the “real” root device can be changed from within<br>linuxrc by writing the number of the new root FS device to the special<br>file /proc/sys/kernel/real-root-dev, e.g.</p>
+<h1 id="echo-0x301-gt-proc-sys-kernel-real-root-dev"><a href="#echo-0x301-gt-proc-sys-kernel-real-root-dev" class="headerlink" title="echo 0x301 &gt;/proc/sys/kernel/real-root-dev"></a>echo 0x301 &gt;/proc/sys/kernel/real-root-dev</h1><p>Note that the mechanism is incompatible with NFS and similar file<br>systems.</p>
+<p>This old, deprecated mechanism is commonly called “change_root”, while<br>the new, supported mechanism is called “pivot_root”.</p>
+<h2 id="Mixed-change-root-and-pivot-root-mechanism"><a href="#Mixed-change-root-and-pivot-root-mechanism" class="headerlink" title="Mixed change_root and pivot_root mechanism"></a>Mixed change_root and pivot_root mechanism</h2><p>In case you did not want to use root=/dev/ram0 to trigger the pivot_root<br>mechanism, you may create both /linuxrc and /sbin/init in your initrd image.</p>
+<p>/linuxrc would contain only the following:</p>
+<p>#! /bin/sh<br>mount -n -t proc proc /proc<br>echo 0x0100 &gt;/proc/sys/kernel/real-root-dev<br>umount -n /proc</p>
+<p>Once linuxrc exited, the kernel would mount again your initrd as root,<br>this time executing /sbin/init. Again, it would be the duty of this init<br>to build the right environment (maybe using the root= device passed on<br>the cmdline) before the final execution of the real /sbin/init.</p>
+<h2 id="Resources"><a href="#Resources" class="headerlink" title="Resources"></a>Resources</h2><p>[1] Almesberger, Werner; “Booting Linux: The History and the Future”<br>    <a target="_blank" rel="noopener" href="http://www.almesberger.net/cv/papers/ols2k-9.ps.gz">http://www.almesberger.net/cv/papers/ols2k-9.ps.gz</a><br>[2] newlib package (experimental), with initrd example<br>    <a target="_blank" rel="noopener" href="http://sources.redhat.com/newlib/">http://sources.redhat.com/newlib/</a><br>[3] util-linux: Miscellaneous utilities for Linux<br>    <a target="_blank" rel="noopener" href="http://www.kernel.org/pub/linux/utils/util-linux/">http://www.kernel.org/pub/linux/utils/util-linux/</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_initrd/" title="Kernel-3.10.0-957.el7_initr" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_initrd/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_init/" title="Kernel-3.10.0-957.el7_init"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_initrd_table_override/" title="Kernel-3.10.0-957.el7_initrd_table_override"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

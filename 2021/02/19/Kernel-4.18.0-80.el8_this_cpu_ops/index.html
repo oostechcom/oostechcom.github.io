@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_this_cpu_ops | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;this_cpu operations&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Author: Christoph Lameter, August 4th, 2014:Author: Pranith Kumar, Aug 2nd, 2014 this_cpu operations are a way of optimizing access to per cp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_this_cpu_ops">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;this_cpu operations&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Author: Christoph Lameter, August 4th, 2014:Author: Pranith Kumar, Aug 2nd, 2014 this_cpu operations are a way of optimizing access to per cp">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Inner-working-of-this-cpu-operations"><span class="toc-number">1.</span> <span class="toc-text">Inner working of this_cpu operations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Special-operations"><span class="toc-number">2.</span> <span class="toc-text">Special operations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Per-cpu-variables-and-offsets"><span class="toc-number">3.</span> <span class="toc-text">Per cpu variables and offsets</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Operations-on-a-field-of-a-per-cpu-structure"><span class="toc-number">4.</span> <span class="toc-text">Operations on a field of a per cpu structure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Variants-of-this-cpu-ops"><span class="toc-number">5.</span> <span class="toc-text">Variants of this_cpu ops</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#amp-this-cpu-ptr-pp-gt-n-vs-this-cpu-ptr-amp-pp-gt-n"><span class="toc-number">6.</span> <span class="toc-text">&amp;this_cpu_ptr(pp)-&gt;n vs this_cpu_ptr(&amp;pp-&gt;n)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Remote-access-to-per-cpu-data"><span class="toc-number">7.</span> <span class="toc-text">Remote access to per cpu data</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_this_cpu_ops" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_this_cpu_ops
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>===================<br>this_cpu operations<br>===================</p>
+<p>:Author: Christoph Lameter, August 4th, 2014<br>:Author: Pranith Kumar, Aug 2nd, 2014</p>
+<p>this_cpu operations are a way of optimizing access to per cpu<br>variables associated with the <em>currently</em> executing processor. This is<br>done through the use of segment registers (or a dedicated register where<br>the cpu permanently stored the beginning of the per cpu    area for a<br>specific processor).</p>
+<p>this_cpu operations add a per cpu variable offset to the processor<br>specific per cpu base and encode that operation in the instruction<br>operating on the per cpu variable.</p>
+<p>This means that there are no atomicity issues between the calculation of<br>the offset and the operation on the data. Therefore it is not<br>necessary to disable preemption or interrupts to ensure that the<br>processor is not changed between the calculation of the address and<br>the operation on the data.</p>
+<p>Read-modify-write operations are of particular interest. Frequently<br>processors have special lower latency instructions that can operate<br>without the typical synchronization overhead, but still provide some<br>sort of relaxed atomicity guarantees. The x86, for example, can execute<br>RMW (Read Modify Write) instructions like inc/dec/cmpxchg without the<br>lock prefix and the associated latency penalty.</p>
+<p>Access to the variable without the lock prefix is not synchronized but<br>synchronization is not necessary since we are dealing with per cpu<br>data specific to the currently executing processor. Only the current<br>processor should be accessing that variable and therefore there are no<br>concurrency issues with other processors in the system.</p>
+<p>Please note that accesses by remote processors to a per cpu area are<br>exceptional situations and may impact performance and/or correctness<br>(remote write operations) of local RMW operations via this_cpu_*.</p>
+<p>The main use of the this_cpu operations has been to optimize counter<br>operations.</p>
+<p>The following this_cpu() operations with implied preemption protection<br>are defined. These operations can be used without worrying about<br>preemption and interrupts::</p>
+<pre><code>this_cpu_read(pcp)
+this_cpu_write(pcp, val)
+this_cpu_add(pcp, val)
+this_cpu_and(pcp, val)
+this_cpu_or(pcp, val)
+this_cpu_add_return(pcp, val)
+this_cpu_xchg(pcp, nval)
+this_cpu_cmpxchg(pcp, oval, nval)
+this_cpu_cmpxchg_double(pcp1, pcp2, oval1, oval2, nval1, nval2)
+this_cpu_sub(pcp, val)
+this_cpu_inc(pcp)
+this_cpu_dec(pcp)
+this_cpu_sub_return(pcp, val)
+this_cpu_inc_return(pcp)
+this_cpu_dec_return(pcp)
+</code></pre>
+<h2 id="Inner-working-of-this-cpu-operations"><a href="#Inner-working-of-this-cpu-operations" class="headerlink" title="Inner working of this_cpu operations"></a>Inner working of this_cpu operations</h2><p>On x86 the fs: or the gs: segment registers contain the base of the<br>per cpu area. It is then possible to simply use the segment override<br>to relocate a per cpu relative address to the proper per cpu area for<br>the processor. So the relocation to the per cpu base is encoded in the<br>instruction via a segment register prefix.</p>
+<p>For example::</p>
+<pre><code>DEFINE_PER_CPU(int, x);
+int z;
+
+z = this_cpu_read(x);
+</code></pre>
+<p>results in a single instruction::</p>
+<pre><code>mov ax, gs:[x]
+</code></pre>
+<p>instead of a sequence of calculation of the address and then a fetch<br>from that address which occurs with the per cpu operations. Before<br>this_cpu_ops such sequence also required preempt disable/enable to<br>prevent the kernel from moving the thread to a different processor<br>while the calculation is performed.</p>
+<p>Consider the following this_cpu operation::</p>
+<pre><code>this_cpu_inc(x)
+</code></pre>
+<p>The above results in the following single instruction (no lock prefix!)::</p>
+<pre><code>inc gs:[x]
+</code></pre>
+<p>instead of the following operations required if there is no segment<br>register::</p>
+<pre><code>int *y;
+int cpu;
+
+cpu = get_cpu();
+y = per_cpu_ptr(&amp;x, cpu);
+(*y)++;
+put_cpu();
+</code></pre>
+<p>Note that these operations can only be used on per cpu data that is<br>reserved for a specific processor. Without disabling preemption in the<br>surrounding code this_cpu_inc() will only guarantee that one of the<br>per cpu counters is correctly incremented. However, there is no<br>guarantee that the OS will not move the process directly before or<br>after the this_cpu instruction is executed. In general this means that<br>the value of the individual counters for each processor are<br>meaningless. The sum of all the per cpu counters is the only value<br>that is of interest.</p>
+<p>Per cpu variables are used for performance reasons. Bouncing cache<br>lines can be avoided if multiple processors concurrently go through<br>the same code paths.  Since each processor has its own per cpu<br>variables no concurrent cache line updates take place. The price that<br>has to be paid for this optimization is the need to add up the per cpu<br>counters when the value of a counter is needed.</p>
+<h2 id="Special-operations"><a href="#Special-operations" class="headerlink" title="Special operations"></a>Special operations</h2><p>::</p>
+<pre><code>y = this_cpu_ptr(&amp;x)
+</code></pre>
+<p>Takes the offset of a per cpu variable (&amp;x !) and returns the address<br>of the per cpu variable that belongs to the currently executing<br>processor.  this_cpu_ptr avoids multiple steps that the common<br>get_cpu/put_cpu sequence requires. No processor number is<br>available. Instead, the offset of the local per cpu area is simply<br>added to the per cpu offset.</p>
+<p>Note that this operation is usually used in a code segment when<br>preemption has been disabled. The pointer is then used to<br>access local per cpu data in a critical section. When preemption<br>is re-enabled this pointer is usually no longer useful since it may<br>no longer point to per cpu data of the current processor.</p>
+<h2 id="Per-cpu-variables-and-offsets"><a href="#Per-cpu-variables-and-offsets" class="headerlink" title="Per cpu variables and offsets"></a>Per cpu variables and offsets</h2><p>Per cpu variables have <em>offsets</em> to the beginning of the per cpu<br>area. They do not have addresses although they look like that in the<br>code. Offsets cannot be directly dereferenced. The offset must be<br>added to a base pointer of a per cpu area of a processor in order to<br>form a valid address.</p>
+<p>Therefore the use of x or &amp;x outside of the context of per cpu<br>operations is invalid and will generally be treated like a NULL<br>pointer dereference.</p>
+<p>::</p>
+<pre><code>DEFINE_PER_CPU(int, x);
+</code></pre>
+<p>In the context of per cpu operations the above implies that x is a per<br>cpu variable. Most this_cpu operations take a cpu variable.</p>
+<p>::</p>
+<pre><code>int __percpu *p = &amp;x;
+</code></pre>
+<p>&amp;x and hence p is the <em>offset</em> of a per cpu variable. this_cpu_ptr()<br>takes the offset of a per cpu variable which makes this look a bit<br>strange.</p>
+<h2 id="Operations-on-a-field-of-a-per-cpu-structure"><a href="#Operations-on-a-field-of-a-per-cpu-structure" class="headerlink" title="Operations on a field of a per cpu structure"></a>Operations on a field of a per cpu structure</h2><p>Let’s say we have a percpu structure::</p>
+<pre><code>struct s &#123;
+    int n,m;
+&#125;;
+
+DEFINE_PER_CPU(struct s, p);
+</code></pre>
+<p>Operations on these fields are straightforward::</p>
+<pre><code>this_cpu_inc(p.m)
+
+z = this_cpu_cmpxchg(p.m, 0, 1);
+</code></pre>
+<p>If we have an offset to struct s::</p>
+<pre><code>struct s __percpu *ps = &amp;p;
+
+this_cpu_dec(ps-&gt;m);
+
+z = this_cpu_inc_return(ps-&gt;n);
+</code></pre>
+<p>The calculation of the pointer may require the use of this_cpu_ptr()<br>if we do not make use of this_cpu ops later to manipulate fields::</p>
+<pre><code>struct s *pp;
+
+pp = this_cpu_ptr(&amp;p);
+
+pp-&gt;m--;
+
+z = pp-&gt;n++;
+</code></pre>
+<h2 id="Variants-of-this-cpu-ops"><a href="#Variants-of-this-cpu-ops" class="headerlink" title="Variants of this_cpu ops"></a>Variants of this_cpu ops</h2><p>this_cpu ops are interrupt safe. Some architectures do not support<br>these per cpu local operations. In that case the operation must be<br>replaced by code that disables interrupts, then does the operations<br>that are guaranteed to be atomic and then re-enable interrupts. Doing<br>so is expensive. If there are other reasons why the scheduler cannot<br>change the processor we are executing on then there is no reason to<br>disable interrupts. For that purpose the following __this_cpu operations<br>are provided.</p>
+<p>These operations have no guarantee against concurrent interrupts or<br>preemption. If a per cpu variable is not used in an interrupt context<br>and the scheduler cannot preempt, then they are safe. If any interrupts<br>still occur while an operation is in progress and if the interrupt too<br>modifies the variable, then RMW actions can not be guaranteed to be<br>safe::</p>
+<pre><code>__this_cpu_read(pcp)
+__this_cpu_write(pcp, val)
+__this_cpu_add(pcp, val)
+__this_cpu_and(pcp, val)
+__this_cpu_or(pcp, val)
+__this_cpu_add_return(pcp, val)
+__this_cpu_xchg(pcp, nval)
+__this_cpu_cmpxchg(pcp, oval, nval)
+__this_cpu_cmpxchg_double(pcp1, pcp2, oval1, oval2, nval1, nval2)
+__this_cpu_sub(pcp, val)
+__this_cpu_inc(pcp)
+__this_cpu_dec(pcp)
+__this_cpu_sub_return(pcp, val)
+__this_cpu_inc_return(pcp)
+__this_cpu_dec_return(pcp)
+</code></pre>
+<p>Will increment x and will not fall-back to code that disables<br>interrupts on platforms that cannot accomplish atomicity through<br>address relocation and a Read-Modify-Write operation in the same<br>instruction.</p>
+<h2 id="amp-this-cpu-ptr-pp-gt-n-vs-this-cpu-ptr-amp-pp-gt-n"><a href="#amp-this-cpu-ptr-pp-gt-n-vs-this-cpu-ptr-amp-pp-gt-n" class="headerlink" title="&amp;this_cpu_ptr(pp)-&gt;n vs this_cpu_ptr(&amp;pp-&gt;n)"></a>&amp;this_cpu_ptr(pp)-&gt;n vs this_cpu_ptr(&amp;pp-&gt;n)</h2><p>The first operation takes the offset and forms an address and then<br>adds the offset of the n field. This may result in two add<br>instructions emitted by the compiler.</p>
+<p>The second one first adds the two offsets and then does the<br>relocation.  IMHO the second form looks cleaner and has an easier time<br>with (). The second form also is consistent with the way<br>this_cpu_read() and friends are used.</p>
+<h2 id="Remote-access-to-per-cpu-data"><a href="#Remote-access-to-per-cpu-data" class="headerlink" title="Remote access to per cpu data"></a>Remote access to per cpu data</h2><p>Per cpu data structures are designed to be used by one cpu exclusively.<br>If you use the variables as intended, this_cpu_ops() are guaranteed to<br>be “atomic” as no other CPU has access to these data structures.</p>
+<p>There are special cases where you might need to access per cpu data<br>structures remotely. It is usually safe to do a remote read access<br>and that is frequently done to summarize counters. Remote write access<br>something which could be problematic because this_cpu ops do not<br>have lock semantics. A remote write may interfere with a this_cpu<br>RMW operation.</p>
+<p>Remote write accesses to percpu data structures are highly discouraged<br>unless absolutely necessary. Please consider using an IPI to wake up<br>the remote CPU and perform the update to its per cpu area.</p>
+<p>To access per-cpu data structure remotely, typically the per_cpu_ptr()<br>function is used::</p>
+<pre><code>DEFINE_PER_CPU(struct data, datap);
+
+struct data *p = per_cpu_ptr(&amp;datap, cpu);
+</code></pre>
+<p>This makes it explicit that we are getting ready to access a percpu<br>area remotely.</p>
+<p>You can also do the following to convert the datap offset to an address::</p>
+<pre><code>struct data *p = this_cpu_ptr(&amp;datap);
+</code></pre>
+<p>but, passing of pointers calculated via this_cpu_ptr to other cpus is<br>unusual and should be avoided.</p>
+<p>Remote access are typically only for reading the status of another cpus<br>per cpu data. Write accesses can cause unique problems due to the<br>relaxed synchronization requirements for this_cpu operations.</p>
+<p>One example that illustrates some concerns with write operations is<br>the following scenario that occurs because two per cpu variables<br>share a cache-line but the relaxed synchronization is applied to<br>only one process updating the cache-line.</p>
+<p>Consider the following example::</p>
+<pre><code>struct test &#123;
+    atomic_t a;
+    int b;
+&#125;;
+
+DEFINE_PER_CPU(struct test, onecacheline);
+</code></pre>
+<p>There is some concern about what would happen if the field ‘a’ is updated<br>remotely from one processor and the local processor would use this_cpu ops<br>to update field b. Care should be taken that such simultaneous accesses to<br>data within the same cache line are avoided. Also costly synchronization<br>may be necessary. IPIs are generally recommended in such scenarios instead<br>of a remote write to the per cpu area of another processor.</p>
+<p>Even in cases where the remote writes are rare, please bear in<br>mind that a remote write will evict the cache line from the processor<br>that most likely will access it. If the processor wakes up and finds a<br>missing local cache line of a per cpu area, its performance and hence<br>the wake up times will be affected.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/" title="Kernel-4.18.0-80.el8_this_cpu_ops" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_this_cpu_ops/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_thine,thc63lvdm83d/" title="Kernel-4.18.0-80.el8_thine,thc63lvdm83"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_ths8200/" title="Kernel-4.18.0-80.el8_ths8200"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

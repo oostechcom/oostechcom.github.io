@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_cluster-pm-race-avoidance | oosTech.com</title>
+  <meta name="description" content="Cluster-wide Power-up&#x2F;power-down race avoidance algorithmThis file documents the algorithm which is used to coordinate CPU andcluster setup and teardown operations and to manage hardware coherencycont">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_cluster-pm-race-avoidance">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Cluster-wide Power-up&#x2F;power-down race avoidance algorithmThis file documents the algorithm which is used to coordinate CPU andcluster setup and teardown operations and to manage hardware coherencycont">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Cluster-wide-Power-up-power-down-race-avoidance-algorithm"><span class="toc-number">1.</span> <span class="toc-text">Cluster-wide Power-up&#x2F;power-down race avoidance algorithm</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Rationale"><span class="toc-number">1.1.</span> <span class="toc-text">Rationale</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Basic-model"><span class="toc-number">1.2.</span> <span class="toc-text">Basic model</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-state"><span class="toc-number">1.3.</span> <span class="toc-text">CPU state</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cluster-state"><span class="toc-number">1.4.</span> <span class="toc-text">Cluster state</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Last-man-and-First-man-selection"><span class="toc-number">1.5.</span> <span class="toc-text">Last man and First man selection</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Features-and-Limitations"><span class="toc-number">1.6.</span> <span class="toc-text">Features and Limitations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Colophon"><span class="toc-number">1.7.</span> <span class="toc-text">Colophon</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_cluster-pm-race-avoidance" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_cluster-pm-race-avoidance
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Cluster-wide-Power-up-power-down-race-avoidance-algorithm"><a href="#Cluster-wide-Power-up-power-down-race-avoidance-algorithm" class="headerlink" title="Cluster-wide Power-up/power-down race avoidance algorithm"></a>Cluster-wide Power-up/power-down race avoidance algorithm</h1><p>This file documents the algorithm which is used to coordinate CPU and<br>cluster setup and teardown operations and to manage hardware coherency<br>controls safely.</p>
+<p>The section “Rationale” explains what the algorithm is for and why it is<br>needed.  “Basic model” explains general concepts using a simplified view<br>of the system.  The other sections explain the actual details of the<br>algorithm in use.</p>
+<h2 id="Rationale"><a href="#Rationale" class="headerlink" title="Rationale"></a>Rationale</h2><p>In a system containing multiple CPUs, it is desirable to have the<br>ability to turn off individual CPUs when the system is idle, reducing<br>power consumption and thermal dissipation.</p>
+<p>In a system containing multiple clusters of CPUs, it is also desirable<br>to have the ability to turn off entire clusters.</p>
+<p>Turning entire clusters off and on is a risky business, because it<br>involves performing potentially destructive operations affecting a group<br>of independently running CPUs, while the OS continues to run.  This<br>means that we need some coordination in order to ensure that critical<br>cluster-level operations are only performed when it is truly safe to do<br>so.</p>
+<p>Simple locking may not be sufficient to solve this problem, because<br>mechanisms like Linux spinlocks may rely on coherency mechanisms which<br>are not immediately enabled when a cluster powers up.  Since enabling or<br>disabling those mechanisms may itself be a non-atomic operation (such as<br>writing some hardware registers and invalidating large caches), other<br>methods of coordination are required in order to guarantee safe<br>power-down and power-up at the cluster level.</p>
+<p>The mechanism presented in this document describes a coherent memory<br>based protocol for performing the needed coordination.  It aims to be as<br>lightweight as possible, while providing the required safety properties.</p>
+<h2 id="Basic-model"><a href="#Basic-model" class="headerlink" title="Basic model"></a>Basic model</h2><p>Each cluster and CPU is assigned a state, as follows:</p>
+<pre><code>DOWN
+COMING_UP
+UP
+GOING_DOWN
+
+    +---------&gt; UP ----------+
+    |                        v
+
+COMING_UP                GOING_DOWN
+
+    ^                        |
+    +--------- DOWN &lt;--------+
+</code></pre>
+<p>DOWN:    The CPU or cluster is not coherent, and is either powered off or<br>    suspended, or is ready to be powered off or suspended.</p>
+<p>COMING_UP: The CPU or cluster has committed to moving to the UP state.<br>    It may be part way through the process of initialisation and<br>    enabling coherency.</p>
+<p>UP:    The CPU or cluster is active and coherent at the hardware<br>    level.  A CPU in this state is not necessarily being used<br>    actively by the kernel.</p>
+<p>GOING_DOWN: The CPU or cluster has committed to moving to the DOWN<br>    state.  It may be part way through the process of teardown and<br>    coherency exit.</p>
+<p>Each CPU has one of these states assigned to it at any point in time.<br>The CPU states are described in the “CPU state” section, below.</p>
+<p>Each cluster is also assigned a state, but it is necessary to split the<br>state value into two parts (the “cluster” state and “inbound” state) and<br>to introduce additional states in order to avoid races between different<br>CPUs in the cluster simultaneously modifying the state.  The cluster-<br>level states are described in the “Cluster state” section.</p>
+<p>To help distinguish the CPU states from cluster states in this<br>discussion, the state names are given a CPU_ prefix for the CPU states,<br>and a CLUSTER_ or INBOUND_ prefix for the cluster states.</p>
+<h2 id="CPU-state"><a href="#CPU-state" class="headerlink" title="CPU state"></a>CPU state</h2><p>In this algorithm, each individual core in a multi-core processor is<br>referred to as a “CPU”.  CPUs are assumed to be single-threaded:<br>therefore, a CPU can only be doing one thing at a single point in time.</p>
+<p>This means that CPUs fit the basic model closely.</p>
+<p>The algorithm defines the following states for each CPU in the system:</p>
+<pre><code>CPU_DOWN
+CPU_COMING_UP
+CPU_UP
+CPU_GOING_DOWN
+
+ cluster setup and
+CPU setup complete          policy decision
+      +-----------&gt; CPU_UP ------------+
+      |                                v
+
+CPU_COMING_UP                   CPU_GOING_DOWN
+
+      ^                                |
+      +----------- CPU_DOWN &lt;----------+
+ policy decision           CPU teardown complete
+or hardware event
+</code></pre>
+<p>The definitions of the four states correspond closely to the states of<br>the basic model.</p>
+<p>Transitions between states occur as follows.</p>
+<p>A trigger event (spontaneous) means that the CPU can transition to the<br>next state as a result of making local progress only, with no<br>requirement for any external event to happen.</p>
+<p>CPU_DOWN:</p>
+<pre><code>A CPU reaches the CPU_DOWN state when it is ready for
+power-down.  On reaching this state, the CPU will typically
+power itself down or suspend itself, via a WFI instruction or a
+firmware call.
+
+Next state:    CPU_COMING_UP
+Conditions:    none
+
+Trigger events:
+
+    a) an explicit hardware power-up operation, resulting
+       from a policy decision on another CPU;
+
+    b) a hardware event, such as an interrupt.
+</code></pre>
+<p>CPU_COMING_UP:</p>
+<pre><code>A CPU cannot start participating in hardware coherency until the
+cluster is set up and coherent.  If the cluster is not ready,
+then the CPU will wait in the CPU_COMING_UP state until the
+cluster has been set up.
+
+Next state:    CPU_UP
+Conditions:    The CPU&#39;s parent cluster must be in CLUSTER_UP.
+Trigger events:    Transition of the parent cluster to CLUSTER_UP.
+
+Refer to the &quot;Cluster state&quot; section for a description of the
+CLUSTER_UP state.
+</code></pre>
+<p>CPU_UP:<br>    When a CPU reaches the CPU_UP state, it is safe for the CPU to<br>    start participating in local coherency.</p>
+<pre><code>This is done by jumping to the kernel&#39;s CPU resume code.
+
+Note that the definition of this state is slightly different
+from the basic model definition: CPU_UP does not mean that the
+CPU is coherent yet, but it does mean that it is safe to resume
+the kernel.  The kernel handles the rest of the resume
+procedure, so the remaining steps are not visible as part of the
+race avoidance algorithm.
+
+The CPU remains in this state until an explicit policy decision
+is made to shut down or suspend the CPU.
+
+Next state:    CPU_GOING_DOWN
+Conditions:    none
+Trigger events:    explicit policy decision
+</code></pre>
+<p>CPU_GOING_DOWN:</p>
+<pre><code>While in this state, the CPU exits coherency, including any
+operations required to achieve this (such as cleaning data
+caches).
+
+Next state:    CPU_DOWN
+Conditions:    local CPU teardown complete
+Trigger events:    (spontaneous)
+</code></pre>
+<h2 id="Cluster-state"><a href="#Cluster-state" class="headerlink" title="Cluster state"></a>Cluster state</h2><p>A cluster is a group of connected CPUs with some common resources.<br>Because a cluster contains multiple CPUs, it can be doing multiple<br>things at the same time.  This has some implications.  In particular, a<br>CPU can start up while another CPU is tearing the cluster down.</p>
+<p>In this discussion, the “outbound side” is the view of the cluster state<br>as seen by a CPU tearing the cluster down.  The “inbound side” is the<br>view of the cluster state as seen by a CPU setting the CPU up.</p>
+<p>In order to enable safe coordination in such situations, it is important<br>that a CPU which is setting up the cluster can advertise its state<br>independently of the CPU which is tearing down the cluster.  For this<br>reason, the cluster state is split into two parts:</p>
+<pre><code>&quot;cluster&quot; state: The global state of the cluster; or the state
+    on the outbound side:
+
+    CLUSTER_DOWN
+    CLUSTER_UP
+    CLUSTER_GOING_DOWN
+
+&quot;inbound&quot; state: The state of the cluster on the inbound side.
+
+    INBOUND_NOT_COMING_UP
+    INBOUND_COMING_UP
+
+
+The different pairings of these states results in six possible
+states for the cluster as a whole:
+
+                            CLUSTER_UP
+          +==========&gt; INBOUND_NOT_COMING_UP -------------+
+          #                                               |
+                                                          |
+     CLUSTER_UP     &lt;----+                                |
+  INBOUND_COMING_UP      |                                v
+
+          ^             CLUSTER_GOING_DOWN       CLUSTER_GOING_DOWN
+          #              INBOUND_COMING_UP &lt;=== INBOUND_NOT_COMING_UP
+
+    CLUSTER_DOWN         |                                |
+  INBOUND_COMING_UP &lt;----+                                |
+                                                          |
+          ^                                               |
+          +===========     CLUSTER_DOWN      &lt;------------+
+                       INBOUND_NOT_COMING_UP
+
+Transitions -----&gt; can only be made by the outbound CPU, and
+only involve changes to the &quot;cluster&quot; state.
+
+Transitions ===##&gt; can only be made by the inbound CPU, and only
+involve changes to the &quot;inbound&quot; state, except where there is no
+further transition possible on the outbound side (i.e., the
+outbound CPU has put the cluster into the CLUSTER_DOWN state).
+
+The race avoidance algorithm does not provide a way to determine
+which exact CPUs within the cluster play these roles.  This must
+be decided in advance by some other means.  Refer to the section
+&quot;Last man and first man selection&quot; for more explanation.
+
+
+CLUSTER_DOWN/INBOUND_NOT_COMING_UP is the only state where the
+cluster can actually be powered down.
+
+The parallelism of the inbound and outbound CPUs is observed by
+the existence of two different paths from CLUSTER_GOING_DOWN/
+INBOUND_NOT_COMING_UP (corresponding to GOING_DOWN in the basic
+model) to CLUSTER_DOWN/INBOUND_COMING_UP (corresponding to
+COMING_UP in the basic model).  The second path avoids cluster
+teardown completely.
+
+CLUSTER_UP/INBOUND_COMING_UP is equivalent to UP in the basic
+model.  The final transition to CLUSTER_UP/INBOUND_NOT_COMING_UP
+is trivial and merely resets the state machine ready for the
+next cycle.
+
+Details of the allowable transitions follow.
+
+The next state in each case is notated
+
+    &lt;cluster state&gt;/&lt;inbound state&gt; (&lt;transitioner&gt;)
+
+where the &lt;transitioner&gt; is the side on which the transition
+can occur; either the inbound or the outbound side.
+</code></pre>
+<p>CLUSTER_DOWN/INBOUND_NOT_COMING_UP:</p>
+<pre><code>Next state:    CLUSTER_DOWN/INBOUND_COMING_UP (inbound)
+Conditions:    none
+Trigger events:
+
+    a) an explicit hardware power-up operation, resulting
+       from a policy decision on another CPU;
+
+    b) a hardware event, such as an interrupt.
+</code></pre>
+<p>CLUSTER_DOWN/INBOUND_COMING_UP:</p>
+<pre><code>In this state, an inbound CPU sets up the cluster, including
+enabling of hardware coherency at the cluster level and any
+other operations (such as cache invalidation) which are required
+in order to achieve this.
+
+The purpose of this state is to do sufficient cluster-level
+setup to enable other CPUs in the cluster to enter coherency
+safely.
+
+Next state:    CLUSTER_UP/INBOUND_COMING_UP (inbound)
+Conditions:    cluster-level setup and hardware coherency complete
+Trigger events:    (spontaneous)
+</code></pre>
+<p>CLUSTER_UP/INBOUND_COMING_UP:</p>
+<pre><code>Cluster-level setup is complete and hardware coherency is
+enabled for the cluster.  Other CPUs in the cluster can safely
+enter coherency.
+
+This is a transient state, leading immediately to
+CLUSTER_UP/INBOUND_NOT_COMING_UP.  All other CPUs on the cluster
+should consider treat these two states as equivalent.
+
+Next state:    CLUSTER_UP/INBOUND_NOT_COMING_UP (inbound)
+Conditions:    none
+Trigger events:    (spontaneous)
+</code></pre>
+<p>CLUSTER_UP/INBOUND_NOT_COMING_UP:</p>
+<pre><code>Cluster-level setup is complete and hardware coherency is
+enabled for the cluster.  Other CPUs in the cluster can safely
+enter coherency.
+
+The cluster will remain in this state until a policy decision is
+made to power the cluster down.
+
+Next state:    CLUSTER_GOING_DOWN/INBOUND_NOT_COMING_UP (outbound)
+Conditions:    none
+Trigger events:    policy decision to power down the cluster
+</code></pre>
+<p>CLUSTER_GOING_DOWN/INBOUND_NOT_COMING_UP:</p>
+<pre><code>An outbound CPU is tearing the cluster down.  The selected CPU
+must wait in this state until all CPUs in the cluster are in the
+CPU_DOWN state.
+
+When all CPUs are in the CPU_DOWN state, the cluster can be torn
+down, for example by cleaning data caches and exiting
+cluster-level coherency.
+
+To avoid wasteful unnecessary teardown operations, the outbound
+should check the inbound cluster state for asynchronous
+transitions to INBOUND_COMING_UP.  Alternatively, individual
+CPUs can be checked for entry into CPU_COMING_UP or CPU_UP.
+
+
+Next states:
+
+CLUSTER_DOWN/INBOUND_NOT_COMING_UP (outbound)
+    Conditions:    cluster torn down and ready to power off
+    Trigger events:    (spontaneous)
+
+CLUSTER_GOING_DOWN/INBOUND_COMING_UP (inbound)
+    Conditions:    none
+    Trigger events:
+
+        a) an explicit hardware power-up operation,
+           resulting from a policy decision on another
+           CPU;
+
+        b) a hardware event, such as an interrupt.
+</code></pre>
+<p>CLUSTER_GOING_DOWN/INBOUND_COMING_UP:</p>
+<pre><code>The cluster is (or was) being torn down, but another CPU has
+come online in the meantime and is trying to set up the cluster
+again.
+
+If the outbound CPU observes this state, it has two choices:
+
+    a) back out of teardown, restoring the cluster to the
+       CLUSTER_UP state;
+
+    b) finish tearing the cluster down and put the cluster
+       in the CLUSTER_DOWN state; the inbound CPU will
+       set up the cluster again from there.
+
+Choice (a) permits the removal of some latency by avoiding
+unnecessary teardown and setup operations in situations where
+the cluster is not really going to be powered down.
+
+
+Next states:
+
+CLUSTER_UP/INBOUND_COMING_UP (outbound)
+    Conditions:    cluster-level setup and hardware
+            coherency complete
+    Trigger events:    (spontaneous)
+
+CLUSTER_DOWN/INBOUND_COMING_UP (outbound)
+    Conditions:    cluster torn down and ready to power off
+    Trigger events:    (spontaneous)
+</code></pre>
+<h2 id="Last-man-and-First-man-selection"><a href="#Last-man-and-First-man-selection" class="headerlink" title="Last man and First man selection"></a>Last man and First man selection</h2><p>The CPU which performs cluster tear-down operations on the outbound side<br>is commonly referred to as the “last man”.</p>
+<p>The CPU which performs cluster setup on the inbound side is commonly<br>referred to as the “first man”.</p>
+<p>The race avoidance algorithm documented above does not provide a<br>mechanism to choose which CPUs should play these roles.</p>
+<p>Last man:</p>
+<p>When shutting down the cluster, all the CPUs involved are initially<br>executing Linux and hence coherent.  Therefore, ordinary spinlocks can<br>be used to select a last man safely, before the CPUs become<br>non-coherent.</p>
+<p>First man:</p>
+<p>Because CPUs may power up asynchronously in response to external wake-up<br>events, a dynamic mechanism is needed to make sure that only one CPU<br>attempts to play the first man role and do the cluster-level<br>initialisation: any other CPUs must wait for this to complete before<br>proceeding.</p>
+<p>Cluster-level initialisation may involve actions such as configuring<br>coherency controls in the bus fabric.</p>
+<p>The current implementation in mcpm_head.S uses a separate mutual exclusion<br>mechanism to do this arbitration.  This mechanism is documented in<br>detail in vlocks.txt.</p>
+<h2 id="Features-and-Limitations"><a href="#Features-and-Limitations" class="headerlink" title="Features and Limitations"></a>Features and Limitations</h2><p>Implementation:</p>
+<pre><code>The current ARM-based implementation is split between
+arch/arm/common/mcpm_head.S (low-level inbound CPU operations) and
+arch/arm/common/mcpm_entry.c (everything else):
+
+__mcpm_cpu_going_down() signals the transition of a CPU to the
+    CPU_GOING_DOWN state.
+
+__mcpm_cpu_down() signals the transition of a CPU to the CPU_DOWN
+    state.
+
+A CPU transitions to CPU_COMING_UP and then to CPU_UP via the
+    low-level power-up code in mcpm_head.S.  This could
+    involve CPU-specific setup code, but in the current
+    implementation it does not.
+
+__mcpm_outbound_enter_critical() and __mcpm_outbound_leave_critical()
+    handle transitions from CLUSTER_UP to CLUSTER_GOING_DOWN
+    and from there to CLUSTER_DOWN or back to CLUSTER_UP (in
+    the case of an aborted cluster power-down).
+
+    These functions are more complex than the __mcpm_cpu_*()
+    functions due to the extra inter-CPU coordination which
+    is needed for safe transitions at the cluster level.
+
+A cluster transitions from CLUSTER_DOWN back to CLUSTER_UP via
+    the low-level power-up code in mcpm_head.S.  This
+    typically involves platform-specific setup code,
+    provided by the platform-specific power_up_setup
+    function registered via mcpm_sync_init.
+</code></pre>
+<p>Deep topologies:</p>
+<pre><code>As currently described and implemented, the algorithm does not
+support CPU topologies involving more than two levels (i.e.,
+clusters of clusters are not supported).  The algorithm could be
+extended by replicating the cluster-level states for the
+additional topological levels, and modifying the transition
+rules for the intermediate (non-outermost) cluster levels.
+</code></pre>
+<h2 id="Colophon"><a href="#Colophon" class="headerlink" title="Colophon"></a>Colophon</h2><p>Originally created and documented by Dave Martin for Linaro Limited, in<br>collaboration with Nicolas Pitre and Achin Gupta.</p>
+<p>Copyright (C) 2012-2013  Linaro Limited<br>Distributed under the terms of Version 2 of the GNU General Public<br>License, as defined in linux/COPYING.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/" title="Kernel-3.10.0-957.el7_cluster-pm-race-avoidance" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_cluster-pm-race-avoidance/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_checklist/" title="Kernel-3.10.0-957.el7_checklist"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_configfs/" title="Kernel-3.10.0-957.el7_configfs"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

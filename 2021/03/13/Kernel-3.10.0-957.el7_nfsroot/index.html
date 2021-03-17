@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_nfsroot | oosTech.com</title>
+  <meta name="description" content="Mounting the root filesystem via NFS (nfsroot)Written 1996 by Gero Kuhlmann &amp;#x67;&amp;#x65;&amp;#114;&amp;#x6f;&amp;#64;&amp;#103;&amp;#x6b;&amp;#109;&amp;#x69;&amp;#110;&amp;#105;&amp;#x78;&amp;#x2e;&amp;#104;&amp;#97;&amp;#110;&amp;#x2e;&amp;#x64;&amp;#x65;Updated 1997">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_nfsroot">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Mounting the root filesystem via NFS (nfsroot)Written 1996 by Gero Kuhlmann &amp;#x67;&amp;#x65;&amp;#114;&amp;#x6f;&amp;#64;&amp;#103;&amp;#x6b;&amp;#109;&amp;#x69;&amp;#110;&amp;#105;&amp;#x78;&amp;#x2e;&amp;#104;&amp;#97;&amp;#110;&amp;#x2e;&amp;#x64;&amp;#x65;Updated 1997">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Mounting-the-root-filesystem-via-NFS-nfsroot"><span class="toc-number">1.</span> <span class="toc-text">Mounting the root filesystem via NFS (nfsroot)</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_nfsroot" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_nfsroot
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Mounting-the-root-filesystem-via-NFS-nfsroot"><a href="#Mounting-the-root-filesystem-via-NFS-nfsroot" class="headerlink" title="Mounting the root filesystem via NFS (nfsroot)"></a>Mounting the root filesystem via NFS (nfsroot)</h1><p>Written 1996 by Gero Kuhlmann <a href="mailto:&#x67;&#x65;&#114;&#x6f;&#64;&#103;&#x6b;&#109;&#x69;&#110;&#105;&#x78;&#x2e;&#104;&#97;&#110;&#x2e;&#x64;&#x65;">&#x67;&#x65;&#114;&#x6f;&#64;&#103;&#x6b;&#109;&#x69;&#110;&#105;&#x78;&#x2e;&#104;&#97;&#110;&#x2e;&#x64;&#x65;</a><br>Updated 1997 by Martin Mares <a href="mailto:&#109;&#x6a;&#x40;&#x61;&#x74;&#114;&#101;&#x79;&#46;&#x6b;&#x61;&#x72;&#108;&#105;&#x6e;&#x2e;&#109;&#102;&#x66;&#x2e;&#x63;&#x75;&#x6e;&#x69;&#46;&#x63;&#x7a;">&#109;&#x6a;&#x40;&#x61;&#x74;&#114;&#101;&#x79;&#46;&#x6b;&#x61;&#x72;&#108;&#105;&#x6e;&#x2e;&#109;&#102;&#x66;&#x2e;&#x63;&#x75;&#x6e;&#x69;&#46;&#x63;&#x7a;</a><br>Updated 2006 by Nico Schottelius <a href="mailto:&#x6e;&#x69;&#99;&#x6f;&#45;&#107;&#x65;&#114;&#x6e;&#x65;&#x6c;&#x2d;&#110;&#x66;&#115;&#x72;&#x6f;&#x6f;&#116;&#64;&#x73;&#99;&#104;&#111;&#x74;&#116;&#x65;&#x6c;&#x69;&#x75;&#x73;&#x2e;&#x6f;&#114;&#x67;">&#x6e;&#x69;&#99;&#x6f;&#45;&#107;&#x65;&#114;&#x6e;&#x65;&#x6c;&#x2d;&#110;&#x66;&#115;&#x72;&#x6f;&#x6f;&#116;&#64;&#x73;&#99;&#104;&#111;&#x74;&#116;&#x65;&#x6c;&#x69;&#x75;&#x73;&#x2e;&#x6f;&#114;&#x67;</a><br>Updated 2006 by Horms <a href="mailto:&#104;&#111;&#x72;&#109;&#x73;&#x40;&#x76;&#101;&#x72;&#103;&#x65;&#x2e;&#x6e;&#x65;&#x74;&#x2e;&#97;&#x75;">&#104;&#111;&#x72;&#109;&#x73;&#x40;&#x76;&#101;&#x72;&#103;&#x65;&#x2e;&#x6e;&#x65;&#x74;&#x2e;&#97;&#x75;</a></p>
+<p>In order to use a diskless system, such as an X-terminal or printer server<br>for example, it is necessary for the root filesystem to be present on a<br>non-disk device. This may be an initramfs (see Documentation/filesystems/<br>ramfs-rootfs-initramfs.txt), a ramdisk (see Documentation/initrd.txt) or a<br>filesystem mounted via NFS. The following text describes on how to use NFS<br>for the root filesystem. For the rest of this text ‘client’ means the<br>diskless system, and ‘server’ means the NFS server.</p>
+<p>1.) Enabling nfsroot capabilities<br>    —————————–</p>
+<p>In order to use nfsroot, NFS client support needs to be selected as<br>built-in during configuration. Once this has been selected, the nfsroot<br>option will become available, which should also be selected.</p>
+<p>In the networking options, kernel level autoconfiguration can be selected,<br>along with the types of autoconfiguration to support. Selecting all of<br>DHCP, BOOTP and RARP is safe.</p>
+<p>2.) Kernel command line<br>    ——————-</p>
+<p>When the kernel has been loaded by a boot loader (see below) it needs to be<br>told what root fs device to use. And in the case of nfsroot, where to find<br>both the server and the name of the directory on the server to mount as root.<br>This can be established using the following kernel command line parameters:</p>
+<p>root=/dev/nfs</p>
+<p>  This is necessary to enable the pseudo-NFS-device. Note that it’s not a<br>  real device but just a synonym to tell the kernel to use NFS instead of<br>  a real device.</p>
+<p>nfsroot=[<server-ip>:]<root-dir>[,<nfs-options>]</p>
+<p>  If the `nfsroot’ parameter is NOT given on the command line,<br>  the default “/tftpboot/%s” will be used.</p>
+<p>  <server-ip>    Specifies the IP address of the NFS server.<br>        The default address is determined by the `ip’ parameter<br>        (see below). This parameter allows the use of different<br>        servers for IP autoconfiguration and NFS.</p>
+<p>  <root-dir>    Name of the directory on the server to mount as root.<br>        If there is a “%s” token in the string, it will be<br>        replaced by the ASCII-representation of the client’s<br>        IP address.</p>
+<p>  <nfs-options>    Standard NFS options. All options are separated by commas.<br>        The following defaults are used:<br>            port        = as given by server portmap daemon<br>            rsize        = 4096<br>            wsize        = 4096<br>            timeo        = 7<br>            retrans        = 3<br>            acregmin    = 3<br>            acregmax    = 60<br>            acdirmin    = 30<br>            acdirmax    = 60<br>            flags        = hard, nointr, noposix, cto, ac</p>
+<p>ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>:<br>   <dns0-ip>:<dns1-ip></p>
+<p>  This parameter tells the kernel how to configure IP addresses of devices<br>  and also how to set up the IP routing table. It was originally called<br>  <code>nfsaddrs&#39;, but now the boot-time IP configuration works independently of   NFS, so it was renamed to </code>ip’ and the old name remained as an alias for<br>  compatibility reasons.</p>
+<p>  If this parameter is missing from the kernel command line, all fields are<br>  assumed to be empty, and the defaults mentioned below apply. In general<br>  this means that the kernel tries to configure everything using<br>  autoconfiguration.</p>
+<p>  The <autoconf> parameter can appear alone as the value to the `ip’<br>  parameter (without all the ‘:’ characters before).  If the value is<br>  “ip=off” or “ip=none”, no autoconfiguration will take place, otherwise<br>  autoconfiguration will take place.  The most common way to use this<br>  is “ip=dhcp”.</p>
+<p>  <client-ip>    IP address of the client.</p>
+<pre><code>      Default:  Determined using autoconfiguration.
+</code></pre>
+<p>  <server-ip>    IP address of the NFS server. If RARP is used to determine<br>        the client address and this parameter is NOT empty only<br>        replies from the specified server are accepted.</p>
+<pre><code>    Only required for NFS root. That is autoconfiguration
+    will not be triggered if it is missing and NFS root is not
+    in operation.
+
+    Default: Determined using autoconfiguration.
+             The address of the autoconfiguration server is used.
+</code></pre>
+<p>  <gw-ip>    IP address of a gateway if the server is on a different subnet.</p>
+<pre><code>    Default: Determined using autoconfiguration.
+</code></pre>
+<p>  <netmask>    Netmask for local network interface. If unspecified<br>        the netmask is derived from the client IP address assuming<br>        classful addressing.</p>
+<pre><code>    Default:  Determined using autoconfiguration.
+</code></pre>
+<p>  <hostname>    Name of the client. May be supplied by autoconfiguration,<br>          but its absence will not trigger autoconfiguration.<br>        If specified and DHCP is used, the user provided hostname will<br>        be carried in the DHCP request to hopefully update DNS record.</p>
+<pre><code>      Default: Client IP address is used in ASCII notation.
+</code></pre>
+<p>  <device>    Name of network device to use.</p>
+<pre><code>    Default: If the host only has one device, it is used.
+         Otherwise the device is determined using
+         autoconfiguration. This is done by sending
+         autoconfiguration requests out of all devices,
+         and using the device that received the first reply.
+</code></pre>
+<p>  <autoconf>    Method to use for autoconfiguration. In the case of options<br>                which specify multiple autoconfiguration protocols,<br>        requests are sent using all protocols, and the first one<br>        to reply is used.</p>
+<pre><code>    Only autoconfiguration protocols that have been compiled
+    into the kernel will be used, regardless of the value of
+    this option.
+
+              off or none: don&#39;t use autoconfiguration
+            (do static IP assignment instead)
+      on or any:   use any protocol available in the kernel
+               (default)
+      dhcp:        use DHCP
+      bootp:       use BOOTP
+      rarp:        use RARP
+      both:        use both BOOTP and RARP but not DHCP
+                   (old option kept for backwards compatibility)
+
+            Default: any
+</code></pre>
+<p>  <dns0-ip>    IP address of first nameserver.<br>        Value gets exported by /proc/net/pnp which is often linked<br>        on embedded systems by /etc/resolv.conf.</p>
+<p>  <dns1-ip>    IP address of secound nameserver.<br>        Same as above.</p>
+<p>nfsrootdebug</p>
+<p>  This parameter enables debugging messages to appear in the kernel<br>  log at boot time so that administrators can verify that the correct<br>  NFS mount options, server address, and root path are passed to the<br>  NFS client.</p>
+<p>rdinit=<executable file></p>
+<p>  To specify which file contains the program that starts system<br>  initialization, administrators can use this command line parameter.<br>  The default value of this parameter is “/init”.  If the specified<br>  file exists and the kernel can execute it, root filesystem related<br>  kernel command line parameters, including `nfsroot=’, are ignored.</p>
+<p>  A description of the process of mounting the root file system can be<br>  found in:</p>
+<pre><code>Documentation/early-userspace/README
+</code></pre>
+<p>3.) Boot Loader<br>    ———-</p>
+<p>To get the kernel into memory different approaches can be used.<br>They depend on various facilities being available:</p>
+<p>3.1)  Booting from a floppy using syslinux</p>
+<pre><code>When building kernels, an easy way to create a boot floppy that uses
+syslinux is to use the zdisk or bzdisk make targets which use zimage
+      and bzimage images respectively. Both targets accept the
+     FDARGS parameter which can be used to set the kernel command line.
+
+e.g.
+   make bzdisk FDARGS=&quot;root=/dev/nfs&quot;
+
+   Note that the user running this command will need to have
+     access to the floppy drive device, /dev/fd0
+
+     For more information on syslinux, including how to create bootdisks
+     for prebuilt kernels, see http://syslinux.zytor.com/
+
+N.B: Previously it was possible to write a kernel directly to
+     a floppy using dd, configure the boot device using rdev, and
+     boot using the resulting floppy. Linux no longer supports this
+     method of booting.
+</code></pre>
+<p>3.2) Booting from a cdrom using isolinux</p>
+<pre><code>     When building kernels, an easy way to create a bootable cdrom that
+     uses isolinux is to use the isoimage target which uses a bzimage
+     image. Like zdisk and bzdisk, this target accepts the FDARGS
+     parameter which can be used to set the kernel command line.
+
+e.g.
+  make isoimage FDARGS=&quot;root=/dev/nfs&quot;
+
+     The resulting iso image will be arch/&lt;ARCH&gt;/boot/image.iso
+     This can be written to a cdrom using a variety of tools including
+     cdrecord.
+
+e.g.
+  cdrecord dev=ATAPI:1,0,0 arch/x86/boot/image.iso
+
+     For more information on isolinux, including how to create bootdisks
+     for prebuilt kernels, see http://syslinux.zytor.com/
+</code></pre>
+<p>3.2) Using LILO<br>    When using LILO all the necessary command line parameters may be<br>    specified using the ‘append=’ directive in the LILO configuration<br>    file.</p>
+<pre><code>However, to use the &#39;root=&#39; directive you also need to create
+a dummy root device, which may be removed after LILO is run.
+
+mknod /dev/boot255 c 0 255
+
+For information on configuring LILO, please refer to its documentation.
+</code></pre>
+<p>3.3) Using GRUB<br>    When using GRUB, kernel parameter are simply appended after the kernel<br>    specification: kernel <kernel> <parameters></p>
+<p>3.4) Using loadlin<br>    loadlin may be used to boot Linux from a DOS command prompt without<br>    requiring a local hard disk to mount as root. This has not been<br>    thoroughly tested by the authors of this document, but in general<br>    it should be possible configure the kernel command line similarly<br>    to the configuration of LILO.</p>
+<pre><code>Please refer to the loadlin documentation for further information.
+</code></pre>
+<p>3.5) Using a boot ROM<br>    This is probably the most elegant way of booting a diskless client.<br>    With a boot ROM the kernel is loaded using the TFTP protocol. The<br>    authors of this document are not aware of any no commercial boot<br>    ROMs that support booting Linux over the network. However, there<br>    are two free implementations of a boot ROM, netboot-nfs and<br>    etherboot, both of which are available on sunsite.unc.edu, and both<br>    of which contain everything you need to boot a diskless Linux client.</p>
+<p>3.6) Using pxelinux<br>    Pxelinux may be used to boot linux using the PXE boot loader<br>    which is present on many modern network cards.</p>
+<pre><code>When using pxelinux, the kernel image is specified using
+&quot;kernel &lt;relative-path-below /tftpboot&gt;&quot;. The nfsroot parameters
+are passed to the kernel by adding them to the &quot;append&quot; line.
+It is common to use serial console in conjunction with pxeliunx,
+see Documentation/serial-console.txt for more information.
+
+For more information on isolinux, including how to create bootdisks
+for prebuilt kernels, see http://syslinux.zytor.com/
+</code></pre>
+<p>4.) Credits<br>    ——-</p>
+<p>  The nfsroot code in the kernel and the RARP support have been written<br>  by Gero Kuhlmann <a href="mailto:&#x67;&#101;&#x72;&#111;&#x40;&#x67;&#x6b;&#x6d;&#105;&#x6e;&#x69;&#120;&#46;&#104;&#97;&#110;&#46;&#x64;&#x65;">&#x67;&#101;&#x72;&#111;&#x40;&#x67;&#x6b;&#x6d;&#105;&#x6e;&#x69;&#120;&#46;&#104;&#97;&#110;&#46;&#x64;&#x65;</a>.</p>
+<p>  The rest of the IP layer autoconfiguration code has been written<br>  by Martin Mares <a href="mailto:&#109;&#106;&#64;&#x61;&#116;&#114;&#101;&#x79;&#x2e;&#x6b;&#97;&#114;&#108;&#105;&#110;&#x2e;&#109;&#102;&#102;&#46;&#x63;&#x75;&#110;&#105;&#x2e;&#x63;&#122;">&#109;&#106;&#64;&#x61;&#116;&#114;&#101;&#x79;&#x2e;&#x6b;&#97;&#114;&#108;&#105;&#110;&#x2e;&#109;&#102;&#102;&#46;&#x63;&#x75;&#110;&#105;&#x2e;&#x63;&#122;</a>.</p>
+<p>  In order to write the initial version of nfsroot I would like to thank<br>  Jens-Uwe Mager <a href="mailto:&#x6a;&#x75;&#x6d;&#64;&#97;&#110;&#x75;&#x62;&#x69;&#115;&#x2e;&#x68;&#x61;&#x6e;&#x2e;&#x64;&#101;">&#x6a;&#x75;&#x6d;&#64;&#97;&#110;&#x75;&#x62;&#x69;&#115;&#x2e;&#x68;&#x61;&#x6e;&#x2e;&#x64;&#101;</a> for his help.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/" title="Kernel-3.10.0-957.el7_nfsroot" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nfsroot/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_nfs41-server/" title="Kernel-3.10.0-957.el7_nfs41-server"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_nilfs2/" title="Kernel-3.10.0-957.el7_nilfs2"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

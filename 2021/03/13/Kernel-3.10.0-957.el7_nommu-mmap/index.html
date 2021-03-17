@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_nommu-mmap | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;          NO-MMU MEMORY MAPPING SUPPORT          &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  The kernel has limited support for memory mapping under no-MMU conditions, suchas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_nommu-mmap">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;          NO-MMU MEMORY MAPPING SUPPORT          &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  The kernel has limited support for memory mapping under no-MMU conditions, suchas">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_nommu-mmap" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_nommu-mmap
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>         =============================
+         NO-MMU MEMORY MAPPING SUPPORT
+         =============================
+</code></pre>
+<p>The kernel has limited support for memory mapping under no-MMU conditions, such<br>as are used in uClinux environments. From the userspace point of view, memory<br>mapping is made use of in conjunction with the mmap() system call, the shmat()<br>call and the execve() system call. From the kernel’s point of view, execve()<br>mapping is actually performed by the binfmt drivers, which call back into the<br>mmap() routines to do the actual work.</p>
+<p>Memory mapping behaviour also involves the way fork(), vfork(), clone() and<br>ptrace() work. Under uClinux there is no fork(), and clone() must be supplied<br>the CLONE_VM flag.</p>
+<p>The behaviour is similar between the MMU and no-MMU cases, but not identical;<br>and it’s also much more restricted in the latter case:</p>
+<p> (*) Anonymous mapping, MAP_PRIVATE</p>
+<pre><code>In the MMU case: VM regions backed by arbitrary pages; copy-on-write
+across fork.
+
+In the no-MMU case: VM regions backed by arbitrary contiguous runs of
+pages.
+</code></pre>
+<p> (*) Anonymous mapping, MAP_SHARED</p>
+<pre><code>These behave very much like private mappings, except that they&#39;re
+shared across fork() or clone() without CLONE_VM in the MMU case. Since
+the no-MMU case doesn&#39;t support these, behaviour is identical to
+MAP_PRIVATE there.
+</code></pre>
+<p> (*) File, MAP_PRIVATE, PROT_READ / PROT_EXEC, !PROT_WRITE</p>
+<pre><code>In the MMU case: VM regions backed by pages read from file; changes to
+the underlying file are reflected in the mapping; copied across fork.
+
+In the no-MMU case:
+
+     - If one exists, the kernel will re-use an existing mapping to the
+       same segment of the same file if that has compatible permissions,
+       even if this was created by another process.
+
+     - If possible, the file mapping will be directly on the backing device
+       if the backing device has the BDI_CAP_MAP_DIRECT capability and
+       appropriate mapping protection capabilities. Ramfs, romfs, cramfs
+       and mtd might all permit this.
+
+ - If the backing device device can&#39;t or won&#39;t permit direct sharing,
+       but does have the BDI_CAP_MAP_COPY capability, then a copy of the
+       appropriate bit of the file will be read into a contiguous bit of
+       memory and any extraneous space beyond the EOF will be cleared
+
+ - Writes to the file do not affect the mapping; writes to the mapping
+   are visible in other processes (no MMU protection), but should not
+   happen.
+</code></pre>
+<p> (*) File, MAP_PRIVATE, PROT_READ / PROT_EXEC, PROT_WRITE</p>
+<pre><code>In the MMU case: like the non-PROT_WRITE case, except that the pages in
+question get copied before the write actually happens. From that point
+on writes to the file underneath that page no longer get reflected into
+the mapping&#39;s backing pages. The page is then backed by swap instead.
+
+In the no-MMU case: works much like the non-PROT_WRITE case, except
+that a copy is always taken and never shared.
+</code></pre>
+<p> (*) Regular file / blockdev, MAP_SHARED, PROT_READ / PROT_EXEC / PROT_WRITE</p>
+<pre><code>In the MMU case: VM regions backed by pages read from file; changes to
+pages written back to file; writes to file reflected into pages backing
+mapping; shared across fork.
+
+In the no-MMU case: not supported.
+</code></pre>
+<p> (*) Memory backed regular file, MAP_SHARED, PROT_READ / PROT_EXEC / PROT_WRITE</p>
+<pre><code>In the MMU case: As for ordinary regular files.
+
+In the no-MMU case: The filesystem providing the memory-backed file
+(such as ramfs or tmpfs) may choose to honour an open, truncate, mmap
+sequence by providing a contiguous sequence of pages to map. In that
+case, a shared-writable memory mapping will be possible. It will work
+as for the MMU case. If the filesystem does not provide any such
+support, then the mapping request will be denied.
+</code></pre>
+<p> (*) Memory backed blockdev, MAP_SHARED, PROT_READ / PROT_EXEC / PROT_WRITE</p>
+<pre><code>In the MMU case: As for ordinary regular files.
+
+In the no-MMU case: As for memory backed regular files, but the
+blockdev must be able to provide a contiguous run of pages without
+truncate being called. The ramdisk driver could do this if it allocated
+all its memory as a contiguous array upfront.
+</code></pre>
+<p> (*) Memory backed chardev, MAP_SHARED, PROT_READ / PROT_EXEC / PROT_WRITE</p>
+<pre><code>In the MMU case: As for ordinary regular files.
+
+In the no-MMU case: The character device driver may choose to honour
+the mmap() by providing direct access to the underlying device if it
+provides memory or quasi-memory that can be accessed directly. Examples
+of such are frame buffers and flash devices. If the driver does not
+provide any such support, then the mapping request will be denied.
+</code></pre>
+<p>============================<br>FURTHER NOTES ON NO-MMU MMAP<br>============================</p>
+<p> (*) A request for a private mapping of a file may return a buffer that is not<br>     page-aligned.  This is because XIP may take place, and the data may not be<br>     paged aligned in the backing store.</p>
+<p> (*) A request for an anonymous mapping will always be page aligned.  If<br>     possible the size of the request should be a power of two otherwise some<br>     of the space may be wasted as the kernel must allocate a power-of-2<br>     granule but will only discard the excess if appropriately configured as<br>     this has an effect on fragmentation.</p>
+<p> (*) The memory allocated by a request for an anonymous mapping will normally<br>     be cleared by the kernel before being returned in accordance with the<br>     Linux man pages (ver 2.22 or later).</p>
+<pre><code> In the MMU case this can be achieved with reasonable performance as
+ regions are backed by virtual pages, with the contents only being mapped
+ to cleared physical pages when a write happens on that specific page
+ (prior to which, the pages are effectively mapped to the global zero page
+ from which reads can take place).  This spreads out the time it takes to
+ initialize the contents of a page - depending on the write-usage of the
+ mapping.
+
+ In the no-MMU case, however, anonymous mappings are backed by physical
+ pages, and the entire map is cleared at allocation time.  This can cause
+ significant delays during a userspace malloc() as the C library does an
+ anonymous mapping and the kernel then does a memset for the entire map.
+
+ However, for memory that isn&#39;t required to be precleared - such as that
+ returned by malloc() - mmap() can take a MAP_UNINITIALIZED flag to
+ indicate to the kernel that it shouldn&#39;t bother clearing the memory before
+ returning it.  Note that CONFIG_MMAP_ALLOW_UNINITIALIZED must be enabled
+ to permit this, otherwise the flag will be ignored.
+
+ uClibc uses this to speed up malloc(), and the ELF-FDPIC binfmt uses this
+ to allocate the brk and stack region.
+</code></pre>
+<p> (*) A list of all the private copy and anonymous mappings on the system is<br>     visible through /proc/maps in no-MMU mode.</p>
+<p> (*) A list of all the mappings in use by a process is visible through<br>     /proc/<pid>/maps in no-MMU mode.</p>
+<p> (*) Supplying MAP_FIXED or a requesting a particular mapping address will<br>     result in an error.</p>
+<p> (*) Files mapped privately usually have to have a read method provided by the<br>     driver or filesystem so that the contents can be read into the memory<br>     allocated if mmap() chooses not to map the backing device directly. An<br>     error will result if they don’t. This is most likely to be encountered<br>     with character device files, pipes, fifos and sockets.</p>
+<p>==========================<br>INTERPROCESS SHARED MEMORY<br>==========================</p>
+<p>Both SYSV IPC SHM shared memory and POSIX shared memory is supported in NOMMU<br>mode.  The former through the usual mechanism, the latter through files created<br>on ramfs or tmpfs mounts.</p>
+<p>=======<br>FUTEXES<br>=======</p>
+<p>Futexes are supported in NOMMU mode if the arch supports them.  An error will<br>be given if an address passed to the futex system call lies outside the<br>mappings made by a process or if the mapping in which the address lies does not<br>support futexes (such as an I/O chardev mapping).</p>
+<p>=============<br>NO-MMU MREMAP<br>=============</p>
+<p>The mremap() function is partially supported.  It may change the size of a<br>mapping, and may move it[*] if MREMAP_MAYMOVE is specified and if the new size<br>of the mapping exceeds the size of the slab object currently occupied by the<br>memory to which the mapping refers, or if a smaller slab object could be used.</p>
+<p>MREMAP_FIXED is not supported, though it is ignored if there’s no change of<br>address and the object does not need to be moved.</p>
+<p>Shared mappings may not be moved.  Shareable mappings may not be moved either,<br>even if they are not currently shared.</p>
+<p>The mremap() function must be given an exact match for base address and size of<br>a previously mapped object.  It may not be used to create holes in existing<br>mappings, move parts of existing mappings or resize parts of mappings.  It must<br>act on a complete mapping.</p>
+<p>[*] Not currently supported.</p>
+<p>============================================<br>PROVIDING SHAREABLE CHARACTER DEVICE SUPPORT<br>============================================</p>
+<p>To provide shareable character device support, a driver must provide a<br>file-&gt;f_op-&gt;get_unmapped_area() operation. The mmap() routines will call this<br>to get a proposed address for the mapping. This may return an error if it<br>doesn’t wish to honour the mapping because it’s too long, at a weird offset,<br>under some unsupported combination of flags or whatever.</p>
+<p>The driver should also provide backing device information with capabilities set<br>to indicate the permitted types of mapping on such devices. The default is<br>assumed to be readable and writable, not executable, and only shareable<br>directly (can’t be copied).</p>
+<p>The file-&gt;f_op-&gt;mmap() operation will be called to actually inaugurate the<br>mapping. It can be rejected at that point. Returning the ENOSYS error will<br>cause the mapping to be copied instead if BDI_CAP_MAP_COPY is specified.</p>
+<p>The vm_ops-&gt;close() routine will be invoked when the last mapping on a chardev<br>is removed. An existing mapping will be shared, partially or not, if possible<br>without notifying the driver.</p>
+<p>It is permitted also for the file-&gt;f_op-&gt;get_unmapped_area() operation to<br>return -ENOSYS. This will be taken to mean that this operation just doesn’t<br>want to handle it, despite the fact it’s got an operation. For instance, it<br>might try directing the call to a secondary driver which turns out not to<br>implement it. Such is the case for the framebuffer driver which attempts to<br>direct the call to the device-specific driver. Under such circumstances, the<br>mapping request will be rejected if BDI_CAP_MAP_COPY is not specified, and a<br>copy mapped otherwise.</p>
+<p>IMPORTANT NOTE:</p>
+<pre><code>Some types of device may present a different appearance to anyone
+looking at them in certain modes. Flash chips can be like this; for
+instance if they&#39;re in programming or erase mode, you might see the
+status reflected in the mapping, instead of the data.
+
+In such a case, care must be taken lest userspace see a shared or a
+private mapping showing such information when the driver is busy
+controlling the device. Remember especially: private executable
+mappings may still be mapped directly off the device under some
+circumstances!
+</code></pre>
+<p>==============================================<br>PROVIDING SHAREABLE MEMORY-BACKED FILE SUPPORT<br>==============================================</p>
+<p>Provision of shared mappings on memory backed files is similar to the provision<br>of support for shared mapped character devices. The main difference is that the<br>filesystem providing the service will probably allocate a contiguous collection<br>of pages and permit mappings to be made on that.</p>
+<p>It is recommended that a truncate operation applied to such a file that<br>increases the file size, if that file is empty, be taken as a request to gather<br>enough pages to honour a mapping. This is required to support POSIX shared<br>memory.</p>
+<p>Memory backed devices are indicated by the mapping’s backing device info having<br>the memory_backed flag set.</p>
+<p>========================================<br>PROVIDING SHAREABLE BLOCK DEVICE SUPPORT<br>========================================</p>
+<p>Provision of shared mappings on block device files is exactly the same as for<br>character devices. If there isn’t a real device underneath, then the driver<br>should allocate sufficient contiguous memory to honour any supported mapping.</p>
+<p>=================================<br>ADJUSTING PAGE TRIMMING BEHAVIOUR<br>=================================</p>
+<p>NOMMU mmap automatically rounds up to the nearest power-of-2 number of pages<br>when performing an allocation.  This can have adverse effects on memory<br>fragmentation, and as such, is left configurable.  The default behaviour is to<br>aggressively trim allocations and discard any excess pages back in to the page<br>allocator.  In order to retain finer-grained control over fragmentation, this<br>behaviour can either be disabled completely, or bumped up to a higher page<br>watermark where trimming begins.</p>
+<p>Page trimming behaviour is configurable via the sysctl `vm.nr_trim_pages’.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/" title="Kernel-3.10.0-957.el7_nommu-mmap" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_nommu-mmap/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_no_new_privs/" title="Kernel-3.10.0-957.el7_no_new_privs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_not-in-cx2388x-datasheet/" title="Kernel-3.10.0-957.el7_not-in-cx2388x-datasheet"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

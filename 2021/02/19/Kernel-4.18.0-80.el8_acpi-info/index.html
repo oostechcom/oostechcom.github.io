@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_acpi-info | oosTech.com</title>
+  <meta name="description" content="ACPI considerations for PCI host bridges  The general rule is that the ACPI namespace should describe everything theOS might use unless there’s another way for the OS to find it [1, 2]. For exampl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_acpi-info">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="ACPI considerations for PCI host bridges  The general rule is that the ACPI namespace should describe everything theOS might use unless there’s another way for the OS to find it [1, 2]. For exampl">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_acpi-info" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_acpi-info
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    ACPI considerations for PCI host bridges
+</code></pre>
+<p>The general rule is that the ACPI namespace should describe everything the<br>OS might use unless there’s another way for the OS to find it [1, 2].</p>
+<p>For example, there’s no standard hardware mechanism for enumerating PCI<br>host bridges, so the ACPI namespace must describe each host bridge, the<br>method for accessing PCI config space below it, the address space windows<br>the host bridge forwards to PCI (using _CRS), and the routing of legacy<br>INTx interrupts (using _PRT).</p>
+<p>PCI devices, which are below the host bridge, generally do not need to be<br>described via ACPI.  The OS can discover them via the standard PCI<br>enumeration mechanism, using config accesses to discover and identify<br>devices and read and size their BARs.  However, ACPI may describe PCI<br>devices if it provides power management or hotplug functionality for them<br>or if the device has INTx interrupts connected by platform interrupt<br>controllers and a _PRT is needed to describe those connections.</p>
+<p>ACPI resource description is done via _CRS objects of devices in the ACPI<br>namespace [2]. Â  The _CRS is like a generalized PCI BAR: the OS can read<br>_CRS and figure out what resource is being consumed even if it doesn’t have<br>a driver for the device [3]. Â That’s important because it means an old OS<br>can work correctly even on a system with new devices unknown to the OS.<br>The new devices might not do anything, but the OS can at least make sure no<br>resources conflict with them.</p>
+<p>Static tables like MCFG, HPET, ECDT, etc., are <em>not</em> mechanisms for<br>reserving address space.  The static tables are for things the OS needs to<br>know early in boot, before it can parse the ACPI namespace.  If a new table<br>is defined, an old OS needs to operate correctly even though it ignores the<br>table.  _CRS allows that because it is generic and understood by the old<br>OS; a static table does not.</p>
+<p>If the OS is expected to manage a non-discoverable device described via<br>ACPI, that device will have a specific _HID/_CID that tells the OS what<br>driver to bind to it, and the _CRS tells the OS and the driver where the<br>device’s registers are.</p>
+<p>PCI host bridges are PNP0A03 or PNP0A08 devices. Â Their _CRS should<br>describe all the address space they consume. Â This includes all the windows<br>they forward down to the PCI bus, as well as registers of the host bridge<br>itself that are not forwarded to PCI. Â The host bridge registers include<br>things like secondary/subordinate bus registers that determine the bus<br>range below the bridge, window registers that describe the apertures, etc.<br>These are all device-specific, non-architected things, so the only way a<br>PNP0A03/PNP0A08 driver can manage them is via _PRS/_CRS/_SRS, which contain<br>the device-specific details. Â The host bridge registers also include ECAM<br>space, since it is consumed by the host bridge.</p>
+<p>ACPI defines a Consumer/Producer bit to distinguish the bridge registers<br>(“Consumer”) from the bridge apertures (“Producer”) [4, 5], but early<br>BIOSes didn’t use that bit correctly.  The result is that the current ACPI<br>spec defines Consumer/Producer only for the Extended Address Space<br>descriptors; the bit should be ignored in the older QWord/DWord/Word<br>Address Space descriptors.  Consequently, OSes have to assume all<br>QWord/DWord/Word descriptors are windows.</p>
+<p>Prior to the addition of Extended Address Space descriptors, the failure of<br>Consumer/Producer meant there was no way to describe bridge registers in<br>the PNP0A03/PNP0A08 device itself.  The workaround was to describe the<br>bridge registers (including ECAM space) in PNP0C02 catch-all devices [6].<br>With the exception of ECAM, the bridge register space is device-specific<br>anyway, so the generic PNP0A03/PNP0A08 driver (pci_root.c) has no need to<br>know about it. Â </p>
+<p>New architectures should be able to use “Consumer” Extended Address Space<br>descriptors in the PNP0A03 device for bridge registers, including ECAM,<br>although a strict interpretation of [6] might prohibit this.  Old x86 and<br>ia64 kernels assume all address space descriptors, including “Consumer”<br>Extended Address Space ones, are windows, so it would not be safe to<br>describe bridge registers this way on those architectures.</p>
+<p>PNP0C02 “motherboard” devices are basically a catch-all. Â There’s no<br>programming model for them other than “don’t use these resources for<br>anything else.” Â So a PNP0C02 _CRS should claim any address space that is<br>(1) not claimed by _CRS under any other device object in the ACPI namespace<br>and (2) should not be assigned by the OS to something else.</p>
+<p>The PCIe spec requires the Enhanced Configuration Access Method (ECAM)<br>unless there’s a standard firmware interface for config access, e.g., the<br>ia64 SAL interface [7].  A host bridge consumes ECAM memory address space<br>and converts memory accesses into PCI configuration accesses.  The spec<br>defines the ECAM address space layout and functionality; only the base of<br>the address space is device-specific.  An ACPI OS learns the base address<br>from either the static MCFG table or a _CBA method in the PNP0A03 device.</p>
+<p>The MCFG table must describe the ECAM space of non-hot pluggable host<br>bridges [8].  Since MCFG is a static table and can’t be updated by hotplug,<br>a _CBA method in the PNP0A03 device describes the ECAM space of a<br>hot-pluggable host bridge [9].  Note that for both MCFG and _CBA, the base<br>address always corresponds to bus 0, even if the bus range below the bridge<br>(which is reported via _CRS) doesn’t start at 0.</p>
+<p>[1] ACPI 6.2, sec 6.1:<br>    For any device that is on a non-enumerable type of bus (for example, an<br>    ISA bus), OSPM enumerates the devices’ identifier(s) and the ACPI<br>    system firmware must supply an _HID object … for each device to<br>    enable OSPM to do that.</p>
+<p>[2] ACPI 6.2, sec 3.7:<br>    The OS enumerates motherboard devices simply by reading through the<br>    ACPI Namespace looking for devices with hardware IDs.</p>
+<pre><code>Each device enumerated by ACPI includes ACPI-defined objects in the
+ACPI Namespace that report the hardware resources the device could
+occupy [_PRS], an object that reports the resources that are currently
+used by the device [_CRS], and objects for configuring those resources
+[_SRS].  The information is used by the Plug and Play OS (OSPM) to
+configure the devices.
+</code></pre>
+<p>[3] ACPI 6.2, sec 6.2:<br>    OSPM uses device configuration objects to configure hardware resources<br>    for devices enumerated via ACPI.  Device configuration objects provide<br>    information about current and possible resource requirements, the<br>    relationship between shared resources, and methods for configuring<br>    hardware resources.</p>
+<pre><code>When OSPM enumerates a device, it calls _PRS to determine the resource
+requirements of the device.  It may also call _CRS to find the current
+resource settings for the device.  Using this information, the Plug and
+Play system determines what resources the device should consume and
+sets those resources by calling the deviceâs _SRS control method.
+
+In ACPI, devices can consume resources (for example, legacy keyboards),
+provide resources (for example, a proprietary PCI bridge), or do both.
+Unless otherwise specified, resources for a device are assumed to be
+taken from the nearest matching resource above the device in the device
+hierarchy.
+</code></pre>
+<p>[4] ACPI 6.2, sec 6.4.3.5.1, 2, 3, 4:<br>    QWord/DWord/Word Address Space Descriptor (.1, .2, .3)<br>    General Flags: Bit [0] Ignored</p>
+<pre><code>Extended Address Space Descriptor (.4)
+General Flags: Bit [0] Consumer/Producer:
+1âThis device consumes this resource
+0âThis device produces and consumes this resource
+</code></pre>
+<p>[5] ACPI 6.2, sec 19.6.43:<br>    ResourceUsage specifies whether the Memory range is consumed by<br>    this device (ResourceConsumer) or passed on to child devices<br>    (ResourceProducer).  If nothing is specified, then<br>    ResourceConsumer is assumed.</p>
+<p>[6] PCI Firmware 3.2, sec 4.1.2:<br>    If the operating system does not natively comprehend reserving the<br>    MMCFG region, the MMCFG region must be reserved by firmware.  The<br>    address range reported in the MCFG table or by _CBA method (see Section<br>    4.1.3) must be reserved by declaring a motherboard resource.  For most<br>    systems, the motherboard resource would appear at the root of the ACPI<br>    namespace (under _SB) in a node with a _HID of EISAID (PNP0C02), and<br>    the resources in this case should not be claimed in the root PCI busâs<br>    _CRS.  The resources can optionally be returned in Int15 E820 or<br>    EFIGetMemoryMap as reserved memory but must always be reported through<br>    ACPI as a motherboard resource.</p>
+<p>[7] PCI Express 4.0, sec 7.2.2:<br>    For systems that are PC-compatible, or that do not implement a<br>    processor-architecture-specific firmware interface standard that allows<br>    access to the Configuration Space, the ECAM is required as defined in<br>    this section.</p>
+<p>[8] PCI Firmware 3.2, sec 4.1.2:<br>    The MCFG table is an ACPI table that is used to communicate the base<br>    addresses corresponding to the non-hot removable PCI Segment Groups<br>    range within a PCI Segment Group available to the operating system at<br>    boot. This is required for the PC-compatible systems.</p>
+<pre><code>The MCFG table is only used to communicate the base addresses
+corresponding to the PCI Segment Groups available to the system at
+boot.
+</code></pre>
+<p>[9] PCI Firmware 3.2, sec 4.1.3:<br>    The _CBA (Memory mapped Configuration Base Address) control method is<br>    an optional ACPI object that returns the 64-bit memory mapped<br>    configuration base address for the hot plug capable host bridge. The<br>    base address returned by _CBA is processor-relative address. The _CBA<br>    control method evaluates to an Integer.</p>
+<pre><code>This control method appears under a host bridge object. When the _CBA
+method appears under an active host bridge object, the operating system
+evaluates this structure to identify the memory mapped configuration
+base address corresponding to the PCI Segment Group for the bus number
+range specified in _CRS method. An ACPI name space object that contains
+the _CBA method must also contain a corresponding _SEG method.
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/" title="Kernel-4.18.0-80.el8_acpi-info" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_acpi-info/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_acm/" title="Kernel-4.18.0-80.el8_ac"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_acpi-lid/" title="Kernel-4.18.0-80.el8_acpi-li"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_openvswitch | oosTech.com</title>
+  <meta name="description" content="Open vSwitch datapath developer documentationThe Open vSwitch kernel module allows flexible userspace control overflow-level packet processing on selected network devices.  It can beused to implement">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_openvswitch">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Open vSwitch datapath developer documentationThe Open vSwitch kernel module allows flexible userspace control overflow-level packet processing on selected network devices.  It can beused to implement">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Open-vSwitch-datapath-developer-documentation"><span class="toc-number">1.</span> <span class="toc-text">Open vSwitch datapath developer documentation</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Flow-key-compatibility"><span class="toc-number">1.1.</span> <span class="toc-text">Flow key compatibility</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Flow-key-format"><span class="toc-number">1.2.</span> <span class="toc-text">Flow key format</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Wildcarded-flow-key-format"><span class="toc-number">1.3.</span> <span class="toc-text">Wildcarded flow key format</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unique-flow-identifiers"><span class="toc-number">1.4.</span> <span class="toc-text">Unique flow identifiers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Basic-rule-for-evolving-flow-keys"><span class="toc-number">1.5.</span> <span class="toc-text">Basic rule for evolving flow keys</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Handling-malformed-packets"><span class="toc-number">1.6.</span> <span class="toc-text">Handling malformed packets</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-rules"><span class="toc-number">1.7.</span> <span class="toc-text">Other rules</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_openvswitch" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_openvswitch
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Open-vSwitch-datapath-developer-documentation"><a href="#Open-vSwitch-datapath-developer-documentation" class="headerlink" title="Open vSwitch datapath developer documentation"></a>Open vSwitch datapath developer documentation</h1><p>The Open vSwitch kernel module allows flexible userspace control over<br>flow-level packet processing on selected network devices.  It can be<br>used to implement a plain Ethernet switch, network device bonding,<br>VLAN processing, network access control, flow-based network control,<br>and so on.</p>
+<p>The kernel module implements multiple “datapaths” (analogous to<br>bridges), each of which can have multiple “vports” (analogous to ports<br>within a bridge).  Each datapath also has associated with it a “flow<br>table” that userspace populates with “flows” that map from keys based<br>on packet headers and metadata to sets of actions.  The most common<br>action forwards the packet to another vport; other actions are also<br>implemented.</p>
+<p>When a packet arrives on a vport, the kernel module processes it by<br>extracting its flow key and looking it up in the flow table.  If there<br>is a matching flow, it executes the associated actions.  If there is<br>no match, it queues the packet to userspace for processing (as part of<br>its processing, userspace will likely set up a flow to handle further<br>packets of the same type entirely in-kernel).</p>
+<h2 id="Flow-key-compatibility"><a href="#Flow-key-compatibility" class="headerlink" title="Flow key compatibility"></a>Flow key compatibility</h2><p>Network protocols evolve over time.  New protocols become important<br>and existing protocols lose their prominence.  For the Open vSwitch<br>kernel module to remain relevant, it must be possible for newer<br>versions to parse additional protocols as part of the flow key.  It<br>might even be desirable, someday, to drop support for parsing<br>protocols that have become obsolete.  Therefore, the Netlink interface<br>to Open vSwitch is designed to allow carefully written userspace<br>applications to work with any version of the flow key, past or future.</p>
+<p>To support this forward and backward compatibility, whenever the<br>kernel module passes a packet to userspace, it also passes along the<br>flow key that it parsed from the packet.  Userspace then extracts its<br>own notion of a flow key from the packet and compares it against the<br>kernel-provided version:</p>
+<pre><code>- If userspace&#39;s notion of the flow key for the packet matches the
+  kernel&#39;s, then nothing special is necessary.
+
+- If the kernel&#39;s flow key includes more fields than the userspace
+  version of the flow key, for example if the kernel decoded IPv6
+  headers but userspace stopped at the Ethernet type (because it
+  does not understand IPv6), then again nothing special is
+  necessary.  Userspace can still set up a flow in the usual way,
+  as long as it uses the kernel-provided flow key to do it.
+
+- If the userspace flow key includes more fields than the
+  kernel&#39;s, for example if userspace decoded an IPv6 header but
+  the kernel stopped at the Ethernet type, then userspace can
+  forward the packet manually, without setting up a flow in the
+  kernel.  This case is bad for performance because every packet
+  that the kernel considers part of the flow must go to userspace,
+  but the forwarding behavior is correct.  (If userspace can
+  determine that the values of the extra fields would not affect
+  forwarding behavior, then it could set up a flow anyway.)
+</code></pre>
+<p>How flow keys evolve over time is important to making this work, so<br>the following sections go into detail.</p>
+<h2 id="Flow-key-format"><a href="#Flow-key-format" class="headerlink" title="Flow key format"></a>Flow key format</h2><p>A flow key is passed over a Netlink socket as a sequence of Netlink<br>attributes.  Some attributes represent packet metadata, defined as any<br>information about a packet that cannot be extracted from the packet<br>itself, e.g. the vport on which the packet was received.  Most<br>attributes, however, are extracted from headers within the packet,<br>e.g. source and destination addresses from Ethernet, IP, or TCP<br>headers.</p>
+<p>The &lt;linux/openvswitch.h&gt; header file defines the exact format of the<br>flow key attributes.  For informal explanatory purposes here, we write<br>them as comma-separated strings, with parentheses indicating arguments<br>and nesting.  For example, the following could represent a flow key<br>corresponding to a TCP packet that arrived on vport 1:</p>
+<pre><code>in_port(1), eth(src=e0:91:f5:21:d0:b2, dst=00:02:e3:0f:80:a4),
+eth_type(0x0800), ipv4(src=172.16.0.20, dst=172.18.0.52, proto=17, tos=0,
+frag=no), tcp(src=49163, dst=80)
+</code></pre>
+<p>Often we ellipsize arguments not important to the discussion, e.g.:</p>
+<pre><code>in_port(1), eth(...), eth_type(0x0800), ipv4(...), tcp(...)
+</code></pre>
+<h2 id="Wildcarded-flow-key-format"><a href="#Wildcarded-flow-key-format" class="headerlink" title="Wildcarded flow key format"></a>Wildcarded flow key format</h2><p>A wildcarded flow is described with two sequences of Netlink attributes<br>passed over the Netlink socket. A flow key, exactly as described above, and an<br>optional corresponding flow mask.</p>
+<p>A wildcarded flow can represent a group of exact match flows. Each ‘1’ bit<br>in the mask specifies a exact match with the corresponding bit in the flow key.<br>A ‘0’ bit specifies a don’t care bit, which will match either a ‘1’ or ‘0’ bit<br>of a incoming packet. Using wildcarded flow can improve the flow set up rate<br>by reduce the number of new flows need to be processed by the user space program.</p>
+<p>Support for the mask Netlink attribute is optional for both the kernel and user<br>space program. The kernel can ignore the mask attribute, installing an exact<br>match flow, or reduce the number of don’t care bits in the kernel to less than<br>what was specified by the user space program. In this case, variations in bits<br>that the kernel does not implement will simply result in additional flow setups.<br>The kernel module will also work with user space programs that neither support<br>nor supply flow mask attributes.</p>
+<p>Since the kernel may ignore or modify wildcard bits, it can be difficult for<br>the userspace program to know exactly what matches are installed. There are<br>two possible approaches: reactively install flows as they miss the kernel<br>flow table (and therefore not attempt to determine wildcard changes at all)<br>or use the kernel’s response messages to determine the installed wildcards.</p>
+<p>When interacting with userspace, the kernel should maintain the match portion<br>of the key exactly as originally installed. This will provides a handle to<br>identify the flow for all future operations. However, when reporting the<br>mask of an installed flow, the mask should include any restrictions imposed<br>by the kernel.</p>
+<p>The behavior when using overlapping wildcarded flows is undefined. It is the<br>responsibility of the user space program to ensure that any incoming packet<br>can match at most one flow, wildcarded or not. The current implementation<br>performs best-effort detection of overlapping wildcarded flows and may reject<br>some but not all of them. However, this behavior may change in future versions.</p>
+<h2 id="Unique-flow-identifiers"><a href="#Unique-flow-identifiers" class="headerlink" title="Unique flow identifiers"></a>Unique flow identifiers</h2><p>An alternative to using the original match portion of a key as the handle for<br>flow identification is a unique flow identifier, or “UFID”. UFIDs are optional<br>for both the kernel and user space program.</p>
+<p>User space programs that support UFID are expected to provide it during flow<br>setup in addition to the flow, then refer to the flow using the UFID for all<br>future operations. The kernel is not required to index flows by the original<br>flow key if a UFID is specified.</p>
+<h2 id="Basic-rule-for-evolving-flow-keys"><a href="#Basic-rule-for-evolving-flow-keys" class="headerlink" title="Basic rule for evolving flow keys"></a>Basic rule for evolving flow keys</h2><p>Some care is needed to really maintain forward and backward<br>compatibility for applications that follow the rules listed under<br>“Flow key compatibility” above.</p>
+<p>The basic rule is obvious:</p>
+<pre><code>------------------------------------------------------------------
+New network protocol support must only supplement existing flow
+key attributes.  It must not change the meaning of already defined
+flow key attributes.
+------------------------------------------------------------------
+</code></pre>
+<p>This rule does have less-obvious consequences so it is worth working<br>through a few examples.  Suppose, for example, that the kernel module<br>did not already implement VLAN parsing.  Instead, it just interpreted<br>the 802.1Q TPID (0x8100) as the Ethertype then stopped parsing the<br>packet.  The flow key for any packet with an 802.1Q header would look<br>essentially like this, ignoring metadata:</p>
+<pre><code>eth(...), eth_type(0x8100)
+</code></pre>
+<p>Naively, to add VLAN support, it makes sense to add a new “vlan” flow<br>key attribute to contain the VLAN tag, then continue to decode the<br>encapsulated headers beyond the VLAN tag using the existing field<br>definitions.  With this change, a TCP packet in VLAN 10 would have a<br>flow key much like this:</p>
+<pre><code>eth(...), vlan(vid=10, pcp=0), eth_type(0x0800), ip(proto=6, ...), tcp(...)
+</code></pre>
+<p>But this change would negatively affect a userspace application that<br>has not been updated to understand the new “vlan” flow key attribute.<br>The application could, following the flow compatibility rules above,<br>ignore the “vlan” attribute that it does not understand and therefore<br>assume that the flow contained IP packets.  This is a bad assumption<br>(the flow only contains IP packets if one parses and skips over the<br>802.1Q header) and it could cause the application’s behavior to change<br>across kernel versions even though it follows the compatibility rules.</p>
+<p>The solution is to use a set of nested attributes.  This is, for<br>example, why 802.1Q support uses nested attributes.  A TCP packet in<br>VLAN 10 is actually expressed as:</p>
+<pre><code>eth(...), eth_type(0x8100), vlan(vid=10, pcp=0), encap(eth_type(0x0800),
+ip(proto=6, ...), tcp(...)))
+</code></pre>
+<p>Notice how the “eth_type”, “ip”, and “tcp” flow key attributes are<br>nested inside the “encap” attribute.  Thus, an application that does<br>not understand the “vlan” key will not see either of those attributes<br>and therefore will not misinterpret them.  (Also, the outer eth_type<br>is still 0x8100, not changed to 0x0800.)</p>
+<h2 id="Handling-malformed-packets"><a href="#Handling-malformed-packets" class="headerlink" title="Handling malformed packets"></a>Handling malformed packets</h2><p>Don’t drop packets in the kernel for malformed protocol headers, bad<br>checksums, etc.  This would prevent userspace from implementing a<br>simple Ethernet switch that forwards every packet.</p>
+<p>Instead, in such a case, include an attribute with “empty” content.<br>It doesn’t matter if the empty content could be valid protocol values,<br>as long as those values are rarely seen in practice, because userspace<br>can always forward all packets with those values to userspace and<br>handle them individually.</p>
+<p>For example, consider a packet that contains an IP header that<br>indicates protocol 6 for TCP, but which is truncated just after the IP<br>header, so that the TCP header is missing.  The flow key for this<br>packet would include a tcp attribute with all-zero src and dst, like<br>this:</p>
+<pre><code>eth(...), eth_type(0x0800), ip(proto=6, ...), tcp(src=0, dst=0)
+</code></pre>
+<p>As another example, consider a packet with an Ethernet type of 0x8100,<br>indicating that a VLAN TCI should follow, but which is truncated just<br>after the Ethernet type.  The flow key for this packet would include<br>an all-zero-bits vlan and an empty encap attribute, like this:</p>
+<pre><code>eth(...), eth_type(0x8100), vlan(0), encap()
+</code></pre>
+<p>Unlike a TCP packet with source and destination ports 0, an<br>all-zero-bits VLAN TCI is not that rare, so the CFI bit (aka<br>VLAN_TAG_PRESENT inside the kernel) is ordinarily set in a vlan<br>attribute expressly to allow this situation to be distinguished.<br>Thus, the flow key in this second example unambiguously indicates a<br>missing or malformed VLAN TCI.</p>
+<h2 id="Other-rules"><a href="#Other-rules" class="headerlink" title="Other rules"></a>Other rules</h2><p>The other rules for flow keys are much less subtle:</p>
+<pre><code>- Duplicate attributes are not allowed at a given nesting level.
+
+- Ordering of attributes is not significant.
+
+- When the kernel sends a given flow key to userspace, it always
+  composes it the same way.  This allows userspace to hash and
+  compare entire flow keys that it may not be able to fully
+  interpret.
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/" title="Kernel-4.18.0-80.el8_openvswitch" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_openvswitch/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_openrisc,ompic/" title="Kernel-4.18.0-80.el8_openrisc,ompic"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_operations/" title="Kernel-4.18.0-80.el8_operations"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_relay | oosTech.com</title>
+  <meta name="description" content="relay interface (formerly relayfs)The relay interface provides a means for kernel applications toefficiently log and transfer large quantities of data from the kernelto userspace via user-defined ‘rel">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_relay">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_relay/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="relay interface (formerly relayfs)The relay interface provides a means for kernel applications toefficiently log and transfer large quantities of data from the kernelto userspace via user-defined ‘rel">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_relay/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#relay-interface-formerly-relayfs"><span class="toc-number">1.</span> <span class="toc-text">relay interface (formerly relayfs)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Semantics"><span class="toc-number">2.</span> <span class="toc-text">Semantics</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#klog-and-relay-apps-example-code"><span class="toc-number">3.</span> <span class="toc-text">klog and relay-apps example code</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-relay-interface-user-space-API"><span class="toc-number">4.</span> <span class="toc-text">The relay interface user space API</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-relay-interface-kernel-API"><span class="toc-number">5.</span> <span class="toc-text">The relay interface kernel API</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Creating-a-channel"><span class="toc-number">5.1.</span> <span class="toc-text">Creating a channel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Buffer-only-channels"><span class="toc-number">5.2.</span> <span class="toc-text">Buffer-only channels</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Channel-%E2%80%98modes%E2%80%99"><span class="toc-number">5.3.</span> <span class="toc-text">Channel ‘modes’</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Writing-to-a-channel"><span class="toc-number">5.4.</span> <span class="toc-text">Writing to a channel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Closing-a-channel"><span class="toc-number">5.5.</span> <span class="toc-text">Closing a channel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Misc"><span class="toc-number">5.6.</span> <span class="toc-text">Misc</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Resources"><span class="toc-number">6.</span> <span class="toc-text">Resources</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Credits"><span class="toc-number">7.</span> <span class="toc-text">Credits</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_relay" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_relay
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_relay/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_relay/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_relay/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="relay-interface-formerly-relayfs"><a href="#relay-interface-formerly-relayfs" class="headerlink" title="relay interface (formerly relayfs)"></a>relay interface (formerly relayfs)</h1><p>The relay interface provides a means for kernel applications to<br>efficiently log and transfer large quantities of data from the kernel<br>to userspace via user-defined ‘relay channels’.</p>
+<p>A ‘relay channel’ is a kernel-&gt;user data relay mechanism implemented<br>as a set of per-cpu kernel buffers (‘channel buffers’), each<br>represented as a regular file (‘relay file’) in user space.  Kernel<br>clients write into the channel buffers using efficient write<br>functions; these automatically log into the current cpu’s channel<br>buffer.  User space applications mmap() or read() from the relay files<br>and retrieve the data as it becomes available.  The relay files<br>themselves are files created in a host filesystem, e.g. debugfs, and<br>are associated with the channel buffers using the API described below.</p>
+<p>The format of the data logged into the channel buffers is completely<br>up to the kernel client; the relay interface does however provide<br>hooks which allow kernel clients to impose some structure on the<br>buffer data.  The relay interface doesn’t implement any form of data<br>filtering - this also is left to the kernel client.  The purpose is to<br>keep things as simple as possible.</p>
+<p>This document provides an overview of the relay interface API.  The<br>details of the function parameters are documented along with the<br>functions in the relay interface code - please see that for details.</p>
+<h1 id="Semantics"><a href="#Semantics" class="headerlink" title="Semantics"></a>Semantics</h1><p>Each relay channel has one buffer per CPU, each buffer has one or more<br>sub-buffers.  Messages are written to the first sub-buffer until it is<br>too full to contain a new message, in which case it is written to<br>the next (if available).  Messages are never split across sub-buffers.<br>At this point, userspace can be notified so it empties the first<br>sub-buffer, while the kernel continues writing to the next.</p>
+<p>When notified that a sub-buffer is full, the kernel knows how many<br>bytes of it are padding i.e. unused space occurring because a complete<br>message couldn’t fit into a sub-buffer.  Userspace can use this<br>knowledge to copy only valid data.</p>
+<p>After copying it, userspace can notify the kernel that a sub-buffer<br>has been consumed.</p>
+<p>A relay channel can operate in a mode where it will overwrite data not<br>yet collected by userspace, and not wait for it to be consumed.</p>
+<p>The relay channel itself does not provide for communication of such<br>data between userspace and kernel, allowing the kernel side to remain<br>simple and not impose a single interface on userspace.  It does<br>provide a set of examples and a separate helper though, described<br>below.</p>
+<p>The read() interface both removes padding and internally consumes the<br>read sub-buffers; thus in cases where read(2) is being used to drain<br>the channel buffers, special-purpose communication between kernel and<br>user isn’t necessary for basic operation.</p>
+<p>One of the major goals of the relay interface is to provide a low<br>overhead mechanism for conveying kernel data to userspace.  While the<br>read() interface is easy to use, it’s not as efficient as the mmap()<br>approach; the example code attempts to make the tradeoff between the<br>two approaches as small as possible.</p>
+<h1 id="klog-and-relay-apps-example-code"><a href="#klog-and-relay-apps-example-code" class="headerlink" title="klog and relay-apps example code"></a>klog and relay-apps example code</h1><p>The relay interface itself is ready to use, but to make things easier,<br>a couple simple utility functions and a set of examples are provided.</p>
+<p>The relay-apps example tarball, available on the relay sourceforge<br>site, contains a set of self-contained examples, each consisting of a<br>pair of .c files containing boilerplate code for each of the user and<br>kernel sides of a relay application.  When combined these two sets of<br>boilerplate code provide glue to easily stream data to disk, without<br>having to bother with mundane housekeeping chores.</p>
+<p>The ‘klog debugging functions’ patch (klog.patch in the relay-apps<br>tarball) provides a couple of high-level logging functions to the<br>kernel which allow writing formatted text or raw data to a channel,<br>regardless of whether a channel to write into exists or not, or even<br>whether the relay interface is compiled into the kernel or not.  These<br>functions allow you to put unconditional ‘trace’ statements anywhere<br>in the kernel or kernel modules; only when there is a ‘klog handler’<br>registered will data actually be logged (see the klog and kleak<br>examples for details).</p>
+<p>It is of course possible to use the relay interface from scratch,<br>i.e. without using any of the relay-apps example code or klog, but<br>you’ll have to implement communication between userspace and kernel,<br>allowing both to convey the state of buffers (full, empty, amount of<br>padding).  The read() interface both removes padding and internally<br>consumes the read sub-buffers; thus in cases where read(2) is being<br>used to drain the channel buffers, special-purpose communication<br>between kernel and user isn’t necessary for basic operation.  Things<br>such as buffer-full conditions would still need to be communicated via<br>some channel though.</p>
+<p>klog and the relay-apps examples can be found in the relay-apps<br>tarball on <a target="_blank" rel="noopener" href="http://relayfs.sourceforge.net/">http://relayfs.sourceforge.net</a></p>
+<h1 id="The-relay-interface-user-space-API"><a href="#The-relay-interface-user-space-API" class="headerlink" title="The relay interface user space API"></a>The relay interface user space API</h1><p>The relay interface implements basic file operations for user space<br>access to relay channel buffer data.  Here are the file operations<br>that are available and some comments regarding their behavior:</p>
+<p>open()        enables user to open an <em>existing</em> channel buffer.</p>
+<p>mmap()      results in channel buffer being mapped into the caller’s<br>        memory space. Note that you can’t do a partial mmap - you<br>        must map the entire file, which is NRBUF * SUBBUFSIZE.</p>
+<p>read()      read the contents of a channel buffer.  The bytes read are<br>        ‘consumed’ by the reader, i.e. they won’t be available<br>        again to subsequent reads.  If the channel is being used<br>        in no-overwrite mode (the default), it can be read at any<br>        time even if there’s an active kernel writer.  If the<br>        channel is being used in overwrite mode and there are<br>        active channel writers, results may be unpredictable -<br>        users should make sure that all logging to the channel has<br>        ended before using read() with overwrite mode.  Sub-buffer<br>        padding is automatically removed and will not be seen by<br>        the reader.</p>
+<p>sendfile()  transfer data from a channel buffer to an output file<br>        descriptor. Sub-buffer padding is automatically removed<br>        and will not be seen by the reader.</p>
+<p>poll()      POLLIN/POLLRDNORM/POLLERR supported.  User applications are<br>        notified when sub-buffer boundaries are crossed.</p>
+<p>close()     decrements the channel buffer’s refcount.  When the refcount<br>        reaches 0, i.e. when no process or kernel client has the<br>        buffer open, the channel buffer is freed.</p>
+<p>In order for a user application to make use of relay files, the<br>host filesystem must be mounted.  For example,</p>
+<pre><code>mount -t debugfs debugfs /sys/kernel/debug
+</code></pre>
+<p>NOTE:   the host filesystem doesn’t need to be mounted for kernel<br>    clients to create or use channels - it only needs to be<br>    mounted when user space applications need access to the buffer<br>    data.</p>
+<h1 id="The-relay-interface-kernel-API"><a href="#The-relay-interface-kernel-API" class="headerlink" title="The relay interface kernel API"></a>The relay interface kernel API</h1><p>Here’s a summary of the API the relay interface provides to in-kernel clients:</p>
+<p>TBD(curr. line MT:/API/)<br>  channel management functions:</p>
+<pre><code>relay_open(base_filename, parent, subbuf_size, n_subbufs,
+           callbacks, private_data)
+relay_close(chan)
+relay_flush(chan)
+relay_reset(chan)
+</code></pre>
+<p>  channel management typically called on instigation of userspace:</p>
+<pre><code>relay_subbufs_consumed(chan, cpu, subbufs_consumed)
+</code></pre>
+<p>  write functions:</p>
+<pre><code>relay_write(chan, data, length)
+__relay_write(chan, data, length)
+relay_reserve(chan, length)
+</code></pre>
+<p>  callbacks:</p>
+<pre><code>subbuf_start(buf, subbuf, prev_subbuf, prev_padding)
+buf_mapped(buf, filp)
+buf_unmapped(buf, filp)
+create_buf_file(filename, parent, mode, buf, is_global)
+remove_buf_file(dentry)
+</code></pre>
+<p>  helper functions:</p>
+<pre><code>relay_buf_full(buf)
+subbuf_start_reserve(buf, length)
+</code></pre>
+<h2 id="Creating-a-channel"><a href="#Creating-a-channel" class="headerlink" title="Creating a channel"></a>Creating a channel</h2><p>relay_open() is used to create a channel, along with its per-cpu<br>channel buffers.  Each channel buffer will have an associated file<br>created for it in the host filesystem, which can be and mmapped or<br>read from in user space.  The files are named basename0…basenameN-1<br>where N is the number of online cpus, and by default will be created<br>in the root of the filesystem (if the parent param is NULL).  If you<br>want a directory structure to contain your relay files, you should<br>create it using the host filesystem’s directory creation function,<br>e.g. debugfs_create_dir(), and pass the parent directory to<br>relay_open().  Users are responsible for cleaning up any directory<br>structure they create, when the channel is closed - again the host<br>filesystem’s directory removal functions should be used for that,<br>e.g. debugfs_remove().</p>
+<p>In order for a channel to be created and the host filesystem’s files<br>associated with its channel buffers, the user must provide definitions<br>for two callback functions, create_buf_file() and remove_buf_file().<br>create_buf_file() is called once for each per-cpu buffer from<br>relay_open() and allows the user to create the file which will be used<br>to represent the corresponding channel buffer.  The callback should<br>return the dentry of the file created to represent the channel buffer.<br>remove_buf_file() must also be defined; it’s responsible for deleting<br>the file(s) created in create_buf_file() and is called during<br>relay_close().</p>
+<p>Here are some typical definitions for these callbacks, in this case<br>using debugfs:</p>
+<p>/*</p>
+<ul>
+<li>create_buf_file() callback.  Creates relay file in debugfs.</li>
+<li>/<br>static struct dentry *create_buf_file_handler(const char *filename,<pre><code>                                        struct dentry *parent,
+                                        int mode,
+                                        struct rchan_buf *buf,
+                                        int *is_global)
+</code></pre>
+{<pre><code>  return debugfs_create_file(filename, mode, parent, buf,
+                         &amp;relay_file_operations);
+</code></pre>
+}</li>
+</ul>
+<p>/*</p>
+<ul>
+<li><p>remove_buf_file() callback.  Removes relay file from debugfs.</p>
+</li>
+<li><p>/<br>static int remove_buf_file_handler(struct dentry *dentry)<br>{</p>
+<pre><code>  debugfs_remove(dentry);
+
+  return 0;
+</code></pre>
+<p>}</p>
+</li>
+</ul>
+<p>/*</p>
+<ul>
+<li>relay interface callbacks</li>
+<li>/<br>static struct rchan_callbacks relay_callbacks =<br>{<pre><code>  .create_buf_file = create_buf_file_handler,
+  .remove_buf_file = remove_buf_file_handler,
+</code></pre>
+};</li>
+</ul>
+<p>And an example relay_open() invocation using them:</p>
+<p>  chan = relay_open(“cpu”, NULL, SUBBUF_SIZE, N_SUBBUFS, &amp;relay_callbacks, NULL);</p>
+<p>If the create_buf_file() callback fails, or isn’t defined, channel<br>creation and thus relay_open() will fail.</p>
+<p>The total size of each per-cpu buffer is calculated by multiplying the<br>number of sub-buffers by the sub-buffer size passed into relay_open().<br>The idea behind sub-buffers is that they’re basically an extension of<br>double-buffering to N buffers, and they also allow applications to<br>easily implement random-access-on-buffer-boundary schemes, which can<br>be important for some high-volume applications.  The number and size<br>of sub-buffers is completely dependent on the application and even for<br>the same application, different conditions will warrant different<br>values for these parameters at different times.  Typically, the right<br>values to use are best decided after some experimentation; in general,<br>though, it’s safe to assume that having only 1 sub-buffer is a bad<br>idea - you’re guaranteed to either overwrite data or lose events<br>depending on the channel mode being used.</p>
+<p>The create_buf_file() implementation can also be defined in such a way<br>as to allow the creation of a single ‘global’ buffer instead of the<br>default per-cpu set.  This can be useful for applications interested<br>mainly in seeing the relative ordering of system-wide events without<br>the need to bother with saving explicit timestamps for the purpose of<br>merging/sorting per-cpu files in a postprocessing step.</p>
+<p>To have relay_open() create a global buffer, the create_buf_file()<br>implementation should set the value of the is_global outparam to a<br>non-zero value in addition to creating the file that will be used to<br>represent the single buffer.  In the case of a global buffer,<br>create_buf_file() and remove_buf_file() will be called only once.  The<br>normal channel-writing functions, e.g. relay_write(), can still be<br>used - writes from any cpu will transparently end up in the global<br>buffer - but since it is a global buffer, callers should make sure<br>they use the proper locking for such a buffer, either by wrapping<br>writes in a spinlock, or by copying a write function from relay.h and<br>creating a local version that internally does the proper locking.</p>
+<p>The private_data passed into relay_open() allows clients to associate<br>user-defined data with a channel, and is immediately available<br>(including in create_buf_file()) via chan-&gt;private_data or<br>buf-&gt;chan-&gt;private_data.</p>
+<h2 id="Buffer-only-channels"><a href="#Buffer-only-channels" class="headerlink" title="Buffer-only channels"></a>Buffer-only channels</h2><p>These channels have no files associated and can be created with<br>relay_open(NULL, NULL, …). Such channels are useful in scenarios such<br>as when doing early tracing in the kernel, before the VFS is up. In these<br>cases, one may open a buffer-only channel and then call<br>relay_late_setup_files() when the kernel is ready to handle files,<br>to expose the buffered data to the userspace.</p>
+<h2 id="Channel-‘modes’"><a href="#Channel-‘modes’" class="headerlink" title="Channel ‘modes’"></a>Channel ‘modes’</h2><p>relay channels can be used in either of two modes - ‘overwrite’ or<br>‘no-overwrite’.  The mode is entirely determined by the implementation<br>of the subbuf_start() callback, as described below.  The default if no<br>subbuf_start() callback is defined is ‘no-overwrite’ mode.  If the<br>default mode suits your needs, and you plan to use the read()<br>interface to retrieve channel data, you can ignore the details of this<br>section, as it pertains mainly to mmap() implementations.</p>
+<p>In ‘overwrite’ mode, also known as ‘flight recorder’ mode, writes<br>continuously cycle around the buffer and will never fail, but will<br>unconditionally overwrite old data regardless of whether it’s actually<br>been consumed.  In no-overwrite mode, writes will fail, i.e. data will<br>be lost, if the number of unconsumed sub-buffers equals the total<br>number of sub-buffers in the channel.  It should be clear that if<br>there is no consumer or if the consumer can’t consume sub-buffers fast<br>enough, data will be lost in either case; the only difference is<br>whether data is lost from the beginning or the end of a buffer.</p>
+<p>As explained above, a relay channel is made of up one or more<br>per-cpu channel buffers, each implemented as a circular buffer<br>subdivided into one or more sub-buffers.  Messages are written into<br>the current sub-buffer of the channel’s current per-cpu buffer via the<br>write functions described below.  Whenever a message can’t fit into<br>the current sub-buffer, because there’s no room left for it, the<br>client is notified via the subbuf_start() callback that a switch to a<br>new sub-buffer is about to occur.  The client uses this callback to 1)<br>initialize the next sub-buffer if appropriate 2) finalize the previous<br>sub-buffer if appropriate and 3) return a boolean value indicating<br>whether or not to actually move on to the next sub-buffer.</p>
+<p>To implement ‘no-overwrite’ mode, the userspace client would provide<br>an implementation of the subbuf_start() callback something like the<br>following:</p>
+<p>static int subbuf_start(struct rchan_buf *buf,<br>                        void *subbuf,<br>            void *prev_subbuf,<br>            unsigned int prev_padding)<br>{<br>    if (prev_subbuf)<br>        *((unsigned *)prev_subbuf) = prev_padding;</p>
+<pre><code>if (relay_buf_full(buf))
+    return 0;
+
+subbuf_start_reserve(buf, sizeof(unsigned int));
+
+return 1;
+</code></pre>
+<p>}</p>
+<p>If the current buffer is full, i.e. all sub-buffers remain unconsumed,<br>the callback returns 0 to indicate that the buffer switch should not<br>occur yet, i.e. until the consumer has had a chance to read the<br>current set of ready sub-buffers.  For the relay_buf_full() function<br>to make sense, the consumer is responsible for notifying the relay<br>interface when sub-buffers have been consumed via<br>relay_subbufs_consumed().  Any subsequent attempts to write into the<br>buffer will again invoke the subbuf_start() callback with the same<br>parameters; only when the consumer has consumed one or more of the<br>ready sub-buffers will relay_buf_full() return 0, in which case the<br>buffer switch can continue.</p>
+<p>The implementation of the subbuf_start() callback for ‘overwrite’ mode<br>would be very similar:</p>
+<p>static int subbuf_start(struct rchan_buf *buf,<br>                        void *subbuf,<br>            void *prev_subbuf,<br>            unsigned int prev_padding)<br>{<br>    if (prev_subbuf)<br>        *((unsigned *)prev_subbuf) = prev_padding;</p>
+<pre><code>subbuf_start_reserve(buf, sizeof(unsigned int));
+
+return 1;
+</code></pre>
+<p>}</p>
+<p>In this case, the relay_buf_full() check is meaningless and the<br>callback always returns 1, causing the buffer switch to occur<br>unconditionally.  It’s also meaningless for the client to use the<br>relay_subbufs_consumed() function in this mode, as it’s never<br>consulted.</p>
+<p>The default subbuf_start() implementation, used if the client doesn’t<br>define any callbacks, or doesn’t define the subbuf_start() callback,<br>implements the simplest possible ‘no-overwrite’ mode, i.e. it does<br>nothing but return 0.</p>
+<p>Header information can be reserved at the beginning of each sub-buffer<br>by calling the subbuf_start_reserve() helper function from within the<br>subbuf_start() callback.  This reserved area can be used to store<br>whatever information the client wants.  In the example above, room is<br>reserved in each sub-buffer to store the padding count for that<br>sub-buffer.  This is filled in for the previous sub-buffer in the<br>subbuf_start() implementation; the padding value for the previous<br>sub-buffer is passed into the subbuf_start() callback along with a<br>pointer to the previous sub-buffer, since the padding value isn’t<br>known until a sub-buffer is filled.  The subbuf_start() callback is<br>also called for the first sub-buffer when the channel is opened, to<br>give the client a chance to reserve space in it.  In this case the<br>previous sub-buffer pointer passed into the callback will be NULL, so<br>the client should check the value of the prev_subbuf pointer before<br>writing into the previous sub-buffer.</p>
+<h2 id="Writing-to-a-channel"><a href="#Writing-to-a-channel" class="headerlink" title="Writing to a channel"></a>Writing to a channel</h2><p>Kernel clients write data into the current cpu’s channel buffer using<br>relay_write() or __relay_write().  relay_write() is the main logging<br>function - it uses local_irqsave() to protect the buffer and should be<br>used if you might be logging from interrupt context.  If you know<br>you’ll never be logging from interrupt context, you can use<br>__relay_write(), which only disables preemption.  These functions<br>don’t return a value, so you can’t determine whether or not they<br>failed - the assumption is that you wouldn’t want to check a return<br>value in the fast logging path anyway, and that they’ll always succeed<br>unless the buffer is full and no-overwrite mode is being used, in<br>which case you can detect a failed write in the subbuf_start()<br>callback by calling the relay_buf_full() helper function.</p>
+<p>relay_reserve() is used to reserve a slot in a channel buffer which<br>can be written to later.  This would typically be used in applications<br>that need to write directly into a channel buffer without having to<br>stage data in a temporary buffer beforehand.  Because the actual write<br>may not happen immediately after the slot is reserved, applications<br>using relay_reserve() can keep a count of the number of bytes actually<br>written, either in space reserved in the sub-buffers themselves or as<br>a separate array.  See the ‘reserve’ example in the relay-apps tarball<br>at <a target="_blank" rel="noopener" href="http://relayfs.sourceforge.net/">http://relayfs.sourceforge.net</a> for an example of how this can be<br>done.  Because the write is under control of the client and is<br>separated from the reserve, relay_reserve() doesn’t protect the buffer<br>at all - it’s up to the client to provide the appropriate<br>synchronization when using relay_reserve().</p>
+<h2 id="Closing-a-channel"><a href="#Closing-a-channel" class="headerlink" title="Closing a channel"></a>Closing a channel</h2><p>The client calls relay_close() when it’s finished using the channel.<br>The channel and its associated buffers are destroyed when there are no<br>longer any references to any of the channel buffers.  relay_flush()<br>forces a sub-buffer switch on all the channel buffers, and can be used<br>to finalize and process the last sub-buffers before the channel is<br>closed.</p>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><p>Some applications may want to keep a channel around and re-use it<br>rather than open and close a new channel for each use.  relay_reset()<br>can be used for this purpose - it resets a channel to its initial<br>state without reallocating channel buffer memory or destroying<br>existing mappings.  It should however only be called when it’s safe to<br>do so, i.e. when the channel isn’t currently being written to.</p>
+<p>Finally, there are a couple of utility callbacks that can be used for<br>different purposes.  buf_mapped() is called whenever a channel buffer<br>is mmapped from user space and buf_unmapped() is called when it’s<br>unmapped.  The client can use this notification to trigger actions<br>within the kernel application, such as enabling/disabling logging to<br>the channel.</p>
+<h1 id="Resources"><a href="#Resources" class="headerlink" title="Resources"></a>Resources</h1><p>For news, example code, mailing list, etc. see the relay interface homepage:</p>
+<pre><code>http://relayfs.sourceforge.net
+</code></pre>
+<h1 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h1><p>The ideas and specs for the relay interface came about as a result of<br>discussions on tracing involving the following:</p>
+<p>Michel Dagenais        <a href="mailto:&#x6d;&#x69;&#99;&#104;&#101;&#108;&#46;&#100;&#97;&#103;&#x65;&#x6e;&#97;&#x69;&#115;&#x40;&#x70;&#x6f;&#108;&#x79;&#x6d;&#x74;&#x6c;&#x2e;&#99;&#x61;">&#x6d;&#x69;&#99;&#104;&#101;&#108;&#46;&#100;&#97;&#103;&#x65;&#x6e;&#97;&#x69;&#115;&#x40;&#x70;&#x6f;&#108;&#x79;&#x6d;&#x74;&#x6c;&#x2e;&#99;&#x61;</a><br>Richard Moore        <a href="mailto:&#x72;&#x69;&#99;&#x68;&#x61;&#114;&#100;&#106;&#95;&#x6d;&#111;&#111;&#x72;&#x65;&#64;&#117;&#x6b;&#x2e;&#105;&#x62;&#x6d;&#x2e;&#99;&#111;&#109;">&#x72;&#x69;&#99;&#x68;&#x61;&#114;&#100;&#106;&#95;&#x6d;&#111;&#111;&#x72;&#x65;&#64;&#117;&#x6b;&#x2e;&#105;&#x62;&#x6d;&#x2e;&#99;&#111;&#109;</a><br>Bob Wisniewski        <a href="mailto:&#98;&#111;&#98;&#x40;&#119;&#x61;&#116;&#115;&#111;&#x6e;&#46;&#x69;&#x62;&#109;&#46;&#x63;&#111;&#x6d;">&#98;&#111;&#98;&#x40;&#119;&#x61;&#116;&#115;&#111;&#x6e;&#46;&#x69;&#x62;&#109;&#46;&#x63;&#111;&#x6d;</a><br>Karim Yaghmour        <a href="mailto:&#107;&#97;&#x72;&#105;&#x6d;&#64;&#111;&#x70;&#101;&#x72;&#115;&#121;&#x73;&#x2e;&#x63;&#111;&#109;">&#107;&#97;&#x72;&#105;&#x6d;&#64;&#111;&#x70;&#101;&#x72;&#115;&#121;&#x73;&#x2e;&#x63;&#111;&#109;</a><br>Tom Zanussi        <a href="mailto:&#x7a;&#x61;&#x6e;&#117;&#x73;&#115;&#x69;&#x40;&#x75;&#x73;&#x2e;&#x69;&#98;&#x6d;&#46;&#99;&#111;&#x6d;">&#x7a;&#x61;&#x6e;&#117;&#x73;&#115;&#x69;&#x40;&#x75;&#x73;&#x2e;&#x69;&#98;&#x6d;&#46;&#99;&#111;&#x6d;</a></p>
+<p>Also thanks to Hubertus Franke for a lot of useful suggestions and bug<br>reports.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_relay/" title="Kernel-4.18.0-80.el8_relay" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_relay/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_rds/" title="Kernel-4.18.0-80.el8_rds"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_renesas,rsnd/" title="Kernel-4.18.0-80.el8_renesas,rsn"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

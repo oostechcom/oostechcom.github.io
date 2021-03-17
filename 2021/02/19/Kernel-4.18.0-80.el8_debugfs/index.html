@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_debugfs | oosTech.com</title>
+  <meta name="description" content="Copyright 2009 Jonathan Corbet &amp;#x63;&amp;#111;&amp;#x72;&amp;#98;&amp;#x65;&amp;#x74;&amp;#64;&amp;#108;&amp;#119;&amp;#x6e;&amp;#46;&amp;#x6e;&amp;#101;&amp;#x74; Debugfs exists as a simple way for kernel developers to make informationavailable to us">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_debugfs">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_debugfs/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Copyright 2009 Jonathan Corbet &amp;#x63;&amp;#111;&amp;#x72;&amp;#98;&amp;#x65;&amp;#x74;&amp;#64;&amp;#108;&amp;#119;&amp;#x6e;&amp;#46;&amp;#x6e;&amp;#101;&amp;#x74; Debugfs exists as a simple way for kernel developers to make informationavailable to us">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_debugfs/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_debugfs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_debugfs
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_debugfs/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_debugfs/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_debugfs/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Copyright 2009 Jonathan Corbet <a href="mailto:&#x63;&#111;&#x72;&#98;&#x65;&#x74;&#64;&#108;&#119;&#x6e;&#46;&#x6e;&#101;&#x74;">&#x63;&#111;&#x72;&#98;&#x65;&#x74;&#64;&#108;&#119;&#x6e;&#46;&#x6e;&#101;&#x74;</a></p>
+<p>Debugfs exists as a simple way for kernel developers to make information<br>available to user space.  Unlike /proc, which is only meant for information<br>about a process, or sysfs, which has strict one-value-per-file rules,<br>debugfs has no rules at all.  Developers can put any information they want<br>there.  The debugfs filesystem is also intended to not serve as a stable<br>ABI to user space; in theory, there are no stability constraints placed on<br>files exported there.  The real world is not always so simple, though [1];<br>even debugfs interfaces are best designed with the idea that they will need<br>to be maintained forever.</p>
+<p>Debugfs is typically mounted with a command like:</p>
+<pre><code>mount -t debugfs none /sys/kernel/debug
+</code></pre>
+<p>(Or an equivalent /etc/fstab line).<br>The debugfs root directory is accessible only to the root user by<br>default. To change access to the tree the “uid”, “gid” and “mode” mount<br>options can be used.</p>
+<p>Note that the debugfs API is exported GPL-only to modules.</p>
+<p>Code using debugfs should include &lt;linux/debugfs.h&gt;.  Then, the first order<br>of business will be to create at least one directory to hold a set of<br>debugfs files:</p>
+<pre><code>struct dentry *debugfs_create_dir(const char *name, struct dentry *parent);
+</code></pre>
+<p>This call, if successful, will make a directory called name underneath the<br>indicated parent directory.  If parent is NULL, the directory will be<br>created in the debugfs root.  On success, the return value is a struct<br>dentry pointer which can be used to create files in the directory (and to<br>clean it up at the end).  A NULL return value indicates that something went<br>wrong.  If ERR_PTR(-ENODEV) is returned, that is an indication that the<br>kernel has been built without debugfs support and none of the functions<br>described below will work.</p>
+<p>The most general way to create a file within a debugfs directory is with:</p>
+<pre><code>struct dentry *debugfs_create_file(const char *name, umode_t mode,
+                   struct dentry *parent, void *data,
+                   const struct file_operations *fops);
+</code></pre>
+<p>Here, name is the name of the file to create, mode describes the access<br>permissions the file should have, parent indicates the directory which<br>should hold the file, data will be stored in the i_private field of the<br>resulting inode structure, and fops is a set of file operations which<br>implement the file’s behavior.  At a minimum, the read() and/or write()<br>operations should be provided; others can be included as needed.  Again,<br>the return value will be a dentry pointer to the created file, NULL for<br>error, or ERR_PTR(-ENODEV) if debugfs support is missing.</p>
+<p>Create a file with an initial size, the following function can be used<br>instead:</p>
+<pre><code>struct dentry *debugfs_create_file_size(const char *name, umode_t mode,
+            struct dentry *parent, void *data,
+            const struct file_operations *fops,
+            loff_t file_size);
+</code></pre>
+<p>file_size is the initial file size. The other parameters are the same<br>as the function debugfs_create_file.</p>
+<p>In a number of cases, the creation of a set of file operations is not<br>actually necessary; the debugfs code provides a number of helper functions<br>for simple situations.  Files containing a single integer value can be<br>created with any of:</p>
+<pre><code>struct dentry *debugfs_create_u8(const char *name, umode_t mode,
+                 struct dentry *parent, u8 *value);
+struct dentry *debugfs_create_u16(const char *name, umode_t mode,
+                  struct dentry *parent, u16 *value);
+struct dentry *debugfs_create_u32(const char *name, umode_t mode,
+                  struct dentry *parent, u32 *value);
+struct dentry *debugfs_create_u64(const char *name, umode_t mode,
+                  struct dentry *parent, u64 *value);
+</code></pre>
+<p>These files support both reading and writing the given value; if a specific<br>file should not be written to, simply set the mode bits accordingly.  The<br>values in these files are in decimal; if hexadecimal is more appropriate,<br>the following functions can be used instead:</p>
+<pre><code>struct dentry *debugfs_create_x8(const char *name, umode_t mode,
+                 struct dentry *parent, u8 *value);
+struct dentry *debugfs_create_x16(const char *name, umode_t mode,
+                  struct dentry *parent, u16 *value);
+struct dentry *debugfs_create_x32(const char *name, umode_t mode,
+                  struct dentry *parent, u32 *value);
+struct dentry *debugfs_create_x64(const char *name, umode_t mode,
+                  struct dentry *parent, u64 *value);
+</code></pre>
+<p>These functions are useful as long as the developer knows the size of the<br>value to be exported.  Some types can have different widths on different<br>architectures, though, complicating the situation somewhat.  There is a<br>function meant to help out in one special case:</p>
+<pre><code>struct dentry *debugfs_create_size_t(const char *name, umode_t mode,
+                     struct dentry *parent, 
+                 size_t *value);
+</code></pre>
+<p>As might be expected, this function will create a debugfs file to represent<br>a variable of type size_t.</p>
+<p>Boolean values can be placed in debugfs with:</p>
+<pre><code>struct dentry *debugfs_create_bool(const char *name, umode_t mode,
+                   struct dentry *parent, bool *value);
+</code></pre>
+<p>A read on the resulting file will yield either Y (for non-zero values) or<br>N, followed by a newline.  If written to, it will accept either upper- or<br>lower-case values, or 1 or 0.  Any other input will be silently ignored.</p>
+<p>Also, atomic_t values can be placed in debugfs with:</p>
+<pre><code>struct dentry *debugfs_create_atomic_t(const char *name, umode_t mode,
+            struct dentry *parent, atomic_t *value)
+</code></pre>
+<p>A read of this file will get atomic_t values, and a write of this file<br>will set atomic_t values.</p>
+<p>Another option is exporting a block of arbitrary binary data, with<br>this structure and function:</p>
+<pre><code>struct debugfs_blob_wrapper &#123;
+void *data;
+unsigned long size;
+&#125;;
+
+struct dentry *debugfs_create_blob(const char *name, umode_t mode,
+                   struct dentry *parent,
+                   struct debugfs_blob_wrapper *blob);
+</code></pre>
+<p>A read of this file will return the data pointed to by the<br>debugfs_blob_wrapper structure.  Some drivers use “blobs” as a simple way<br>to return several lines of (static) formatted text output.  This function<br>can be used to export binary information, but there does not appear to be<br>any code which does so in the mainline.  Note that all files created with<br>debugfs_create_blob() are read-only.</p>
+<p>If you want to dump a block of registers (something that happens quite<br>often during development, even if little such code reaches mainline.<br>Debugfs offers two functions: one to make a registers-only file, and<br>another to insert a register block in the middle of another sequential<br>file.</p>
+<pre><code>struct debugfs_reg32 &#123;
+char *name;
+unsigned long offset;
+&#125;;
+
+struct debugfs_regset32 &#123;
+struct debugfs_reg32 *regs;
+int nregs;
+void __iomem *base;
+&#125;;
+
+struct dentry *debugfs_create_regset32(const char *name, umode_t mode,
+                 struct dentry *parent,
+                 struct debugfs_regset32 *regset);
+
+void debugfs_print_regs32(struct seq_file *s, struct debugfs_reg32 *regs,
+         int nregs, void __iomem *base, char *prefix);
+</code></pre>
+<p>The “base” argument may be 0, but you may want to build the reg32 array<br>using __stringify, and a number of register names (macros) are actually<br>byte offsets over a base for the register block.</p>
+<p>If you want to dump an u32 array in debugfs, you can create file with:</p>
+<pre><code>struct dentry *debugfs_create_u32_array(const char *name, umode_t mode,
+        struct dentry *parent,
+        u32 *array, u32 elements);
+</code></pre>
+<p>The “array” argument provides data, and the “elements” argument is<br>the number of elements in the array. Note: Once array is created its<br>size can not be changed.</p>
+<p>There is a helper function to create device related seq_file:</p>
+<p>   struct dentry *debugfs_create_devm_seqfile(struct device *dev,<br>                const char *name,<br>                struct dentry *parent,<br>                int (*read_fn)(struct seq_file *s,<br>                    void *data));</p>
+<p>The “dev” argument is the device related to this debugfs file, and<br>the “read_fn” is a function pointer which to be called to print the<br>seq_file content.</p>
+<p>There are a couple of other directory-oriented helper functions:</p>
+<pre><code>struct dentry *debugfs_rename(struct dentry *old_dir, 
+                  struct dentry *old_dentry,
+                      struct dentry *new_dir, 
+              const char *new_name);
+
+struct dentry *debugfs_create_symlink(const char *name, 
+                                      struct dentry *parent,
+                        const char *target);
+</code></pre>
+<p>A call to debugfs_rename() will give a new name to an existing debugfs<br>file, possibly in a different directory.  The new_name must not exist prior<br>to the call; the return value is old_dentry with updated information.<br>Symbolic links can be created with debugfs_create_symlink().</p>
+<p>There is one important thing that all debugfs users must take into account:<br>there is no automatic cleanup of any directories created in debugfs.  If a<br>module is unloaded without explicitly removing debugfs entries, the result<br>will be a lot of stale pointers and no end of highly antisocial behavior.<br>So all debugfs users - at least those which can be built as modules - must<br>be prepared to remove all files and directories they create there.  A file<br>can be removed with:</p>
+<pre><code>void debugfs_remove(struct dentry *dentry);
+</code></pre>
+<p>The dentry value can be NULL, in which case nothing will be removed.</p>
+<p>Once upon a time, debugfs users were required to remember the dentry<br>pointer for every debugfs file they created so that all files could be<br>cleaned up.  We live in more civilized times now, though, and debugfs users<br>can call:</p>
+<pre><code>void debugfs_remove_recursive(struct dentry *dentry);
+</code></pre>
+<p>If this function is passed a pointer for the dentry corresponding to the<br>top-level directory, the entire hierarchy below that directory will be<br>removed.</p>
+<p>Notes:<br>    [1] <a target="_blank" rel="noopener" href="http://lwn.net/Articles/309298/">http://lwn.net/Articles/309298/</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_debugfs/" title="Kernel-4.18.0-80.el8_debugfs" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_debugfs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_debug/" title="Kernel-4.18.0-80.el8_debug"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_debugging-modules/" title="Kernel-4.18.0-80.el8_debugging-modules"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

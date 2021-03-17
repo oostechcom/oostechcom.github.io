@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_hdio | oosTech.com</title>
+  <meta name="description" content="Summary of HDIO_ ioctl calls.     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;      Edward A. Falk &lt;efalk@google.com&gt;      November, 2004  This document attempts to describe the ioctl(2) calls supported byt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_hdio">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hdio/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Summary of HDIO_ ioctl calls.     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;      Edward A. Falk &lt;efalk@google.com&gt;      November, 2004  This document attempts to describe the ioctl(2) calls supported byt">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hdio/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_hdio" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_hdio
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_hdio/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_hdio/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_hdio/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    Summary of HDIO_ ioctl calls.
+    ============================
+
+    Edward A. Falk &lt;efalk@google.com&gt;
+
+    November, 2004
+</code></pre>
+<p>This document attempts to describe the ioctl(2) calls supported by<br>the HD/IDE layer.  These are by-and-large implemented (as of Linux 2.6)<br>in drivers/ide/ide.c and drivers/block/scsi_ioctl.c</p>
+<p>ioctl values are listed in &lt;linux/hdreg.h&gt;.  As of this writing, they<br>are as follows:</p>
+<pre><code>ioctls that pass argument pointers to user space:
+
+HDIO_GETGEO        get device geometry
+HDIO_GET_UNMASKINTR    get current unmask setting
+HDIO_GET_MULTCOUNT    get current IDE blockmode setting
+HDIO_GET_QDMA        get use-qdma flag
+HDIO_SET_XFER        set transfer rate via proc
+HDIO_OBSOLETE_IDENTITY    OBSOLETE, DO NOT USE
+HDIO_GET_KEEPSETTINGS    get keep-settings-on-reset flag
+HDIO_GET_32BIT        get current io_32bit setting
+HDIO_GET_NOWERR        get ignore-write-error flag
+HDIO_GET_DMA        get use-dma flag
+HDIO_GET_NICE        get nice flags
+HDIO_GET_IDENTITY    get IDE identification info
+HDIO_GET_WCACHE        get write cache mode on|off
+HDIO_GET_ACOUSTIC    get acoustic value
+HDIO_GET_ADDRESS    get sector addressing mode
+HDIO_GET_BUSSTATE    get the bus state of the hwif
+HDIO_TRISTATE_HWIF    execute a channel tristate
+HDIO_DRIVE_RESET    execute a device reset
+HDIO_DRIVE_TASKFILE    execute raw taskfile
+HDIO_DRIVE_TASK        execute task and special drive command
+HDIO_DRIVE_CMD        execute a special drive command
+HDIO_DRIVE_CMD_AEB    HDIO_DRIVE_TASK
+
+ioctls that pass non-pointer values:
+
+HDIO_SET_MULTCOUNT    change IDE blockmode
+HDIO_SET_UNMASKINTR    permit other irqs during I/O
+HDIO_SET_KEEPSETTINGS    keep ioctl settings on reset
+HDIO_SET_32BIT        change io_32bit flags
+HDIO_SET_NOWERR        change ignore-write-error flag
+HDIO_SET_DMA        change use-dma flag
+HDIO_SET_PIO_MODE    reconfig interface to new speed
+HDIO_SCAN_HWIF        register and (re)scan interface
+HDIO_SET_NICE        set nice flags
+HDIO_UNREGISTER_HWIF    unregister interface
+HDIO_SET_WCACHE        change write cache enable-disable
+HDIO_SET_ACOUSTIC    change acoustic behavior
+HDIO_SET_BUSSTATE    set the bus state of the hwif
+HDIO_SET_QDMA        change use-qdma flag
+HDIO_SET_ADDRESS    change lba addressing modes
+
+HDIO_SET_IDE_SCSI    Set scsi emulation mode on/off
+HDIO_SET_SCSI_IDE    not implemented yet
+</code></pre>
+<p>The information that follows was determined from reading kernel source<br>code.  It is likely that some corrections will be made over time.</p>
+<p>General:</p>
+<pre><code>Unless otherwise specified, all ioctl calls return 0 on success
+and -1 with errno set to an appropriate value on error.
+
+Unless otherwise specified, all ioctl calls return -1 and set
+errno to EFAULT on a failed attempt to copy data to or from user
+address space.
+
+Unless otherwise specified, all data structures and constants
+are defined in &lt;linux/hdreg.h&gt;
+</code></pre>
+<p>HDIO_GETGEO            get device geometry</p>
+<pre><code>usage:
+
+  struct hd_geometry geom;
+  ioctl(fd, HDIO_GETGEO, &amp;geom);
+
+
+inputs:        none
+
+outputs:
+
+  hd_geometry structure containing:
+
+    heads    number of heads
+    sectors    number of sectors/track
+    cylinders    number of cylinders, mod 65536
+    start    starting sector of this partition.
+
+
+error returns:
+  EINVAL    if the device is not a disk drive or floppy drive,
+          or if the user passes a null pointer
+
+
+notes:
+
+  Not particularly useful with modern disk drives, whose geometry
+  is a polite fiction anyway.  Modern drives are addressed
+  purely by sector number nowadays (lba addressing), and the
+  drive geometry is an abstraction which is actually subject
+  to change.  Currently (as of Nov 2004), the geometry values
+  are the &quot;bios&quot; values -- presumably the values the drive had
+  when Linux first booted.
+
+  In addition, the cylinders field of the hd_geometry is an
+  unsigned short, meaning that on most architectures, this
+  ioctl will not return a meaningful value on drives with more
+  than 65535 tracks.
+
+  The start field is unsigned long, meaning that it will not
+  contain a meaningful value for disks over 219 Gb in size.
+</code></pre>
+<p>HDIO_GET_UNMASKINTR        get current unmask setting</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_UNMASKINTR, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the drive&#39;s current unmask setting
+</code></pre>
+<p>HDIO_SET_UNMASKINTR        permit other irqs during I/O</p>
+<pre><code>usage:
+
+  unsigned long val;
+  ioctl(fd, HDIO_SET_UNMASKINTR, val);
+
+inputs:
+  New value for unmask flag
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 1]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_GET_MULTCOUNT        get current IDE blockmode setting</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_MULTCOUNT, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current IDE block mode setting.  This
+  controls how many sectors the drive will transfer per
+  interrupt.
+</code></pre>
+<p>HDIO_SET_MULTCOUNT        change IDE blockmode</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, HDIO_SET_MULTCOUNT, val);
+
+inputs:
+  New value for IDE block mode setting.  This controls how many
+  sectors the drive will transfer per interrupt.
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range supported by disk.
+  EBUSY        Controller busy or blockmode already set.
+  EIO        Drive did not accept new block mode.
+
+notes:
+
+  Source code comments read:
+
+    This is tightly woven into the driver-&gt;do_special cannot
+    touch.  DON&#39;T do it again until a total personality rewrite
+    is committed.
+
+  If blockmode has already been set, this ioctl will fail with
+  EBUSY
+</code></pre>
+<p>HDIO_GET_QDMA            get use-qdma flag</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+<p>HDIO_SET_XFER            set transfer rate via proc</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+<p>HDIO_OBSOLETE_IDENTITY        OBSOLETE, DO NOT USE</p>
+<pre><code>Same as HDIO_GET_IDENTITY (see below), except that it only
+returns the first 142 bytes of drive identity information.
+</code></pre>
+<p>HDIO_GET_IDENTITY        get IDE identification info</p>
+<pre><code>usage:
+
+  unsigned char identity[512];
+  ioctl(fd, HDIO_GET_IDENTITY, identity);
+
+inputs:        none
+
+outputs:
+
+  ATA drive identity information.  For full description, see
+  the IDENTIFY DEVICE and IDENTIFY PACKET DEVICE commands in
+  the ATA specification.
+
+error returns:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  ENOMSG    IDENTIFY DEVICE information not available
+
+notes:
+
+  Returns information that was obtained when the drive was
+  probed.  Some of this information is subject to change, and
+  this ioctl does not re-probe the drive to update the
+  information.
+
+  This information is also available from /proc/ide/hdX/identify
+</code></pre>
+<p>HDIO_GET_KEEPSETTINGS        get keep-settings-on-reset flag</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_KEEPSETTINGS, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current &quot;keep settings&quot; flag
+
+notes:
+
+  When set, indicates that kernel should restore settings
+  after a drive reset.
+</code></pre>
+<p>HDIO_SET_KEEPSETTINGS        keep ioctl settings on reset</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_SET_KEEPSETTINGS, val);
+
+inputs:
+  New value for keep_settings flag
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 1]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_GET_32BIT            get current io_32bit setting</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_32BIT, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current io_32bit setting
+
+notes:
+
+  0=16-bit, 1=32-bit, 2,3 = 32bit+sync
+</code></pre>
+<p>HDIO_GET_NOWERR            get ignore-write-error flag</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_NOWERR, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current ignore-write-error flag
+</code></pre>
+<p>HDIO_GET_DMA            get use-dma flag</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_DMA, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current use-dma flag
+</code></pre>
+<p>HDIO_GET_NICE            get nice flags</p>
+<pre><code>usage:
+
+  long nice;
+  ioctl(fd, HDIO_GET_NICE, &amp;nice);
+
+inputs:        none
+
+outputs:
+
+  The drive&#39;s &quot;nice&quot; values.
+
+notes:
+
+  Per-drive flags which determine when the system will give more
+  bandwidth to other devices sharing the same IDE bus.
+  See &lt;linux/hdreg.h&gt;, near symbol IDE_NICE_DSC_OVERLAP.
+</code></pre>
+<p>HDIO_SET_NICE            set nice flags</p>
+<pre><code>usage:
+
+  unsigned long nice;
+  ...
+  ioctl(fd, HDIO_SET_NICE, nice);
+
+inputs:
+  bitmask of nice flags.
+
+outputs:    none
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EPERM        Flags other than DSC_OVERLAP and NICE_1 set.
+  EPERM        DSC_OVERLAP specified but not supported by drive
+
+notes:
+
+  This ioctl sets the DSC_OVERLAP and NICE_1 flags from values
+  provided by the user.
+
+  Nice flags are listed in &lt;linux/hdreg.h&gt;, starting with
+  IDE_NICE_DSC_OVERLAP.  These values represent shifts.
+</code></pre>
+<p>HDIO_GET_WCACHE            get write cache mode on|off</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_WCACHE, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current write cache mode
+</code></pre>
+<p>HDIO_GET_ACOUSTIC        get acoustic value</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_ACOUSTIC, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current acoustic settings
+
+notes:
+
+  See HDIO_SET_ACOUSTIC
+</code></pre>
+<p>HDIO_GET_ADDRESS</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_GET_ADDRESS, &amp;val);
+
+inputs:        none
+
+outputs:
+  The value of the current addressing mode:
+    0 = 28-bit
+    1 = 48-bit
+    2 = 48-bit doing 28-bit
+    3 = 64-bit
+</code></pre>
+<p>HDIO_GET_BUSSTATE        get the bus state of the hwif</p>
+<pre><code>usage:
+
+  long state;
+  ioctl(fd, HDIO_SCAN_HWIF, &amp;state);
+
+inputs:        none
+
+outputs:
+  Current power state of the IDE bus.  One of BUSSTATE_OFF,
+  BUSSTATE_ON, or BUSSTATE_TRISTATE
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+</code></pre>
+<p>HDIO_SET_BUSSTATE        set the bus state of the hwif</p>
+<pre><code>usage:
+
+  int state;
+  ...
+  ioctl(fd, HDIO_SCAN_HWIF, state);
+
+inputs:
+  Desired IDE power state.  One of BUSSTATE_OFF, BUSSTATE_ON,
+  or BUSSTATE_TRISTATE
+
+outputs:    none
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_RAWIO
+  EOPNOTSUPP    Hardware interface does not support bus power control
+</code></pre>
+<p>HDIO_TRISTATE_HWIF        execute a channel tristate</p>
+<pre><code>Not implemented, as of 2.6.8.1.  See HDIO_SET_BUSSTATE
+</code></pre>
+<p>HDIO_DRIVE_RESET        execute a device reset</p>
+<pre><code>usage:
+
+  int args[3]
+  ...
+  ioctl(fd, HDIO_DRIVE_RESET, args);
+
+inputs:        none
+
+outputs:    none
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  ENXIO        No such device:    phy dead or ctl_addr == 0
+  EIO        I/O error:    reset timed out or hardware error
+
+notes:
+
+  Execute a reset on the device as soon as the current IO
+  operation has completed.
+
+  Executes an ATAPI soft reset if applicable, otherwise
+  executes an ATA soft reset on the controller.
+</code></pre>
+<p>HDIO_DRIVE_TASKFILE        execute raw taskfile</p>
+<pre><code>Note:  If you don&#39;t have a copy of the ANSI ATA specification
+handy, you should probably ignore this ioctl.
+
+Execute an ATA disk command directly by writing the &quot;taskfile&quot;
+registers of the drive.  Requires ADMIN and RAWIO access
+privileges.
+
+usage:
+
+  struct &#123;
+    ide_task_request_t req_task;
+    u8 outbuf[OUTPUT_SIZE];
+    u8 inbuf[INPUT_SIZE];
+  &#125; task;
+  memset(&amp;task.req_task, 0, sizeof(task.req_task));
+  task.req_task.out_size = sizeof(task.outbuf);
+  task.req_task.in_size = sizeof(task.inbuf);
+  ...
+  ioctl(fd, HDIO_DRIVE_TASKFILE, &amp;task);
+  ...
+
+inputs:
+
+  (See below for details on memory area passed to ioctl.)
+
+  io_ports[8]    values to be written to taskfile registers
+  hob_ports[8]    high-order bytes, for extended commands.
+  out_flags    flags indicating which registers are valid
+  in_flags    flags indicating which registers should be returned
+  data_phase    see below
+  req_cmd    command type to be executed
+  out_size    size of output buffer
+  outbuf    buffer of data to be transmitted to disk
+  inbuf        buffer of data to be received from disk (see [1])
+
+outputs:
+
+  io_ports[]    values returned in the taskfile registers
+  hob_ports[]    high-order bytes, for extended commands.
+  out_flags    flags indicating which registers are valid (see [2])
+  in_flags    flags indicating which registers should be returned
+  outbuf    buffer of data to be transmitted to disk (see [1])
+  inbuf        buffer of data to be received from disk
+
+error returns:
+  EACCES    CAP_SYS_ADMIN or CAP_SYS_RAWIO privilege not set.
+  ENOMSG    Device is not a disk drive.
+  ENOMEM    Unable to allocate memory for task
+  EFAULT    req_cmd == TASKFILE_IN_OUT (not implemented as of 2.6.8)
+  EPERM        req_cmd == TASKFILE_MULTI_OUT and drive
+          multi-count not yet set.
+  EIO        Drive failed the command.
+
+notes:
+
+  [1] READ THE FOLLOWING NOTES *CAREFULLY*.  THIS IOCTL IS
+  FULL OF GOTCHAS.  Extreme caution should be used with using
+  this ioctl.  A mistake can easily corrupt data or hang the
+  system.
+
+  [2] Both the input and output buffers are copied from the
+  user and written back to the user, even when not used.
+
+  [3] If one or more bits are set in out_flags and in_flags is
+  zero, the following values are used for in_flags.all and
+  written back into in_flags on completion.
+
+   * IDE_TASKFILE_STD_IN_FLAGS | (IDE_HOB_STD_IN_FLAGS &lt;&lt; 8)
+     if LBA48 addressing is enabled for the drive
+   * IDE_TASKFILE_STD_IN_FLAGS
+     if CHS/LBA28
+
+  The association between in_flags.all and each enable
+  bitfield flips depending on endianness; fortunately, TASKFILE
+  only uses inflags.b.data bit and ignores all other bits.
+  The end result is that, on any endian machines, it has no
+  effect other than modifying in_flags on completion.
+
+  [4] The default value of SELECT is (0xa0|DEV_bit|LBA_bit)
+  except for four drives per port chipsets.  For four drives
+  per port chipsets, it&#39;s (0xa0|DEV_bit|LBA_bit) for the first
+  pair and (0x80|DEV_bit|LBA_bit) for the second pair.
+
+  [5] The argument to the ioctl is a pointer to a region of
+  memory containing a ide_task_request_t structure, followed
+  by an optional buffer of data to be transmitted to the
+  drive, followed by an optional buffer to receive data from
+  the drive.
+
+  Command is passed to the disk drive via the ide_task_request_t
+  structure, which contains these fields:
+
+    io_ports[8]        values for the taskfile registers
+    hob_ports[8]    high-order bytes, for extended commands
+    out_flags        flags indicating which entries in the
+                io_ports[] and hob_ports[] arrays
+            contain valid values.  Type ide_reg_valid_t.
+    in_flags        flags indicating which entries in the
+                io_ports[] and hob_ports[] arrays
+            are expected to contain valid values
+            on return.
+    data_phase        See below
+    req_cmd        Command type, see below
+    out_size        output (user-&gt;drive) buffer size, bytes
+    in_size        input (drive-&gt;user) buffer size, bytes
+
+  When out_flags is zero, the following registers are loaded.
+
+    HOB_FEATURE        If the drive supports LBA48
+    HOB_NSECTOR        If the drive supports LBA48
+    HOB_SECTOR        If the drive supports LBA48
+    HOB_LCYL        If the drive supports LBA48
+    HOB_HCYL        If the drive supports LBA48
+    FEATURE
+    NSECTOR
+    SECTOR
+    LCYL
+    HCYL
+    SELECT        First, masked with 0xE0 if LBA48, 0xEF
+            otherwise; then, or&#39;ed with the default
+            value of SELECT.
+
+  If any bit in out_flags is set, the following registers are loaded.
+
+    HOB_DATA        If out_flags.b.data is set.  HOB_DATA will
+            travel on DD8-DD15 on little endian machines
+            and on DD0-DD7 on big endian machines.
+    DATA        If out_flags.b.data is set.  DATA will
+            travel on DD0-DD7 on little endian machines
+            and on DD8-DD15 on big endian machines.
+    HOB_NSECTOR        If out_flags.b.nsector_hob is set
+    HOB_SECTOR        If out_flags.b.sector_hob is set
+    HOB_LCYL        If out_flags.b.lcyl_hob is set
+    HOB_HCYL        If out_flags.b.hcyl_hob is set
+    FEATURE        If out_flags.b.feature is set
+    NSECTOR        If out_flags.b.nsector is set
+    SECTOR        If out_flags.b.sector is set
+    LCYL        If out_flags.b.lcyl is set
+    HCYL        If out_flags.b.hcyl is set
+    SELECT        Or&#39;ed with the default value of SELECT and
+            loaded regardless of out_flags.b.select.
+
+  Taskfile registers are read back from the drive into
+  &#123;io|hob&#125;_ports[] after the command completes iff one of the
+  following conditions is met; otherwise, the original values
+  will be written back, unchanged.
+
+    1. The drive fails the command (EIO).
+    2. One or more than one bits are set in out_flags.
+    3. The requested data_phase is TASKFILE_NO_DATA.
+
+    HOB_DATA        If in_flags.b.data is set.  It will contain
+            DD8-DD15 on little endian machines and
+            DD0-DD7 on big endian machines.
+    DATA        If in_flags.b.data is set.  It will contain
+            DD0-DD7 on little endian machines and
+            DD8-DD15 on big endian machines.
+    HOB_FEATURE        If the drive supports LBA48
+    HOB_NSECTOR        If the drive supports LBA48
+    HOB_SECTOR        If the drive supports LBA48
+    HOB_LCYL        If the drive supports LBA48
+    HOB_HCYL        If the drive supports LBA48
+    NSECTOR
+    SECTOR
+    LCYL
+    HCYL
+
+  The data_phase field describes the data transfer to be
+  performed.  Value is one of:
+
+    TASKFILE_IN
+    TASKFILE_MULTI_IN
+    TASKFILE_OUT
+    TASKFILE_MULTI_OUT
+    TASKFILE_IN_OUT
+    TASKFILE_IN_DMA
+    TASKFILE_IN_DMAQ        == IN_DMA (queueing not supported)
+    TASKFILE_OUT_DMA
+    TASKFILE_OUT_DMAQ        == OUT_DMA (queueing not supported)
+    TASKFILE_P_IN        unimplemented
+    TASKFILE_P_IN_DMA        unimplemented
+    TASKFILE_P_IN_DMAQ        unimplemented
+    TASKFILE_P_OUT        unimplemented
+    TASKFILE_P_OUT_DMA        unimplemented
+    TASKFILE_P_OUT_DMAQ        unimplemented
+
+  The req_cmd field classifies the command type.  It may be
+  one of:
+
+    IDE_DRIVE_TASK_NO_DATA
+    IDE_DRIVE_TASK_SET_XFER    unimplemented
+    IDE_DRIVE_TASK_IN
+    IDE_DRIVE_TASK_OUT        unimplemented
+    IDE_DRIVE_TASK_RAW_WRITE
+
+  [6] Do not access &#123;in|out&#125;_flags-&gt;all except for resetting
+  all the bits.  Always access individual bit fields.  -&gt;all
+  value will flip depending on endianness.  For the same
+  reason, do not use IDE_&#123;TASKFILE|HOB&#125;_STD_&#123;OUT|IN&#125;_FLAGS
+  constants defined in hdreg.h.
+</code></pre>
+<p>HDIO_DRIVE_CMD            execute a special drive command</p>
+<pre><code>Note:  If you don&#39;t have a copy of the ANSI ATA specification
+handy, you should probably ignore this ioctl.
+
+usage:
+
+  u8 args[4+XFER_SIZE];
+  ...
+  ioctl(fd, HDIO_DRIVE_CMD, args);
+
+inputs:
+
+  Commands other than WIN_SMART
+    args[0]    COMMAND
+    args[1]    NSECTOR
+    args[2]    FEATURE
+    args[3]    NSECTOR
+
+  WIN_SMART
+    args[0]    COMMAND
+    args[1]    SECTOR
+    args[2]    FEATURE
+    args[3]    NSECTOR
+
+outputs:
+
+  args[] buffer is filled with register values followed by any
+  data returned by the disk.
+    args[0]    status
+    args[1]    error
+    args[2]    NSECTOR
+    args[3]    undefined
+    args[4+]    NSECTOR * 512 bytes of data returned by the command.
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_RAWIO
+  ENOMEM    Unable to allocate memory for task
+  EIO        Drive reports error
+
+notes:
+
+  [1] For commands other than WIN_SMART, args[1] should equal
+  args[3].  SECTOR, LCYL and HCYL are undefined.  For
+  WIN_SMART, 0x4f and 0xc2 are loaded into LCYL and HCYL
+  respectively.  In both cases SELECT will contain the default
+  value for the drive.  Please refer to HDIO_DRIVE_TASKFILE
+  notes for the default value of SELECT.
+
+  [2] If NSECTOR value is greater than zero and the drive sets
+  DRQ when interrupting for the command, NSECTOR * 512 bytes
+  are read from the device into the area following NSECTOR.
+  In the above example, the area would be
+  args[4..4+XFER_SIZE].  16bit PIO is used regardless of
+  HDIO_SET_32BIT setting.
+
+  [3] If COMMAND == WIN_SETFEATURES &amp;&amp; FEATURE == SETFEATURES_XFER
+  &amp;&amp; NSECTOR &gt;= XFER_SW_DMA_0 &amp;&amp; the drive supports any DMA
+  mode, IDE driver will try to tune the transfer mode of the
+  drive accordingly.
+</code></pre>
+<p>HDIO_DRIVE_TASK            execute task and special drive command</p>
+<pre><code>Note:  If you don&#39;t have a copy of the ANSI ATA specification
+handy, you should probably ignore this ioctl.
+
+usage:
+
+  u8 args[7];
+  ...
+  ioctl(fd, HDIO_DRIVE_TASK, args);
+
+inputs:
+
+  Taskfile register values:
+    args[0]    COMMAND
+    args[1]    FEATURE
+    args[2]    NSECTOR
+    args[3]    SECTOR
+    args[4]    LCYL
+    args[5]    HCYL
+    args[6]    SELECT
+
+outputs:
+
+  Taskfile register values:
+    args[0]    status
+    args[1]    error
+    args[2]    NSECTOR
+    args[3]    SECTOR
+    args[4]    LCYL
+    args[5]    HCYL
+    args[6]    SELECT
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_RAWIO
+  ENOMEM    Unable to allocate memory for task
+  ENOMSG    Device is not a disk drive.
+  EIO        Drive failed the command.
+
+notes:
+
+  [1] DEV bit (0x10) of SELECT register is ignored and the
+  appropriate value for the drive is used.  All other bits
+  are used unaltered.
+</code></pre>
+<p>HDIO_DRIVE_CMD_AEB        HDIO_DRIVE_TASK</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+<p>HDIO_SET_32BIT            change io_32bit flags</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, HDIO_SET_32BIT, val);
+
+inputs:
+  New value for io_32bit flag
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 3]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SET_NOWERR            change ignore-write-error flag</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, HDIO_SET_NOWERR, val);
+
+inputs:
+  New value for ignore-write-error flag.  Used for ignoring
+  WRERR_STAT
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 1]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SET_DMA            change use-dma flag</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_SET_DMA, val);
+
+inputs:
+  New value for use-dma flag
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 1]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SET_PIO_MODE        reconfig interface to new speed</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_SET_PIO_MODE, val);
+
+inputs:
+  New interface speed.
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 255]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SCAN_HWIF            register and (re)scan interface</p>
+<pre><code>usage:
+
+  int args[3]
+  ...
+  ioctl(fd, HDIO_SCAN_HWIF, args);
+
+inputs:
+  args[0]    io address to probe
+  args[1]    control address to probe
+  args[2]    irq number
+
+outputs:    none
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_RAWIO
+  EIO        Probe failed.
+
+notes:
+
+  This ioctl initializes the addresses and irq for a disk
+  controller, probes for drives, and creates /proc/ide
+  interfaces as appropriate.
+</code></pre>
+<p>HDIO_UNREGISTER_HWIF        unregister interface</p>
+<pre><code>usage:
+
+  int index;
+  ioctl(fd, HDIO_UNREGISTER_HWIF, index);
+
+inputs:
+  index        index of hardware interface to unregister
+
+outputs:    none
+
+error returns:
+  EACCES    Access denied:  requires CAP_SYS_RAWIO
+
+notes:
+
+  This ioctl removes a hardware interface from the kernel.
+
+  Currently (2.6.8) this ioctl silently fails if any drive on
+  the interface is busy.
+</code></pre>
+<p>HDIO_SET_WCACHE            change write cache enable-disable</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, HDIO_SET_WCACHE, val);
+
+inputs:
+  New value for write cache enable
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 1]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SET_ACOUSTIC        change acoustic behavior</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, HDIO_SET_ACOUSTIC, val);
+
+inputs:
+  New value for drive acoustic settings
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 254]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SET_QDMA            change use-qdma flag</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+<p>HDIO_SET_ADDRESS        change lba addressing modes</p>
+<pre><code>usage:
+
+  int val;
+  ioctl(fd, HDIO_SET_ADDRESS, val);
+
+inputs:
+  New value for addressing mode
+    0 = 28-bit
+    1 = 48-bit
+    2 = 48-bit doing 28-bit
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 2]
+  EBUSY        Controller busy
+  EIO        Drive does not support lba48 mode.
+</code></pre>
+<p>HDIO_SET_IDE_SCSI</p>
+<pre><code>usage:
+
+  long val;
+  ioctl(fd, HDIO_SET_IDE_SCSI, val);
+
+inputs:
+  New value for scsi emulation mode (?)
+
+outputs:    none
+
+error return:
+  EINVAL    (bdev != bdev-&gt;bd_contains) (not sure what this means)
+  EACCES    Access denied:  requires CAP_SYS_ADMIN
+  EINVAL    value out of range [0 1]
+  EBUSY        Controller busy
+</code></pre>
+<p>HDIO_SET_SCSI_IDE</p>
+<pre><code>Not implemented, as of 2.6.8.1
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hdio/" title="Kernel-4.18.0-80.el8_hdio" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hdio/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_gadget-testing/" title="Kernel-4.18.0-80.el8_gadget-testing"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_hvcs/" title="Kernel-4.18.0-80.el8_hvcs"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

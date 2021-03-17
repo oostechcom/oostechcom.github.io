@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_mca | oosTech.com</title>
+  <meta name="description" content="An ad-hoc collection of notes on IA64 MCA and INIT processing.  Feelfree to update it with notes about any area that is not clear.  MCA&#x2F;INIT are completely asynchronous.  They can occur at any time, w">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_mca">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_mca/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="An ad-hoc collection of notes on IA64 MCA and INIT processing.  Feelfree to update it with notes about any area that is not clear.  MCA&#x2F;INIT are completely asynchronous.  They can occur at any time, w">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_mca/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_mca" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_mca
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_mca/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_mca/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_mca/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>An ad-hoc collection of notes on IA64 MCA and INIT processing.  Feel<br>free to update it with notes about any area that is not clear.</p>
+<hr>
+<p>MCA/INIT are completely asynchronous.  They can occur at any time, when<br>the OS is in any state.  Including when one of the cpus is already<br>holding a spinlock.  Trying to get any lock from MCA/INIT state is<br>asking for deadlock.  Also the state of structures that are protected<br>by locks is indeterminate, including linked lists.</p>
+<hr>
+<p>The complicated ia64 MCA process.  All of this is mandated by Intel’s<br>specification for ia64 SAL, error recovery and unwind, it is not as<br>if we have a choice here.</p>
+<ul>
+<li><p>MCA occurs on one cpu, usually due to a double bit memory error.<br>This is the monarch cpu.</p>
+</li>
+<li><p>SAL sends an MCA rendezvous interrupt (which is a normal interrupt)<br>to all the other cpus, the slaves.</p>
+</li>
+<li><p>Slave cpus that receive the MCA interrupt call down into SAL, they<br>end up spinning disabled while the MCA is being serviced.</p>
+</li>
+<li><p>If any slave cpu was already spinning disabled when the MCA occurred<br>then it cannot service the MCA interrupt.  SAL waits ~20 seconds then<br>sends an unmaskable INIT event to the slave cpus that have not<br>already rendezvoused.</p>
+</li>
+<li><p>Because MCA/INIT can be delivered at any time, including when the cpu<br>is down in PAL in physical mode, the registers at the time of the<br>event are <em>completely</em> undefined.  In particular the MCA/INIT<br>handlers cannot rely on the thread pointer, PAL physical mode can<br>(and does) modify TP.  It is allowed to do that as long as it resets<br>TP on return.  However MCA/INIT events expose us to these PAL<br>internal TP changes.  Hence curr_task().</p>
+</li>
+<li><p>If an MCA/INIT event occurs while the kernel was running (not user<br>space) and the kernel has called PAL then the MCA/INIT handler cannot<br>assume that the kernel stack is in a fit state to be used.  Mainly<br>because PAL may or may not maintain the stack pointer internally.<br>Because the MCA/INIT handlers cannot trust the kernel stack, they<br>have to use their own, per-cpu stacks.  The MCA/INIT stacks are<br>preformatted with just enough task state to let the relevant handlers<br>do their job.</p>
+</li>
+<li><p>Unlike most other architectures, the ia64 struct task is embedded in<br>the kernel stack[1].  So switching to a new kernel stack means that<br>we switch to a new task as well.  Because various bits of the kernel<br>assume that current points into the struct task, switching to a new<br>stack also means a new value for current.</p>
+</li>
+<li><p>Once all slaves have rendezvoused and are spinning disabled, the<br>monarch is entered.  The monarch now tries to diagnose the problem<br>and decide if it can recover or not.</p>
+</li>
+<li><p>Part of the monarch’s job is to look at the state of all the other<br>tasks.  The only way to do that on ia64 is to call the unwinder,<br>as mandated by Intel.</p>
+</li>
+<li><p>The starting point for the unwind depends on whether a task is<br>running or not.  That is, whether it is on a cpu or is blocked.  The<br>monarch has to determine whether or not a task is on a cpu before it<br>knows how to start unwinding it.  The tasks that received an MCA or<br>INIT event are no longer running, they have been converted to blocked<br>tasks.  But (and its a big but), the cpus that received the MCA<br>rendezvous interrupt are still running on their normal kernel stacks!</p>
+</li>
+<li><p>To distinguish between these two cases, the monarch must know which<br>tasks are on a cpu and which are not.  Hence each slave cpu that<br>switches to an MCA/INIT stack, registers its new stack using<br>set_curr_task(), so the monarch can tell that the <em>original</em> task is<br>no longer running on that cpu.  That gives us a decent chance of<br>getting a valid backtrace of the <em>original</em> task.</p>
+</li>
+<li><p>MCA/INIT can be nested, to a depth of 2 on any cpu.  In the case of a<br>nested error, we want diagnostics on the MCA/INIT handler that<br>failed, not on the task that was originally running.  Again this<br>requires set_curr_task() so the MCA/INIT handlers can register their<br>own stack as running on that cpu.  Then a recursive error gets a<br>trace of the failing handler’s “task”.</p>
+</li>
+</ul>
+<p>[1] My (Keith Owens) original design called for ia64 to separate its<br>    struct task and the kernel stacks.  Then the MCA/INIT data would be<br>    chained stacks like i386 interrupt stacks.  But that required<br>    radical surgery on the rest of ia64, plus extra hard wired TLB<br>    entries with its associated performance degradation.  David<br>    Mosberger vetoed that approach.  Which meant that separate kernel<br>    stacks meant separate “tasks” for the MCA/INIT handlers.</p>
+<hr>
+<p>INIT is less complicated than MCA.  Pressing the nmi button or using<br>the equivalent command on the management console sends INIT to all<br>cpus.  SAL picks one of the cpus as the monarch and the rest are<br>slaves.  All the OS INIT handlers are entered at approximately the same<br>time.  The OS monarch prints the state of all tasks and returns, after<br>which the slaves return and the system resumes.</p>
+<p>At least that is what is supposed to happen.  Alas there are broken<br>versions of SAL out there.  Some drive all the cpus as monarchs.  Some<br>drive them all as slaves.  Some drive one cpu as monarch, wait for that<br>cpu to return from the OS then drive the rest as slaves.  Some versions<br>of SAL cannot even cope with returning from the OS, they spin inside<br>SAL on resume.  The OS INIT code has workarounds for some of these<br>broken SAL symptoms, but some simply cannot be fixed from the OS side.</p>
+<hr>
+<p>The scheduler hooks used by ia64 (curr_task, set_curr_task) are layer<br>violations.  Unfortunately MCA/INIT start off as massive layer<br>violations (can occur at <em>any</em> time) and they build from there.</p>
+<p>At least ia64 makes an attempt at recovering from hardware errors, but<br>it is a difficult problem because of the asynchronous nature of these<br>errors.  When processing an unmaskable interrupt we sometimes need<br>special code to cope with our inability to take any locks.</p>
+<hr>
+<p>How is ia64 MCA/INIT different from x86 NMI?</p>
+<ul>
+<li><p>x86 NMI typically gets delivered to one cpu.  MCA/INIT gets sent to<br>all cpus.</p>
+</li>
+<li><p>x86 NMI cannot be nested.  MCA/INIT can be nested, to a depth of 2<br>per cpu.</p>
+</li>
+<li><p>x86 has a separate struct task which points to one of multiple kernel<br>stacks.  ia64 has the struct task embedded in the single kernel<br>stack, so switching stack means switching task.</p>
+</li>
+<li><p>x86 does not call the BIOS so the NMI handler does not have to worry<br>about any registers having changed.  MCA/INIT can occur while the cpu<br>is in PAL in physical mode, with undefined registers and an undefined<br>kernel stack.</p>
+</li>
+<li><p>i386 backtrace is not very sensitive to whether a process is running<br>or not.  ia64 unwind is very, very sensitive to whether a process is<br>running or not.</p>
+</li>
+</ul>
+<hr>
+<p>What happens when MCA/INIT is delivered what a cpu is running user<br>space code?</p>
+<p>The user mode registers are stored in the RSE area of the MCA/INIT on<br>entry to the OS and are restored from there on return to SAL, so user<br>mode registers are preserved across a recoverable MCA/INIT.  Since the<br>OS has no idea what unwind data is available for the user space stack,<br>MCA/INIT never tries to backtrace user space.  Which means that the OS<br>does not bother making the user space process look like a blocked task,<br>i.e. the OS does not copy pt_regs and switch_stack to the user space<br>stack.  Also the OS has no idea how big the user space RSE and memory<br>stacks are, which makes it too risky to copy the saved state to a user<br>mode stack.</p>
+<hr>
+<p>How do we get a backtrace on the tasks that were running when MCA/INIT<br>was delivered?</p>
+<p>mca.c:::ia64_mca_modify_original_stack().  That identifies and<br>verifies the original kernel stack, copies the dirty registers from<br>the MCA/INIT stack’s RSE to the original stack’s RSE, copies the<br>skeleton struct pt_regs and switch_stack to the original stack, fills<br>in the skeleton structures from the PAL minstate area and updates the<br>original stack’s thread.ksp.  That makes the original stack look<br>exactly like any other blocked task, i.e. it now appears to be<br>sleeping.  To get a backtrace, just start with thread.ksp for the<br>original task and unwind like any other sleeping task.</p>
+<hr>
+<p>How do we identify the tasks that were running when MCA/INIT was<br>delivered?</p>
+<p>If the previous task has been verified and converted to a blocked<br>state, then sos-&gt;prev_task on the MCA/INIT stack is updated to point to<br>the previous task.  You can look at that field in dumps or debuggers.<br>To help distinguish between the handler and the original tasks,<br>handlers have _TIF_MCA_INIT set in thread_info.flags.</p>
+<p>The sos data is always in the MCA/INIT handler stack, at offset<br>MCA_SOS_OFFSET.  You can get that value from mca_asm.h or calculate it<br>as KERNEL_STACK_SIZE - sizeof(struct pt_regs) - sizeof(struct<br>ia64_sal_os_state), with 16 byte alignment for all structures.</p>
+<p>Also the comm field of the MCA/INIT task is modified to include the pid<br>of the original task, for humans to use.  For example, a comm field of<br>‘MCA 12159’ means that pid 12159 was running when the MCA was<br>delivered.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_mca/" title="Kernel-3.10.0-957.el7_mca" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_mca/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_mc13xxx/" title="Kernel-3.10.0-957.el7_mc13xxx"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_mcm/" title="Kernel-3.10.0-957.el7_mc"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

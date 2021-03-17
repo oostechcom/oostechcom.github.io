@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_kprobes | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Kernel Probes (Kprobes)&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Author: Jim Keniston &amp;#106;&amp;#x6b;&amp;#x65;&amp;#110;&amp;#105;&amp;#115;&amp;#116;&amp;#111;&amp;#x40;&amp;#117;&amp;#x73;&amp;#x2e;&amp;#105;&amp;#x62;&amp;#x6d;&amp;#x2e;&amp;#x63;&amp;#x6f;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_kprobes">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_kprobes/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Kernel Probes (Kprobes)&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Author: Jim Keniston &amp;#106;&amp;#x6b;&amp;#x65;&amp;#110;&amp;#105;&amp;#115;&amp;#116;&amp;#111;&amp;#x40;&amp;#117;&amp;#x73;&amp;#x2e;&amp;#105;&amp;#x62;&amp;#x6d;&amp;#x2e;&amp;#x63;&amp;#x6f;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_kprobes/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Concepts-Kprobes-and-Return-Probes"><span class="toc-number">1.</span> <span class="toc-text">Concepts: Kprobes and Return Probes</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#How-Does-a-Kprobe-Work"><span class="toc-number">1.1.</span> <span class="toc-text">How Does a Kprobe Work?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Return-Probes"><span class="toc-number">1.2.</span> <span class="toc-text">Return Probes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-Does-Jump-Optimization-Work"><span class="toc-number">1.3.</span> <span class="toc-text">How Does Jump Optimization Work?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Blacklist"><span class="toc-number">1.4.</span> <span class="toc-text">Blacklist</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Architectures-Supported"><span class="toc-number">2.</span> <span class="toc-text">Architectures Supported</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Configuring-Kprobes"><span class="toc-number">3.</span> <span class="toc-text">Configuring Kprobes</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#API-Reference"><span class="toc-number">4.</span> <span class="toc-text">API Reference</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#register-kprobe"><span class="toc-number">4.1.</span> <span class="toc-text">register_kprobe</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#register-kretprobe"><span class="toc-number">4.2.</span> <span class="toc-text">register_kretprobe</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#unregister-probe"><span class="toc-number">4.3.</span> <span class="toc-text">unregister_*probe</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#register-probes"><span class="toc-number">4.4.</span> <span class="toc-text">register_*probes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#unregister-probes"><span class="toc-number">4.5.</span> <span class="toc-text">unregister_*probes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#disable-probe"><span class="toc-number">4.6.</span> <span class="toc-text">disable_*probe</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#enable-probe"><span class="toc-number">4.7.</span> <span class="toc-text">enable_*probe</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kprobes-Features-and-Limitations"><span class="toc-number">5.</span> <span class="toc-text">Kprobes Features and Limitations</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Probe-Overhead"><span class="toc-number">6.</span> <span class="toc-text">Probe Overhead</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Optimized-Probe-Overhead"><span class="toc-number">6.1.</span> <span class="toc-text">Optimized Probe Overhead</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#TODO"><span class="toc-number">7.</span> <span class="toc-text">TODO</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kprobes-Example"><span class="toc-number">8.</span> <span class="toc-text">Kprobes Example</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kretprobes-Example"><span class="toc-number">9.</span> <span class="toc-text">Kretprobes Example</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Deprecated-Features"><span class="toc-number">10.</span> <span class="toc-text">Deprecated Features</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-kprobes-debugfs-interface"><span class="toc-number">11.</span> <span class="toc-text">The kprobes debugfs interface</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-kprobes-sysctl-interface"><span class="toc-number">12.</span> <span class="toc-text">The kprobes sysctl interface</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_kprobes" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_kprobes
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_kprobes/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_kprobes/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_kprobes/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>=======================<br>Kernel Probes (Kprobes)<br>=======================</p>
+<p>:Author: Jim Keniston <a href="mailto:&#106;&#x6b;&#x65;&#110;&#105;&#115;&#116;&#111;&#x40;&#117;&#x73;&#x2e;&#105;&#x62;&#x6d;&#x2e;&#x63;&#x6f;&#109;">&#106;&#x6b;&#x65;&#110;&#105;&#115;&#116;&#111;&#x40;&#117;&#x73;&#x2e;&#105;&#x62;&#x6d;&#x2e;&#x63;&#x6f;&#109;</a><br>:Author: Prasanna S Panchamukhi <a href="mailto:&#112;&#114;&#97;&#115;&#x61;&#110;&#x6e;&#97;&#x2e;&#112;&#97;&#x6e;&#99;&#x68;&#97;&#109;&#117;&#x6b;&#104;&#105;&#x40;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#109;">&#112;&#114;&#97;&#115;&#x61;&#110;&#x6e;&#97;&#x2e;&#112;&#97;&#x6e;&#99;&#x68;&#97;&#109;&#117;&#x6b;&#104;&#105;&#x40;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#109;</a><br>:Author: Masami Hiramatsu <a href="mailto:&#109;&#x68;&#105;&#x72;&#x61;&#x6d;&#x61;&#116;&#64;&#x72;&#x65;&#x64;&#x68;&#97;&#x74;&#46;&#x63;&#111;&#x6d;">&#109;&#x68;&#105;&#x72;&#x61;&#x6d;&#x61;&#116;&#64;&#x72;&#x65;&#x64;&#x68;&#97;&#x74;&#46;&#x63;&#111;&#x6d;</a></p>
+<p>.. CONTENTS</p>
+<ol>
+<li>Concepts: Kprobes, and Return Probes</li>
+<li>Architectures Supported</li>
+<li>Configuring Kprobes</li>
+<li>API Reference</li>
+<li>Kprobes Features and Limitations</li>
+<li>Probe Overhead</li>
+<li>TODO</li>
+<li>Kprobes Example</li>
+<li>Kretprobes Example</li>
+<li>Deprecated Features<br>Appendix A: The kprobes debugfs interface<br>Appendix B: The kprobes sysctl interface</li>
+</ol>
+<h1 id="Concepts-Kprobes-and-Return-Probes"><a href="#Concepts-Kprobes-and-Return-Probes" class="headerlink" title="Concepts: Kprobes and Return Probes"></a>Concepts: Kprobes and Return Probes</h1><p>Kprobes enables you to dynamically break into any kernel routine and<br>collect debugging and performance information non-disruptively. You<br>can trap at almost any kernel code address [1]_, specifying a handler<br>routine to be invoked when the breakpoint is hit.</p>
+<p>.. [1] some parts of the kernel code can not be trapped, see<br>       :ref:<code>kprobes_blacklist</code>)</p>
+<p>There are currently two types of probes: kprobes, and kretprobes<br>(also called return probes).  A kprobe can be inserted on virtually<br>any instruction in the kernel.  A return probe fires when a specified<br>function returns.</p>
+<p>In the typical case, Kprobes-based instrumentation is packaged as<br>a kernel module.  The module’s init function installs (“registers”)<br>one or more probes, and the exit function unregisters them.  A<br>registration function such as register_kprobe() specifies where<br>the probe is to be inserted and what handler is to be called when<br>the probe is hit.</p>
+<p>There are also <code>register_/unregister_*probes()</code> functions for batch<br>registration/unregistration of a group of <code>*probes</code>. These functions<br>can speed up unregistration process when you have to unregister<br>a lot of probes at once.</p>
+<p>The next four subsections explain how the different types of<br>probes work and how jump optimization works.  They explain certain<br>things that you’ll need to know in order to make the best use of<br>Kprobes – e.g., the difference between a pre_handler and<br>a post_handler, and how to use the maxactive and nmissed fields of<br>a kretprobe.  But if you’re in a hurry to start using Kprobes, you<br>can skip ahead to :ref:<code>kprobes_archs_supported</code>.</p>
+<h2 id="How-Does-a-Kprobe-Work"><a href="#How-Does-a-Kprobe-Work" class="headerlink" title="How Does a Kprobe Work?"></a>How Does a Kprobe Work?</h2><p>When a kprobe is registered, Kprobes makes a copy of the probed<br>instruction and replaces the first byte(s) of the probed instruction<br>with a breakpoint instruction (e.g., int3 on i386 and x86_64).</p>
+<p>When a CPU hits the breakpoint instruction, a trap occurs, the CPU’s<br>registers are saved, and control passes to Kprobes via the<br>notifier_call_chain mechanism.  Kprobes executes the “pre_handler”<br>associated with the kprobe, passing the handler the addresses of the<br>kprobe struct and the saved registers.</p>
+<p>Next, Kprobes single-steps its copy of the probed instruction.<br>(It would be simpler to single-step the actual instruction in place,<br>but then Kprobes would have to temporarily remove the breakpoint<br>instruction.  This would open a small time window when another CPU<br>could sail right past the probepoint.)</p>
+<p>After the instruction is single-stepped, Kprobes executes the<br>“post_handler,” if any, that is associated with the kprobe.<br>Execution then continues with the instruction following the probepoint.</p>
+<h2 id="Return-Probes"><a href="#Return-Probes" class="headerlink" title="Return Probes"></a>Return Probes</h2><p>How Does a Return Probe Work?<br>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</p>
+<p>When you call register_kretprobe(), Kprobes establishes a kprobe at<br>the entry to the function.  When the probed function is called and this<br>probe is hit, Kprobes saves a copy of the return address, and replaces<br>the return address with the address of a “trampoline.”  The trampoline<br>is an arbitrary piece of code – typically just a nop instruction.<br>At boot time, Kprobes registers a kprobe at the trampoline.</p>
+<p>When the probed function executes its return instruction, control<br>passes to the trampoline and that probe is hit.  Kprobes’ trampoline<br>handler calls the user-specified return handler associated with the<br>kretprobe, then sets the saved instruction pointer to the saved return<br>address, and that’s where execution resumes upon return from the trap.</p>
+<p>While the probed function is executing, its return address is<br>stored in an object of type kretprobe_instance.  Before calling<br>register_kretprobe(), the user sets the maxactive field of the<br>kretprobe struct to specify how many instances of the specified<br>function can be probed simultaneously.  register_kretprobe()<br>pre-allocates the indicated number of kretprobe_instance objects.</p>
+<p>For example, if the function is non-recursive and is called with a<br>spinlock held, maxactive = 1 should be enough.  If the function is<br>non-recursive and can never relinquish the CPU (e.g., via a semaphore<br>or preemption), NR_CPUS should be enough.  If maxactive &lt;= 0, it is<br>set to a default value.  If CONFIG_PREEMPT is enabled, the default<br>is max(10, 2*NR_CPUS).  Otherwise, the default is NR_CPUS.</p>
+<p>It’s not a disaster if you set maxactive too low; you’ll just miss<br>some probes.  In the kretprobe struct, the nmissed field is set to<br>zero when the return probe is registered, and is incremented every<br>time the probed function is entered but there is no kretprobe_instance<br>object available for establishing the return probe.</p>
+<p>Kretprobe entry-handler<br>^^^^^^^^^^^^^^^^^^^^^^^</p>
+<p>Kretprobes also provides an optional user-specified handler which runs<br>on function entry. This handler is specified by setting the entry_handler<br>field of the kretprobe struct. Whenever the kprobe placed by kretprobe at the<br>function entry is hit, the user-defined entry_handler, if any, is invoked.<br>If the entry_handler returns 0 (success) then a corresponding return handler<br>is guaranteed to be called upon function return. If the entry_handler<br>returns a non-zero error then Kprobes leaves the return address as is, and<br>the kretprobe has no further effect for that particular function instance.</p>
+<p>Multiple entry and return handler invocations are matched using the unique<br>kretprobe_instance object associated with them. Additionally, a user<br>may also specify per return-instance private data to be part of each<br>kretprobe_instance object. This is especially useful when sharing private<br>data between corresponding user entry and return handlers. The size of each<br>private data object can be specified at kretprobe registration time by<br>setting the data_size field of the kretprobe struct. This data can be<br>accessed through the data field of each kretprobe_instance object.</p>
+<p>In case probed function is entered but there is no kretprobe_instance<br>object available, then in addition to incrementing the nmissed count,<br>the user entry_handler invocation is also skipped.</p>
+<p>.. _kprobes_jump_optimization:</p>
+<h2 id="How-Does-Jump-Optimization-Work"><a href="#How-Does-Jump-Optimization-Work" class="headerlink" title="How Does Jump Optimization Work?"></a>How Does Jump Optimization Work?</h2><p>If your kernel is built with CONFIG_OPTPROBES=y (currently this flag<br>is automatically set ‘y’ on x86/x86-64, non-preemptive kernel) and<br>the “debug.kprobes_optimization” kernel parameter is set to 1 (see<br>sysctl(8)), Kprobes tries to reduce probe-hit overhead by using a jump<br>instruction instead of a breakpoint instruction at each probepoint.</p>
+<p>Init a Kprobe<br>^^^^^^^^^^^^^</p>
+<p>When a probe is registered, before attempting this optimization,<br>Kprobes inserts an ordinary, breakpoint-based kprobe at the specified<br>address. So, even if it’s not possible to optimize this particular<br>probepoint, there’ll be a probe there.</p>
+<p>Safety Check<br>^^^^^^^^^^^^</p>
+<p>Before optimizing a probe, Kprobes performs the following safety checks:</p>
+<ul>
+<li><p>Kprobes verifies that the region that will be replaced by the jump<br>instruction (the “optimized region”) lies entirely within one function.<br>(A jump instruction is multiple bytes, and so may overlay multiple<br>instructions.)</p>
+</li>
+<li><p>Kprobes analyzes the entire function and verifies that there is no<br>jump into the optimized region.  Specifically:</p>
+<ul>
+<li>the function contains no indirect jump;</li>
+<li>the function contains no instruction that causes an exception (since<br>the fixup code triggered by the exception could jump back into the<br>optimized region – Kprobes checks the exception tables to verify this);</li>
+<li>there is no near jump to the optimized region (other than to the first<br>byte).</li>
+</ul>
+</li>
+<li><p>For each instruction in the optimized region, Kprobes verifies that<br>the instruction can be executed out of line.</p>
+</li>
+</ul>
+<p>Preparing Detour Buffer<br>^^^^^^^^^^^^^^^^^^^^^^^</p>
+<p>Next, Kprobes prepares a “detour” buffer, which contains the following<br>instruction sequence:</p>
+<ul>
+<li>code to push the CPU’s registers (emulating a breakpoint trap)</li>
+<li>a call to the trampoline code which calls user’s probe handlers.</li>
+<li>code to restore registers</li>
+<li>the instructions from the optimized region</li>
+<li>a jump back to the original execution path.</li>
+</ul>
+<p>Pre-optimization<br>^^^^^^^^^^^^^^^^</p>
+<p>After preparing the detour buffer, Kprobes verifies that none of the<br>following situations exist:</p>
+<ul>
+<li>The probe has a post_handler.</li>
+<li>Other instructions in the optimized region are probed.</li>
+<li>The probe is disabled.</li>
+</ul>
+<p>In any of the above cases, Kprobes won’t start optimizing the probe.<br>Since these are temporary situations, Kprobes tries to start<br>optimizing it again if the situation is changed.</p>
+<p>If the kprobe can be optimized, Kprobes enqueues the kprobe to an<br>optimizing list, and kicks the kprobe-optimizer workqueue to optimize<br>it.  If the to-be-optimized probepoint is hit before being optimized,<br>Kprobes returns control to the original instruction path by setting<br>the CPU’s instruction pointer to the copied code in the detour buffer<br>– thus at least avoiding the single-step.</p>
+<p>Optimization<br>^^^^^^^^^^^^</p>
+<p>The Kprobe-optimizer doesn’t insert the jump instruction immediately;<br>rather, it calls synchronize_sched() for safety first, because it’s<br>possible for a CPU to be interrupted in the middle of executing the<br>optimized region [3]<em>.  As you know, synchronize_sched() can ensure<br>that all interruptions that were active when synchronize_sched()<br>was called are done, but only if CONFIG_PREEMPT=n.  So, this version<br>of kprobe optimization supports only kernels with CONFIG_PREEMPT=n [4]</em>.</p>
+<p>After that, the Kprobe-optimizer calls stop_machine() to replace<br>the optimized region with a jump instruction to the detour buffer,<br>using text_poke_smp().</p>
+<p>Unoptimization<br>^^^^^^^^^^^^^^</p>
+<p>When an optimized kprobe is unregistered, disabled, or blocked by<br>another kprobe, it will be unoptimized.  If this happens before<br>the optimization is complete, the kprobe is just dequeued from the<br>optimized list.  If the optimization has been done, the jump is<br>replaced with the original code (except for an int3 breakpoint in<br>the first byte) by using text_poke_smp().</p>
+<p>.. [3] Please imagine that the 2nd instruction is interrupted and then<br>   the optimizer replaces the 2nd instruction with the jump <em>address</em><br>   while the interrupt handler is running. When the interrupt<br>   returns to original address, there is no valid instruction,<br>   and it causes an unexpected result.</p>
+<p>.. [4] This optimization-safety checking may be replaced with the<br>   stop-machine method that ksplice uses for supporting a CONFIG_PREEMPT=y<br>   kernel.</p>
+<p>NOTE for geeks:<br>The jump optimization changes the kprobe’s pre_handler behavior.<br>Without optimization, the pre_handler can change the kernel’s execution<br>path by changing regs-&gt;ip and returning 1.  However, when the probe<br>is optimized, that modification is ignored.  Thus, if you want to<br>tweak the kernel’s execution path, you need to suppress optimization,<br>using one of the following techniques:</p>
+<ul>
+<li>Specify an empty function for the kprobe’s post_handler or break_handler.</li>
+</ul>
+<p>or</p>
+<ul>
+<li>Execute ‘sysctl -w debug.kprobes_optimization=n’</li>
+</ul>
+<p>.. _kprobes_blacklist:</p>
+<h2 id="Blacklist"><a href="#Blacklist" class="headerlink" title="Blacklist"></a>Blacklist</h2><p>Kprobes can probe most of the kernel except itself. This means<br>that there are some functions where kprobes cannot probe. Probing<br>(trapping) such functions can cause a recursive trap (e.g. double<br>fault) or the nested probe handler may never be called.<br>Kprobes manages such functions as a blacklist.<br>If you want to add a function into the blacklist, you just need<br>to (1) include linux/kprobes.h and (2) use NOKPROBE_SYMBOL() macro<br>to specify a blacklisted function.<br>Kprobes checks the given probe address against the blacklist and<br>rejects registering it, if the given address is in the blacklist.</p>
+<p>.. _kprobes_archs_supported:</p>
+<h1 id="Architectures-Supported"><a href="#Architectures-Supported" class="headerlink" title="Architectures Supported"></a>Architectures Supported</h1><p>Kprobes and return probes are implemented on the following<br>architectures:</p>
+<ul>
+<li>i386 (Supports jump optimization)</li>
+<li>x86_64 (AMD-64, EM64T) (Supports jump optimization)</li>
+<li>ppc64</li>
+<li>ia64 (Does not support probes on instruction slot1.)</li>
+<li>sparc64 (Return probes not yet implemented.)</li>
+<li>arm</li>
+<li>ppc</li>
+<li>mips</li>
+<li>s390</li>
+</ul>
+<h1 id="Configuring-Kprobes"><a href="#Configuring-Kprobes" class="headerlink" title="Configuring Kprobes"></a>Configuring Kprobes</h1><p>When configuring the kernel using make menuconfig/xconfig/oldconfig,<br>ensure that CONFIG_KPROBES is set to “y”. Under “General setup”, look<br>for “Kprobes”.</p>
+<p>So that you can load and unload Kprobes-based instrumentation modules,<br>make sure “Loadable module support” (CONFIG_MODULES) and “Module<br>unloading” (CONFIG_MODULE_UNLOAD) are set to “y”.</p>
+<p>Also make sure that CONFIG_KALLSYMS and perhaps even CONFIG_KALLSYMS_ALL<br>are set to “y”, since kallsyms_lookup_name() is used by the in-kernel<br>kprobe address resolution code.</p>
+<p>If you need to insert a probe in the middle of a function, you may find<br>it useful to “Compile the kernel with debug info” (CONFIG_DEBUG_INFO),<br>so you can use “objdump -d -l vmlinux” to see the source-to-object<br>code mapping.</p>
+<h1 id="API-Reference"><a href="#API-Reference" class="headerlink" title="API Reference"></a>API Reference</h1><p>The Kprobes API includes a “register” function and an “unregister”<br>function for each type of probe. The API also includes “register_<em>probes”<br>and “unregister_</em>probes” functions for (un)registering arrays of probes.<br>Here are terse, mini-man-page specifications for these functions and<br>the associated probe handlers that you’ll write. See the files in the<br>samples/kprobes/ sub-directory for examples.</p>
+<h2 id="register-kprobe"><a href="#register-kprobe" class="headerlink" title="register_kprobe"></a>register_kprobe</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+int register_kprobe(struct kprobe *kp);
+</code></pre>
+<p>Sets a breakpoint at the address kp-&gt;addr.  When the breakpoint is<br>hit, Kprobes calls kp-&gt;pre_handler.  After the probed instruction<br>is single-stepped, Kprobe calls kp-&gt;post_handler.  If a fault<br>occurs during execution of kp-&gt;pre_handler or kp-&gt;post_handler,<br>or during single-stepping of the probed instruction, Kprobes calls<br>kp-&gt;fault_handler.  Any or all handlers can be NULL. If kp-&gt;flags<br>is set KPROBE_FLAG_DISABLED, that kp will be registered but disabled,<br>so, its handlers aren’t hit until calling enable_kprobe(kp).</p>
+<p>.. note::</p>
+<ol>
+<li><p>With the introduction of the “symbol_name” field to struct kprobe,<br>the probepoint address resolution will now be taken care of by the kernel.<br>The following will now work::</p>
+<p>kp.symbol_name = “symbol_name”;</p>
+<p>(64-bit powerpc intricacies such as function descriptors are handled<br>transparently)</p>
+</li>
+<li><p>Use the “offset” field of struct kprobe if the offset into the symbol<br>to install a probepoint is known. This field is used to calculate the<br>probepoint.</p>
+</li>
+<li><p>Specify either the kprobe “symbol_name” OR the “addr”. If both are<br>specified, kprobe registration will fail with -EINVAL.</p>
+</li>
+<li><p>With CISC architectures (such as i386 and x86_64), the kprobes code<br>does not validate if the kprobe.addr is at an instruction boundary.<br>Use “offset” with caution.</p>
+</li>
+</ol>
+<p>register_kprobe() returns 0 on success, or a negative errno otherwise.</p>
+<p>User’s pre-handler (kp-&gt;pre_handler)::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+#include &lt;linux/ptrace.h&gt;
+int pre_handler(struct kprobe *p, struct pt_regs *regs);
+</code></pre>
+<p>Called with p pointing to the kprobe associated with the breakpoint,<br>and regs pointing to the struct containing the registers saved when<br>the breakpoint was hit.  Return 0 here unless you’re a Kprobes geek.</p>
+<p>User’s post-handler (kp-&gt;post_handler)::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+#include &lt;linux/ptrace.h&gt;
+void post_handler(struct kprobe *p, struct pt_regs *regs,
+          unsigned long flags);
+</code></pre>
+<p>p and regs are as described for the pre_handler.  flags always seems<br>to be zero.</p>
+<p>User’s fault-handler (kp-&gt;fault_handler)::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+#include &lt;linux/ptrace.h&gt;
+int fault_handler(struct kprobe *p, struct pt_regs *regs, int trapnr);
+</code></pre>
+<p>p and regs are as described for the pre_handler.  trapnr is the<br>architecture-specific trap number associated with the fault (e.g.,<br>on i386, 13 for a general protection fault or 14 for a page fault).<br>Returns 1 if it successfully handled the exception.</p>
+<h2 id="register-kretprobe"><a href="#register-kretprobe" class="headerlink" title="register_kretprobe"></a>register_kretprobe</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+int register_kretprobe(struct kretprobe *rp);
+</code></pre>
+<p>Establishes a return probe for the function whose address is<br>rp-&gt;kp.addr.  When that function returns, Kprobes calls rp-&gt;handler.<br>You must set rp-&gt;maxactive appropriately before you call<br>register_kretprobe(); see “How Does a Return Probe Work?” for details.</p>
+<p>register_kretprobe() returns 0 on success, or a negative errno<br>otherwise.</p>
+<p>User’s return-probe handler (rp-&gt;handler)::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+#include &lt;linux/ptrace.h&gt;
+int kretprobe_handler(struct kretprobe_instance *ri,
+              struct pt_regs *regs);
+</code></pre>
+<p>regs is as described for kprobe.pre_handler.  ri points to the<br>kretprobe_instance object, of which the following fields may be<br>of interest:</p>
+<ul>
+<li>ret_addr: the return address</li>
+<li>rp: points to the corresponding kretprobe object</li>
+<li>task: points to the corresponding task struct</li>
+<li>data: points to per return-instance private data; see “Kretprobe<br>  entry-handler” for details.</li>
+</ul>
+<p>The regs_return_value(regs) macro provides a simple abstraction to<br>extract the return value from the appropriate register as defined by<br>the architecture’s ABI.</p>
+<p>The handler’s return value is currently ignored.</p>
+<h2 id="unregister-probe"><a href="#unregister-probe" class="headerlink" title="unregister_*probe"></a>unregister_*probe</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+void unregister_kprobe(struct kprobe *kp);
+void unregister_kretprobe(struct kretprobe *rp);
+</code></pre>
+<p>Removes the specified probe.  The unregister function can be called<br>at any time after the probe has been registered.</p>
+<p>.. note::</p>
+<p>   If the functions find an incorrect probe (ex. an unregistered probe),<br>   they clear the addr field of the probe.</p>
+<h2 id="register-probes"><a href="#register-probes" class="headerlink" title="register_*probes"></a>register_*probes</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+int register_kprobes(struct kprobe **kps, int num);
+int register_kretprobes(struct kretprobe **rps, int num);
+</code></pre>
+<p>Registers each of the num probes in the specified array.  If any<br>error occurs during registration, all probes in the array, up to<br>the bad probe, are safely unregistered before the register_*probes<br>function returns.</p>
+<ul>
+<li>kps/rps/jps: an array of pointers to <code>*probe</code> data structures</li>
+<li>num: the number of the array entries.</li>
+</ul>
+<p>.. note::</p>
+<p>   You have to allocate(or define) an array of pointers and set all<br>   of the array entries before using these functions.</p>
+<h2 id="unregister-probes"><a href="#unregister-probes" class="headerlink" title="unregister_*probes"></a>unregister_*probes</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+void unregister_kprobes(struct kprobe **kps, int num);
+void unregister_kretprobes(struct kretprobe **rps, int num);
+</code></pre>
+<p>Removes each of the num probes in the specified array at once.</p>
+<p>.. note::</p>
+<p>   If the functions find some incorrect probes (ex. unregistered<br>   probes) in the specified array, they clear the addr field of those<br>   incorrect probes. However, other probes in the array are<br>   unregistered correctly.</p>
+<h2 id="disable-probe"><a href="#disable-probe" class="headerlink" title="disable_*probe"></a>disable_*probe</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+int disable_kprobe(struct kprobe *kp);
+int disable_kretprobe(struct kretprobe *rp);
+</code></pre>
+<p>Temporarily disables the specified <code>*probe</code>. You can enable it again by using<br>enable_*probe(). You must specify the probe which has been registered.</p>
+<h2 id="enable-probe"><a href="#enable-probe" class="headerlink" title="enable_*probe"></a>enable_*probe</h2><p>::</p>
+<pre><code>#include &lt;linux/kprobes.h&gt;
+int enable_kprobe(struct kprobe *kp);
+int enable_kretprobe(struct kretprobe *rp);
+</code></pre>
+<p>Enables <code>*probe</code> which has been disabled by disable_*probe(). You must specify<br>the probe which has been registered.</p>
+<h1 id="Kprobes-Features-and-Limitations"><a href="#Kprobes-Features-and-Limitations" class="headerlink" title="Kprobes Features and Limitations"></a>Kprobes Features and Limitations</h1><p>Kprobes allows multiple probes at the same address. Also,<br>a probepoint for which there is a post_handler cannot be optimized.<br>So if you install a kprobe with a post_handler, at an optimized<br>probepoint, the probepoint will be unoptimized automatically.</p>
+<p>In general, you can install a probe anywhere in the kernel.<br>In particular, you can probe interrupt handlers.  Known exceptions<br>are discussed in this section.</p>
+<p>The register_<em>probe functions will return -EINVAL if you attempt<br>to install a probe in the code that implements Kprobes (mostly<br>kernel/kprobes.c and ``arch/</em>/kernel/kprobes.c``, but also functions such<br>as do_page_fault and notifier_call_chain).</p>
+<p>If you install a probe in an inline-able function, Kprobes makes<br>no attempt to chase down all inline instances of the function and<br>install probes there.  gcc may inline a function without being asked,<br>so keep this in mind if you’re not seeing the probe hits you expect.</p>
+<p>A probe handler can modify the environment of the probed function<br>– e.g., by modifying kernel data structures, or by modifying the<br>contents of the pt_regs struct (which are restored to the registers<br>upon return from the breakpoint).  So Kprobes can be used, for example,<br>to install a bug fix or to inject faults for testing.  Kprobes, of<br>course, has no way to distinguish the deliberately injected faults<br>from the accidental ones.  Don’t drink and probe.</p>
+<p>Kprobes makes no attempt to prevent probe handlers from stepping on<br>each other – e.g., probing printk() and then calling printk() from a<br>probe handler.  If a probe handler hits a probe, that second probe’s<br>handlers won’t be run in that instance, and the kprobe.nmissed member<br>of the second probe will be incremented.</p>
+<p>As of Linux v2.6.15-rc1, multiple handlers (or multiple instances of<br>the same handler) may run concurrently on different CPUs.</p>
+<p>Kprobes does not use mutexes or allocate memory except during<br>registration and unregistration.</p>
+<p>Probe handlers are run with preemption disabled.  Depending on the<br>architecture and optimization state, handlers may also run with<br>interrupts disabled (e.g., kretprobe handlers and optimized kprobe<br>handlers run without interrupt disabled on x86/x86-64).  In any case,<br>your handler should not yield the CPU (e.g., by attempting to acquire<br>a semaphore).</p>
+<p>Since a return probe is implemented by replacing the return<br>address with the trampoline’s address, stack backtraces and calls<br>to __builtin_return_address() will typically yield the trampoline’s<br>address instead of the real return address for kretprobed functions.<br>(As far as we can tell, __builtin_return_address() is used only<br>for instrumentation and error reporting.)</p>
+<p>If the number of times a function is called does not match the number<br>of times it returns, registering a return probe on that function may<br>produce undesirable results. In such a case, a line:<br>kretprobe BUG!: Processing kretprobe d000000000041aa8 @ c00000000004f48c<br>gets printed. With this information, one will be able to correlate the<br>exact instance of the kretprobe that caused the problem. We have the<br>do_exit() case covered. do_execve() and do_fork() are not an issue.<br>We’re unaware of other specific cases where this could be a problem.</p>
+<p>If, upon entry to or exit from a function, the CPU is running on<br>a stack other than that of the current task, registering a return<br>probe on that function may produce undesirable results.  For this<br>reason, Kprobes doesn’t support return probes (or kprobes)<br>on the x86_64 version of __switch_to(); the registration functions<br>return -EINVAL.</p>
+<p>On x86/x86-64, since the Jump Optimization of Kprobes modifies<br>instructions widely, there are some limitations to optimization. To<br>explain it, we introduce some terminology. Imagine a 3-instruction<br>sequence consisting of a two 2-byte instructions and one 3-byte<br>instruction.</p>
+<p>::</p>
+<pre><code>    IA
+    |
+[-2][-1][0][1][2][3][4][5][6][7]
+    [ins1][ins2][  ins3 ]
+    [&lt;-     DCR       -&gt;]
+    [&lt;- JTPR -&gt;]
+
+ins1: 1st Instruction
+ins2: 2nd Instruction
+ins3: 3rd Instruction
+IA:  Insertion Address
+JTPR: Jump Target Prohibition Region
+DCR: Detoured Code Region
+</code></pre>
+<p>The instructions in DCR are copied to the out-of-line buffer<br>of the kprobe, because the bytes in DCR are replaced by<br>a 5-byte jump instruction. So there are several limitations.</p>
+<p>a) The instructions in DCR must be relocatable.<br>b) The instructions in DCR must not include a call instruction.<br>c) JTPR must not be targeted by any jump or call instruction.<br>d) DCR must not straddle the border between functions.</p>
+<p>Anyway, these limitations are checked by the in-kernel instruction<br>decoder, so you don’t need to worry about that.</p>
+<h1 id="Probe-Overhead"><a href="#Probe-Overhead" class="headerlink" title="Probe Overhead"></a>Probe Overhead</h1><p>On a typical CPU in use in 2005, a kprobe hit takes 0.5 to 1.0<br>microseconds to process.  Specifically, a benchmark that hits the same<br>probepoint repeatedly, firing a simple handler each time, reports 1-2<br>million hits per second, depending on the architecture.  A return-probe<br>hit typically takes 50-75% longer than a kprobe hit.<br>When you have a return probe set on a function, adding a kprobe at<br>the entry to that function adds essentially no overhead.</p>
+<p>Here are sample overhead figures (in usec) for different architectures::</p>
+<p>  k = kprobe; r = return probe; kr = kprobe + return probe<br>  on same function</p>
+<p>  i386: Intel Pentium M, 1495 MHz, 2957.31 bogomips<br>  k = 0.57 usec; r = 0.92; kr = 0.99</p>
+<p>  x86_64: AMD Opteron 246, 1994 MHz, 3971.48 bogomips<br>  k = 0.49 usec; r = 0.80; kr = 0.82</p>
+<p>  ppc64: POWER5 (gr), 1656 MHz (SMT disabled, 1 virtual CPU per physical CPU)<br>  k = 0.77 usec; r = 1.26; kr = 1.45</p>
+<h2 id="Optimized-Probe-Overhead"><a href="#Optimized-Probe-Overhead" class="headerlink" title="Optimized Probe Overhead"></a>Optimized Probe Overhead</h2><p>Typically, an optimized kprobe hit takes 0.07 to 0.1 microseconds to<br>process. Here are sample overhead figures (in usec) for x86 architectures::</p>
+<p>  k = unoptimized kprobe, b = boosted (single-step skipped), o = optimized kprobe,<br>  r = unoptimized kretprobe, rb = boosted kretprobe, ro = optimized kretprobe.</p>
+<p>  i386: Intel(R) Xeon(R) E5410, 2.33GHz, 4656.90 bogomips<br>  k = 0.80 usec; b = 0.33; o = 0.05; r = 1.10; rb = 0.61; ro = 0.33</p>
+<p>  x86-64: Intel(R) Xeon(R) E5410, 2.33GHz, 4656.90 bogomips<br>  k = 0.99 usec; b = 0.43; o = 0.06; r = 1.24; rb = 0.68; ro = 0.30</p>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><p>a. SystemTap (<a target="_blank" rel="noopener" href="http://sourceware.org/systemtap">http://sourceware.org/systemtap</a>): Provides a simplified<br>   programming interface for probe-based instrumentation.  Try it out.<br>b. Kernel return probes for sparc64.<br>c. Support for other architectures.<br>d. User-space probes.<br>e. Watchpoint probes (which fire on data references).</p>
+<h1 id="Kprobes-Example"><a href="#Kprobes-Example" class="headerlink" title="Kprobes Example"></a>Kprobes Example</h1><p>See samples/kprobes/kprobe_example.c</p>
+<h1 id="Kretprobes-Example"><a href="#Kretprobes-Example" class="headerlink" title="Kretprobes Example"></a>Kretprobes Example</h1><p>See samples/kprobes/kretprobe_example.c</p>
+<p>For additional information on Kprobes, refer to the following URLs:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www-106.ibm.com/developerworks/library/l-kprobes.html?ca=dgr-lnxw42Kprobe">http://www-106.ibm.com/developerworks/library/l-kprobes.html?ca=dgr-lnxw42Kprobe</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.redhat.com/magazine/005mar05/features/kprobes/">http://www.redhat.com/magazine/005mar05/features/kprobes/</a></li>
+<li><a target="_blank" rel="noopener" href="http://www-users.cs.umn.edu/~boutcher/kprobes/">http://www-users.cs.umn.edu/~boutcher/kprobes/</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.linuxsymposium.org/2006/linuxsymposium_procv2.pdf">http://www.linuxsymposium.org/2006/linuxsymposium_procv2.pdf</a> (pages 101-115)</li>
+</ul>
+<h1 id="Deprecated-Features"><a href="#Deprecated-Features" class="headerlink" title="Deprecated Features"></a>Deprecated Features</h1><p>Jprobes is now a deprecated feature. People who are depending on it should<br>migrate to other tracing features or use older kernels. Please consider to<br>migrate your tool to one of the following options:</p>
+<ul>
+<li><p>Use trace-event to trace target function with arguments.</p>
+<p>trace-event is a low-overhead (and almost no visible overhead if it<br>is off) statically defined event interface. You can define new events<br>and trace it via ftrace or any other tracing tools.</p>
+<p>See the following urls:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://lwn.net/Articles/379903/">https://lwn.net/Articles/379903/</a></li>
+<li><a target="_blank" rel="noopener" href="https://lwn.net/Articles/381064/">https://lwn.net/Articles/381064/</a></li>
+<li><a target="_blank" rel="noopener" href="https://lwn.net/Articles/383362/">https://lwn.net/Articles/383362/</a></li>
+</ul>
+</li>
+<li><p>Use ftrace dynamic events (kprobe event) with perf-probe.</p>
+<p>If you build your kernel with debug info (CONFIG_DEBUG_INFO=y), you can<br>find which register/stack is assigned to which local variable or arguments<br>by using perf-probe and set up new event to trace it.</p>
+<p>See following documents:</p>
+<ul>
+<li>Documentation/trace/kprobetrace.rst</li>
+<li>Documentation/trace/events.rst</li>
+<li>tools/perf/Documentation/perf-probe.txt</li>
+</ul>
+</li>
+</ul>
+<h1 id="The-kprobes-debugfs-interface"><a href="#The-kprobes-debugfs-interface" class="headerlink" title="The kprobes debugfs interface"></a>The kprobes debugfs interface</h1><p>With recent kernels (&gt; 2.6.20) the list of registered kprobes is visible<br>under the /sys/kernel/debug/kprobes/ directory (assuming debugfs is mounted at //sys/kernel/debug).</p>
+<p>/sys/kernel/debug/kprobes/list: Lists all registered probes on the system::</p>
+<pre><code>c015d71a  k  vfs_read+0x0
+c03dedc5  r  tcp_v4_rcv+0x0
+</code></pre>
+<p>The first column provides the kernel address where the probe is inserted.<br>The second column identifies the type of probe (k - kprobe and r - kretprobe)<br>while the third column specifies the symbol+offset of the probe.<br>If the probed function belongs to a module, the module name is also<br>specified. Following columns show probe status. If the probe is on<br>a virtual address that is no longer valid (module init sections, module<br>virtual addresses that correspond to modules that’ve been unloaded),<br>such probes are marked with [GONE]. If the probe is temporarily disabled,<br>such probes are marked with [DISABLED]. If the probe is optimized, it is<br>marked with [OPTIMIZED]. If the probe is ftrace-based, it is marked with<br>[FTRACE].</p>
+<p>/sys/kernel/debug/kprobes/enabled: Turn kprobes ON/OFF forcibly.</p>
+<p>Provides a knob to globally and forcibly turn registered kprobes ON or OFF.<br>By default, all kprobes are enabled. By echoing “0” to this file, all<br>registered probes will be disarmed, till such time a “1” is echoed to this<br>file. Note that this knob just disarms and arms all kprobes and doesn’t<br>change each probe’s disabling state. This means that disabled kprobes (marked<br>[DISABLED]) will be not enabled if you turn ON all kprobes by this knob.</p>
+<h1 id="The-kprobes-sysctl-interface"><a href="#The-kprobes-sysctl-interface" class="headerlink" title="The kprobes sysctl interface"></a>The kprobes sysctl interface</h1><p>/proc/sys/debug/kprobes-optimization: Turn kprobes optimization ON/OFF.</p>
+<p>When CONFIG_OPTPROBES=y, this sysctl interface appears and it provides<br>a knob to globally and forcibly turn jump optimization (see section<br>:ref:<code>kprobes_jump_optimization</code>) ON or OFF. By default, jump optimization<br>is allowed (ON). If you echo “0” to this file or set<br>“debug.kprobes_optimization” to 0 via sysctl, all optimized probes will be<br>unoptimized, and any new probes registered after that will not be optimized.</p>
+<p>Note that this knob <em>changes</em> the optimized state. This means that optimized<br>probes (marked [OPTIMIZED]) will be unoptimized ([OPTIMIZED] tag will be<br>removed). If the knob is turned on, they will be optimized again.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_kprobes/" title="Kernel-4.18.0-80.el8_kprobes" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_kprobes/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_kobject/" title="Kernel-4.18.0-80.el8_kobject"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_kryo-cpufreq/" title="Kernel-4.18.0-80.el8_kryo-cpufreq"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

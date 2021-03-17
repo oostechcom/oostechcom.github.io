@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv | oosTech.com</title>
+  <meta name="description" content="Wei Yang &amp;#119;&amp;#101;&amp;#105;&amp;#121;&amp;#97;&amp;#x6e;&amp;#x67;&amp;#64;&amp;#x6c;&amp;#105;&amp;#x6e;&amp;#117;&amp;#x78;&amp;#x2e;&amp;#118;&amp;#110;&amp;#x65;&amp;#116;&amp;#46;&amp;#105;&amp;#x62;&amp;#x6d;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#x6d;Benjamin Herrenschmidt &amp;#x62;&amp;#x65;&amp;#1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Wei Yang &amp;#119;&amp;#101;&amp;#105;&amp;#121;&amp;#97;&amp;#x6e;&amp;#x67;&amp;#64;&amp;#x6c;&amp;#105;&amp;#x6e;&amp;#117;&amp;#x78;&amp;#x2e;&amp;#118;&amp;#110;&amp;#x65;&amp;#116;&amp;#46;&amp;#105;&amp;#x62;&amp;#x6d;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#x6d;Benjamin Herrenschmidt &amp;#x62;&amp;#x65;&amp;#1">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Wei Yang <a href="mailto:&#119;&#101;&#105;&#121;&#97;&#x6e;&#x67;&#64;&#x6c;&#105;&#x6e;&#117;&#x78;&#x2e;&#118;&#110;&#x65;&#116;&#46;&#105;&#x62;&#x6d;&#x2e;&#x63;&#111;&#x6d;">&#119;&#101;&#105;&#121;&#97;&#x6e;&#x67;&#64;&#x6c;&#105;&#x6e;&#117;&#x78;&#x2e;&#118;&#110;&#x65;&#116;&#46;&#105;&#x62;&#x6d;&#x2e;&#x63;&#111;&#x6d;</a><br>Benjamin Herrenschmidt <a href="mailto:&#x62;&#x65;&#110;&#104;&#x40;&#x61;&#117;&#x31;&#x2e;&#105;&#x62;&#109;&#46;&#99;&#111;&#x6d;">&#x62;&#x65;&#110;&#104;&#x40;&#x61;&#117;&#x31;&#x2e;&#105;&#x62;&#109;&#46;&#99;&#111;&#x6d;</a><br>Bjorn Helgaas <a href="mailto:&#x62;&#104;&#x65;&#x6c;&#x67;&#97;&#97;&#115;&#x40;&#103;&#111;&#111;&#103;&#108;&#101;&#x2e;&#x63;&#x6f;&#109;">&#x62;&#104;&#x65;&#x6c;&#x67;&#97;&#97;&#115;&#x40;&#103;&#111;&#111;&#103;&#108;&#101;&#x2e;&#x63;&#x6f;&#109;</a><br>26 Aug 2014</p>
+<p>This document describes the requirement from hardware for PCI MMIO resource<br>sizing and assignment on PowerKVM and how generic PCI code handles this<br>requirement. The first two sections describe the concepts of Partitionable<br>Endpoints and the implementation on P8 (IODA2). The next two sections talks<br>about considerations on enabling SRIOV on IODA2.</p>
+<ol>
+<li>Introduction to Partitionable Endpoints</li>
+</ol>
+<p>A Partitionable Endpoint (PE) is a way to group the various resources<br>associated with a device or a set of devices to provide isolation between<br>partitions (i.e., filtering of DMA, MSIs etc.) and to provide a mechanism<br>to freeze a device that is causing errors in order to limit the possibility<br>of propagation of bad data.</p>
+<p>There is thus, in HW, a table of PE states that contains a pair of “frozen”<br>state bits (one for MMIO and one for DMA, they get set together but can be<br>cleared independently) for each PE.</p>
+<p>When a PE is frozen, all stores in any direction are dropped and all loads<br>return all 1’s value. MSIs are also blocked. There’s a bit more state that<br>captures things like the details of the error that caused the freeze etc., but<br>that’s not critical.</p>
+<p>The interesting part is how the various PCIe transactions (MMIO, DMA, …)<br>are matched to their corresponding PEs.</p>
+<p>The following section provides a rough description of what we have on P8<br>(IODA2).  Keep in mind that this is all per PHB (PCI host bridge).  Each PHB<br>is a completely separate HW entity that replicates the entire logic, so has<br>its own set of PEs, etc.</p>
+<ol start="2">
+<li>Implementation of Partitionable Endpoints on P8 (IODA2)</li>
+</ol>
+<p>P8 supports up to 256 Partitionable Endpoints per PHB.</p>
+<ul>
+<li><p>Inbound</p>
+<p>For DMA, MSIs and inbound PCIe error messages, we have a table (in<br>memory but accessed in HW by the chip) that provides a direct<br>correspondence between a PCIe RID (bus/dev/fn) with a PE number.<br>We call this the RTT.</p>
+<ul>
+<li><p>For DMA we then provide an entire address space for each PE that can<br>contain two “windows”, depending on the value of PCI address bit 59.<br>Each window can be configured to be remapped via a “TCE table” (IOMMU<br>translation table), which has various configurable characteristics<br>not described here.</p>
+</li>
+<li><p>For MSIs, we have two windows in the address space (one at the top of<br>the 32-bit space and one much higher) which, via a combination of the<br>address and MSI value, will result in one of the 2048 interrupts per<br>bridge being triggered.  There’s a PE# in the interrupt controller<br>descriptor table as well which is compared with the PE# obtained from<br>the RTT to “authorize” the device to emit that specific interrupt.</p>
+</li>
+<li><p>Error messages just use the RTT.</p>
+</li>
+</ul>
+</li>
+<li><p>Outbound.  That’s where the tricky part is.</p>
+<p>Like other PCI host bridges, the Power8 IODA2 PHB supports “windows”<br>from the CPU address space to the PCI address space.  There is one M32<br>window and sixteen M64 windows.  They have different characteristics.<br>First what they have in common: they forward a configurable portion of<br>the CPU address space to the PCIe bus and must be naturally aligned<br>power of two in size.  The rest is different:</p>
+<ul>
+<li><p>The M32 window:</p>
+<ul>
+<li><p>Is limited to 4GB in size.</p>
+</li>
+<li><p>Drops the top bits of the address (above the size) and replaces<br>them with a configurable value.  This is typically used to generate<br>32-bit PCIe accesses.  We configure that window at boot from FW and<br>don’t touch it from Linux; it’s usually set to forward a 2GB<br>portion of address space from the CPU to PCIe<br>0x8000_0000..0xffff_ffff.  (Note: The top 64KB are actually<br>reserved for MSIs but this is not a problem at this point; we just<br>need to ensure Linux doesn’t assign anything there, the M32 logic<br>ignores that however and will forward in that space if we try).</p>
+</li>
+<li><p>It is divided into 256 segments of equal size.  A table in the chip<br>maps each segment to a PE#.  That allows portions of the MMIO space<br>to be assigned to PEs on a segment granularity.  For a 2GB window,<br>the segment granularity is 2GB/256 = 8MB.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Now, this is the “main” window we use in Linux today (excluding<br>SR-IOV).  We basically use the trick of forcing the bridge MMIO windows<br>onto a segment alignment/granularity so that the space behind a bridge<br>can be assigned to a PE.</p>
+<p>Ideally we would like to be able to have individual functions in PEs<br>but that would mean using a completely different address allocation<br>scheme where individual function BARs can be “grouped” to fit in one or<br>more segments.</p>
+<ul>
+<li><p>The M64 windows:</p>
+<ul>
+<li><p>Must be at least 256MB in size.</p>
+</li>
+<li><p>Do not translate addresses (the address on PCIe is the same as the<br>address on the PowerBus).  There is a way to also set the top 14<br>bits which are not conveyed by PowerBus but we don’t use this.</p>
+</li>
+<li><p>Can be configured to be segmented.  When not segmented, we can<br>specify the PE# for the entire window.  When segmented, a window<br>has 256 segments; however, there is no table for mapping a segment<br>to a PE#.  The segment number <em>is</em> the PE#.</p>
+</li>
+<li><p>Support overlaps.  If an address is covered by multiple windows,<br>there’s a defined ordering for which window applies.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>We have code (fairly new compared to the M32 stuff) that exploits that<br>for large BARs in 64-bit space:</p>
+<p>We configure an M64 window to cover the entire region of address space<br>that has been assigned by FW for the PHB (about 64GB, ignore the space<br>for the M32, it comes out of a different “reserve”).  We configure it<br>as segmented.</p>
+<p>Then we do the same thing as with M32, using the bridge alignment<br>trick, to match to those giant segments.</p>
+<p>Since we cannot remap, we have two additional constraints:</p>
+<ul>
+<li><p>We do the PE# allocation <em>after</em> the 64-bit space has been assigned<br>because the addresses we use directly determine the PE#.  We then<br>update the M32 PE# for the devices that use both 32-bit and 64-bit<br>spaces or assign the remaining PE# to 32-bit only devices.</p>
+</li>
+<li><p>We cannot “group” segments in HW, so if a device ends up using more<br>than one segment, we end up with more than one PE#.  There is a HW<br>mechanism to make the freeze state cascade to “companion” PEs but<br>that only works for PCIe error messages (typically used so that if<br>you freeze a switch, it freezes all its children).  So we do it in<br>SW.  We lose a bit of effectiveness of EEH in that case, but that’s<br>the best we found.  So when any of the PEs freezes, we freeze the<br>other ones for that “domain”.  We thus introduce the concept of<br>“master PE” which is the one used for DMA, MSIs, etc., and “secondary<br>PEs” that are used for the remaining M64 segments.</p>
+</li>
+</ul>
+<p>We would like to investigate using additional M64 windows in “single<br>PE” mode to overlay over specific BARs to work around some of that, for<br>example for devices with very large BARs, e.g., GPUs.  It would make<br>sense, but we haven’t done it yet.</p>
+</li>
+</ul>
+<ol start="3">
+<li>Considerations for SR-IOV on PowerKVM</li>
+</ol>
+<ul>
+<li><p>SR-IOV Background</p>
+<p>The PCIe SR-IOV feature allows a single Physical Function (PF) to<br>support several Virtual Functions (VFs).  Registers in the PF’s SR-IOV<br>Capability control the number of VFs and whether they are enabled.</p>
+<p>When VFs are enabled, they appear in Configuration Space like normal<br>PCI devices, but the BARs in VF config space headers are unusual.  For<br>a non-VF device, software uses BARs in the config space header to<br>discover the BAR sizes and assign addresses for them.  For VF devices,<br>software uses VF BAR registers in the <em>PF</em> SR-IOV Capability to<br>discover sizes and assign addresses.  The BARs in the VF’s config space<br>header are read-only zeros.</p>
+<p>When a VF BAR in the PF SR-IOV Capability is programmed, it sets the<br>base address for all the corresponding VF(n) BARs.  For example, if the<br>PF SR-IOV Capability is programmed to enable eight VFs, and it has a<br>1MB VF BAR0, the address in that VF BAR sets the base of an 8MB region.<br>This region is divided into eight contiguous 1MB regions, each of which<br>is a BAR0 for one of the VFs.  Note that even though the VF BAR<br>describes an 8MB region, the alignment requirement is for a single VF,<br>i.e., 1MB in this example.</p>
+<p>There are several strategies for isolating VFs in PEs:</p>
+</li>
+</ul>
+<ul>
+<li><p>M32 window: There’s one M32 window, and it is split into 256<br>equally-sized segments.  The finest granularity possible is a 256MB<br>window with 1MB segments.  VF BARs that are 1MB or larger could be<br>mapped to separate PEs in this window.  Each segment can be<br>individually mapped to a PE via the lookup table, so this is quite<br>flexible, but it works best when all the VF BARs are the same size.  If<br>they are different sizes, the entire window has to be small enough that<br>the segment size matches the smallest VF BAR, which means larger VF<br>BARs span several segments.</p>
+</li>
+<li><p>Non-segmented M64 window: A non-segmented M64 window is mapped entirely<br>to a single PE, so it could only isolate one VF.</p>
+</li>
+<li><p>Single segmented M64 windows: A segmented M64 window could be used just<br>like the M32 window, but the segments can’t be individually mapped to<br>PEs (the segment number is the PE#), so there isn’t as much<br>flexibility.  A VF with multiple BARs would have to be in a “domain” of<br>multiple PEs, which is not as well isolated as a single PE.</p>
+</li>
+<li><p>Multiple segmented M64 windows: As usual, each window is split into 256<br>equally-sized segments, and the segment number is the PE#.  But if we<br>use several M64 windows, they can be set to different base addresses<br>and different segment sizes.  If we have VFs that each have a 1MB BAR<br>and a 32MB BAR, we could use one M64 window to assign 1MB segments and<br>another M64 window to assign 32MB segments.</p>
+<p>Finally, the plan to use M64 windows for SR-IOV, which will be described<br>more in the next two sections.  For a given VF BAR, we need to<br>effectively reserve the entire 256 segments (256 * VF BAR size) and<br>position the VF BAR to start at the beginning of a free range of<br>segments/PEs inside that M64 window.</p>
+<p>The goal is of course to be able to give a separate PE for each VF.</p>
+<p>The IODA2 platform has 16 M64 windows, which are used to map MMIO<br>range to PE#.  Each M64 window defines one MMIO range and this range is<br>divided into 256 segments, with each segment corresponding to one PE.</p>
+<p>We decide to leverage this M64 window to map VFs to individual PEs, since<br>SR-IOV VF BARs are all the same size.</p>
+<p>But doing so introduces another problem: total_VFs is usually smaller<br>than the number of M64 window segments, so if we map one VF BAR directly<br>to one M64 window, some part of the M64 window will map to another<br>device’s MMIO range.</p>
+<p>IODA supports 256 PEs, so segmented windows contain 256 segments, so if<br>total_VFs is less than 256, we have the situation in Figure 1.0, where<br>segments [total_VFs, 255] of the M64 window may map to some MMIO range on<br>other devices:</p>
+<p> 0      1                     total_VFs - 1<br> +——+——+-     -+——+——+<br> |      |      |  …  |      |      |<br> +——+——+-     -+——+——+</p>
+<pre><code>                   VF(n) BAR space
+</code></pre>
+<p> 0      1                     total_VFs - 1                255<br> +——+——+-     -+——+——+-      -+——+——+<br> |      |      |  …  |      |      |   …  |      |      |<br> +——+——+-     -+——+——+-      -+——+——+</p>
+<pre><code>                   M64 window
+
+Figure 1.0 Direct map VF(n) BAR space
+</code></pre>
+<p>Our current solution is to allocate 256 segments even if the VF(n) BAR<br>space doesn’t need that much, as shown in Figure 1.1:</p>
+<p> 0      1                     total_VFs - 1                255<br> +——+——+-     -+——+——+-      -+——+——+<br> |      |      |  …  |      |      |   …  |      |      |<br> +——+——+-     -+——+——+-      -+——+——+</p>
+<pre><code>                   VF(n) BAR space + extra
+</code></pre>
+<p> 0      1                     total_VFs - 1                255<br> +——+——+-     -+——+——+-      -+——+——+<br> |      |      |  …  |      |      |   …  |      |      |<br> +——+——+-     -+——+——+-      -+——+——+</p>
+<pre><code>       M64 window
+
+Figure 1.1 Map VF(n) BAR space + extra
+</code></pre>
+<p>Allocating the extra space ensures that the entire M64 window will be<br>assigned to this one SR-IOV device and none of the space will be<br>available for other devices.  Note that this only expands the space<br>reserved in software; there are still only total_VFs VFs, and they only<br>respond to segments [0, total_VFs - 1].  There’s nothing in hardware that<br>responds to segments [total_VFs, 255].</p>
+</li>
+</ul>
+<ol start="4">
+<li>Implications for the Generic PCI Code</li>
+</ol>
+<p>The PCIe SR-IOV spec requires that the base of the VF(n) BAR space be<br>aligned to the size of an individual VF BAR.</p>
+<p>In IODA2, the MMIO address determines the PE#.  If the address is in an M32<br>window, we can set the PE# by updating the table that translates segments<br>to PE#s.  Similarly, if the address is in an unsegmented M64 window, we can<br>set the PE# for the window.  But if it’s in a segmented M64 window, the<br>segment number is the PE#.</p>
+<p>Therefore, the only way to control the PE# for a VF is to change the base<br>of the VF(n) BAR space in the VF BAR.  If the PCI core allocates the exact<br>amount of space required for the VF(n) BAR space, the VF BAR value is fixed<br>and cannot be changed.</p>
+<p>On the other hand, if the PCI core allocates additional space, the VF BAR<br>value can be changed as long as the entire VF(n) BAR space remains inside<br>the space allocated by the core.</p>
+<p>Ideally the segment size will be the same as an individual VF BAR size.<br>Then each VF will be in its own PE.  The VF BARs (and therefore the PE#s)<br>are contiguous.  If VF0 is in PE(x), then VF(n) is in PE(x+n).  If we<br>allocate 256 segments, there are (256 - numVFs) choices for the PE# of VF0.</p>
+<p>If the segment size is smaller than the VF BAR size, it will take several<br>segments to cover a VF BAR, and a VF will be in several PEs.  This is<br>possible, but the isolation isn’t as good, and it reduces the number of PE#<br>choices because instead of consuming only numVFs segments, the VF(n) BAR<br>space will consume (numVFs * n) segments.  That means there aren’t as many<br>available segments for adjusting base of the VF(n) BAR space.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/" title="Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pci-iov-howto/" title="Kernel-3.10.0-957.el7_pci-iov-howto"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/" title="Kernel-3.10.0-957.el7_pcieaer-howto"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_pti | oosTech.com</title>
+  <meta name="description" content="OverviewPage Table Isolation (pti, previously known as KAISER[1]) is acountermeasure against attacks on the shared user&#x2F;kernel addressspace such as the “Meltdown” approach[2]. To mitigate this class o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_pti">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pti/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="OverviewPage Table Isolation (pti, previously known as KAISER[1]) is acountermeasure against attacks on the shared user&#x2F;kernel addressspace such as the “Meltdown” approach[2]. To mitigate this class o">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pti/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Page-Table-Management"><span class="toc-number">2.</span> <span class="toc-text">Page Table Management</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Overhead"><span class="toc-number">3.</span> <span class="toc-text">Overhead</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Possible-Future-Work"><span class="toc-number">4.</span> <span class="toc-text">Possible Future Work</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Testing"><span class="toc-number">5.</span> <span class="toc-text">Testing</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debugging"><span class="toc-number">6.</span> <span class="toc-text">Debugging</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_pti" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_pti
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pti/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pti/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_pti/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>Page Table Isolation (pti, previously known as KAISER[1]) is a<br>countermeasure against attacks on the shared user/kernel address<br>space such as the “Meltdown” approach[2].</p>
+<p>To mitigate this class of attacks, we create an independent set of<br>page tables for use only when running userspace applications.  When<br>the kernel is entered via syscalls, interrupts or exceptions, the<br>page tables are switched to the full “kernel” copy.  When the system<br>switches back to user mode, the user copy is used again.</p>
+<p>The userspace page tables contain only a minimal amount of kernel<br>data: only what is needed to enter/exit the kernel such as the<br>entry/exit functions themselves and the interrupt descriptor table<br>(IDT).  There are a few strictly unnecessary things that get mapped<br>such as the first C function when entering an interrupt (see<br>comments in pti.c).</p>
+<p>This approach helps to ensure that side-channel attacks leveraging<br>the paging structures do not function when PTI is enabled.  It can be<br>enabled by setting CONFIG_PAGE_TABLE_ISOLATION=y at compile time.<br>Once enabled at compile-time, it can be disabled at boot with the<br>‘nopti’ or ‘pti=’ kernel parameters (see kernel-parameters.txt).</p>
+<h1 id="Page-Table-Management"><a href="#Page-Table-Management" class="headerlink" title="Page Table Management"></a>Page Table Management</h1><p>When PTI is enabled, the kernel manages two sets of page tables.<br>The first set is very similar to the single set which is present in<br>kernels without PTI.  This includes a complete mapping of userspace<br>that the kernel can use for things like copy_to_user().</p>
+<p>Although <em>complete</em>, the user portion of the kernel page tables is<br>crippled by setting the NX bit in the top level.  This ensures<br>that any missed kernel-&gt;user CR3 switch will immediately crash<br>userspace upon executing its first instruction.</p>
+<p>The userspace page tables map only the kernel data needed to enter<br>and exit the kernel.  This data is entirely contained in the ‘struct<br>cpu_entry_area’ structure which is placed in the fixmap which gives<br>each CPU’s copy of the area a compile-time-fixed virtual address.</p>
+<p>For new userspace mappings, the kernel makes the entries in its<br>page tables like normal.  The only difference is when the kernel<br>makes entries in the top (PGD) level.  In addition to setting the<br>entry in the main kernel PGD, a copy of the entry is made in the<br>userspace page tables’ PGD.</p>
+<p>This sharing at the PGD level also inherently shares all the lower<br>layers of the page tables.  This leaves a single, shared set of<br>userspace page tables to manage.  One PTE to lock, one set of<br>accessed bits, dirty bits, etc…</p>
+<h1 id="Overhead"><a href="#Overhead" class="headerlink" title="Overhead"></a>Overhead</h1><p>Protection against side-channel attacks is important.  But,<br>this protection comes at a cost:</p>
+<ol>
+<li><p>Increased Memory Use<br>a. Each process now needs an order-1 PGD instead of order-0.<br>  (Consumes an additional 4k per process).<br>b. The ‘cpu_entry_area’ structure must be 2MB in size and 2MB<br>  aligned so that it can be mapped by setting a single PMD<br>  entry.  This consumes nearly 2MB of RAM once the kernel<br>  is decompressed, but no space in the kernel image itself.</p>
+</li>
+<li><p>Runtime Cost<br>a. CR3 manipulation to switch between the page table copies<br>  must be done at interrupt, syscall, and exception entry<br>  and exit (it can be skipped when the kernel is interrupted,<br>  though.)  Moves to CR3 are on the order of a hundred<br>  cycles, and are required at every entry and exit.<br>b. A “trampoline” must be used for SYSCALL entry.  This<br>  trampoline depends on a smaller set of resources than the<br>  non-PTI SYSCALL entry code, so requires mapping fewer<br>  things into the userspace page tables.  The downside is<br>  that stacks must be switched at entry time.<br>c. Global pages are disabled for all kernel structures not<br>  mapped into both kernel and userspace page tables.  This<br>  feature of the MMU allows different processes to share TLB<br>  entries mapping the kernel.  Losing the feature means more<br>  TLB misses after a context switch.  The actual loss of<br>  performance is very small, however, never exceeding 1%.<br>d. Process Context IDentifiers (PCID) is a CPU feature that<br>  allows us to skip flushing the entire TLB when switching page<br>  tables by setting a special bit in CR3 when the page tables<br>  are changed.  This makes switching the page tables (at context<br>  switch, or kernel entry/exit) cheaper.  But, on systems with<br>  PCID support, the context switch code must flush both the user<br>  and kernel entries out of the TLB.  The user PCID TLB flush is<br>  deferred until the exit to userspace, minimizing the cost.<br>  See intel.com/sdm for the gory PCID/INVPCID details.<br>e. The userspace page tables must be populated for each new<br>  process.  Even without PTI, the shared kernel mappings<br>  are created by copying top-level (PGD) entries into each<br>  new process.  But, with PTI, there are now <em>two</em> kernel<br>  mappings: one in the kernel page tables that maps everything<br>  and one for the entry/exit structures.  At fork(), we need to<br>  copy both.<br>f. In addition to the fork()-time copying, there must also<br>  be an update to the userspace PGD any time a set_pgd() is done<br>  on a PGD used to map userspace.  This ensures that the kernel<br>  and userspace copies always map the same userspace<br>  memory.<br>g. On systems without PCID support, each CR3 write flushes<br>  the entire TLB.  That means that each syscall, interrupt<br>  or exception flushes the TLB.<br>h. INVPCID is a TLB-flushing instruction which allows flushing<br>  of TLB entries for non-current PCIDs.  Some systems support<br>  PCIDs, but do not support INVPCID.  On these systems, addresses<br>  can only be flushed from the TLB for the current PCID.  When<br>  flushing a kernel address, we need to flush all PCIDs, so a<br>  single kernel address flush will require a TLB-flushing CR3<br>  write upon the next use of every PCID.</p>
+</li>
+</ol>
+<h1 id="Possible-Future-Work"><a href="#Possible-Future-Work" class="headerlink" title="Possible Future Work"></a>Possible Future Work</h1><ol>
+<li>We can be more careful about not actually writing to CR3<br>unless its value is actually changed.</li>
+<li>Allow PTI to be enabled/disabled at runtime in addition to the<br>boot-time switching.</li>
+</ol>
+<h1 id="Testing"><a href="#Testing" class="headerlink" title="Testing"></a>Testing</h1><p>To test stability of PTI, the following test procedure is recommended,<br>ideally doing all of these in parallel:</p>
+<ol>
+<li><p>Set CONFIG_DEBUG_ENTRY=y</p>
+</li>
+<li><p>Run several copies of all of the tools/testing/selftests/x86/ tests<br>(excluding MPX and protection_keys) in a loop on multiple CPUs for<br>several minutes.  These tests frequently uncover corner cases in the<br>kernel entry code.  In general, old kernels might cause these tests<br>themselves to crash, but they should never crash the kernel.</p>
+</li>
+<li><p>Run the ‘perf’ tool in a mode (top or record) that generates many<br>frequent performance monitoring non-maskable interrupts (see “NMI”<br>in /proc/interrupts).  This exercises the NMI entry/exit code which<br>is known to trigger bugs in code paths that did not expect to be<br>interrupted, including nested NMIs.  Using “-c” boosts the rate of<br>NMIs, and using two -c with separate counters encourages nested NMIs<br>and less deterministic behavior.</p>
+<p> while true; do perf record -c 10000 -e instructions,cycles -a sleep 10; done</p>
+</li>
+<li><p>Launch a KVM virtual machine.</p>
+</li>
+<li><p>Run 32-bit binaries on systems supporting the SYSCALL instruction.<br>This has been a lightly-tested code path and needs extra scrutiny.</p>
+</li>
+</ol>
+<h1 id="Debugging"><a href="#Debugging" class="headerlink" title="Debugging"></a>Debugging</h1><p>Bugs in PTI cause a few different signatures of crashes<br>that are worth noting here.</p>
+<ul>
+<li>Failures of the selftests/x86 code.  Usually a bug in one of the<br>more obscure corners of entry_64.S</li>
+<li>Crashes in early boot, especially around CPU bringup.  Bugs<br>in the trampoline code or mappings cause these.</li>
+<li>Crashes at the first interrupt.  Caused by bugs in entry_64.S,<br>like screwing up a page table switch.  Also caused by<br>incorrectly mapping the IRQ handler entry code.</li>
+<li>Crashes at the first NMI.  The NMI code is separate from main<br>interrupt handlers and can have bugs that do not affect<br>normal interrupts.  Also caused by incorrectly mapping NMI<br>code.  NMIs that interrupt the entry code must be very<br>careful and can be the cause of crashes that show up when<br>running perf.</li>
+<li>Kernel crashes at the first exit to userspace.  entry_64.S<br>bugs, or failing to map some of the exit code.</li>
+<li>Crashes at first interrupt that interrupts userspace. The paths<br>in entry_64.S that return to userspace are sometimes separate<br>from the ones that return to the kernel.</li>
+<li>Double faults: overflowing the kernel stack because of page<br>faults upon page faults.  Caused by touching non-pti-mapped<br>data in the entry code, or forgetting to switch to kernel<br>CR3 before calling into C functions which are not pti-mapped.</li>
+<li>Userspace segfaults early in boot, sometimes manifesting<br>as mount(8) failing to mount the rootfs.  These have<br>tended to be TLB invalidation issues.  Usually invalidating<br>the wrong PCID, or otherwise missing an invalidation.</li>
+</ul>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://gruss.cc/files/kaiser.pdf">https://gruss.cc/files/kaiser.pdf</a></li>
+<li><a target="_blank" rel="noopener" href="https://meltdownattack.com/meltdown.pdf">https://meltdownattack.com/meltdown.pdf</a></li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pti/" title="Kernel-3.10.0-957.el7_pti" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pti/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_psci/" title="Kernel-3.10.0-957.el7_psci"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pti_intel_mid/" title="Kernel-3.10.0-957.el7_pti_intel_mi"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

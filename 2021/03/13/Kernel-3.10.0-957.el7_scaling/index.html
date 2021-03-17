@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_scaling | oosTech.com</title>
+  <meta name="description" content="Scaling in the Linux Networking Stack IntroductionThis document describes a set of complementary techniques in the Linuxnetworking stack to increase parallelism and improve performance formulti-proces">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_scaling">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_scaling/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Scaling in the Linux Networking Stack IntroductionThis document describes a set of complementary techniques in the Linuxnetworking stack to increase parallelism and improve performance formulti-proces">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_scaling/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RSS-Receive-Side-Scaling"><span class="toc-number">2.</span> <span class="toc-text">RSS: Receive Side Scaling</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RPS-Receive-Packet-Steering"><span class="toc-number">3.</span> <span class="toc-text">RPS: Receive Packet Steering</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RFS-Receive-Flow-Steering"><span class="toc-number">4.</span> <span class="toc-text">RFS: Receive Flow Steering</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Accelerated-RFS"><span class="toc-number">5.</span> <span class="toc-text">Accelerated RFS</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#XPS-Transmit-Packet-Steering"><span class="toc-number">6.</span> <span class="toc-text">XPS: Transmit Packet Steering</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Per-TX-Queue-rate-limitation"><span class="toc-number">7.</span> <span class="toc-text">Per TX Queue rate limitation:</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Further-Information"><span class="toc-number">8.</span> <span class="toc-text">Further Information</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_scaling" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_scaling
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_scaling/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_scaling/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_scaling/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Scaling in the Linux Networking Stack</p>
+<h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>This document describes a set of complementary techniques in the Linux<br>networking stack to increase parallelism and improve performance for<br>multi-processor systems.</p>
+<p>The following technologies are described:</p>
+<p>  RSS: Receive Side Scaling<br>  RPS: Receive Packet Steering<br>  RFS: Receive Flow Steering<br>  Accelerated Receive Flow Steering<br>  XPS: Transmit Packet Steering</p>
+<h1 id="RSS-Receive-Side-Scaling"><a href="#RSS-Receive-Side-Scaling" class="headerlink" title="RSS: Receive Side Scaling"></a>RSS: Receive Side Scaling</h1><p>Contemporary NICs support multiple receive and transmit descriptor queues<br>(multi-queue). On reception, a NIC can send different packets to different<br>queues to distribute processing among CPUs. The NIC distributes packets by<br>applying a filter to each packet that assigns it to one of a small number<br>of logical flows. Packets for each flow are steered to a separate receive<br>queue, which in turn can be processed by separate CPUs. This mechanism is<br>generally known as âReceive-side Scalingâ (RSS). The goal of RSS and<br>the other scaling techniques is to increase performance uniformly.<br>Multi-queue distribution can also be used for traffic prioritization, but<br>that is not the focus of these techniques.</p>
+<p>The filter used in RSS is typically a hash function over the network<br>and/or transport layer headers– for example, a 4-tuple hash over<br>IP addresses and TCP ports of a packet. The most common hardware<br>implementation of RSS uses a 128-entry indirection table where each entry<br>stores a queue number. The receive queue for a packet is determined<br>by masking out the low order seven bits of the computed hash for the<br>packet (usually a Toeplitz hash), taking this number as a key into the<br>indirection table and reading the corresponding value.</p>
+<p>Some advanced NICs allow steering packets to queues based on<br>programmable filters. For example, webserver bound TCP port 80 packets<br>can be directed to their own receive queue. Such ân-tupleâ filters can<br>be configured from ethtool (–config-ntuple).</p>
+<p>==== RSS Configuration</p>
+<p>The driver for a multi-queue capable NIC typically provides a kernel<br>module parameter for specifying the number of hardware queues to<br>configure. In the bnx2x driver, for instance, this parameter is called<br>num_queues. A typical RSS configuration would be to have one receive queue<br>for each CPU if the device supports enough queues, or otherwise at least<br>one for each memory domain, where a memory domain is a set of CPUs that<br>share a particular memory level (L1, L2, NUMA node, etc.).</p>
+<p>The indirection table of an RSS device, which resolves a queue by masked<br>hash, is usually programmed by the driver at initialization. The<br>default mapping is to distribute the queues evenly in the table, but the<br>indirection table can be retrieved and modified at runtime using ethtool<br>commands (–show-rxfh-indir and –set-rxfh-indir). Modifying the<br>indirection table could be done to give different queues different<br>relative weights.</p>
+<p>== RSS IRQ Configuration</p>
+<p>Each receive queue has a separate IRQ associated with it. The NIC triggers<br>this to notify a CPU when new packets arrive on the given queue. The<br>signaling path for PCIe devices uses message signaled interrupts (MSI-X),<br>that can route each interrupt to a particular CPU. The active mapping<br>of queues to IRQs can be determined from /proc/interrupts. By default,<br>an IRQ may be handled on any CPU. Because a non-negligible part of packet<br>processing takes place in receive interrupt handling, it is advantageous<br>to spread receive interrupts between CPUs. To manually adjust the IRQ<br>affinity of each interrupt see Documentation/IRQ-affinity.txt. Some systems<br>will be running irqbalance, a daemon that dynamically optimizes IRQ<br>assignments and as a result may override any manual settings.</p>
+<p>== Suggested Configuration</p>
+<p>RSS should be enabled when latency is a concern or whenever receive<br>interrupt processing forms a bottleneck. Spreading load between CPUs<br>decreases queue length. For low latency networking, the optimal setting<br>is to allocate as many queues as there are CPUs in the system (or the<br>NIC maximum, if lower). The most efficient high-rate configuration<br>is likely the one with the smallest number of receive queues where no<br>receive queue overflows due to a saturated CPU, because in default<br>mode with interrupt coalescing enabled, the aggregate number of<br>interrupts (and thus work) grows with each additional queue.</p>
+<p>Per-cpu load can be observed using the mpstat utility, but note that on<br>processors with hyperthreading (HT), each hyperthread is represented as<br>a separate CPU. For interrupt handling, HT has shown no benefit in<br>initial tests, so limit the number of queues to the number of CPU cores<br>in the system.</p>
+<h1 id="RPS-Receive-Packet-Steering"><a href="#RPS-Receive-Packet-Steering" class="headerlink" title="RPS: Receive Packet Steering"></a>RPS: Receive Packet Steering</h1><p>Receive Packet Steering (RPS) is logically a software implementation of<br>RSS. Being in software, it is necessarily called later in the datapath.<br>Whereas RSS selects the queue and hence CPU that will run the hardware<br>interrupt handler, RPS selects the CPU to perform protocol processing<br>above the interrupt handler. This is accomplished by placing the packet<br>on the desired CPUâs backlog queue and waking up the CPU for processing.<br>RPS has some advantages over RSS: 1) it can be used with any NIC,<br>2) software filters can easily be added to hash over new protocols,<br>3) it does not increase hardware device interrupt rate (although it does<br>introduce inter-processor interrupts (IPIs)).</p>
+<p>RPS is called during bottom half of the receive interrupt handler, when<br>a driver sends a packet up the network stack with netif_rx() or<br>netif_receive_skb(). These call the get_rps_cpu() function, which<br>selects the queue that should process a packet.</p>
+<p>The first step in determining the target CPU for RPS is to calculate a<br>flow hash over the packetâs addresses or ports (2-tuple or 4-tuple hash<br>depending on the protocol). This serves as a consistent hash of the<br>associated flow of the packet. The hash is either provided by hardware<br>or will be computed in the stack. Capable hardware can pass the hash in<br>the receive descriptor for the packet; this would usually be the same<br>hash used for RSS (e.g. computed Toeplitz hash). The hash is saved in<br>skb-&gt;rx_hash and can be used elsewhere in the stack as a hash of the<br>packetâs flow.</p>
+<p>Each receive hardware queue has an associated list of CPUs to which<br>RPS may enqueue packets for processing. For each received packet,<br>an index into the list is computed from the flow hash modulo the size<br>of the list. The indexed CPU is the target for processing the packet,<br>and the packet is queued to the tail of that CPUâs backlog queue. At<br>the end of the bottom half routine, IPIs are sent to any CPUs for which<br>packets have been queued to their backlog queue. The IPI wakes backlog<br>processing on the remote CPU, and any queued packets are then processed<br>up the networking stack.</p>
+<p>==== RPS Configuration</p>
+<p>RPS requires a kernel compiled with the CONFIG_RPS kconfig symbol (on<br>by default for SMP). Even when compiled in, RPS remains disabled until<br>explicitly configured. The list of CPUs to which RPS may forward traffic<br>can be configured for each receive queue using a sysfs file entry:</p>
+<p> /sys/class/net/<dev>/queues/rx-<n>/rps_cpus</p>
+<p>This file implements a bitmap of CPUs. RPS is disabled when it is zero<br>(the default), in which case packets are processed on the interrupting<br>CPU. Documentation/IRQ-affinity.txt explains how CPUs are assigned to<br>the bitmap.</p>
+<p>== Suggested Configuration</p>
+<p>For a single queue device, a typical RPS configuration would be to set<br>the rps_cpus to the CPUs in the same memory domain of the interrupting<br>CPU. If NUMA locality is not an issue, this could also be all CPUs in<br>the system. At high interrupt rate, it might be wise to exclude the<br>interrupting CPU from the map since that already performs much work.</p>
+<p>For a multi-queue system, if RSS is configured so that a hardware<br>receive queue is mapped to each CPU, then RPS is probably redundant<br>and unnecessary. If there are fewer hardware queues than CPUs, then<br>RPS might be beneficial if the rps_cpus for each queue are the ones that<br>share the same memory domain as the interrupting CPU for that queue.</p>
+<h1 id="RFS-Receive-Flow-Steering"><a href="#RFS-Receive-Flow-Steering" class="headerlink" title="RFS: Receive Flow Steering"></a>RFS: Receive Flow Steering</h1><p>While RPS steers packets solely based on hash, and thus generally<br>provides good load distribution, it does not take into account<br>application locality. This is accomplished by Receive Flow Steering<br>(RFS). The goal of RFS is to increase datacache hitrate by steering<br>kernel processing of packets to the CPU where the application thread<br>consuming the packet is running. RFS relies on the same RPS mechanisms<br>to enqueue packets onto the backlog of another CPU and to wake up that<br>CPU.</p>
+<p>In RFS, packets are not forwarded directly by the value of their hash,<br>but the hash is used as index into a flow lookup table. This table maps<br>flows to the CPUs where those flows are being processed. The flow hash<br>(see RPS section above) is used to calculate the index into this table.<br>The CPU recorded in each entry is the one which last processed the flow.<br>If an entry does not hold a valid CPU, then packets mapped to that entry<br>are steered using plain RPS. Multiple table entries may point to the<br>same CPU. Indeed, with many flows and few CPUs, it is very likely that<br>a single application thread handles flows with many different flow hashes.</p>
+<p>rps_sock_flow_table is a global flow table that contains the <em>desired</em> CPU<br>for flows: the CPU that is currently processing the flow in userspace.<br>Each table value is a CPU index that is updated during calls to recvmsg<br>and sendmsg (specifically, inet_recvmsg(), inet_sendmsg(), inet_sendpage()<br>and tcp_splice_read()).</p>
+<p>When the scheduler moves a thread to a new CPU while it has outstanding<br>receive packets on the old CPU, packets may arrive out of order. To<br>avoid this, RFS uses a second flow table to track outstanding packets<br>for each flow: rps_dev_flow_table is a table specific to each hardware<br>receive queue of each device. Each table value stores a CPU index and a<br>counter. The CPU index represents the <em>current</em> CPU onto which packets<br>for this flow are enqueued for further kernel processing. Ideally, kernel<br>and userspace processing occur on the same CPU, and hence the CPU index<br>in both tables is identical. This is likely false if the scheduler has<br>recently migrated a userspace thread while the kernel still has packets<br>enqueued for kernel processing on the old CPU.</p>
+<p>The counter in rps_dev_flow_table values records the length of the current<br>CPU’s backlog when a packet in this flow was last enqueued. Each backlog<br>queue has a head counter that is incremented on dequeue. A tail counter<br>is computed as head counter + queue length. In other words, the counter<br>in rps_dev_flow[i] records the last element in flow i that has<br>been enqueued onto the currently designated CPU for flow i (of course,<br>entry i is actually selected by hash and multiple flows may hash to the<br>same entry i).</p>
+<p>And now the trick for avoiding out of order packets: when selecting the<br>CPU for packet processing (from get_rps_cpu()) the rps_sock_flow table<br>and the rps_dev_flow table of the queue that the packet was received on<br>are compared. If the desired CPU for the flow (found in the<br>rps_sock_flow table) matches the current CPU (found in the rps_dev_flow<br>table), the packet is enqueued onto that CPUâs backlog. If they differ,<br>the current CPU is updated to match the desired CPU if one of the<br>following is true:</p>
+<ul>
+<li>The current CPU’s queue head counter &gt;= the recorded tail counter<br>value in rps_dev_flow[i]</li>
+<li>The current CPU is unset (equal to RPS_NO_CPU)</li>
+<li>The current CPU is offline</li>
+</ul>
+<p>After this check, the packet is sent to the (possibly updated) current<br>CPU. These rules aim to ensure that a flow only moves to a new CPU when<br>there are no packets outstanding on the old CPU, as the outstanding<br>packets could arrive later than those about to be processed on the new<br>CPU.</p>
+<p>==== RFS Configuration</p>
+<p>RFS is only available if the kconfig symbol CONFIG_RPS is enabled (on<br>by default for SMP). The functionality remains disabled until explicitly<br>configured. The number of entries in the global flow table is set through:</p>
+<p> /proc/sys/net/core/rps_sock_flow_entries</p>
+<p>The number of entries in the per-queue flow table are set through:</p>
+<p> /sys/class/net/<dev>/queues/rx-<n>/rps_flow_cnt</p>
+<p>== Suggested Configuration</p>
+<p>Both of these need to be set before RFS is enabled for a receive queue.<br>Values for both are rounded up to the nearest power of two. The<br>suggested flow count depends on the expected number of active connections<br>at any given time, which may be significantly less than the number of open<br>connections. We have found that a value of 32768 for rps_sock_flow_entries<br>works fairly well on a moderately loaded server.</p>
+<p>For a single queue device, the rps_flow_cnt value for the single queue<br>would normally be configured to the same value as rps_sock_flow_entries.<br>For a multi-queue device, the rps_flow_cnt for each queue might be<br>configured as rps_sock_flow_entries / N, where N is the number of<br>queues. So for instance, if rps_sock_flow_entries is set to 32768 and there<br>are 16 configured receive queues, rps_flow_cnt for each queue might be<br>configured as 2048.</p>
+<h1 id="Accelerated-RFS"><a href="#Accelerated-RFS" class="headerlink" title="Accelerated RFS"></a>Accelerated RFS</h1><p>Accelerated RFS is to RFS what RSS is to RPS: a hardware-accelerated load<br>balancing mechanism that uses soft state to steer flows based on where<br>the application thread consuming the packets of each flow is running.<br>Accelerated RFS should perform better than RFS since packets are sent<br>directly to a CPU local to the thread consuming the data. The target CPU<br>will either be the same CPU where the application runs, or at least a CPU<br>which is local to the application threadâs CPU in the cache hierarchy.</p>
+<p>To enable accelerated RFS, the networking stack calls the<br>ndo_rx_flow_steer driver function to communicate the desired hardware<br>queue for packets matching a particular flow. The network stack<br>automatically calls this function every time a flow entry in<br>rps_dev_flow_table is updated. The driver in turn uses a device specific<br>method to program the NIC to steer the packets.</p>
+<p>The hardware queue for a flow is derived from the CPU recorded in<br>rps_dev_flow_table. The stack consults a CPU to hardware queue map which<br>is maintained by the NIC driver. This is an auto-generated reverse map of<br>the IRQ affinity table shown by /proc/interrupts. Drivers can use<br>functions in the cpu_rmap (âCPU affinity reverse mapâ) kernel library<br>to populate the map. For each CPU, the corresponding queue in the map is<br>set to be one whose processing CPU is closest in cache locality.</p>
+<p>==== Accelerated RFS Configuration</p>
+<p>Accelerated RFS is only available if the kernel is compiled with<br>CONFIG_RFS_ACCEL and support is provided by the NIC device and driver.<br>It also requires that ntuple filtering is enabled via ethtool. The map<br>of CPU to queues is automatically deduced from the IRQ affinities<br>configured for each receive queue by the driver, so no additional<br>configuration should be necessary.</p>
+<p>== Suggested Configuration</p>
+<p>This technique should be enabled whenever one wants to use RFS and the<br>NIC supports hardware acceleration.</p>
+<h1 id="XPS-Transmit-Packet-Steering"><a href="#XPS-Transmit-Packet-Steering" class="headerlink" title="XPS: Transmit Packet Steering"></a>XPS: Transmit Packet Steering</h1><p>Transmit Packet Steering is a mechanism for intelligently selecting<br>which transmit queue to use when transmitting a packet on a multi-queue<br>device. To accomplish this, a mapping from CPU to hardware queue(s) is<br>recorded. The goal of this mapping is usually to assign queues<br>exclusively to a subset of CPUs, where the transmit completions for<br>these queues are processed on a CPU within this set. This choice<br>provides two benefits. First, contention on the device queue lock is<br>significantly reduced since fewer CPUs contend for the same queue<br>(contention can be eliminated completely if each CPU has its own<br>transmit queue). Secondly, cache miss rate on transmit completion is<br>reduced, in particular for data cache lines that hold the sk_buff<br>structures.</p>
+<p>XPS is configured per transmit queue by setting a bitmap of CPUs that<br>may use that queue to transmit. The reverse mapping, from CPUs to<br>transmit queues, is computed and maintained for each network device.<br>When transmitting the first packet in a flow, the function<br>get_xps_queue() is called to select a queue. This function uses the ID<br>of the running CPU as a key into the CPU-to-queue lookup table. If the<br>ID matches a single queue, that is used for transmission. If multiple<br>queues match, one is selected by using the flow hash to compute an index<br>into the set.</p>
+<p>The queue chosen for transmitting a particular flow is saved in the<br>corresponding socket structure for the flow (e.g. a TCP connection).<br>This transmit queue is used for subsequent packets sent on the flow to<br>prevent out of order (ooo) packets. The choice also amortizes the cost<br>of calling get_xps_queues() over all packets in the flow. To avoid<br>ooo packets, the queue for a flow can subsequently only be changed if<br>skb-&gt;ooo_okay is set for a packet in the flow. This flag indicates that<br>there are no outstanding packets in the flow, so the transmit queue can<br>change without the risk of generating out of order packets. The<br>transport layer is responsible for setting ooo_okay appropriately. TCP,<br>for instance, sets the flag when all data for a connection has been<br>acknowledged.</p>
+<p>==== XPS Configuration</p>
+<p>XPS is only available if the kconfig symbol CONFIG_XPS is enabled (on by<br>default for SMP). The functionality remains disabled until explicitly<br>configured. To enable XPS, the bitmap of CPUs that may use a transmit<br>queue is configured using the sysfs file entry:</p>
+<p>/sys/class/net/<dev>/queues/tx-<n>/xps_cpus</p>
+<p>== Suggested Configuration</p>
+<p>For a network device with a single transmission queue, XPS configuration<br>has no effect, since there is no choice in this case. In a multi-queue<br>system, XPS is preferably configured so that each CPU maps onto one queue.<br>If there are as many queues as there are CPUs in the system, then each<br>queue can also map onto one CPU, resulting in exclusive pairings that<br>experience no contention. If there are fewer queues than CPUs, then the<br>best CPUs to share a given queue are probably those that share the cache<br>with the CPU that processes transmit completions for that queue<br>(transmit interrupts).</p>
+<h1 id="Per-TX-Queue-rate-limitation"><a href="#Per-TX-Queue-rate-limitation" class="headerlink" title="Per TX Queue rate limitation:"></a>Per TX Queue rate limitation:</h1><p>These are rate-limitation mechanisms implemented by HW, where currently<br>a max-rate attribute is supported, by setting a Mbps value to</p>
+<p>/sys/class/net/<dev>/queues/tx-<n>/tx_maxrate</p>
+<p>A value of zero means disabled, and this is the default.</p>
+<h1 id="Further-Information"><a href="#Further-Information" class="headerlink" title="Further Information"></a>Further Information</h1><p>RPS and RFS were introduced in kernel 2.6.35. XPS was incorporated into<br>2.6.38. Original patches were submitted by Tom Herbert<br>(therbert@google.com)</p>
+<p>Accelerated RFS was introduced in 2.6.35. Original patches were<br>submitted by Ben Hutchings (<a href="mailto:&#x62;&#x68;&#117;&#x74;&#x63;&#x68;&#105;&#x6e;&#x67;&#115;&#x40;&#x73;&#111;&#x6c;&#x61;&#x72;&#102;&#x6c;&#x61;&#114;&#101;&#x2e;&#99;&#111;&#109;">&#x62;&#x68;&#117;&#x74;&#x63;&#x68;&#105;&#x6e;&#x67;&#115;&#x40;&#x73;&#111;&#x6c;&#x61;&#x72;&#102;&#x6c;&#x61;&#114;&#101;&#x2e;&#99;&#111;&#109;</a>)</p>
+<p>Authors:<br>Tom Herbert (<a href="mailto:&#x74;&#104;&#x65;&#114;&#98;&#x65;&#114;&#x74;&#64;&#103;&#111;&#111;&#103;&#108;&#101;&#46;&#99;&#111;&#x6d;">&#x74;&#104;&#x65;&#114;&#98;&#x65;&#114;&#x74;&#64;&#103;&#111;&#111;&#103;&#108;&#101;&#46;&#99;&#111;&#x6d;</a>)<br>Willem de Bruijn (<a href="mailto:&#x77;&#x69;&#x6c;&#x6c;&#x65;&#109;&#98;&#x40;&#103;&#111;&#111;&#103;&#108;&#101;&#x2e;&#x63;&#111;&#x6d;">&#x77;&#x69;&#x6c;&#x6c;&#x65;&#109;&#98;&#x40;&#103;&#111;&#111;&#103;&#108;&#101;&#x2e;&#x63;&#111;&#x6d;</a>)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_scaling/" title="Kernel-3.10.0-957.el7_scaling" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_scaling/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_s390dbf/" title="Kernel-3.10.0-957.el7_s390dbf"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_scsi_eh/" title="Kernel-3.10.0-957.el7_scsi_eh"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

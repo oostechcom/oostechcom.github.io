@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_s390dbf | oosTech.com</title>
+  <meta name="description" content="S390 Debug Featurefiles: arch&#x2F;s390&#x2F;kernel&#x2F;debug.c       arch&#x2F;s390&#x2F;include&#x2F;asm&#x2F;debug.h Description:The goal of this feature is to provide a kernel debug logging APIwhere log records can be stored effic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_s390dbf">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="S390 Debug Featurefiles: arch&#x2F;s390&#x2F;kernel&#x2F;debug.c       arch&#x2F;s390&#x2F;include&#x2F;asm&#x2F;debug.h Description:The goal of this feature is to provide a kernel debug logging APIwhere log records can be stored effic">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#S390-Debug-Feature"><span class="toc-number">1.</span> <span class="toc-text">S390 Debug Feature</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Description"><span class="toc-number">1.1.</span> <span class="toc-text">Description:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Design"><span class="toc-number">1.2.</span> <span class="toc-text">Design:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kernel-Interfaces"><span class="toc-number">1.3.</span> <span class="toc-text">Kernel Interfaces:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Predefined-views"><span class="toc-number">1.4.</span> <span class="toc-text">Predefined views:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Examples"><span class="toc-number">1.5.</span> <span class="toc-text">Examples</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Debugfs-Interface"><span class="toc-number">1.6.</span> <span class="toc-text">Debugfs Interface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Changing-the-debug-level"><span class="toc-number">1.7.</span> <span class="toc-text">Changing the debug level</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Flushing-debug-areas"><span class="toc-number">1.8.</span> <span class="toc-text">Flushing debug areas</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Changing-the-size-of-debug-areas"><span class="toc-number">1.9.</span> <span class="toc-text">Changing the size of debug areas</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Stooping-the-debug-feature"><span class="toc-number">1.10.</span> <span class="toc-text">Stooping the debug feature</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#lcrash-Interface"><span class="toc-number">1.11.</span> <span class="toc-text">lcrash Interface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Investigating-raw-memory"><span class="toc-number">1.12.</span> <span class="toc-text">Investigating raw memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Predefined-Views"><span class="toc-number">1.13.</span> <span class="toc-text">Predefined Views</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#area-time-level-exception-cpu-caller-data-hex-ascii"><span class="toc-number">1.14.</span> <span class="toc-text">area  time           level exception cpu caller    data (hex + ascii)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Defining-views"><span class="toc-number">1.15.</span> <span class="toc-text">Defining views</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_s390dbf" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_s390dbf
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="S390-Debug-Feature"><a href="#S390-Debug-Feature" class="headerlink" title="S390 Debug Feature"></a>S390 Debug Feature</h1><p>files: arch/s390/kernel/debug.c<br>       arch/s390/include/asm/debug.h</p>
+<h2 id="Description"><a href="#Description" class="headerlink" title="Description:"></a>Description:</h2><p>The goal of this feature is to provide a kernel debug logging API<br>where log records can be stored efficiently in memory, where each component<br>(e.g. device drivers) can have one separate debug log.<br>One purpose of this is to inspect the debug logs after a production system crash<br>in order to analyze the reason for the crash.<br>If the system still runs but only a subcomponent which uses dbf fails,<br>it is possible to look at the debug logs on a live system via the Linux<br>debugfs filesystem.<br>The debug feature may also very useful for kernel and driver development.</p>
+<h2 id="Design"><a href="#Design" class="headerlink" title="Design:"></a>Design:</h2><p>Kernel components (e.g. device drivers) can register themselves at the debug<br>feature with the function call debug_register(). This function initializes a<br>debug log for the caller. For each debug log exists a number of debug areas<br>where exactly one is active at one time.  Each debug area consists of contiguous<br>pages in memory. In the debug areas there are stored debug entries (log records)<br>which are written by event- and exception-calls. </p>
+<p>An event-call writes the specified debug entry to the active debug<br>area and updates the log pointer for the active area. If the end<br>of the active debug area is reached, a wrap around is done (ring buffer)<br>and the next debug entry will be written at the beginning of the active<br>debug area.</p>
+<p>An exception-call writes the specified debug entry to the log and<br>switches to the next debug area. This is done in order to be sure<br>that the records which describe the origin of the exception are not<br>overwritten when a wrap around for the current area occurs.</p>
+<p>The debug areas themselves are also ordered in form of a ring buffer.<br>When an exception is thrown in the last debug area, the following debug<br>entries are then written again in the very first area.</p>
+<p>There are three versions for the event- and exception-calls: One for<br>logging raw data, one for text and one for numbers.</p>
+<p>Each debug entry contains the following data:</p>
+<ul>
+<li>Timestamp</li>
+<li>Cpu-Number of calling task</li>
+<li>Level of debug entry (0…6)</li>
+<li>Return Address to caller</li>
+<li>Flag, if entry is an exception or not</li>
+</ul>
+<p>The debug logs can be inspected in a live system through entries in<br>the debugfs-filesystem. Under the toplevel directory “s390dbf” there is<br>a directory for each registered component, which is named like the<br>corresponding component. The debugfs normally should be mounted to<br>/sys/kernel/debug therefore the debug feature can be accessed under<br>/sys/kernel/debug/s390dbf.</p>
+<p>The content of the directories are files which represent different views<br>to the debug log. Each component can decide which views should be<br>used through registering them with the function debug_register_view().<br>Predefined views for hex/ascii, sprintf and raw binary data are provided.<br>It is also possible to define other views. The content of<br>a view can be inspected simply by reading the corresponding debugfs file.</p>
+<p>All debug logs have an actual debug level (range from 0 to 6).<br>The default level is 3. Event and Exception functions have a ‘level’<br>parameter. Only debug entries with a level that is lower or equal<br>than the actual level are written to the log. This means, when<br>writing events, high priority log entries should have a low level<br>value whereas low priority entries should have a high one.<br>The actual debug level can be changed with the help of the debugfs-filesystem<br>through writing a number string “x” to the ‘level’ debugfs file which is<br>provided for every debug log. Debugging can be switched off completely<br>by using “-“ on the ‘level’ debugfs file.</p>
+<p>Example:</p>
+<blockquote>
+<p>echo “-“ &gt; /sys/kernel/debug/s390dbf/dasd/level</p>
+</blockquote>
+<p>It is also possible to deactivate the debug feature globally for every<br>debug log. You can change the behavior using  2 sysctl parameters in<br>/proc/sys/s390dbf:<br>There are currently 2 possible triggers, which stop the debug feature<br>globally. The first possibility is to use the “debug_active” sysctl. If<br>set to 1 the debug feature is running. If “debug_active” is set to 0 the<br>debug feature is turned off.<br>The second trigger which stops the debug feature is a kernel oops.<br>That prevents the debug feature from overwriting debug information that<br>happened before the oops. After an oops you can reactivate the debug feature<br>by piping 1 to /proc/sys/s390dbf/debug_active. Nevertheless, its not<br>suggested to use an oopsed kernel in a production environment.<br>If you want to disallow the deactivation of the debug feature, you can use<br>the “debug_stoppable” sysctl. If you set “debug_stoppable” to 0 the debug<br>feature cannot be stopped. If the debug feature is already stopped, it<br>will stay deactivated.</p>
+<h2 id="Kernel-Interfaces"><a href="#Kernel-Interfaces" class="headerlink" title="Kernel Interfaces:"></a>Kernel Interfaces:</h2><hr>
+<p>debug_info_t *debug_register(char *name, int pages, int nr_areas,<br>                             int buf_size);</p>
+<p>Parameter:    name:        Name of debug log (e.g. used for debugfs entry)<br>              pages:       number of pages, which will be allocated per area<br>              nr_areas:    number of debug areas<br>              buf_size:    size of data area in each debug entry</p>
+<p>Return Value: Handle for generated debug area<br>              NULL if register failed </p>
+<p>Description:  Allocates memory for a debug log<br>              Must not be called within an interrupt handler </p>
+<hr>
+<p>debug_info_t *debug_register_mode(char *name, int pages, int nr_areas,<br>                  int buf_size, mode_t mode, uid_t uid,<br>                  gid_t gid);</p>
+<p>Parameter:    name:       Name of debug log (e.g. used for debugfs entry)<br>          pages:       Number of pages, which will be allocated per area<br>          nr_areas:    Number of debug areas<br>          buf_size:    Size of data area in each debug entry<br>          mode:       File mode for debugfs files. E.g. S_IRWXUGO<br>          uid:       User ID for debugfs files. Currently only 0 is<br>               supported.<br>          gid:       Group ID for debugfs files. Currently only 0 is<br>               supported.</p>
+<p>Return Value: Handle for generated debug area<br>          NULL if register failed</p>
+<p>Description:  Allocates memory for a debug log<br>          Must not be called within an interrupt handler</p>
+<hr>
+<p>void debug_unregister (debug_info_t * id);</p>
+<p>Parameter:     id:   handle for debug log  </p>
+<p>Return Value:  none </p>
+<p>Description:   frees memory for a debug log and removes all registered debug<br>           views.<br>               Must not be called within an interrupt handler </p>
+<hr>
+<p>void debug_set_level (debug_info_t * id, int new_level);</p>
+<p>Parameter:     id:        handle for debug log<br>               new_level: new debug level </p>
+<p>Return Value:  none </p>
+<p>Description:   Sets new actual debug level if new_level is valid. </p>
+<hr>
+<p>bool debug_level_enabled (debug_info_t * id, int level);</p>
+<p>Parameter:    id:      handle for debug log<br>          level:      debug level</p>
+<p>Return Value: True if level is less or equal to the current debug level.</p>
+<p>Description:  Returns true if debug events for the specified level would be<br>          logged. Otherwise returns false.</p>
+<hr>
+<p>void debug_stop_all(void);</p>
+<p>Parameter:     none</p>
+<p>Return Value:  none</p>
+<p>Description:   stops the debug feature if stopping is allowed. Currently<br>               used in case of a kernel oops.</p>
+<hr>
+<p>debug_entry_t* debug_event (debug_info_t* id, int level, void* data,<br>                            int length);</p>
+<p>Parameter:     id:     handle for debug log<br>               level:  debug level<br>               data:   pointer to data for debug entry<br>               length: length of data in bytes       </p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry to active debug area (if level &lt;= actual<br>               debug level)    </p>
+<hr>
+<p>debug_entry_t* debug_int_event (debug_info_t * id, int level,<br>                                unsigned int data);<br>debug_entry_t* debug_long_event(debug_info_t * id, int level,<br>                                unsigned long data);</p>
+<p>Parameter:     id:     handle for debug log<br>               level:  debug level<br>               data:   integer value for debug entry           </p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry to active debug area (if level &lt;= actual<br>               debug level)    </p>
+<hr>
+<p>debug_entry_t* debug_text_event (debug_info_t * id, int level,<br>                                 const char* data);</p>
+<p>Parameter:     id:     handle for debug log<br>               level:  debug level<br>               data:   string for debug entry  </p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry in ascii format to active debug area<br>               (if level &lt;= actual debug level)     </p>
+<hr>
+<p>debug_entry_t* debug_sprintf_event (debug_info_t * id, int level,<br>                                    char* string,…);</p>
+<p>Parameter:     id:    handle for debug log<br>               level: debug level<br>               string: format string for debug entry<br>               …: varargs used as in sprintf()</p>
+<p>Return Value:  Address of written debug entry</p>
+<p>Description:   writes debug entry with format string and varargs (longs) to<br>               active debug area (if level $&lt;=$ actual debug level).<br>               floats and long long datatypes cannot be used as varargs.</p>
+<hr>
+<p>debug_entry_t* debug_exception (debug_info_t* id, int level, void* data,<br>                                int length);</p>
+<p>Parameter:     id:     handle for debug log<br>               level:  debug level<br>               data:   pointer to data for debug entry<br>               length: length of data in bytes       </p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry to active debug area (if level &lt;= actual<br>               debug level) and switches to next debug area  </p>
+<hr>
+<p>debug_entry_t* debug_int_exception (debug_info_t * id, int level,<br>                                    unsigned int data);<br>debug_entry_t* debug_long_exception(debug_info_t * id, int level,<br>                                    unsigned long data);</p>
+<p>Parameter:     id:     handle for debug log<br>               level:  debug level<br>               data:   integer value for debug entry           </p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry to active debug area (if level &lt;= actual<br>               debug level) and switches to next debug area  </p>
+<hr>
+<p>debug_entry_t* debug_text_exception (debug_info_t * id, int level,<br>                                     const char* data);</p>
+<p>Parameter:     id:     handle for debug log<br>               level:  debug level<br>               data:   string for debug entry  </p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry in ascii format to active debug area<br>               (if level &lt;= actual debug level) and switches to next debug<br>               area  </p>
+<hr>
+<p>debug_entry_t* debug_sprintf_exception (debug_info_t * id, int level,<br>                                        char* string,…);</p>
+<p>Parameter:     id:    handle for debug log<br>               level: debug level<br>               string: format string for debug entry<br>               …: varargs used as in sprintf()</p>
+<p>Return Value:  Address of written debug entry </p>
+<p>Description:   writes debug entry with format string and varargs (longs) to<br>               active debug area (if level $&lt;=$ actual debug level) and<br>               switches to next debug area.<br>               floats and long long datatypes cannot be used as varargs.</p>
+<hr>
+<p>int debug_register_view (debug_info_t * id, struct debug_view *view);</p>
+<p>Parameter:     id:    handle for debug log<br>               view:  pointer to debug view struct </p>
+<p>Return Value:  0  : ok<br>               &lt; 0: Error </p>
+<p>Description:   registers new debug view and creates debugfs dir entry</p>
+<hr>
+<p>int debug_unregister_view (debug_info_t * id, struct debug_view *view); </p>
+<p>Parameter:     id:    handle for debug log<br>               view:  pointer to debug view struct </p>
+<p>Return Value:  0  : ok<br>               &lt; 0: Error </p>
+<p>Description:   unregisters debug view and removes debugfs dir entry</p>
+<h2 id="Predefined-views"><a href="#Predefined-views" class="headerlink" title="Predefined views:"></a>Predefined views:</h2><p>extern struct debug_view debug_hex_ascii_view;<br>extern struct debug_view debug_raw_view;<br>extern struct debug_view debug_sprintf_view;</p>
+<h2 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h2><p>/*</p>
+<ul>
+<li>hex_ascii- + raw-view Example</li>
+<li>/</li>
+</ul>
+<p>#include &lt;linux/init.h&gt;<br>#include &lt;asm/debug.h&gt;</p>
+<p>static debug_info_t* debug_info;</p>
+<p>static int init(void)<br>{<br>    /* register 4 debug areas with one page each and 4 byte data field */</p>
+<pre><code>debug_info = debug_register (&quot;test&quot;, 1, 4, 4 );
+debug_register_view(debug_info,&amp;debug_hex_ascii_view);
+debug_register_view(debug_info,&amp;debug_raw_view);
+
+debug_text_event(debug_info, 4 , &quot;one &quot;);
+debug_int_exception(debug_info, 4, 4711);
+debug_event(debug_info, 3, &amp;debug_info, 4);
+
+return 0;
+</code></pre>
+<p>}</p>
+<p>static void cleanup(void)<br>{<br>    debug_unregister (debug_info);<br>}</p>
+<p>module_init(init);<br>module_exit(cleanup);</p>
+<hr>
+<p>/*</p>
+<ul>
+<li>sprintf-view Example</li>
+<li>/</li>
+</ul>
+<p>#include &lt;linux/init.h&gt;<br>#include &lt;asm/debug.h&gt;</p>
+<p>static debug_info_t* debug_info;</p>
+<p>static int init(void)<br>{<br>    /* register 4 debug areas with one page each and data field for <em>/<br>    /</em> format string pointer + 2 varargs (= 3 * sizeof(long))       */</p>
+<pre><code>debug_info = debug_register (&quot;test&quot;, 1, 4, sizeof(long) * 3);
+debug_register_view(debug_info,&amp;debug_sprintf_view);
+
+debug_sprintf_event(debug_info, 2 , &quot;first event in %s:%i\n&quot;,__FILE__,__LINE__);
+debug_sprintf_exception(debug_info, 1, &quot;pointer to debug info: %p\n&quot;,&amp;debug_info);
+
+return 0;
+</code></pre>
+<p>}</p>
+<p>static void cleanup(void)<br>{<br>    debug_unregister (debug_info);<br>}</p>
+<p>module_init(init);<br>module_exit(cleanup);</p>
+<h2 id="Debugfs-Interface"><a href="#Debugfs-Interface" class="headerlink" title="Debugfs Interface"></a>Debugfs Interface</h2><p>Views to the debug logs can be investigated through reading the corresponding<br>debugfs-files:</p>
+<p>Example:</p>
+<blockquote>
+<p>ls /sys/kernel/debug/s390dbf/dasd<br>flush  hex_ascii  level pages raw<br>cat /sys/kernel/debug/s390dbf/dasd/hex_ascii | sort -k2,2 -s<br>00 00974733272:680099 2 - 02 0006ad7e  07 ea 4a 90 | ….<br>00 00974733272:682210 2 - 02 0006ade6  46 52 45 45 | FREE<br>00 00974733272:682213 2 - 02 0006adf6  07 ea 4a 90 | ….<br>00 00974733272:682281 1 * 02 0006ab08  41 4c 4c 43 | EXCP<br>01 00974733272:682284 2 - 02 0006ab16  45 43 4b 44 | ECKD<br>01 00974733272:682287 2 - 02 0006ab28  00 00 00 04 | ….<br>01 00974733272:682289 2 - 02 0006ab3e  00 00 00 20 | …<br>01 00974733272:682297 2 - 02 0006ad7e  07 ea 4a 90 | ….<br>01 00974733272:684384 2 - 00 0006ade6  46 52 45 45 | FREE<br>01 00974733272:684388 2 - 00 0006adf6  07 ea 4a 90 | ….</p>
+</blockquote>
+<p>See section about predefined views for explanation of the above output!</p>
+<h2 id="Changing-the-debug-level"><a href="#Changing-the-debug-level" class="headerlink" title="Changing the debug level"></a>Changing the debug level</h2><p>Example:</p>
+<blockquote>
+<p>cat /sys/kernel/debug/s390dbf/dasd/level<br>3<br>echo “5” &gt; /sys/kernel/debug/s390dbf/dasd/level<br>cat /sys/kernel/debug/s390dbf/dasd/level<br>5</p>
+</blockquote>
+<h2 id="Flushing-debug-areas"><a href="#Flushing-debug-areas" class="headerlink" title="Flushing debug areas"></a>Flushing debug areas</h2><p>Debug areas can be flushed with piping the number of the desired<br>area (0…n) to the debugfs file “flush”. When using “-“ all debug areas<br>are flushed.</p>
+<p>Examples:</p>
+<ol>
+<li><p>Flush debug area 0:</p>
+<blockquote>
+<p>echo “0” &gt; /sys/kernel/debug/s390dbf/dasd/flush</p>
+</blockquote>
+</li>
+<li><p>Flush all debug areas:</p>
+<blockquote>
+<p>echo “-“ &gt; /sys/kernel/debug/s390dbf/dasd/flush</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="Changing-the-size-of-debug-areas"><a href="#Changing-the-size-of-debug-areas" class="headerlink" title="Changing the size of debug areas"></a>Changing the size of debug areas</h2><p>It is possible the change the size of debug areas through piping<br>the number of pages to the debugfs file “pages”. The resize request will<br>also flush the debug areas.</p>
+<p>Example:</p>
+<p>Define 4 pages for the debug areas of debug feature “dasd”:</p>
+<blockquote>
+<p>echo “4” &gt; /sys/kernel/debug/s390dbf/dasd/pages</p>
+</blockquote>
+<h2 id="Stooping-the-debug-feature"><a href="#Stooping-the-debug-feature" class="headerlink" title="Stooping the debug feature"></a>Stooping the debug feature</h2><p>Example:</p>
+<ol>
+<li>Check if stopping is allowed<blockquote>
+<p>cat /proc/sys/s390dbf/debug_stoppable</p>
+</blockquote>
+</li>
+<li>Stop debug feature<blockquote>
+<p>echo 0 &gt; /proc/sys/s390dbf/debug_active</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="lcrash-Interface"><a href="#lcrash-Interface" class="headerlink" title="lcrash Interface"></a>lcrash Interface</h2><p>It is planned that the dump analysis tool lcrash gets an additional command<br>‘s390dbf’ to display all the debug logs. With this tool it will be possible<br>to investigate the debug logs on a live system and with a memory dump after<br>a system crash.</p>
+<h2 id="Investigating-raw-memory"><a href="#Investigating-raw-memory" class="headerlink" title="Investigating raw memory"></a>Investigating raw memory</h2><p>One last possibility to investigate the debug logs at a live<br>system and after a system crash is to look at the raw memory<br>under VM or at the Service Element.<br>It is possible to find the anker of the debug-logs through<br>the ‘debug_area_first’ symbol in the System map. Then one has<br>to follow the correct pointers of the data-structures defined<br>in debug.h and find the debug-areas in memory.<br>Normally modules which use the debug feature will also have<br>a global variable with the pointer to the debug-logs. Following<br>this pointer it will also be possible to find the debug logs in<br>memory.</p>
+<p>For this method it is recommended to use ‘16 * x + 4’ byte (x = 0..n)<br>for the length of the data field in debug_register() in<br>order to see the debug entries well formatted.</p>
+<h2 id="Predefined-Views"><a href="#Predefined-Views" class="headerlink" title="Predefined Views"></a>Predefined Views</h2><p>There are three predefined views: hex_ascii, raw and sprintf.<br>The hex_ascii view shows the data field in hex and ascii representation<br>(e.g. ‘45 43 4b 44 | ECKD’).<br>The raw view returns a bytestream as the debug areas are stored in memory.</p>
+<p>The sprintf view formats the debug entries in the same way as the sprintf<br>function would do. The sprintf event/exception functions write to the<br>debug entry a pointer to the format string (size = sizeof(long))<br>and for each vararg a long value. So e.g. for a debug entry with a format<br>string plus two varargs one would need to allocate a (3 * sizeof(long))<br>byte data area in the debug_register() function.</p>
+<p>IMPORTANT: Using “%s” in sprintf event functions is dangerous. You can only<br>use “%s” in the sprintf event functions, if the memory for the passed string is<br>available as long as the debug feature exists. The reason behind this is that<br>due to performance considerations only a pointer to the string is stored in<br>the debug feature. If you log a string that is freed afterwards, you will get<br>an OOPS when inspecting the debug feature, because then the debug feature will<br>access the already freed memory.</p>
+<p>NOTE: If using the sprintf view do NOT use other event/exception functions<br>than the sprintf-event and -exception functions.</p>
+<p>The format of the hex_ascii and sprintf view is as follows:</p>
+<ul>
+<li>Number of area</li>
+<li>Timestamp (formatted as seconds and microseconds since 00:00:00 Coordinated<br>Universal Time (UTC), January 1, 1970)</li>
+<li>level of debug entry</li>
+<li>Exception flag (* = Exception)</li>
+<li>Cpu-Number of calling task</li>
+<li>Return Address to caller</li>
+<li>data field</li>
+</ul>
+<p>The format of the raw view is:</p>
+<ul>
+<li>Header as described in debug.h</li>
+<li>datafield </li>
+</ul>
+<p>A typical line of the hex_ascii view will look like the following (first line<br>is only for explanation and will not be displayed when ‘cating’ the view):</p>
+<h2 id="area-time-level-exception-cpu-caller-data-hex-ascii"><a href="#area-time-level-exception-cpu-caller-data-hex-ascii" class="headerlink" title="area  time           level exception cpu caller    data (hex + ascii)"></a>area  time           level exception cpu caller    data (hex + ascii)</h2><p>00    00964419409:440690 1 -         00  88023fe   </p>
+<h2 id="Defining-views"><a href="#Defining-views" class="headerlink" title="Defining views"></a>Defining views</h2><p>Views are specified with the ‘debug_view’ structure. There are defined<br>callback functions which are used for reading and writing the debugfs files:</p>
+<p>struct debug_view {<br>        char name[DEBUG_MAX_PROCF_LEN];<br>        debug_prolog_proc_t* prolog_proc;<br>        debug_header_proc_t* header_proc;<br>        debug_format_proc_t* format_proc;<br>        debug_input_proc_t*  input_proc;<br>    void*                private_data;<br>};</p>
+<p>where</p>
+<p>typedef int (debug_header_proc_t) (debug_info_t* id,<br>                                   struct debug_view* view,<br>                                   int area,<br>                                   debug_entry_t* entry,<br>                                   char* out_buf);</p>
+<p>typedef int (debug_format_proc_t) (debug_info_t* id,<br>                                   struct debug_view* view, char* out_buf,<br>                                   const char* in_buf);<br>typedef int (debug_prolog_proc_t) (debug_info_t* id,<br>                                   struct debug_view* view,<br>                                   char* out_buf);<br>typedef int (debug_input_proc_t) (debug_info_t* id,<br>                                  struct debug_view* view,<br>                                  struct file* file, const char* user_buf,<br>                                  size_t in_buf_size, loff_t* offset);</p>
+<p>The “private_data” member can be used as pointer to view specific data.<br>It is not used by the debug feature itself.</p>
+<p>The output when reading a debugfs file is structured like this:</p>
+<p>“prolog_proc output”</p>
+<p>“header_proc output 1”  “format_proc output 1”<br>“header_proc output 2”  “format_proc output 2”<br>“header_proc output 3”  “format_proc output 3”<br>…</p>
+<p>When a view is read from the debugfs, the Debug Feature calls the<br>‘prolog_proc’ once for writing the prolog.<br>Then ‘header_proc’ and ‘format_proc’ are called for each<br>existing debug entry.</p>
+<p>The input_proc can be used to implement functionality when it is written to<br>the view (e.g. like with ‘echo “0” &gt; /sys/kernel/debug/s390dbf/dasd/level).</p>
+<p>For header_proc there can be used the default function<br>debug_dflt_header_fn() which is defined in debug.h.<br>and which produces the same header output as the predefined views.<br>E.g:<br>00 00964419409:440761 2 - 00 88023ec</p>
+<p>In order to see how to use the callback functions check the implementation<br>of the default views!</p>
+<p>Example</p>
+<p>#include &lt;asm/debug.h&gt;</p>
+<p>#define UNKNOWNSTR “data: %08x”</p>
+<p>const char* messages[] =<br>{“This error………..\n”,<br> “That error………..\n”,<br> “Problem…………..\n”,<br> “Something went wrong.\n”,<br> “Everything ok……..\n”,<br> NULL<br>};</p>
+<p>static int debug_test_format_fn(<br>   debug_info_t * id, struct debug_view *view,<br>   char *out_buf, const char *in_buf<br>)<br>{<br>  int i, rc = 0;</p>
+<p>  if(id-&gt;buf_size &gt;= 4) {<br>     int msg_nr = <em>((int</em>)in_buf);<br>     if(msg_nr &lt; sizeof(messages)/sizeof(char*) - 1)<br>        rc += sprintf(out_buf, “%s”, messages[msg_nr]);<br>     else<br>        rc += sprintf(out_buf, UNKNOWNSTR, msg_nr);<br>  }<br> out:<br>   return rc;<br>}</p>
+<p>struct debug_view debug_test_view = {<br>  “myview”,                 /* name of view <em>/<br>  NULL,                     /</em> no prolog <em>/<br>  &amp;debug_dflt_header_fn,    /</em> default header for each entry <em>/<br>  &amp;debug_test_format_fn,    /</em> our own format function <em>/<br>  NULL,                     /</em> no input function <em>/<br>  NULL                      /</em> no private data */<br>};</p>
+<p>=====<br>test:<br>=====<br>debug_info_t *debug_info;<br>…<br>debug_info = debug_register (“test”, 0, 4, 4 ));<br>debug_register_view(debug_info, &amp;debug_test_view);<br>for(i = 0; i &lt; 10; i ++) debug_int_event(debug_info, 1, i);</p>
+<blockquote>
+<p>cat /sys/kernel/debug/s390dbf/test/myview<br>00 00964419734:611402 1 - 00 88042ca   This error………..<br>00 00964419734:611405 1 - 00 88042ca   That error………..<br>00 00964419734:611408 1 - 00 88042ca   Problem…………..<br>00 00964419734:611411 1 - 00 88042ca   Something went wrong.<br>00 00964419734:611414 1 - 00 88042ca   Everything ok……..<br>00 00964419734:611417 1 - 00 88042ca   data: 00000005<br>00 00964419734:611419 1 - 00 88042ca   data: 00000006<br>00 00964419734:611422 1 - 00 88042ca   data: 00000007<br>00 00964419734:611425 1 - 00 88042ca   data: 00000008<br>00 00964419734:611428 1 - 00 88042ca   data: 00000009</p>
+</blockquote>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/" title="Kernel-4.18.0-80.el8_s390dbf" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_s390dbf/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_rt-mutex-design/" title="Kernel-4.18.0-80.el8_rt-mutex-design"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_scaling/" title="Kernel-4.18.0-80.el8_scaling"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_lockdep-design | oosTech.com</title>
+  <meta name="description" content="Runtime locking correctness validatorstarted by Ingo Molnar &amp;#109;&amp;#105;&amp;#x6e;&amp;#103;&amp;#x6f;&amp;#x40;&amp;#x72;&amp;#x65;&amp;#100;&amp;#104;&amp;#97;&amp;#116;&amp;#46;&amp;#99;&amp;#111;&amp;#109;additions by Arjan van de Ven &amp;#97;&amp;#114;&amp;#x6a;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_lockdep-design">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Runtime locking correctness validatorstarted by Ingo Molnar &amp;#109;&amp;#105;&amp;#x6e;&amp;#103;&amp;#x6f;&amp;#x40;&amp;#x72;&amp;#x65;&amp;#100;&amp;#104;&amp;#97;&amp;#116;&amp;#46;&amp;#99;&amp;#111;&amp;#109;additions by Arjan van de Ven &amp;#97;&amp;#114;&amp;#x6a;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Runtime-locking-correctness-validator"><span class="toc-number">1.</span> <span class="toc-text">Runtime locking correctness validator</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lock-class"><span class="toc-number">1.1.</span> <span class="toc-text">Lock-class</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#State"><span class="toc-number">1.2.</span> <span class="toc-text">State</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Single-lock-state-rules"><span class="toc-number">1.3.</span> <span class="toc-text">Single-lock state rules:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Multi-lock-dependency-rules"><span class="toc-number">1.4.</span> <span class="toc-text">Multi-lock dependency rules:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Exception-Nested-data-dependencies-leading-to-nested-locking"><span class="toc-number">1.5.</span> <span class="toc-text">Exception: Nested data dependencies leading to nested locking</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proof-of-100-correctness"><span class="toc-number">1.6.</span> <span class="toc-text">Proof of 100% correctness:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Performance"><span class="toc-number">1.7.</span> <span class="toc-text">Performance:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Troubleshooting"><span class="toc-number">1.8.</span> <span class="toc-text">Troubleshooting:</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_lockdep-design" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_lockdep-design
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Runtime-locking-correctness-validator"><a href="#Runtime-locking-correctness-validator" class="headerlink" title="Runtime locking correctness validator"></a>Runtime locking correctness validator</h1><p>started by Ingo Molnar <a href="mailto:&#109;&#105;&#x6e;&#103;&#x6f;&#x40;&#x72;&#x65;&#100;&#104;&#97;&#116;&#46;&#99;&#111;&#109;">&#109;&#105;&#x6e;&#103;&#x6f;&#x40;&#x72;&#x65;&#100;&#104;&#97;&#116;&#46;&#99;&#111;&#109;</a><br>additions by Arjan van de Ven <a href="mailto:&#97;&#114;&#x6a;&#97;&#x6e;&#64;&#x6c;&#105;&#x6e;&#x75;&#120;&#x2e;&#105;&#110;&#x74;&#x65;&#108;&#46;&#x63;&#111;&#x6d;">&#97;&#114;&#x6a;&#97;&#x6e;&#64;&#x6c;&#105;&#x6e;&#x75;&#120;&#x2e;&#105;&#110;&#x74;&#x65;&#108;&#46;&#x63;&#111;&#x6d;</a></p>
+<h2 id="Lock-class"><a href="#Lock-class" class="headerlink" title="Lock-class"></a>Lock-class</h2><p>The basic object the validator operates upon is a ‘class’ of locks.</p>
+<p>A class of locks is a group of locks that are logically the same with<br>respect to locking rules, even if the locks may have multiple (possibly<br>tens of thousands of) instantiations. For example a lock in the inode<br>struct is one class, while each inode has its own instantiation of that<br>lock class.</p>
+<p>The validator tracks the ‘state’ of lock-classes, and it tracks<br>dependencies between different lock-classes. The validator maintains a<br>rolling proof that the state and the dependencies are correct.</p>
+<p>Unlike an lock instantiation, the lock-class itself never goes away: when<br>a lock-class is used for the first time after bootup it gets registered,<br>and all subsequent uses of that lock-class will be attached to this<br>lock-class.</p>
+<h2 id="State"><a href="#State" class="headerlink" title="State"></a>State</h2><p>The validator tracks lock-class usage history into 4n + 1 separate state bits:</p>
+<ul>
+<li>‘ever held in STATE context’</li>
+<li>‘ever held as readlock in STATE context’</li>
+<li>‘ever held with STATE enabled’</li>
+<li>‘ever held as readlock with STATE enabled’</li>
+</ul>
+<p>Where STATE can be either one of (kernel/lockdep_states.h)</p>
+<ul>
+<li><p>hardirq</p>
+</li>
+<li><p>softirq</p>
+</li>
+<li><p>reclaim_fs</p>
+</li>
+<li><p>‘ever used’                                       [ == !unused        ]</p>
+</li>
+</ul>
+<p>When locking rules are violated, these state bits are presented in the<br>locking error messages, inside curlies. A contrived example:</p>
+<p>   modprobe/2287 is trying to acquire lock:<br>    (&amp;sio_locks[i].lock){-.-…}, at: [<c02867fd>] mutex_lock+0x21/0x24</p>
+<p>   but task is already holding lock:<br>    (&amp;sio_locks[i].lock){-.-…}, at: [<c02867fd>] mutex_lock+0x21/0x24</p>
+<p>The bit position indicates STATE, STATE-read, for each of the states listed<br>above, and the character displayed in each indicates:</p>
+<p>   ‘.’  acquired while irqs disabled and not in irq context<br>   ‘-‘  acquired in irq context<br>   ‘+’  acquired with irqs enabled<br>   ‘?’  acquired in irq context with irqs enabled.</p>
+<p>Unused mutexes cannot be part of the cause of an error.</p>
+<h2 id="Single-lock-state-rules"><a href="#Single-lock-state-rules" class="headerlink" title="Single-lock state rules:"></a>Single-lock state rules:</h2><p>A softirq-unsafe lock-class is automatically hardirq-unsafe as well. The<br>following states are exclusive, and only one of them is allowed to be<br>set for any lock-class:</p>
+<p> <hardirq-safe> and <hardirq-unsafe><br> <softirq-safe> and <softirq-unsafe></p>
+<p>The validator detects and reports lock usage that violate these<br>single-lock state rules.</p>
+<h2 id="Multi-lock-dependency-rules"><a href="#Multi-lock-dependency-rules" class="headerlink" title="Multi-lock dependency rules:"></a>Multi-lock dependency rules:</h2><p>The same lock-class must not be acquired twice, because this could lead<br>to lock recursion deadlocks.</p>
+<p>Furthermore, two locks may not be taken in different order:</p>
+<p> <L1> -&gt; <L2><br> <L2> -&gt; <L1></p>
+<p>because this could lead to lock inversion deadlocks. (The validator<br>finds such dependencies in arbitrary complexity, i.e. there can be any<br>other locking sequence between the acquire-lock operations, the<br>validator will still track all dependencies between locks.)</p>
+<p>Furthermore, the following usage based lock dependencies are not allowed<br>between any two lock-classes:</p>
+<p>   <hardirq-safe>   -&gt;  <hardirq-unsafe><br>   <softirq-safe>   -&gt;  <softirq-unsafe></p>
+<p>The first rule comes from the fact the a hardirq-safe lock could be<br>taken by a hardirq context, interrupting a hardirq-unsafe lock - and<br>thus could result in a lock inversion deadlock. Likewise, a softirq-safe<br>lock could be taken by an softirq context, interrupting a softirq-unsafe<br>lock.</p>
+<p>The above rules are enforced for any locking sequence that occurs in the<br>kernel: when acquiring a new lock, the validator checks whether there is<br>any rule violation between the new lock and any of the held locks.</p>
+<p>When a lock-class changes its state, the following aspects of the above<br>dependency rules are enforced:</p>
+<ul>
+<li><p>if a new hardirq-safe lock is discovered, we check whether it<br>took any hardirq-unsafe lock in the past.</p>
+</li>
+<li><p>if a new softirq-safe lock is discovered, we check whether it took<br>any softirq-unsafe lock in the past.</p>
+</li>
+<li><p>if a new hardirq-unsafe lock is discovered, we check whether any<br>hardirq-safe lock took it in the past.</p>
+</li>
+<li><p>if a new softirq-unsafe lock is discovered, we check whether any<br>softirq-safe lock took it in the past.</p>
+</li>
+</ul>
+<p>(Again, we do these checks too on the basis that an interrupt context<br>could interrupt <em>any</em> of the irq-unsafe or hardirq-unsafe locks, which<br>could lead to a lock inversion deadlock - even if that lock scenario did<br>not trigger in practice yet.)</p>
+<h2 id="Exception-Nested-data-dependencies-leading-to-nested-locking"><a href="#Exception-Nested-data-dependencies-leading-to-nested-locking" class="headerlink" title="Exception: Nested data dependencies leading to nested locking"></a>Exception: Nested data dependencies leading to nested locking</h2><p>There are a few cases where the Linux kernel acquires more than one<br>instance of the same lock-class. Such cases typically happen when there<br>is some sort of hierarchy within objects of the same type. In these<br>cases there is an inherent “natural” ordering between the two objects<br>(defined by the properties of the hierarchy), and the kernel grabs the<br>locks in this fixed order on each of the objects.</p>
+<p>An example of such an object hierarchy that results in “nested locking”<br>is that of a “whole disk” block-dev object and a “partition” block-dev<br>object; the partition is “part of” the whole device and as long as one<br>always takes the whole disk lock as a higher lock than the partition<br>lock, the lock ordering is fully correct. The validator does not<br>automatically detect this natural ordering, as the locking rule behind<br>the ordering is not static.</p>
+<p>In order to teach the validator about this correct usage model, new<br>versions of the various locking primitives were added that allow you to<br>specify a “nesting level”. An example call, for the block device mutex,<br>looks like this:</p>
+<p>enum bdev_bd_mutex_lock_class<br>{<br>       BD_MUTEX_NORMAL,<br>       BD_MUTEX_WHOLE,<br>       BD_MUTEX_PARTITION<br>};</p>
+<p> mutex_lock_nested(&amp;bdev-&gt;bd_contains-&gt;bd_mutex, BD_MUTEX_PARTITION);</p>
+<p>In this case the locking is done on a bdev object that is known to be a<br>partition.</p>
+<p>The validator treats a lock that is taken in such a nested fashion as a<br>separate (sub)class for the purposes of validation.</p>
+<p>Note: When changing code to use the _nested() primitives, be careful and<br>check really thoroughly that the hierarchy is correctly mapped; otherwise<br>you can get false positives or false negatives.</p>
+<h2 id="Proof-of-100-correctness"><a href="#Proof-of-100-correctness" class="headerlink" title="Proof of 100% correctness:"></a>Proof of 100% correctness:</h2><p>The validator achieves perfect, mathematical ‘closure’ (proof of locking<br>correctness) in the sense that for every simple, standalone single-task<br>locking sequence that occurred at least once during the lifetime of the<br>kernel, the validator proves it with a 100% certainty that no<br>combination and timing of these locking sequences can cause any class of<br>lock related deadlock. [*]</p>
+<p>I.e. complex multi-CPU and multi-task locking scenarios do not have to<br>occur in practice to prove a deadlock: only the simple ‘component’<br>locking chains have to occur at least once (anytime, in any<br>task/context) for the validator to be able to prove correctness. (For<br>example, complex deadlocks that would normally need more than 3 CPUs and<br>a very unlikely constellation of tasks, irq-contexts and timings to<br>occur, can be detected on a plain, lightly loaded single-CPU system as<br>well!)</p>
+<p>This radically decreases the complexity of locking related QA of the<br>kernel: what has to be done during QA is to trigger as many “simple”<br>single-task locking dependencies in the kernel as possible, at least<br>once, to prove locking correctness - instead of having to trigger every<br>possible combination of locking interaction between CPUs, combined with<br>every possible hardirq and softirq nesting scenario (which is impossible<br>to do in practice).</p>
+<p>[*] assuming that the validator itself is 100% correct, and no other<br>    part of the system corrupts the state of the validator in any way.<br>    We also assume that all NMI/SMM paths [which could interrupt<br>    even hardirq-disabled codepaths] are correct and do not interfere<br>    with the validator. We also assume that the 64-bit ‘chain hash’<br>    value is unique for every lock-chain in the system. Also, lock<br>    recursion must not be higher than 20.</p>
+<h2 id="Performance"><a href="#Performance" class="headerlink" title="Performance:"></a>Performance:</h2><p>The above rules require <em>massive</em> amounts of runtime checking. If we did<br>that for every lock taken and for every irqs-enable event, it would<br>render the system practically unusably slow. The complexity of checking<br>is O(N^2), so even with just a few hundred lock-classes we’d have to do<br>tens of thousands of checks for every event.</p>
+<p>This problem is solved by checking any given ‘locking scenario’ (unique<br>sequence of locks taken after each other) only once. A simple stack of<br>held locks is maintained, and a lightweight 64-bit hash value is<br>calculated, which hash is unique for every lock chain. The hash value,<br>when the chain is validated for the first time, is then put into a hash<br>table, which hash-table can be checked in a lockfree manner. If the<br>locking chain occurs again later on, the hash table tells us that we<br>dont have to validate the chain again.</p>
+<h2 id="Troubleshooting"><a href="#Troubleshooting" class="headerlink" title="Troubleshooting:"></a>Troubleshooting:</h2><p>The validator tracks a maximum of MAX_LOCKDEP_KEYS number of lock classes.<br>Exceeding this number will trigger the following lockdep warning:</p>
+<pre><code>(DEBUG_LOCKS_WARN_ON(id &gt;= MAX_LOCKDEP_KEYS))
+</code></pre>
+<p>By default, MAX_LOCKDEP_KEYS is currently set to 8191, and typical<br>desktop systems have less than 1,000 lock classes, so this warning<br>normally results from lock-class leakage or failure to properly<br>initialize locks.  These two problems are illustrated below:</p>
+<ol>
+<li><p>Repeated module loading and unloading while running the validator<br> will result in lock-class leakage.  The issue here is that each<br> load of the module will create a new set of lock classes for<br> that module’s locks, but module unloading does not remove old<br> classes (see below discussion of reuse of lock classes for why).<br> Therefore, if that module is loaded and unloaded repeatedly,<br> the number of lock classes will eventually reach the maximum.</p>
+</li>
+<li><p>Using structures such as arrays that have large numbers of<br> locks that are not explicitly initialized.  For example,<br> a hash table with 8192 buckets where each bucket has its own<br> spinlock_t will consume 8192 lock classes -unless- each spinlock<br> is explicitly initialized at runtime, for example, using the<br> run-time spin_lock_init() as opposed to compile-time initializers<br> such as __SPIN_LOCK_UNLOCKED().  Failure to properly initialize<br> the per-bucket spinlocks would guarantee lock-class overflow.<br> In contrast, a loop that called spin_lock_init() on each lock<br> would place all 8192 locks into a single lock class.</p>
+<p> The moral of this story is that you should always explicitly<br> initialize your locks.</p>
+</li>
+</ol>
+<p>One might argue that the validator should be modified to allow<br>lock classes to be reused.  However, if you are tempted to make this<br>argument, first review the code and think through the changes that would<br>be required, keeping in mind that the lock classes to be removed are<br>likely to be linked into the lock-dependency graph.  This turns out to<br>be harder to do than to say.</p>
+<p>Of course, if you do run out of lock classes, the next thing to do is<br>to find the offending lock classes.  First, the following command gives<br>you the number of lock classes currently in use along with the maximum:</p>
+<pre><code>grep &quot;lock-classes&quot; /proc/lockdep_stats
+</code></pre>
+<p>This command produces the following output on a modest system:</p>
+<pre><code> lock-classes:                          748 [max: 8191]
+</code></pre>
+<p>If the number allocated (748 above) increases continually over time,<br>then there is likely a leak.  The following command can be used to<br>identify the leaking lock classes:</p>
+<pre><code>grep &quot;BD&quot; /proc/lockdep
+</code></pre>
+<p>Run the command and save the output, then compare against the output from<br>a later run of this command to identify the leakers.  This same output<br>can also help you find situations where runtime lock initialization has<br>been omitted.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/" title="Kernel-3.10.0-957.el7_lockdep-design" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_lockdep-design/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_local_ops/" title="Kernel-3.10.0-957.el7_local_ops"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_lockdep-splat/" title="Kernel-3.10.0-957.el7_lockdep-splat"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

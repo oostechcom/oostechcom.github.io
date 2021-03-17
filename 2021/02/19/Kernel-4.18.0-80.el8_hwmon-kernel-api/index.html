@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_hwmon-kernel-api | oosTech.com</title>
+  <meta name="description" content="The Linux Hardware Monitoring kernel API.Guenter Roeck IntroductionThis document describes the API that can be used by hardware monitoringdrivers that want to use the hardware monitoring framework. Th">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_hwmon-kernel-api">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The Linux Hardware Monitoring kernel API.Guenter Roeck IntroductionThis document describes the API that can be used by hardware monitoringdrivers that want to use the hardware monitoring framework. Th">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Linux-Hardware-Monitoring-kernel-API"><span class="toc-number">1.</span> <span class="toc-text">The Linux Hardware Monitoring kernel API.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-API"><span class="toc-number">1.2.</span> <span class="toc-text">The API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Using-devm-hwmon-device-register-with-info"><span class="toc-number">1.3.</span> <span class="toc-text">Using devm_hwmon_device_register_with_info()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Driver-callback-functions"><span class="toc-number">1.4.</span> <span class="toc-text">Driver callback functions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Driver-provided-sysfs-attributes"><span class="toc-number">1.5.</span> <span class="toc-text">Driver-provided sysfs attributes</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_hwmon-kernel-api" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_hwmon-kernel-api
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="The-Linux-Hardware-Monitoring-kernel-API"><a href="#The-Linux-Hardware-Monitoring-kernel-API" class="headerlink" title="The Linux Hardware Monitoring kernel API."></a>The Linux Hardware Monitoring kernel API.</h1><p>Guenter Roeck</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>This document describes the API that can be used by hardware monitoring<br>drivers that want to use the hardware monitoring framework.</p>
+<p>This document does not describe what a hardware monitoring (hwmon) Driver or<br>Device is. It also does not describe the API which can be used by user space<br>to communicate with a hardware monitoring device. If you want to know this<br>then please read the following file: Documentation/hwmon/sysfs-interface.</p>
+<p>For additional guidelines on how to write and improve hwmon drivers, please<br>also read Documentation/hwmon/submitting-patches.</p>
+<h2 id="The-API"><a href="#The-API" class="headerlink" title="The API"></a>The API</h2><p>Each hardware monitoring driver must #include &lt;linux/hwmon.h&gt; and, in most<br>cases, &lt;linux/hwmon-sysfs.h&gt;. linux/hwmon.h declares the following<br>register/unregister functions:</p>
+<p>struct device *<br>hwmon_device_register_with_groups(struct device *dev, const char <em>name,<br>                  void *drvdata,<br>                  const struct attribute_group *</em>groups);</p>
+<p>struct device *<br>devm_hwmon_device_register_with_groups(struct device *dev,<br>                       const char <em>name, void *drvdata,<br>                       const struct attribute_group *</em>groups);</p>
+<p>struct device *<br>hwmon_device_register_with_info(struct device <em>dev,<br>                const char *name, void *drvdata,<br>                const struct hwmon_chip_info *info,<br>                const struct attribute_group *</em>extra_groups);</p>
+<p>struct device *<br>devm_hwmon_device_register_with_info(struct device <em>dev,<br>                const char *name,<br>                void *drvdata,<br>                const struct hwmon_chip_info *info,<br>                const struct attribute_group *</em>extra_groups);</p>
+<p>void hwmon_device_unregister(struct device *dev);<br>void devm_hwmon_device_unregister(struct device *dev);</p>
+<p>hwmon_device_register_with_groups registers a hardware monitoring device.<br>The first parameter of this function is a pointer to the parent device.<br>The name parameter is a pointer to the hwmon device name. The registration<br>function wil create a name sysfs attribute pointing to this name.<br>The drvdata parameter is the pointer to the local driver data.<br>hwmon_device_register_with_groups will attach this pointer to the newly<br>allocated hwmon device. The pointer can be retrieved by the driver using<br>dev_get_drvdata() on the hwmon device pointer. The groups parameter is<br>a pointer to a list of sysfs attribute groups. The list must be NULL terminated.<br>hwmon_device_register_with_groups creates the hwmon device with name attribute<br>as well as all sysfs attributes attached to the hwmon device.<br>This function returns a pointer to the newly created hardware monitoring device<br>or PTR_ERR for failure.</p>
+<p>devm_hwmon_device_register_with_groups is similar to<br>hwmon_device_register_with_groups. However, it is device managed, meaning the<br>hwmon device does not have to be removed explicitly by the removal function.</p>
+<p>hwmon_device_register_with_info is the most comprehensive and preferred means<br>to register a hardware monitoring device. It creates the standard sysfs<br>attributes in the hardware monitoring core, letting the driver focus on reading<br>from and writing to the chip instead of having to bother with sysfs attributes.<br>The parent device parameter cannot be NULL with non-NULL chip info. Its<br>parameters are described in more detail below.</p>
+<p>devm_hwmon_device_register_with_info is similar to<br>hwmon_device_register_with_info. However, it is device managed, meaning the<br>hwmon device does not have to be removed explicitly by the removal function.</p>
+<p>hwmon_device_unregister deregisters a registered hardware monitoring device.<br>The parameter of this function is the pointer to the registered hardware<br>monitoring device structure. This function must be called from the driver<br>remove function if the hardware monitoring device was registered with<br>hwmon_device_register_with_groups or hwmon_device_register_with_info.</p>
+<p>devm_hwmon_device_unregister does not normally have to be called. It is only<br>needed for error handling, and only needed if the driver probe fails after<br>the call to devm_hwmon_device_register_with_groups or<br>hwmon_device_register_with_info and if the automatic (device managed)<br>removal would be too late.</p>
+<p>All supported hwmon device registration functions only accept valid device<br>names. Device names including invalid characters (whitespace, ‘*’, or ‘-‘)<br>will be rejected. The ‘name’ parameter is mandatory.</p>
+<h2 id="Using-devm-hwmon-device-register-with-info"><a href="#Using-devm-hwmon-device-register-with-info" class="headerlink" title="Using devm_hwmon_device_register_with_info()"></a>Using devm_hwmon_device_register_with_info()</h2><p>hwmon_device_register_with_info() registers a hardware monitoring device.<br>The parameters to this function are</p>
+<p>struct device <em>dev    Pointer to parent device<br>const char *name    Device name<br>void *drvdata        Driver private data<br>const struct hwmon_chip_info *info<br>            Pointer to chip description.<br>const struct attribute_group *</em>extra_groups<br>            Null-terminated list of additional non-standard<br>            sysfs attribute groups.</p>
+<p>This function returns a pointer to the created hardware monitoring device<br>on success and a negative error code for failure.</p>
+<p>The hwmon_chip_info structure looks as follows.</p>
+<p>struct hwmon_chip_info {<br>    const struct hwmon_ops *ops;<br>    const struct hwmon_channel_info **info;<br>};</p>
+<p>It contains the following fields:</p>
+<ul>
+<li>ops:    Pointer to device operations.</li>
+<li>info: NULL-terminated list of device channel descriptors.</li>
+</ul>
+<p>The list of hwmon operations is defined as:</p>
+<p>struct hwmon_ops {<br>    umode_t (*is_visible)(const void *, enum hwmon_sensor_types type,<br>                  u32 attr, int);<br>    int (*read)(struct device *, enum hwmon_sensor_types type,<br>            u32 attr, int, long *);<br>    int (*write)(struct device *, enum hwmon_sensor_types type,<br>             u32 attr, int, long);<br>};</p>
+<p>It defines the following operations.</p>
+<ul>
+<li><p>is_visible: Pointer to a function to return the file mode for each supported<br>attribute. This function is mandatory.</p>
+</li>
+<li><p>read: Pointer to a function for reading a value from the chip. This function<br>is optional, but must be provided if any readable attributes exist.</p>
+</li>
+<li><p>write: Pointer to a function for writing a value to the chip. This function is<br>optional, but must be provided if any writeable attributes exist.</p>
+</li>
+</ul>
+<p>Each sensor channel is described with struct hwmon_channel_info, which is<br>defined as follows.</p>
+<p>struct hwmon_channel_info {<br>    enum hwmon_sensor_types type;<br>    u32 *config;<br>};</p>
+<p>It contains following fields:</p>
+<ul>
+<li><p>type: The hardware monitoring sensor type.<br>Supported sensor types are</p>
+<ul>
+<li>hwmon_chip        A virtual sensor type, used to describe attributes</li>
+<li><pre><code>       which are not bound to a specific input or output
+</code></pre>
+</li>
+<li>hwmon_temp        Temperature sensor</li>
+<li>hwmon_in        Voltage sensor</li>
+<li>hwmon_curr        Current sensor</li>
+<li>hwmon_power        Power sensor</li>
+<li>hwmon_energy    Energy sensor</li>
+<li>hwmon_humidity    Humidity sensor</li>
+<li>hwmon_fan        Fan speed sensor</li>
+<li>hwmon_pwm        PWM control</li>
+</ul>
+</li>
+<li><p>config: Pointer to a 0-terminated list of configuration values for each<br>sensor of the given type. Each value is a combination of bit values<br>describing the attributes supposed by a single sensor.</p>
+</li>
+</ul>
+<p>As an example, here is the complete description file for a LM75 compatible<br>sensor chip. The chip has a single temperature sensor. The driver wants to<br>register with the thermal subsystem (HWMON_C_REGISTER_TZ), and it supports<br>the update_interval attribute (HWMON_C_UPDATE_INTERVAL). The chip supports<br>reading the temperature (HWMON_T_INPUT), it has a maximum temperature<br>register (HWMON_T_MAX) as well as a maximum temperature hysteresis register<br>(HWMON_T_MAX_HYST).</p>
+<p>static const u32 lm75_chip_config[] = {<br>    HWMON_C_REGISTER_TZ | HWMON_C_UPDATE_INTERVAL,<br>    0<br>};</p>
+<p>static const struct hwmon_channel_info lm75_chip = {<br>    .type = hwmon_chip,<br>    .config = lm75_chip_config,<br>};</p>
+<p>static const u32 lm75_temp_config[] = {<br>    HWMON_T_INPUT | HWMON_T_MAX | HWMON_T_MAX_HYST,<br>    0<br>};</p>
+<p>static const struct hwmon_channel_info lm75_temp = {<br>    .type = hwmon_temp,<br>    .config = lm75_temp_config,<br>};</p>
+<p>static const struct hwmon_channel_info *lm75_info[] = {<br>    &amp;lm75_chip,<br>    &amp;lm75_temp,<br>    NULL<br>};</p>
+<p>static const struct hwmon_ops lm75_hwmon_ops = {<br>    .is_visible = lm75_is_visible,<br>    .read = lm75_read,<br>    .write = lm75_write,<br>};</p>
+<p>static const struct hwmon_chip_info lm75_chip_info = {<br>    .ops = &amp;lm75_hwmon_ops,<br>    .info = lm75_info,<br>};</p>
+<p>A complete list of bit values indicating individual attribute support<br>is defined in include/linux/hwmon.h. Definition prefixes are as follows.</p>
+<p>HWMON_C_xxxx    Chip attributes, for use with hwmon_chip.<br>HWMON_T_xxxx    Temperature attributes, for use with hwmon_temp.<br>HWMON_I_xxxx    Voltage attributes, for use with hwmon_in.<br>HWMON_C_xxxx    Current attributes, for use with hwmon_curr.<br>        Notice the prefix overlap with chip attributes.<br>HWMON_P_xxxx    Power attributes, for use with hwmon_power.<br>HWMON_E_xxxx    Energy attributes, for use with hwmon_energy.<br>HWMON_H_xxxx    Humidity attributes, for use with hwmon_humidity.<br>HWMON_F_xxxx    Fan speed attributes, for use with hwmon_fan.<br>HWMON_PWM_xxxx    PWM control attributes, for use with hwmon_pwm.</p>
+<h2 id="Driver-callback-functions"><a href="#Driver-callback-functions" class="headerlink" title="Driver callback functions"></a>Driver callback functions</h2><p>Each driver provides is_visible, read, and write functions. Parameters<br>and return values for those functions are as follows.</p>
+<p>umode_t is_visible_func(const void *data, enum hwmon_sensor_types type,<br>            u32 attr, int channel)</p>
+<p>Parameters:<br>    data:    Pointer to device private data structure.<br>    type:    The sensor type.<br>    attr:    Attribute identifier associated with a specific attribute.<br>        For example, the attribute value for HWMON_T_INPUT would be<br>        hwmon_temp_input. For complete mappings of bit fields to<br>        attribute values please see include/linux/hwmon.h.<br>    channel:The sensor channel number.</p>
+<p>Return value:<br>    The file mode for this attribute. Typically, this will be 0 (the<br>    attribute will not be created), S_IRUGO, or ‘S_IRUGO | S_IWUSR’.</p>
+<p>int read_func(struct device *dev, enum hwmon_sensor_types type,<br>          u32 attr, int channel, long *val)</p>
+<p>Parameters:<br>    dev:    Pointer to the hardware monitoring device.<br>    type:    The sensor type.<br>    attr:    Attribute identifier associated with a specific attribute.<br>        For example, the attribute value for HWMON_T_INPUT would be<br>        hwmon_temp_input. For complete mappings please see<br>        include/linux/hwmon.h.<br>    channel:The sensor channel number.<br>    val:    Pointer to attribute value.</p>
+<p>Return value:<br>    0 on success, a negative error number otherwise.</p>
+<p>int write_func(struct device *dev, enum hwmon_sensor_types type,<br>           u32 attr, int channel, long val)</p>
+<p>Parameters:<br>    dev:    Pointer to the hardware monitoring device.<br>    type:    The sensor type.<br>    attr:    Attribute identifier associated with a specific attribute.<br>        For example, the attribute value for HWMON_T_INPUT would be<br>        hwmon_temp_input. For complete mappings please see<br>        include/linux/hwmon.h.<br>    channel:The sensor channel number.<br>    val:    The value to write to the chip.</p>
+<p>Return value:<br>    0 on success, a negative error number otherwise.</p>
+<h2 id="Driver-provided-sysfs-attributes"><a href="#Driver-provided-sysfs-attributes" class="headerlink" title="Driver-provided sysfs attributes"></a>Driver-provided sysfs attributes</h2><p>If the hardware monitoring device is registered with<br>hwmon_device_register_with_info or devm_hwmon_device_register_with_info,<br>it is most likely not necessary to provide sysfs attributes. Only additional<br>non-standard sysfs attributes need to be provided when one of those registration<br>functions is used.</p>
+<p>The header file linux/hwmon-sysfs.h provides a number of useful macros to<br>declare and use hardware monitoring sysfs attributes.</p>
+<p>In many cases, you can use the exsting define DEVICE_ATTR to declare such<br>attributes. This is feasible if an attribute has no additional context. However,<br>in many cases there will be additional information such as a sensor index which<br>will need to be passed to the sysfs attribute handling function.</p>
+<p>SENSOR_DEVICE_ATTR and SENSOR_DEVICE_ATTR_2 can be used to define attributes<br>which need such additional context information. SENSOR_DEVICE_ATTR requires<br>one additional argument, SENSOR_DEVICE_ATTR_2 requires two.</p>
+<p>SENSOR_DEVICE_ATTR defines a struct sensor_device_attribute variable.<br>This structure has the following fields.</p>
+<p>struct sensor_device_attribute {<br>    struct device_attribute dev_attr;<br>    int index;<br>};</p>
+<p>You can use to_sensor_dev_attr to get the pointer to this structure from the<br>attribute read or write function. Its parameter is the device to which the<br>attribute is attached.</p>
+<p>SENSOR_DEVICE_ATTR_2 defines a struct sensor_device_attribute_2 variable,<br>which is defined as follows.</p>
+<p>struct sensor_device_attribute_2 {<br>    struct device_attribute dev_attr;<br>    u8 index;<br>    u8 nr;<br>};</p>
+<p>Use to_sensor_dev_attr_2 to get the pointer to this structure. Its parameter<br>is the device to which the attribute is attached.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/" title="Kernel-4.18.0-80.el8_hwmon-kernel-api" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_hwmon-kernel-api/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_hwlock/" title="Kernel-4.18.0-80.el8_hwlock"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_hwspinlock/" title="Kernel-4.18.0-80.el8_hwspinlock"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

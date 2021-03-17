@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_sysfs-api | oosTech.com</title>
+  <meta name="description" content="Generic Thermal Sysfs driver How ToWritten by Sujith Thomas &amp;#x73;&amp;#117;&amp;#x6a;&amp;#x69;&amp;#x74;&amp;#104;&amp;#46;&amp;#116;&amp;#104;&amp;#x6f;&amp;#109;&amp;#97;&amp;#x73;&amp;#x40;&amp;#x69;&amp;#x6e;&amp;#116;&amp;#101;&amp;#108;&amp;#46;&amp;#99;&amp;#x6f;&amp;#109;, Zhan">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_sysfs-api">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Generic Thermal Sysfs driver How ToWritten by Sujith Thomas &amp;#x73;&amp;#117;&amp;#x6a;&amp;#x69;&amp;#x74;&amp;#104;&amp;#46;&amp;#116;&amp;#104;&amp;#x6f;&amp;#109;&amp;#97;&amp;#x73;&amp;#x40;&amp;#x69;&amp;#x6e;&amp;#116;&amp;#101;&amp;#108;&amp;#46;&amp;#99;&amp;#x6f;&amp;#109;, Zhan">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Generic-Thermal-Sysfs-driver-How-To"><span class="toc-number">1.</span> <span class="toc-text">Generic Thermal Sysfs driver How To</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_sysfs-api" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_sysfs-api
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Generic-Thermal-Sysfs-driver-How-To"><a href="#Generic-Thermal-Sysfs-driver-How-To" class="headerlink" title="Generic Thermal Sysfs driver How To"></a>Generic Thermal Sysfs driver How To</h1><p>Written by Sujith Thomas <a href="mailto:&#x73;&#117;&#x6a;&#x69;&#x74;&#104;&#46;&#116;&#104;&#x6f;&#109;&#97;&#x73;&#x40;&#x69;&#x6e;&#116;&#101;&#108;&#46;&#99;&#x6f;&#109;">&#x73;&#117;&#x6a;&#x69;&#x74;&#104;&#46;&#116;&#104;&#x6f;&#109;&#97;&#x73;&#x40;&#x69;&#x6e;&#116;&#101;&#108;&#46;&#99;&#x6f;&#109;</a>, Zhang Rui <a href="mailto:&#x72;&#x75;&#105;&#46;&#122;&#104;&#x61;&#x6e;&#x67;&#x40;&#105;&#110;&#x74;&#x65;&#x6c;&#46;&#x63;&#111;&#109;">&#x72;&#x75;&#105;&#46;&#122;&#104;&#x61;&#x6e;&#x67;&#x40;&#105;&#110;&#x74;&#x65;&#x6c;&#46;&#x63;&#111;&#109;</a></p>
+<p>Updated: 2 January 2008</p>
+<p>Copyright (c)  2008 Intel Corporation</p>
+<ol start="0">
+<li>Introduction</li>
+</ol>
+<p>The generic thermal sysfs provides a set of interfaces for thermal zone<br>devices (sensors) and thermal cooling devices (fan, processor…) to register<br>with the thermal management solution and to be a part of it.</p>
+<p>This how-to focuses on enabling new thermal zone and cooling devices to<br>participate in thermal management.<br>This solution is platform independent and any type of thermal zone devices<br>and cooling devices should be able to make use of the infrastructure.</p>
+<p>The main task of the thermal sysfs driver is to expose thermal zone attributes<br>as well as cooling device attributes to the user space.<br>An intelligent thermal management application can make decisions based on<br>inputs from thermal zone attributes (the current temperature and trip point<br>temperature) and throttle appropriate devices.</p>
+<p>[0-<em>]    denotes any positive number starting from 0<br>[1-</em>]    denotes any positive number starting from 1</p>
+<ol>
+<li>thermal sysfs driver interface functions</li>
+</ol>
+<p>1.1 thermal zone device interface<br>1.1.1 struct thermal_zone_device *thermal_zone_device_register(char *type,<br>        int trips, int mask, void *devdata,<br>        struct thermal_zone_device_ops *ops,<br>        const struct thermal_zone_params *tzp,<br>        int passive_delay, int polling_delay))</p>
+<pre><code>This interface function adds a new thermal zone device (sensor) to
+/sys/class/thermal folder as thermal_zone[0-*]. It tries to bind all the
+thermal cooling devices registered at the same time.
+
+type: the thermal zone type.
+trips: the total number of trip points this thermal zone supports.
+mask: Bit string: If &#39;n&#39;th bit is set, then trip point &#39;n&#39; is writeable.
+devdata: device private data
+ops: thermal zone device call-backs.
+.bind: bind the thermal zone device with a thermal cooling device.
+.unbind: unbind the thermal zone device with a thermal cooling device.
+.get_temp: get the current temperature of the thermal zone.
+.set_trips: set the trip points window. Whenever the current temperature
+        is updated, the trip points immediately below and above the
+        current temperature are found.
+.get_mode: get the current mode (enabled/disabled) of the thermal zone.
+    - &quot;enabled&quot; means the kernel thermal management is enabled.
+    - &quot;disabled&quot; will prevent kernel thermal driver action upon trip points
+      so that user applications can take charge of thermal management.
+.set_mode: set the mode (enabled/disabled) of the thermal zone.
+.get_trip_type: get the type of certain trip point.
+.get_trip_temp: get the temperature above which the certain trip point
+        will be fired.
+.set_emul_temp: set the emulation temperature which helps in debugging
+        different threshold temperature points.
+tzp: thermal zone platform parameters.
+passive_delay: number of milliseconds to wait between polls when
+performing passive cooling.
+polling_delay: number of milliseconds to wait between polls when checking
+whether trip points have been crossed (0 for interrupt driven systems).
+</code></pre>
+<p>1.1.2 void thermal_zone_device_unregister(struct thermal_zone_device *tz)</p>
+<pre><code>This interface function removes the thermal zone device.
+It deletes the corresponding entry from /sys/class/thermal folder and
+unbinds all the thermal cooling devices it uses.
+</code></pre>
+<p>1.1.3 struct thermal_zone_device *thermal_zone_of_sensor_register(<br>        struct device *dev, int sensor_id, void *data,<br>        const struct thermal_zone_of_device_ops *ops)</p>
+<pre><code>This interface adds a new sensor to a DT thermal zone.
+This function will search the list of thermal zones described in
+device tree and look for the zone that refer to the sensor device
+pointed by dev-&gt;of_node as temperature providers. For the zone
+pointing to the sensor node, the sensor will be added to the DT
+thermal zone device.
+
+The parameters for this interface are:
+dev:        Device node of sensor containing valid node pointer in
+        dev-&gt;of_node.
+sensor_id:    a sensor identifier, in case the sensor IP has more
+        than one sensors
+data:        a private pointer (owned by the caller) that will be
+        passed back, when a temperature reading is needed.
+ops:        struct thermal_zone_of_device_ops *.
+
+        get_temp:    a pointer to a function that reads the
+                sensor temperature. This is mandatory
+                callback provided by sensor driver.
+        set_trips:      a pointer to a function that sets a
+                temperature window. When this window is
+                left the driver must inform the thermal
+                core via thermal_zone_device_update.
+        get_trend:     a pointer to a function that reads the
+                sensor temperature trend.
+        set_emul_temp:    a pointer to a function that sets
+                sensor emulated temperature.
+The thermal zone temperature is provided by the get_temp() function
+pointer of thermal_zone_of_device_ops. When called, it will
+have the private pointer @data back.
+
+It returns error pointer if fails otherwise valid thermal zone device
+handle. Caller should check the return handle with IS_ERR() for finding
+whether success or not.
+</code></pre>
+<p>1.1.4 void thermal_zone_of_sensor_unregister(struct device *dev,<br>        struct thermal_zone_device *tzd)</p>
+<pre><code>This interface unregisters a sensor from a DT thermal zone which was
+successfully added by interface thermal_zone_of_sensor_register().
+This function removes the sensor callbacks and private data from the
+thermal zone device registered with thermal_zone_of_sensor_register()
+interface. It will also silent the zone by remove the .get_temp() and
+get_trend() thermal zone device callbacks.
+</code></pre>
+<p>1.1.5 struct thermal_zone_device *devm_thermal_zone_of_sensor_register(<br>        struct device *dev, int sensor_id,<br>        void *data, const struct thermal_zone_of_device_ops *ops)</p>
+<pre><code>This interface is resource managed version of
+thermal_zone_of_sensor_register().
+All details of thermal_zone_of_sensor_register() described in
+section 1.1.3 is applicable here.
+The benefit of using this interface to register sensor is that it
+is not require to explicitly call thermal_zone_of_sensor_unregister()
+in error path or during driver unbinding as this is done by driver
+resource manager.
+</code></pre>
+<p>1.1.6 void devm_thermal_zone_of_sensor_unregister(struct device *dev,<br>        struct thermal_zone_device *tzd)</p>
+<pre><code>This interface is resource managed version of
+thermal_zone_of_sensor_unregister().
+All details of thermal_zone_of_sensor_unregister() described in
+section 1.1.4 is applicable here.
+Normally this function will not need to be called and the resource
+management code will ensure that the resource is freed.
+</code></pre>
+<p>1.1.7 int thermal_zone_get_slope(struct thermal_zone_device *tz)</p>
+<pre><code>This interface is used to read the slope attribute value
+for the thermal zone device, which might be useful for platform
+drivers for temperature calculations.
+</code></pre>
+<p>1.1.8 int thermal_zone_get_offset(struct thermal_zone_device *tz)</p>
+<pre><code>This interface is used to read the offset attribute value
+for the thermal zone device, which might be useful for platform
+drivers for temperature calculations.
+</code></pre>
+<p>1.2 thermal cooling device interface<br>1.2.1 struct thermal_cooling_device *thermal_cooling_device_register(char *name,<br>        void *devdata, struct thermal_cooling_device_ops *)</p>
+<pre><code>This interface function adds a new thermal cooling device (fan/processor/...)
+to /sys/class/thermal/ folder as cooling_device[0-*]. It tries to bind itself
+to all the thermal zone devices registered at the same time.
+name: the cooling device name.
+devdata: device private data.
+ops: thermal cooling devices call-backs.
+.get_max_state: get the Maximum throttle state of the cooling device.
+.get_cur_state: get the Currently requested throttle state of the cooling device.
+.set_cur_state: set the Current throttle state of the cooling device.
+</code></pre>
+<p>1.2.2 void thermal_cooling_device_unregister(struct thermal_cooling_device *cdev)</p>
+<pre><code>This interface function removes the thermal cooling device.
+It deletes the corresponding entry from /sys/class/thermal folder and
+unbinds itself from all the thermal zone devices using it.
+</code></pre>
+<p>1.3 interface for binding a thermal zone device with a thermal cooling device<br>1.3.1 int thermal_zone_bind_cooling_device(struct thermal_zone_device *tz,<br>    int trip, struct thermal_cooling_device *cdev,<br>    unsigned long upper, unsigned long lower, unsigned int weight);</p>
+<pre><code>This interface function binds a thermal cooling device to a particular trip
+point of a thermal zone device.
+This function is usually called in the thermal zone device .bind callback.
+tz: the thermal zone device
+cdev: thermal cooling device
+trip: indicates which trip point in this thermal zone the cooling device
+      is associated with.
+upper:the Maximum cooling state for this trip point.
+      THERMAL_NO_LIMIT means no upper limit,
+  and the cooling device can be in max_state.
+lower:the Minimum cooling state can be used for this trip point.
+      THERMAL_NO_LIMIT means no lower limit,
+  and the cooling device can be in cooling state 0.
+weight: the influence of this cooling device in this thermal
+        zone.  See 1.4.1 below for more information.
+</code></pre>
+<p>1.3.2 int thermal_zone_unbind_cooling_device(struct thermal_zone_device *tz,<br>        int trip, struct thermal_cooling_device *cdev);</p>
+<pre><code>This interface function unbinds a thermal cooling device from a particular
+trip point of a thermal zone device. This function is usually called in
+the thermal zone device .unbind callback.
+tz: the thermal zone device
+cdev: thermal cooling device
+trip: indicates which trip point in this thermal zone the cooling device
+      is associated with.
+</code></pre>
+<p>1.4 Thermal Zone Parameters<br>1.4.1 struct thermal_bind_params<br>    This structure defines the following parameters that are used to bind<br>    a zone with a cooling device for a particular trip point.<br>    .cdev: The cooling device pointer<br>    .weight: The ‘influence’ of a particular cooling device on this<br>             zone. This is relative to the rest of the cooling<br>             devices. For example, if all cooling devices have a<br>             weight of 1, then they all contribute the same. You can<br>             use percentages if you want, but it’s not mandatory. A<br>             weight of 0 means that this cooling device doesn’t<br>             contribute to the cooling of this zone unless all cooling<br>             devices have a weight of 0. If all weights are 0, then<br>             they all contribute the same.<br>    .trip_mask:This is a bit mask that gives the binding relation between<br>               this thermal zone and cdev, for a particular trip point.<br>               If nth bit is set, then the cdev and thermal zone are bound<br>               for trip point n.<br>    .binding_limits: This is an array of cooling state limits. Must have<br>                     exactly 2 * thermal_zone.number_of_trip_points. It is an<br>                     array consisting of tuples <lower-state upper-state> of<br>                     state limits. Each trip will be associated with one state<br>                     limit tuple when binding. A NULL pointer means<br>                     <THERMAL_NO_LIMITS THERMAL_NO_LIMITS> on all trips.<br>                     These limits are used when binding a cdev to a trip point.<br>    .match: This call back returns success(0) if the ‘tz and cdev’ need to<br>        be bound, as per platform data.<br>1.4.2 struct thermal_zone_params<br>    This structure defines the platform level parameters for a thermal zone.<br>    This data, for each thermal zone should come from the platform layer.<br>    This is an optional feature where some platforms can choose not to<br>    provide this data.<br>    .governor_name: Name of the thermal governor used for this zone<br>    .no_hwmon: a boolean to indicate if the thermal to hwmon sysfs interface<br>               is required. when no_hwmon == false, a hwmon sysfs interface<br>               will be created. when no_hwmon == true, nothing will be done.<br>               In case the thermal_zone_params is NULL, the hwmon interface<br>               will be created (for backward compatibility).<br>    .num_tbps: Number of thermal_bind_params entries for this zone<br>    .tbp: thermal_bind_params entries</p>
+<ol start="2">
+<li>sysfs attributes structure</li>
+</ol>
+<p>RO    read only value<br>WO    write only value<br>RW    read/write value</p>
+<p>Thermal sysfs attributes will be represented under /sys/class/thermal.<br>Hwmon sysfs I/F extension is also available under /sys/class/hwmon<br>if hwmon is compiled in or built as a module.</p>
+<p>Thermal zone device sys I/F, created once it’s registered:<br>/sys/class/thermal/thermal_zone[0-<em>]:<br>    |—type:            Type of the thermal zone<br>    |—temp:            Current temperature<br>    |—mode:            Working mode of the thermal zone<br>    |—policy:            Thermal governor used for this zone<br>    |—available_policies:    Available thermal governors for this zone<br>    |—trip_point_[0-</em>]<em>temp:    Trip point temperature<br>    |—trip_point_[0-*]_type:    Trip point type<br>    |—trip_point</em>[0-*]_hyst:    Hysteresis value for this trip point<br>    |—emul_temp:        Emulated temperature set node<br>    |—sustainable_power:      Sustainable dissipatable power<br>    |—k_po:                   Proportional term during temperature overshoot<br>    |—k_pu:                   Proportional term during temperature undershoot<br>    |—k_i:                    PID’s integral term in the power allocator gov<br>    |—k_d:                    PID’s derivative term in the power allocator<br>    |—integral_cutoff:        Offset above which errors are accumulated<br>    |—slope:                  Slope constant applied as linear extrapolation<br>    |—offset:                 Offset constant applied as linear extrapolation</p>
+<p>Thermal cooling device sys I/F, created once it’s registered:<br>/sys/class/thermal/cooling_device[0-*]:<br>    |—type:            Type of the cooling device(processor/fan/…)<br>    |—max_state:        Maximum cooling state of the cooling device<br>    |—cur_state:        Current cooling state of the cooling device<br>    |—stats:            Directory containing cooling device’s statistics<br>    |—stats/reset:        Writing any value resets the statistics<br>    |—stats/time_in_state_ms:    Time (msec) spent in various cooling states<br>    |—stats/total_trans:    Total number of times cooling state is changed<br>    |—stats/trans_table:    Cooing state transition table</p>
+<p>Then next two dynamic attributes are created/removed in pairs. They represent<br>the relationship between a thermal zone and its associated cooling device.<br>They are created/removed for each successful execution of<br>thermal_zone_bind_cooling_device/thermal_zone_unbind_cooling_device.</p>
+<p>/sys/class/thermal/thermal_zone[0-<em>]:<br>    |—cdev[0-</em>]:        [0-<em>]th cooling device in current thermal zone<br>    |—cdev[0-</em>]_trip_point:    Trip point that cdev[0-<em>] is associated with<br>    |—cdev[0-</em>]_weight:       Influence of the cooling device in<br>                                this thermal zone</p>
+<p>Besides the thermal zone device sysfs I/F and cooling device sysfs I/F,<br>the generic thermal driver also creates a hwmon sysfs I/F for each <em>type</em><br>of thermal zone device. E.g. the generic thermal driver registers one hwmon<br>class device and build the associated hwmon sysfs I/F for all the registered<br>ACPI thermal zones.</p>
+<p>/sys/class/hwmon/hwmon[0-<em>]:<br>    |—name:            The type of the thermal zone devices<br>    |—temp[1-</em>]_input:    The current temperature of thermal zone [1-<em>]<br>    |—temp[1-</em>]_critical:    The critical trip point of thermal zone [1-*]</p>
+<p>Please read Documentation/hwmon/sysfs-interface for additional information.</p>
+<hr>
+<ul>
+<li>Thermal zone attributes *</li>
+</ul>
+<hr>
+<p>type<br>    Strings which represent the thermal zone type.<br>    This is given by thermal zone driver as part of registration.<br>    E.g: “acpitz” indicates it’s an ACPI thermal device.<br>    In order to keep it consistent with hwmon sys attribute; this should<br>    be a short, lowercase string, not containing spaces nor dashes.<br>    RO, Required</p>
+<p>temp<br>    Current temperature as reported by thermal zone (sensor).<br>    Unit: millidegree Celsius<br>    RO, Required</p>
+<p>mode<br>    One of the predefined values in [enabled, disabled].<br>    This file gives information about the algorithm that is currently<br>    managing the thermal zone. It can be either default kernel based<br>    algorithm or user space application.<br>    enabled        = enable Kernel Thermal management.<br>    disabled    = Preventing kernel thermal zone driver actions upon<br>              trip points so that user application can take full<br>              charge of the thermal management.<br>    RW, Optional</p>
+<p>policy<br>    One of the various thermal governors used for a particular zone.<br>    RW, Required</p>
+<p>available_policies<br>    Available thermal governors which can be used for a particular zone.<br>    RO, Required</p>
+<p>trip_point_[0-*]_temp<br>    The temperature above which trip point will be fired.<br>    Unit: millidegree Celsius<br>    RO, Optional</p>
+<p>trip_point_[0-<em>]_type<br>    Strings which indicate the type of the trip point.<br>    E.g. it can be one of critical, hot, passive, active[0-</em>] for ACPI<br>    thermal zone.<br>    RO, Optional</p>
+<p>trip_point_[0-*]_hyst<br>    The hysteresis value for a trip point, represented as an integer<br>    Unit: Celsius<br>    RW, Optional</p>
+<p>cdev[0-*]<br>    Sysfs link to the thermal cooling device node where the sys I/F<br>    for cooling device throttling control represents.<br>    RO, Optional</p>
+<p>cdev[0-<em>]_trip_point<br>    The trip point in this thermal zone which cdev[0-</em>] is associated<br>    with; -1 means the cooling device is not associated with any trip<br>    point.<br>    RO, Optional</p>
+<p>cdev[0-<em>]_weight<br>        The influence of cdev[0-</em>] in this thermal zone. This value<br>        is relative to the rest of cooling devices in the thermal<br>        zone. For example, if a cooling device has a weight double<br>        than that of other, it’s twice as effective in cooling the<br>        thermal zone.<br>        RW, Optional</p>
+<p>passive<br>    Attribute is only present for zones in which the passive cooling<br>    policy is not supported by native thermal driver. Default is zero<br>    and can be set to a temperature (in millidegrees) to enable a<br>    passive trip point for the zone. Activation is done by polling with<br>    an interval of 1 second.<br>    Unit: millidegrees Celsius<br>    Valid values: 0 (disabled) or greater than 1000<br>    RW, Optional</p>
+<p>emul_temp<br>    Interface to set the emulated temperature method in thermal zone<br>    (sensor). After setting this temperature, the thermal zone may pass<br>    this temperature to platform emulation function if registered or<br>    cache it locally. This is useful in debugging different temperature<br>    threshold and its associated cooling action. This is write only node<br>    and writing 0 on this node should disable emulation.<br>    Unit: millidegree Celsius<br>    WO, Optional</p>
+<pre><code>  WARNING: Be careful while enabling this option on production systems,
+  because userland can easily disable the thermal policy by simply
+  flooding this sysfs node with low temperature values.
+</code></pre>
+<p>sustainable_power<br>    An estimate of the sustained power that can be dissipated by<br>    the thermal zone. Used by the power allocator governor. For<br>    more information see Documentation/thermal/power_allocator.txt<br>    Unit: milliwatts<br>    RW, Optional</p>
+<p>k_po<br>    The proportional term of the power allocator governor’s PID<br>    controller during temperature overshoot. Temperature overshoot<br>    is when the current temperature is above the “desired<br>    temperature” trip point. For more information see<br>    Documentation/thermal/power_allocator.txt<br>    RW, Optional</p>
+<p>k_pu<br>    The proportional term of the power allocator governor’s PID<br>    controller during temperature undershoot. Temperature undershoot<br>    is when the current temperature is below the “desired<br>    temperature” trip point. For more information see<br>    Documentation/thermal/power_allocator.txt<br>    RW, Optional</p>
+<p>k_i<br>    The integral term of the power allocator governor’s PID<br>    controller. This term allows the PID controller to compensate<br>    for long term drift. For more information see<br>    Documentation/thermal/power_allocator.txt<br>    RW, Optional</p>
+<p>k_d<br>    The derivative term of the power allocator governor’s PID<br>    controller. For more information see<br>    Documentation/thermal/power_allocator.txt<br>    RW, Optional</p>
+<p>integral_cutoff<br>    Temperature offset from the desired temperature trip point<br>    above which the integral term of the power allocator<br>    governor’s PID controller starts accumulating errors. For<br>    example, if integral_cutoff is 0, then the integral term only<br>    accumulates error when temperature is above the desired<br>    temperature trip point. For more information see<br>    Documentation/thermal/power_allocator.txt<br>    Unit: millidegree Celsius<br>    RW, Optional</p>
+<p>slope<br>    The slope constant used in a linear extrapolation model<br>    to determine a hotspot temperature based off the sensor’s<br>    raw readings. It is up to the device driver to determine<br>    the usage of these values.<br>    RW, Optional</p>
+<p>offset<br>    The offset constant used in a linear extrapolation model<br>    to determine a hotspot temperature based off the sensor’s<br>    raw readings. It is up to the device driver to determine<br>    the usage of these values.<br>    RW, Optional</p>
+<hr>
+<ul>
+<li>Cooling device attributes *</li>
+</ul>
+<hr>
+<p>type<br>    String which represents the type of device, e.g:<br>    - for generic ACPI: should be “Fan”, “Processor” or “LCD”<br>    - for memory controller device on intel_menlow platform:<br>      should be “Memory controller”.<br>    RO, Required</p>
+<p>max_state<br>    The maximum permissible cooling state of this cooling device.<br>    RO, Required</p>
+<p>cur_state<br>    The current cooling state of this cooling device.<br>    The value can any integer numbers between 0 and max_state:<br>    - cur_state == 0 means no cooling<br>    - cur_state == max_state means the maximum cooling.<br>    RW, Required</p>
+<p>stats/reset<br>    Writing any value resets the cooling device’s statistics.<br>    WO, Required</p>
+<p>stats/time_in_state_ms:<br>    The amount of time spent by the cooling device in various cooling<br>    states. The output will have “<state> <time>“ pair in each line, which<br>    will mean this cooling device spent <time> msec of time at <state>.<br>    Output will have one line for each of the supported states.  usertime<br>    units here is 10mS (similar to other time exported in /proc).<br>    RO, Required</p>
+<p>stats/total_trans:<br>    A single positive value showing the total number of times the state of a<br>    cooling device is changed.<br>    RO, Required</p>
+<p>stats/trans_table:<br>    This gives fine grained information about all the cooling state<br>    transitions. The cat output here is a two dimensional matrix, where an<br>    entry &lt;i,j&gt; (row i, column j) represents the number of transitions from<br>    State_i to State_j. If the transition table is bigger than PAGE_SIZE,<br>    reading this will return an -EFBIG error.<br>    RO, Required</p>
+<ol start="3">
+<li>A simple implementation</li>
+</ol>
+<p>ACPI thermal zone may support multiple trip points like critical, hot,<br>passive, active. If an ACPI thermal zone supports critical, passive,<br>active[0] and active[1] at the same time, it may register itself as a<br>thermal_zone_device (thermal_zone1) with 4 trip points in all.<br>It has one processor and one fan, which are both registered as<br>thermal_cooling_device. Both are considered to have the same<br>effectiveness in cooling the thermal zone.</p>
+<p>If the processor is listed in _PSL method, and the fan is listed in _AL0<br>method, the sys I/F structure will be built like this:</p>
+<p>/sys/class/thermal:</p>
+<p>|thermal_zone1:<br>    |—type:            acpitz<br>    |—temp:            37000<br>    |—mode:            enabled<br>    |—policy:            step_wise<br>    |—available_policies:    step_wise fair_share<br>    |—trip_point_0_temp:    100000<br>    |—trip_point_0_type:    critical<br>    |—trip_point_1_temp:    80000<br>    |—trip_point_1_type:    passive<br>    |—trip_point_2_temp:    70000<br>    |—trip_point_2_type:    active0<br>    |—trip_point_3_temp:    60000<br>    |—trip_point_3_type:    active1<br>    |—cdev0:            —&gt;/sys/class/thermal/cooling_device0<br>    |—cdev0_trip_point:    1    /* cdev0 can be used for passive <em>/<br>    |—cdev0_weight:           1024<br>    |—cdev1:            —&gt;/sys/class/thermal/cooling_device3<br>    |—cdev1_trip_point:    2    /</em> cdev1 can be used for active[0]*/<br>    |—cdev1_weight:           1024</p>
+<p>|cooling_device0:<br>    |—type:            Processor<br>    |—max_state:        8<br>    |—cur_state:        0</p>
+<p>|cooling_device3:<br>    |—type:            Fan<br>    |—max_state:        2<br>    |—cur_state:        0</p>
+<p>/sys/class/hwmon:</p>
+<p>|hwmon0:<br>    |—name:            acpitz<br>    |—temp1_input:        37000<br>    |—temp1_crit:        100000</p>
+<ol start="4">
+<li>Event Notification</li>
+</ol>
+<p>The framework includes a simple notification mechanism, in the form of a<br>netlink event. Netlink socket initialization is done during the <em>init</em><br>of the framework. Drivers which intend to use the notification mechanism<br>just need to call thermal_generate_netlink_event() with two arguments viz<br>(originator, event). The originator is a pointer to struct thermal_zone_device<br>from where the event has been originated. An integer which represents the<br>thermal zone device will be used in the message to identify the zone. The<br>event will be one of:{THERMAL_AUX0, THERMAL_AUX1, THERMAL_CRITICAL,<br>THERMAL_DEV_FAULT}. Notification can be sent when the current temperature<br>crosses any of the configured thresholds.</p>
+<ol start="5">
+<li>Export Symbol APIs:</li>
+</ol>
+<p>5.1: get_tz_trend:<br>This function returns the trend of a thermal zone, i.e the rate of change<br>of temperature of the thermal zone. Ideally, the thermal sensor drivers<br>are supposed to implement the callback. If they don’t, the thermal<br>framework calculated the trend by comparing the previous and the current<br>temperature values.</p>
+<p>5.2:get_thermal_instance:<br>This function returns the thermal_instance corresponding to a given<br>{thermal_zone, cooling_device, trip_point} combination. Returns NULL<br>if such an instance does not exist.</p>
+<p>5.3:thermal_notify_framework:<br>This function handles the trip events from sensor drivers. It starts<br>throttling the cooling devices according to the policy configured.<br>For CRITICAL and HOT trip points, this notifies the respective drivers,<br>and does actual throttling for other trip points i.e ACTIVE and PASSIVE.<br>The throttling policy is based on the configured platform data; if no<br>platform data is provided, this uses the step_wise throttling policy.</p>
+<p>5.4:thermal_cdev_update:<br>This function serves as an arbitrator to set the state of a cooling<br>device. It sets the cooling device to the deepest cooling state if<br>possible.</p>
+<ol start="6">
+<li>thermal_emergency_poweroff:</li>
+</ol>
+<p>On an event of critical trip temperature crossing. Thermal framework<br>allows the system to shutdown gracefully by calling orderly_poweroff().<br>In the event of a failure of orderly_poweroff() to shut down the system<br>we are in danger of keeping the system alive at undesirably high<br>temperatures. To mitigate this high risk scenario we program a work<br>queue to fire after a pre-determined number of seconds to start<br>an emergency shutdown of the device using the kernel_power_off()<br>function. In case kernel_power_off() fails then finally<br>emergency_restart() is called in the worst case.</p>
+<p>The delay should be carefully profiled so as to give adequate time for<br>orderly_poweroff(). In case of failure of an orderly_poweroff() the<br>emergency poweroff kicks in after the delay has elapsed and shuts down<br>the system.</p>
+<p>If set to 0 emergency poweroff will not be supported. So a carefully<br>profiled non-zero positive value is a must for emergerncy poweroff to be<br>triggered.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/" title="Kernel-4.18.0-80.el8_sysfs-api" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_sysfs-api/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_swsusp/" title="Kernel-4.18.0-80.el8_swsusp"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_sysfs/" title="Kernel-4.18.0-80.el8_sysfs"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

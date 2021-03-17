@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_robust-futexes | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;A description of what robust futexes are&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Started by: Ingo Molnar &amp;#109;&amp;#x69;&amp;#110;&amp;#103;&amp;#111;&amp;#x40;&amp;#114;&amp;#x65;&amp;#x64;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_robust-futexes">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;A description of what robust futexes are&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Started by: Ingo Molnar &amp;#109;&amp;#x69;&amp;#110;&amp;#103;&amp;#111;&amp;#x40;&amp;#114;&amp;#x65;&amp;#x64;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Background"><span class="toc-number">1.</span> <span class="toc-text">Background</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#New-approach-to-robust-futexes"><span class="toc-number">2.</span> <span class="toc-text">New approach to robust futexes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Performance"><span class="toc-number">3.</span> <span class="toc-text">Performance</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implementation-details"><span class="toc-number">4.</span> <span class="toc-text">Implementation details</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Testing-architecture-support"><span class="toc-number">5.</span> <span class="toc-text">Testing, architecture support</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_robust-futexes" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_robust-futexes
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>========================================<br>A description of what robust futexes are<br>========================================</p>
+<p>:Started by: Ingo Molnar <a href="mailto:&#109;&#x69;&#110;&#103;&#111;&#x40;&#114;&#x65;&#x64;&#x68;&#x61;&#116;&#x2e;&#x63;&#111;&#109;">&#109;&#x69;&#110;&#103;&#111;&#x40;&#114;&#x65;&#x64;&#x68;&#x61;&#116;&#x2e;&#x63;&#111;&#109;</a></p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>what are robust futexes? To answer that, we first need to understand<br>what futexes are: normal futexes are special types of locks that in the<br>noncontended case can be acquired/released from userspace without having<br>to enter the kernel.</p>
+<p>A futex is in essence a user-space address, e.g. a 32-bit lock variable<br>field. If userspace notices contention (the lock is already owned and<br>someone else wants to grab it too) then the lock is marked with a value<br>that says “there’s a waiter pending”, and the sys_futex(FUTEX_WAIT)<br>syscall is used to wait for the other guy to release it. The kernel<br>creates a ‘futex queue’ internally, so that it can later on match up the<br>waiter with the waker - without them having to know about each other.<br>When the owner thread releases the futex, it notices (via the variable<br>value) that there were waiter(s) pending, and does the<br>sys_futex(FUTEX_WAKE) syscall to wake them up.  Once all waiters have<br>taken and released the lock, the futex is again back to ‘uncontended’<br>state, and there’s no in-kernel state associated with it. The kernel<br>completely forgets that there ever was a futex at that address. This<br>method makes futexes very lightweight and scalable.</p>
+<p>“Robustness” is about dealing with crashes while holding a lock: if a<br>process exits prematurely while holding a pthread_mutex_t lock that is<br>also shared with some other process (e.g. yum segfaults while holding a<br>pthread_mutex_t, or yum is kill -9-ed), then waiters for that lock need<br>to be notified that the last owner of the lock exited in some irregular<br>way.</p>
+<p>To solve such types of problems, “robust mutex” userspace APIs were<br>created: pthread_mutex_lock() returns an error value if the owner exits<br>prematurely - and the new owner can decide whether the data protected by<br>the lock can be recovered safely.</p>
+<p>There is a big conceptual problem with futex based mutexes though: it is<br>the kernel that destroys the owner task (e.g. due to a SEGFAULT), but<br>the kernel cannot help with the cleanup: if there is no ‘futex queue’<br>(and in most cases there is none, futexes being fast lightweight locks)<br>then the kernel has no information to clean up after the held lock!<br>Userspace has no chance to clean up after the lock either - userspace is<br>the one that crashes, so it has no opportunity to clean up. Catch-22.</p>
+<p>In practice, when e.g. yum is kill -9-ed (or segfaults), a system reboot<br>is needed to release that futex based lock. This is one of the leading<br>bugreports against yum.</p>
+<p>To solve this problem, the traditional approach was to extend the vma<br>(virtual memory area descriptor) concept to have a notion of ‘pending<br>robust futexes attached to this area’. This approach requires 3 new<br>syscall variants to sys_futex(): FUTEX_REGISTER, FUTEX_DEREGISTER and<br>FUTEX_RECOVER. At do_exit() time, all vmas are searched to see whether<br>they have a robust_head set. This approach has two fundamental problems<br>left:</p>
+<ul>
+<li><p>it has quite complex locking and race scenarios. The vma-based<br>approach had been pending for years, but they are still not completely<br>reliable.</p>
+</li>
+<li><p>they have to scan <em>every</em> vma at sys_exit() time, per thread!</p>
+</li>
+</ul>
+<p>The second disadvantage is a real killer: pthread_exit() takes around 1<br>microsecond on Linux, but with thousands (or tens of thousands) of vmas<br>every pthread_exit() takes a millisecond or more, also totally<br>destroying the CPU’s L1 and L2 caches!</p>
+<p>This is very much noticeable even for normal process sys_exit_group()<br>calls: the kernel has to do the vma scanning unconditionally! (this is<br>because the kernel has no knowledge about how many robust futexes there<br>are to be cleaned up, because a robust futex might have been registered<br>in another task, and the futex variable might have been simply mmap()-ed<br>into this process’s address space).</p>
+<p>This huge overhead forced the creation of CONFIG_FUTEX_ROBUST so that<br>normal kernels can turn it off, but worse than that: the overhead makes<br>robust futexes impractical for any type of generic Linux distribution.</p>
+<p>So something had to be done.</p>
+<h2 id="New-approach-to-robust-futexes"><a href="#New-approach-to-robust-futexes" class="headerlink" title="New approach to robust futexes"></a>New approach to robust futexes</h2><p>At the heart of this new approach there is a per-thread private list of<br>robust locks that userspace is holding (maintained by glibc) - which<br>userspace list is registered with the kernel via a new syscall [this<br>registration happens at most once per thread lifetime]. At do_exit()<br>time, the kernel checks this user-space list: are there any robust futex<br>locks to be cleaned up?</p>
+<p>In the common case, at do_exit() time, there is no list registered, so<br>the cost of robust futexes is just a simple current-&gt;robust_list != NULL<br>comparison. If the thread has registered a list, then normally the list<br>is empty. If the thread/process crashed or terminated in some incorrect<br>way then the list might be non-empty: in this case the kernel carefully<br>walks the list [not trusting it], and marks all locks that are owned by<br>this thread with the FUTEX_OWNER_DIED bit, and wakes up one waiter (if<br>any).</p>
+<p>The list is guaranteed to be private and per-thread at do_exit() time,<br>so it can be accessed by the kernel in a lockless way.</p>
+<p>There is one race possible though: since adding to and removing from the<br>list is done after the futex is acquired by glibc, there is a few<br>instructions window for the thread (or process) to die there, leaving<br>the futex hung. To protect against this possibility, userspace (glibc)<br>also maintains a simple per-thread ‘list_op_pending’ field, to allow the<br>kernel to clean up if the thread dies after acquiring the lock, but just<br>before it could have added itself to the list. Glibc sets this<br>list_op_pending field before it tries to acquire the futex, and clears<br>it after the list-add (or list-remove) has finished.</p>
+<p>That’s all that is needed - all the rest of robust-futex cleanup is done<br>in userspace [just like with the previous patches].</p>
+<p>Ulrich Drepper has implemented the necessary glibc support for this new<br>mechanism, which fully enables robust mutexes.</p>
+<p>Key differences of this userspace-list based approach, compared to the<br>vma based method:</p>
+<ul>
+<li><p>it’s much, much faster: at thread exit time, there’s no need to loop<br>over every vma (!), which the VM-based method has to do. Only a very<br>simple ‘is the list empty’ op is done.</p>
+</li>
+<li><p>no VM changes are needed - ‘struct address_space’ is left alone.</p>
+</li>
+<li><p>no registration of individual locks is needed: robust mutexes don’t<br>need any extra per-lock syscalls. Robust mutexes thus become a very<br>lightweight primitive - so they don’t force the application designer<br>to do a hard choice between performance and robustness - robust<br>mutexes are just as fast.</p>
+</li>
+<li><p>no per-lock kernel allocation happens.</p>
+</li>
+<li><p>no resource limits are needed.</p>
+</li>
+<li><p>no kernel-space recovery call (FUTEX_RECOVER) is needed.</p>
+</li>
+<li><p>the implementation and the locking is “obvious”, and there are no<br>interactions with the VM.</p>
+</li>
+</ul>
+<h2 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h2><p>I have benchmarked the time needed for the kernel to process a list of 1<br>million (!) held locks, using the new method [on a 2GHz CPU]:</p>
+<ul>
+<li>with FUTEX_WAIT set [contended mutex]: 130 msecs</li>
+<li>without FUTEX_WAIT set [uncontended mutex]: 30 msecs</li>
+</ul>
+<p>I have also measured an approach where glibc does the lock notification<br>[which it currently does for !pshared robust mutexes], and that took 256<br>msecs - clearly slower, due to the 1 million FUTEX_WAKE syscalls<br>userspace had to do.</p>
+<p>(1 million held locks are unheard of - we expect at most a handful of<br>locks to be held at a time. Nevertheless it’s nice to know that this<br>approach scales nicely.)</p>
+<h2 id="Implementation-details"><a href="#Implementation-details" class="headerlink" title="Implementation details"></a>Implementation details</h2><p>The patch adds two new syscalls: one to register the userspace list, and<br>one to query the registered list pointer::</p>
+<p> asmlinkage long<br> sys_set_robust_list(struct robust_list_head __user *head,<br>                     size_t len);</p>
+<p> asmlinkage long<br> sys_get_robust_list(int pid, struct robust_list_head __user **head_ptr,<br>                     size_t __user *len_ptr);</p>
+<p>List registration is very fast: the pointer is simply stored in<br>current-&gt;robust_list. [Note that in the future, if robust futexes become<br>widespread, we could extend sys_clone() to register a robust-list head<br>for new threads, without the need of another syscall.]</p>
+<p>So there is virtually zero overhead for tasks not using robust futexes,<br>and even for robust futex users, there is only one extra syscall per<br>thread lifetime, and the cleanup operation, if it happens, is fast and<br>straightforward. The kernel doesn’t have any internal distinction between<br>robust and normal futexes.</p>
+<p>If a futex is found to be held at exit time, the kernel sets the<br>following bit of the futex word::</p>
+<pre><code>#define FUTEX_OWNER_DIED        0x40000000
+</code></pre>
+<p>and wakes up the next futex waiter (if any). User-space does the rest of<br>the cleanup.</p>
+<p>Otherwise, robust futexes are acquired by glibc by putting the TID into<br>the futex field atomically. Waiters set the FUTEX_WAITERS bit::</p>
+<pre><code>#define FUTEX_WAITERS           0x80000000
+</code></pre>
+<p>and the remaining bits are for the TID.</p>
+<h2 id="Testing-architecture-support"><a href="#Testing-architecture-support" class="headerlink" title="Testing, architecture support"></a>Testing, architecture support</h2><p>I’ve tested the new syscalls on x86 and x86_64, and have made sure the<br>parsing of the userspace list is robust [ ;-) ] even if the list is<br>deliberately corrupted.</p>
+<p>i386 and x86_64 syscalls are wired up at the moment, and Ulrich has<br>tested the new glibc code (on x86_64 and i386), and it works for his<br>robust-mutex testcases.</p>
+<p>All other architectures should build just fine too - but they won’t have<br>the new syscalls yet.</p>
+<p>Architectures need to implement the new futex_atomic_cmpxchg_inatomic()<br>inline function before writing up the syscalls (that function returns<br>-ENOSYS right now).</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/" title="Kernel-4.18.0-80.el8_robust-futexes" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_robust-futexes/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_robust-futex-ABI/" title="Kernel-4.18.0-80.el8_robust-futex-ABI"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_rockchip,dwc3/" title="Kernel-4.18.0-80.el8_rockchip,dwc3"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

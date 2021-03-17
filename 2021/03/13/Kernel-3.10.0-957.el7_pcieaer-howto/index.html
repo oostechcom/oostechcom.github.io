@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_pcieaer-howto | oosTech.com</title>
+  <meta name="description" content="The PCI Express Advanced Error Reporting Driver Guide HOWTO        T. Long Nguyen    &amp;#116;&amp;#x6f;&amp;#109;&amp;#46;&amp;#108;&amp;#x2e;&amp;#110;&amp;#103;&amp;#117;&amp;#121;&amp;#101;&amp;#110;&amp;#64;&amp;#x69;&amp;#x6e;&amp;#116;&amp;#101;&amp;#108;&amp;#x2e;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_pcieaer-howto">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The PCI Express Advanced Error Reporting Driver Guide HOWTO        T. Long Nguyen    &amp;#116;&amp;#x6f;&amp;#109;&amp;#46;&amp;#108;&amp;#x2e;&amp;#110;&amp;#103;&amp;#117;&amp;#121;&amp;#101;&amp;#110;&amp;#64;&amp;#x69;&amp;#x6e;&amp;#116;&amp;#101;&amp;#108;&amp;#x2e;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_pcieaer-howto" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_pcieaer-howto
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>   The PCI Express Advanced Error Reporting Driver Guide HOWTO<br>        T. Long Nguyen    <a href="mailto:&#116;&#x6f;&#109;&#46;&#108;&#x2e;&#110;&#103;&#117;&#121;&#101;&#110;&#64;&#x69;&#x6e;&#116;&#101;&#108;&#x2e;&#x63;&#x6f;&#109;">&#116;&#x6f;&#109;&#46;&#108;&#x2e;&#110;&#103;&#117;&#121;&#101;&#110;&#64;&#x69;&#x6e;&#116;&#101;&#108;&#x2e;&#x63;&#x6f;&#109;</a><br>        Yanmin Zhang    <a href="mailto:&#121;&#x61;&#110;&#109;&#x69;&#110;&#46;&#x7a;&#104;&#x61;&#110;&#103;&#x40;&#105;&#x6e;&#x74;&#101;&#108;&#46;&#x63;&#111;&#109;">&#121;&#x61;&#110;&#109;&#x69;&#110;&#46;&#x7a;&#104;&#x61;&#110;&#103;&#x40;&#105;&#x6e;&#x74;&#101;&#108;&#46;&#x63;&#111;&#109;</a><br>                07/29/2006</p>
+<ol>
+<li>Overview</li>
+</ol>
+<p>1.1 About this guide</p>
+<p>This guide describes the basics of the PCI Express Advanced Error<br>Reporting (AER) driver and provides information on how to use it, as<br>well as how to enable the drivers of endpoint devices to conform with<br>PCI Express AER driver.</p>
+<p>1.2 Copyright (C) Intel Corporation 2006.</p>
+<p>1.3 What is the PCI Express AER Driver?</p>
+<p>PCI Express error signaling can occur on the PCI Express link itself<br>or on behalf of transactions initiated on the link. PCI Express<br>defines two error reporting paradigms: the baseline capability and<br>the Advanced Error Reporting capability. The baseline capability is<br>required of all PCI Express components providing a minimum defined<br>set of error reporting requirements. Advanced Error Reporting<br>capability is implemented with a PCI Express advanced error reporting<br>extended capability structure providing more robust error reporting.</p>
+<p>The PCI Express AER driver provides the infrastructure to support PCI<br>Express Advanced Error Reporting capability. The PCI Express AER<br>driver provides three basic functions:</p>
+<ul>
+<li>   Gathers the comprehensive error information if errors occurred.</li>
+<li>   Reports error to the users.</li>
+<li>   Performs error recovery actions.</li>
+</ul>
+<p>AER driver only attaches root ports which support PCI-Express AER<br>capability.</p>
+<ol start="2">
+<li>User Guide</li>
+</ol>
+<p>2.1 Include the PCI Express AER Root Driver into the Linux Kernel</p>
+<p>The PCI Express AER Root driver is a Root Port service driver attached<br>to the PCI Express Port Bus driver. If a user wants to use it, the driver<br>has to be compiled. Option CONFIG_PCIEAER supports this capability. It<br>depends on CONFIG_PCIEPORTBUS, so pls. set CONFIG_PCIEPORTBUS=y and<br>CONFIG_PCIEAER = y.</p>
+<p>2.2 Load PCI Express AER Root Driver<br>There is a case where a system has AER support in BIOS. Enabling the AER<br>Root driver and having AER support in BIOS may result unpredictable<br>behavior. To avoid this conflict, a successful load of the AER Root driver<br>requires ACPI _OSC support in the BIOS to allow the AER Root driver to<br>request for native control of AER. See the PCI FW 3.0 Specification for<br>details regarding OSC usage. Currently, lots of firmwares don’t provide<br>_OSC support while they use PCI Express. To support such firmwares,<br>forceload, a parameter of type bool, could enable AER to continue to<br>be initiated although firmwares have no _OSC support. To enable the<br>walkaround, pls. add aerdriver.forceload=y to kernel boot parameter line<br>when booting kernel. Note that forceload=n by default.</p>
+<p>nosourceid, another parameter of type bool, can be used when broken<br>hardware (mostly chipsets) has root ports that cannot obtain the reporting<br>source ID. nosourceid=n by default.</p>
+<p>2.3 AER error output<br>When a PCI-E AER error is captured, an error message will be outputed to<br>console. If it’s a correctable error, it is outputed as a warning.<br>Otherwise, it is printed as an error. So users could choose different<br>log level to filter out correctable error messages.</p>
+<p>Below shows an example:<br>0000:50:00.0: PCIe Bus Error: severity=Uncorrected (Fatal), type=Transaction Layer, id=0500(Requester ID)<br>0000:50:00.0:   device [8086:0329] error status/mask=00100000/00000000<br>0000:50:00.0:    [20] Unsupported Request    (First)<br>0000:50:00.0:   TLP Header: 04000001 00200a03 05010000 00050100</p>
+<p>In the example, ‘Requester ID’ means the ID of the device who sends<br>the error message to root port. Pls. refer to pci express specs for<br>other fields.</p>
+<ol start="3">
+<li>Developer Guide</li>
+</ol>
+<p>To enable AER aware support requires a software driver to configure<br>the AER capability structure within its device and to provide callbacks.</p>
+<p>To support AER better, developers need understand how AER does work<br>firstly.</p>
+<p>PCI Express errors are classified into two types: correctable errors<br>and uncorrectable errors. This classification is based on the impacts<br>of those errors, which may result in degraded performance or function<br>failure.</p>
+<p>Correctable errors pose no impacts on the functionality of the<br>interface. The PCI Express protocol can recover without any software<br>intervention or any loss of data. These errors are detected and<br>corrected by hardware. Unlike correctable errors, uncorrectable<br>errors impact functionality of the interface. Uncorrectable errors<br>can cause a particular transaction or a particular PCI Express link<br>to be unreliable. Depending on those error conditions, uncorrectable<br>errors are further classified into non-fatal errors and fatal errors.<br>Non-fatal errors cause the particular transaction to be unreliable,<br>but the PCI Express link itself is fully functional. Fatal errors, on<br>the other hand, cause the link to be unreliable.</p>
+<p>When AER is enabled, a PCI Express device will automatically send an<br>error message to the PCIe root port above it when the device captures<br>an error. The Root Port, upon receiving an error reporting message,<br>internally processes and logs the error message in its PCI Express<br>capability structure. Error information being logged includes storing<br>the error reporting agent’s requestor ID into the Error Source<br>Identification Registers and setting the error bits of the Root Error<br>Status Register accordingly. If AER error reporting is enabled in Root<br>Error Command Register, the Root Port generates an interrupt if an<br>error is detected.</p>
+<p>Note that the errors as described above are related to the PCI Express<br>hierarchy and links. These errors do not include any device specific<br>errors because device specific errors will still get sent directly to<br>the device driver.</p>
+<p>3.1 Configure the AER capability structure</p>
+<p>AER aware drivers of PCI Express component need change the device<br>control registers to enable AER. They also could change AER registers,<br>including mask and severity registers. Helper function<br>pci_enable_pcie_error_reporting could be used to enable AER. See<br>section 3.3.</p>
+<p>3.2. Provide callbacks</p>
+<p>3.2.1 callback reset_link to reset pci express link</p>
+<p>This callback is used to reset the pci express physical link when a<br>fatal error happens. The root port aer service driver provides a<br>default reset_link function, but different upstream ports might<br>have different specifications to reset pci express link, so all<br>upstream ports should provide their own reset_link functions.</p>
+<p>In struct pcie_port_service_driver, a new pointer, reset_link, is<br>added.</p>
+<p>pci_ers_result_t (*reset_link) (struct pci_dev *dev);</p>
+<p>Section 3.2.2.2 provides more detailed info on when to call<br>reset_link.</p>
+<p>3.2.2 PCI error-recovery callbacks</p>
+<p>The PCI Express AER Root driver uses error callbacks to coordinate<br>with downstream device drivers associated with a hierarchy in question<br>when performing error recovery actions.</p>
+<p>Data struct pci_driver has a pointer, err_handler, to point to<br>pci_error_handlers who consists of a couple of callback function<br>pointers. AER driver follows the rules defined in<br>pci-error-recovery.txt except pci express specific parts (e.g.<br>reset_link). Pls. refer to pci-error-recovery.txt for detailed<br>definitions of the callbacks.</p>
+<p>Below sections specify when to call the error callback functions.</p>
+<p>3.2.2.1 Correctable errors</p>
+<p>Correctable errors pose no impacts on the functionality of<br>the interface. The PCI Express protocol can recover without any<br>software intervention or any loss of data. These errors do not<br>require any recovery actions. The AER driver clears the device’s<br>correctable error status register accordingly and logs these errors.</p>
+<p>3.2.2.2 Non-correctable (non-fatal and fatal) errors</p>
+<p>If an error message indicates a non-fatal error, performing link reset<br>at upstream is not required. The AER driver calls error_detected(dev,<br>pci_channel_io_normal) to all drivers associated within a hierarchy in<br>question. for example,<br>EndPoint&lt;==&gt;DownstreamPort B&lt;==&gt;UpstreamPort A&lt;==&gt;RootPort.<br>If Upstream port A captures an AER error, the hierarchy consists of<br>Downstream port B and EndPoint.</p>
+<p>A driver may return PCI_ERS_RESULT_CAN_RECOVER,<br>PCI_ERS_RESULT_DISCONNECT, or PCI_ERS_RESULT_NEED_RESET, depending on<br>whether it can recover or the AER driver calls mmio_enabled as next.</p>
+<p>If an error message indicates a fatal error, kernel will broadcast<br>error_detected(dev, pci_channel_io_frozen) to all drivers within<br>a hierarchy in question. Then, performing link reset at upstream is<br>necessary. As different kinds of devices might use different approaches<br>to reset link, AER port service driver is required to provide the<br>function to reset link. Firstly, kernel looks for if the upstream<br>component has an aer driver. If it has, kernel uses the reset_link<br>callback of the aer driver. If the upstream component has no aer driver<br>and the port is downstream port, we will perform a hot reset as the<br>default by setting the Secondary Bus Reset bit of the Bridge Control<br>register associated with the downstream port. As for upstream ports,<br>they should provide their own aer service drivers with reset_link<br>function. If error_detected returns PCI_ERS_RESULT_CAN_RECOVER and<br>reset_link returns PCI_ERS_RESULT_RECOVERED, the error handling goes<br>to mmio_enabled.</p>
+<p>3.3 helper functions</p>
+<p>3.3.1 int pci_enable_pcie_error_reporting(struct pci_dev *dev);<br>pci_enable_pcie_error_reporting enables the device to send error<br>messages to root port when an error is detected. Note that devices<br>don’t enable the error reporting by default, so device drivers need<br>call this function to enable it.</p>
+<p>3.3.2 int pci_disable_pcie_error_reporting(struct pci_dev *dev);<br>pci_disable_pcie_error_reporting disables the device to send error<br>messages to root port when an error is detected.</p>
+<p>3.3.3 int pci_cleanup_aer_uncorrect_error_status(struct pci_dev *dev);<br>pci_cleanup_aer_uncorrect_error_status cleanups the uncorrectable<br>error status register.</p>
+<p>3.4 Frequent Asked Questions</p>
+<p>Q: What happens if a PCI Express device driver does not provide an<br>error recovery handler (pci_driver-&gt;err_handler is equal to NULL)?</p>
+<p>A: The devices attached with the driver won’t be recovered. If the<br>error is fatal, kernel will print out warning messages. Please refer<br>to section 3 for more information.</p>
+<p>Q: What happens if an upstream port service driver does not provide<br>callback reset_link?</p>
+<p>A: Fatal error recovery will fail if the errors are reported by the<br>upstream ports who are attached by the service driver.</p>
+<p>Q: How does this infrastructure deal with driver that is not PCI<br>Express aware?</p>
+<p>A: This infrastructure calls the error callback functions of the<br>driver when an error happens. But if the driver is not aware of<br>PCI Express, the device might not report its own errors to root<br>port.</p>
+<p>Q: What modifications will that driver need to make it compatible<br>with the PCI Express AER Root driver?</p>
+<p>A: It could call the helper functions to enable AER in devices and<br>cleanup uncorrectable status register. Pls. refer to section 3.3.</p>
+<ol start="4">
+<li>Software error injection</li>
+</ol>
+<p>Debugging PCIe AER error recovery code is quite difficult because it<br>is hard to trigger real hardware errors. Software based error<br>injection can be used to fake various kinds of PCIe errors.</p>
+<p>First you should enable PCIe AER software error injection in kernel<br>configuration, that is, following item should be in your .config.</p>
+<p>CONFIG_PCIEAER_INJECT=y or CONFIG_PCIEAER_INJECT=m</p>
+<p>After reboot with new kernel or insert the module, a device file named<br>/dev/aer_inject should be created.</p>
+<p>Then, you need a user space tool named aer-inject, which can be gotten<br>from:<br>    <a target="_blank" rel="noopener" href="http://www.kernel.org/pub/linux/utils/pci/aer-inject/">http://www.kernel.org/pub/linux/utils/pci/aer-inject/</a></p>
+<p>More information about aer-inject can be found in the document comes<br>with its source code.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/" title="Kernel-3.10.0-957.el7_pcieaer-howto" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_pcieaer-howto/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv/" title="Kernel-3.10.0-957.el7_pci_iov_resource_on_powernv"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pcwd-watchdog/" title="Kernel-3.10.0-957.el7_pcwd-watchdog"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

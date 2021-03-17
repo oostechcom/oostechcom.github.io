@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_static-keys | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Static Keys&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; .. warning::    DEPRECATED API:    The use of ‘struct static_key’ directly, is now DEPRECATED. In addition   static_key_{true,false}() is also DEPRECATED. IE DO NOT u">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_static-keys">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_static-keys/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Static Keys&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; .. warning::    DEPRECATED API:    The use of ‘struct static_key’ directly, is now DEPRECATED. In addition   static_key_{true,false}() is also DEPRECATED. IE DO NOT u">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_static-keys/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Abstract"><span class="toc-number">1.</span> <span class="toc-text">Abstract</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Motivation"><span class="toc-number">2.</span> <span class="toc-text">Motivation</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Solution"><span class="toc-number">3.</span> <span class="toc-text">Solution</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Static-key-label-API-usage-and-examples"><span class="toc-number">4.</span> <span class="toc-text">Static key label API, usage and examples</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_static-keys" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_static-keys
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_static-keys/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_static-keys/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_static-keys/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>===========<br>Static Keys<br>===========</p>
+<p>.. warning::</p>
+<p>   DEPRECATED API:</p>
+<p>   The use of ‘struct static_key’ directly, is now DEPRECATED. In addition<br>   static_key_{true,false}() is also DEPRECATED. IE DO NOT use the following::</p>
+<pre><code>struct static_key false = STATIC_KEY_INIT_FALSE;
+struct static_key true = STATIC_KEY_INIT_TRUE;
+static_key_true()
+static_key_false()
+</code></pre>
+<p>   The updated API replacements are::</p>
+<pre><code>DEFINE_STATIC_KEY_TRUE(key);
+DEFINE_STATIC_KEY_FALSE(key);
+DEFINE_STATIC_KEY_ARRAY_TRUE(keys, count);
+DEFINE_STATIC_KEY_ARRAY_FALSE(keys, count);
+static_branch_likely()
+static_branch_unlikely()
+</code></pre>
+<h1 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h1><p>Static keys allows the inclusion of seldom used features in<br>performance-sensitive fast-path kernel code, via a GCC feature and a code<br>patching technique. A quick example::</p>
+<pre><code>DEFINE_STATIC_KEY_FALSE(key);
+
+...
+
+    if (static_branch_unlikely(&amp;key))
+            do unlikely code
+    else
+            do likely code
+
+...
+static_branch_enable(&amp;key);
+...
+static_branch_disable(&amp;key);
+...
+</code></pre>
+<p>The static_branch_unlikely() branch will be generated into the code with as little<br>impact to the likely code path as possible.</p>
+<h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><p>Currently, tracepoints are implemented using a conditional branch. The<br>conditional check requires checking a global variable for each tracepoint.<br>Although the overhead of this check is small, it increases when the memory<br>cache comes under pressure (memory cache lines for these global variables may<br>be shared with other memory accesses). As we increase the number of tracepoints<br>in the kernel this overhead may become more of an issue. In addition,<br>tracepoints are often dormant (disabled) and provide no direct kernel<br>functionality. Thus, it is highly desirable to reduce their impact as much as<br>possible. Although tracepoints are the original motivation for this work, other<br>kernel code paths should be able to make use of the static keys facility.</p>
+<h1 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h1><p>gcc (v4.5) adds a new ‘asm goto’ statement that allows branching to a label:</p>
+<p><a target="_blank" rel="noopener" href="http://gcc.gnu.org/ml/gcc-patches/2009-07/msg01556.html">http://gcc.gnu.org/ml/gcc-patches/2009-07/msg01556.html</a></p>
+<p>Using the ‘asm goto’, we can create branches that are either taken or not taken<br>by default, without the need to check memory. Then, at run-time, we can patch<br>the branch site to change the branch direction.</p>
+<p>For example, if we have a simple branch that is disabled by default::</p>
+<pre><code>if (static_branch_unlikely(&amp;key))
+    printk(&quot;I am the true branch\n&quot;);
+</code></pre>
+<p>Thus, by default the ‘printk’ will not be emitted. And the code generated will<br>consist of a single atomic ‘no-op’ instruction (5 bytes on x86), in the<br>straight-line code path. When the branch is ‘flipped’, we will patch the<br>‘no-op’ in the straight-line codepath with a ‘jump’ instruction to the<br>out-of-line true branch. Thus, changing branch direction is expensive but<br>branch selection is basically ‘free’. That is the basic tradeoff of this<br>optimization.</p>
+<p>This lowlevel patching mechanism is called ‘jump label patching’, and it gives<br>the basis for the static keys facility.</p>
+<h1 id="Static-key-label-API-usage-and-examples"><a href="#Static-key-label-API-usage-and-examples" class="headerlink" title="Static key label API, usage and examples"></a>Static key label API, usage and examples</h1><p>In order to make use of this optimization you must first define a key::</p>
+<pre><code>DEFINE_STATIC_KEY_TRUE(key);
+</code></pre>
+<p>or::</p>
+<pre><code>DEFINE_STATIC_KEY_FALSE(key);
+</code></pre>
+<p>The key must be global, that is, it can’t be allocated on the stack or dynamically<br>allocated at run-time.</p>
+<p>The key is then used in code as::</p>
+<pre><code>    if (static_branch_unlikely(&amp;key))
+            do unlikely code
+    else
+            do likely code
+</code></pre>
+<p>Or::</p>
+<pre><code>    if (static_branch_likely(&amp;key))
+            do likely code
+    else
+            do unlikely code
+</code></pre>
+<p>Keys defined via DEFINE_STATIC_KEY_TRUE(), or DEFINE_STATIC_KEY_FALSE, may<br>be used in either static_branch_likely() or static_branch_unlikely()<br>statements.</p>
+<p>Branch(es) can be set true via::</p>
+<pre><code>static_branch_enable(&amp;key);
+</code></pre>
+<p>or false via::</p>
+<pre><code>static_branch_disable(&amp;key);
+</code></pre>
+<p>The branch(es) can then be switched via reference counts::</p>
+<pre><code>static_branch_inc(&amp;key);
+...
+static_branch_dec(&amp;key);
+</code></pre>
+<p>Thus, ‘static_branch_inc()’ means ‘make the branch true’, and<br>‘static_branch_dec()’ means ‘make the branch false’ with appropriate<br>reference counting. For example, if the key is initialized true, a<br>static_branch_dec(), will switch the branch to false. And a subsequent<br>static_branch_inc(), will change the branch back to true. Likewise, if the<br>key is initialized false, a ‘static_branch_inc()’, will change the branch to<br>true. And then a ‘static_branch_dec()’, will again make the branch false.</p>
+<p>The state and the reference count can be retrieved with ‘static_key_enabled()’<br>and ‘static_key_count()’.  In general, if you use these functions, they<br>should be protected with the same mutex used around the enable/disable<br>or increment/decrement function.</p>
+<p>Note that switching branches results in some locks being taken,<br>particularly the CPU hotplug lock (in order to avoid races against<br>CPUs being brought in the kernel whilst the kernel is getting<br>patched). Calling the static key API from within a hotplug notifier is<br>thus a sure deadlock recipe. In order to still allow use of the<br>functionnality, the following functions are provided:</p>
+<pre><code>static_key_enable_cpuslocked()
+static_key_disable_cpuslocked()
+static_branch_enable_cpuslocked()
+static_branch_disable_cpuslocked()
+</code></pre>
+<p>These functions are <em>not</em> general purpose, and must only be used when<br>you really know that you’re in the above context, and no other.</p>
+<p>Where an array of keys is required, it can be defined as::</p>
+<pre><code>DEFINE_STATIC_KEY_ARRAY_TRUE(keys, count);
+</code></pre>
+<p>or::</p>
+<pre><code>DEFINE_STATIC_KEY_ARRAY_FALSE(keys, count);
+</code></pre>
+<ol start="4">
+<li>Architecture level code patching interface, ‘jump labels’</li>
+</ol>
+<p>There are a few functions and macros that architectures must implement in order<br>to take advantage of this optimization. If there is no architecture support, we<br>simply fall back to a traditional, load, test, and jump sequence. Also, the<br>struct jump_entry table must be at least 4-byte aligned because the<br>static_key-&gt;entry field makes use of the two least significant bits.</p>
+<ul>
+<li><p><code>select HAVE_ARCH_JUMP_LABEL</code>,<br>  see: arch/x86/Kconfig</p>
+</li>
+<li><p><code>#define JUMP_LABEL_NOP_SIZE</code>,<br>  see: arch/x86/include/asm/jump_label.h</p>
+</li>
+<li><p><code>__always_inline bool arch_static_branch(struct static_key *key, bool branch)</code>,<br>  see: arch/x86/include/asm/jump_label.h</p>
+</li>
+<li><p><code>__always_inline bool arch_static_branch_jump(struct static_key *key, bool branch)</code>,<br>  see: arch/x86/include/asm/jump_label.h</p>
+</li>
+<li><p><code>void arch_jump_label_transform(struct jump_entry *entry, enum jump_label_type type)</code>,<br>  see: arch/x86/kernel/jump_label.c</p>
+</li>
+<li><p><code>__init_or_module void arch_jump_label_transform_static(struct jump_entry *entry, enum jump_label_type type)</code>,<br>  see: arch/x86/kernel/jump_label.c</p>
+</li>
+<li><p><code>struct jump_entry</code>,<br>  see: arch/x86/include/asm/jump_label.h</p>
+</li>
+</ul>
+<ol start="5">
+<li>Static keys / jump label analysis, results (x86_64):</li>
+</ol>
+<p>As an example, let’s add the following branch to ‘getppid()’, such that the<br>system call now looks like::</p>
+<p>  SYSCALL_DEFINE0(getppid)<br>  {<br>        int pid;</p>
+<ul>
+<li><pre><code>if (static_branch_unlikely(&amp;key))
+</code></pre>
+</li>
+<li><pre><code>    printk(&quot;I am the true branch\n&quot;);
+
+rcu_read_lock();
+pid = task_tgid_vnr(rcu_dereference(current-&gt;real_parent));
+rcu_read_unlock();
+
+return pid;
+</code></pre>
+<p>}</p>
+</li>
+</ul>
+<p>The resulting instructions with jump labels generated by GCC is::</p>
+<p>  ffffffff81044290 <sys_getppid>:<br>  ffffffff81044290:       55                      push   %rbp<br>  ffffffff81044291:       48 89 e5                mov    %rsp,%rbp<br>  ffffffff81044294:       e9 00 00 00 00          jmpq   ffffffff81044299 &lt;sys_getppid+0x9&gt;<br>  ffffffff81044299:       65 48 8b 04 25 c0 b6    mov    %gs:0xb6c0,%rax<br>  ffffffff810442a0:       00 00<br>  ffffffff810442a2:       48 8b 80 80 02 00 00    mov    0x280(%rax),%rax<br>  ffffffff810442a9:       48 8b 80 b0 02 00 00    mov    0x2b0(%rax),%rax<br>  ffffffff810442b0:       48 8b b8 e8 02 00 00    mov    0x2e8(%rax),%rdi<br>  ffffffff810442b7:       e8 f4 d9 00 00          callq  ffffffff81051cb0 <pid_vnr><br>  ffffffff810442bc:       5d                      pop    %rbp<br>  ffffffff810442bd:       48 98                   cltq<br>  ffffffff810442bf:       c3                      retq<br>  ffffffff810442c0:       48 c7 c7 e3 54 98 81    mov    $0xffffffff819854e3,%rdi<br>  ffffffff810442c7:       31 c0                   xor    %eax,%eax<br>  ffffffff810442c9:       e8 71 13 6d 00          callq  ffffffff8171563f <printk><br>  ffffffff810442ce:       eb c9                   jmp    ffffffff81044299 &lt;sys_getppid+0x9&gt;</p>
+<p>Without the jump label optimization it looks like::</p>
+<p>  ffffffff810441f0 <sys_getppid>:<br>  ffffffff810441f0:       8b 05 8a 52 d8 00       mov    0xd8528a(%rip),%eax        # ffffffff81dc9480 <key><br>  ffffffff810441f6:       55                      push   %rbp<br>  ffffffff810441f7:       48 89 e5                mov    %rsp,%rbp<br>  ffffffff810441fa:       85 c0                   test   %eax,%eax<br>  ffffffff810441fc:       75 27                   jne    ffffffff81044225 &lt;sys_getppid+0x35&gt;<br>  ffffffff810441fe:       65 48 8b 04 25 c0 b6    mov    %gs:0xb6c0,%rax<br>  ffffffff81044205:       00 00<br>  ffffffff81044207:       48 8b 80 80 02 00 00    mov    0x280(%rax),%rax<br>  ffffffff8104420e:       48 8b 80 b0 02 00 00    mov    0x2b0(%rax),%rax<br>  ffffffff81044215:       48 8b b8 e8 02 00 00    mov    0x2e8(%rax),%rdi<br>  ffffffff8104421c:       e8 2f da 00 00          callq  ffffffff81051c50 <pid_vnr><br>  ffffffff81044221:       5d                      pop    %rbp<br>  ffffffff81044222:       48 98                   cltq<br>  ffffffff81044224:       c3                      retq<br>  ffffffff81044225:       48 c7 c7 13 53 98 81    mov    $0xffffffff81985313,%rdi<br>  ffffffff8104422c:       31 c0                   xor    %eax,%eax<br>  ffffffff8104422e:       e8 60 0f 6d 00          callq  ffffffff81715193 <printk><br>  ffffffff81044233:       eb c9                   jmp    ffffffff810441fe &lt;sys_getppid+0xe&gt;<br>  ffffffff81044235:       66 66 2e 0f 1f 84 00    data32 nopw %cs:0x0(%rax,%rax,1)<br>  ffffffff8104423c:       00 00 00 00</p>
+<p>Thus, the disable jump label case adds a ‘mov’, ‘test’ and ‘jne’ instruction<br>vs. the jump label case just has a ‘no-op’ or ‘jmp 0’. (The jmp 0, is patched<br>to a 5 byte atomic no-op instruction at boot-time.) Thus, the disabled jump<br>label case adds::</p>
+<p>  6 (mov) + 2 (test) + 2 (jne) = 10 - 5 (5 byte jump 0) = 5 addition bytes.</p>
+<p>If we then include the padding bytes, the jump label code saves, 16 total bytes<br>of instruction memory for this small function. In this case the non-jump label<br>function is 80 bytes long. Thus, we have saved 20% of the instruction<br>footprint. We can in fact improve this even further, since the 5-byte no-op<br>really can be a 2-byte no-op since we can reach the branch with a 2-byte jmp.<br>However, we have not yet implemented optimal no-op sizes (they are currently<br>hard-coded).</p>
+<p>Since there are a number of static key API uses in the scheduler paths,<br>‘pipe-test’ (also known as ‘perf bench sched pipe’) can be used to show the<br>performance improvement. Testing done on 3.3.0-rc2:</p>
+<p>jump label disabled::</p>
+<p> Performance counter stats for ‘bash -c /tmp/pipe-test’ (50 runs):</p>
+<pre><code>    855.700314 task-clock                #    0.534 CPUs utilized            ( +-  0.11% )
+       200,003 context-switches          #    0.234 M/sec                    ( +-  0.00% )
+             0 CPU-migrations            #    0.000 M/sec                    ( +- 39.58% )
+           487 page-faults               #    0.001 M/sec                    ( +-  0.02% )
+ 1,474,374,262 cycles                    #    1.723 GHz                      ( +-  0.17% )
+</code></pre>
+<p>   <not supported> stalled-cycles-frontend<br>   <not supported> stalled-cycles-backend<br>     1,178,049,567 instructions              #    0.80  insns per cycle          ( +-  0.06% )<br>       208,368,926 branches                  #  243.507 M/sec                    ( +-  0.06% )<br>         5,569,188 branch-misses             #    2.67% of all branches          ( +-  0.54% )</p>
+<pre><code>   1.601607384 seconds time elapsed                                          ( +-  0.07% )
+</code></pre>
+<p>jump label enabled::</p>
+<p> Performance counter stats for ‘bash -c /tmp/pipe-test’ (50 runs):</p>
+<pre><code>    841.043185 task-clock                #    0.533 CPUs utilized            ( +-  0.12% )
+       200,004 context-switches          #    0.238 M/sec                    ( +-  0.00% )
+             0 CPU-migrations            #    0.000 M/sec                    ( +- 40.87% )
+           487 page-faults               #    0.001 M/sec                    ( +-  0.05% )
+ 1,432,559,428 cycles                    #    1.703 GHz                      ( +-  0.18% )
+</code></pre>
+<p>   <not supported> stalled-cycles-frontend<br>   <not supported> stalled-cycles-backend<br>     1,175,363,994 instructions              #    0.82  insns per cycle          ( +-  0.04% )<br>       206,859,359 branches                  #  245.956 M/sec                    ( +-  0.04% )<br>         4,884,119 branch-misses             #    2.36% of all branches          ( +-  0.85% )</p>
+<pre><code>   1.579384366 seconds time elapsed
+</code></pre>
+<p>The percentage of saved branches is .7%, and we’ve saved 12% on<br>‘branch-misses’. This is where we would expect to get the most savings, since<br>this optimization is about reducing the number of branches. In addition, we’ve<br>saved .2% on instructions, and 2.8% on cycles and 1.4% on elapsed time.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_static-keys/" title="Kernel-4.18.0-80.el8_static-keys" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_static-keys/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_stat/" title="Kernel-4.18.0-80.el8_stat"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_ste,abx500/" title="Kernel-4.18.0-80.el8_ste,abx500"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

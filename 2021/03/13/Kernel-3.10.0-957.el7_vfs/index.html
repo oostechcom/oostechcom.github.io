@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_vfs | oosTech.com</title>
+  <meta name="description" content="Overview of the Linux Virtual File System  Original author: Richard Gooch &lt;rgooch@atnf.csiro.au&gt;        Last updated on June 24, 2007.    Copyright (C) 1999 Richard Gooch  Copyright (C) 20">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_vfs">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfs/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Overview of the Linux Virtual File System  Original author: Richard Gooch &lt;rgooch@atnf.csiro.au&gt;        Last updated on June 24, 2007.    Copyright (C) 1999 Richard Gooch  Copyright (C) 20">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfs/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Directory-Entry-Cache-dcache"><span class="toc-number">1.1.</span> <span class="toc-text">Directory Entry Cache (dcache)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Inode-Object"><span class="toc-number">1.2.</span> <span class="toc-text">The Inode Object</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-File-Object"><span class="toc-number">1.3.</span> <span class="toc-text">The File Object</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Registering-and-Mounting-a-Filesystem"><span class="toc-number">2.</span> <span class="toc-text">Registering and Mounting a Filesystem</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#struct-file-system-type"><span class="toc-number">2.1.</span> <span class="toc-text">struct file_system_type</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Superblock-Object"><span class="toc-number">3.</span> <span class="toc-text">The Superblock Object</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#struct-super-operations"><span class="toc-number">3.1.</span> <span class="toc-text">struct super_operations</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Inode-Object-1"><span class="toc-number">4.</span> <span class="toc-text">The Inode Object</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#struct-inode-operations"><span class="toc-number">4.1.</span> <span class="toc-text">struct inode_operations</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Address-Space-Object"><span class="toc-number">5.</span> <span class="toc-text">The Address Space Object</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#struct-address-space-operations"><span class="toc-number">5.1.</span> <span class="toc-text">struct address_space_operations</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-File-Object-1"><span class="toc-number">6.</span> <span class="toc-text">The File Object</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#struct-file-operations"><span class="toc-number">6.1.</span> <span class="toc-text">struct file_operations</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Directory-Entry-Cache-dcache-1"><span class="toc-number">7.</span> <span class="toc-text">Directory Entry Cache (dcache)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#struct-dentry-operations"><span class="toc-number">7.1.</span> <span class="toc-text">struct dentry_operations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Directory-Entry-Cache-API"><span class="toc-number">7.2.</span> <span class="toc-text">Directory Entry Cache API</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Mount-Options"><span class="toc-number">8.</span> <span class="toc-text">Mount Options</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Parsing-options"><span class="toc-number">8.1.</span> <span class="toc-text">Parsing options</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Showing-options"><span class="toc-number">8.2.</span> <span class="toc-text">Showing options</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Resources"><span class="toc-number">9.</span> <span class="toc-text">Resources</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_vfs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_vfs
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_vfs/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_vfs/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_vfs/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>      Overview of the Linux Virtual File System
+
+Original author: Richard Gooch &lt;rgooch@atnf.csiro.au&gt;
+
+      Last updated on June 24, 2007.
+</code></pre>
+<p>  Copyright (C) 1999 Richard Gooch<br>  Copyright (C) 2005 Pekka Enberg</p>
+<p>  This file is released under the GPLv2.</p>
+<h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>The Virtual File System (also known as the Virtual Filesystem Switch)<br>is the software layer in the kernel that provides the filesystem<br>interface to userspace programs. It also provides an abstraction<br>within the kernel which allows different filesystem implementations to<br>coexist.</p>
+<p>VFS system calls open(2), stat(2), read(2), write(2), chmod(2) and so<br>on are called from a process context. Filesystem locking is described<br>in the document Documentation/filesystems/Locking.</p>
+<h2 id="Directory-Entry-Cache-dcache"><a href="#Directory-Entry-Cache-dcache" class="headerlink" title="Directory Entry Cache (dcache)"></a>Directory Entry Cache (dcache)</h2><p>The VFS implements the open(2), stat(2), chmod(2), and similar system<br>calls. The pathname argument that is passed to them is used by the VFS<br>to search through the directory entry cache (also known as the dentry<br>cache or dcache). This provides a very fast look-up mechanism to<br>translate a pathname (filename) into a specific dentry. Dentries live<br>in RAM and are never saved to disc: they exist only for performance.</p>
+<p>The dentry cache is meant to be a view into your entire filespace. As<br>most computers cannot fit all dentries in the RAM at the same time,<br>some bits of the cache are missing. In order to resolve your pathname<br>into a dentry, the VFS may have to resort to creating dentries along<br>the way, and then loading the inode. This is done by looking up the<br>inode.</p>
+<h2 id="The-Inode-Object"><a href="#The-Inode-Object" class="headerlink" title="The Inode Object"></a>The Inode Object</h2><p>An individual dentry usually has a pointer to an inode. Inodes are<br>filesystem objects such as regular files, directories, FIFOs and other<br>beasts.  They live either on the disc (for block device filesystems)<br>or in the memory (for pseudo filesystems). Inodes that live on the<br>disc are copied into the memory when required and changes to the inode<br>are written back to disc. A single inode can be pointed to by multiple<br>dentries (hard links, for example, do this).</p>
+<p>To look up an inode requires that the VFS calls the lookup() method of<br>the parent directory inode. This method is installed by the specific<br>filesystem implementation that the inode lives in. Once the VFS has<br>the required dentry (and hence the inode), we can do all those boring<br>things like open(2) the file, or stat(2) it to peek at the inode<br>data. The stat(2) operation is fairly simple: once the VFS has the<br>dentry, it peeks at the inode data and passes some of it back to<br>userspace.</p>
+<h2 id="The-File-Object"><a href="#The-File-Object" class="headerlink" title="The File Object"></a>The File Object</h2><p>Opening a file requires another operation: allocation of a file<br>structure (this is the kernel-side implementation of file<br>descriptors). The freshly allocated file structure is initialized with<br>a pointer to the dentry and a set of file operation member functions.<br>These are taken from the inode data. The open() file method is then<br>called so the specific filesystem implementation can do its work. You<br>can see that this is another switch performed by the VFS. The file<br>structure is placed into the file descriptor table for the process.</p>
+<p>Reading, writing and closing files (and other assorted VFS operations)<br>is done by using the userspace file descriptor to grab the appropriate<br>file structure, and then calling the required file structure method to<br>do whatever is required. For as long as the file is open, it keeps the<br>dentry in use, which in turn means that the VFS inode is still in use.</p>
+<h1 id="Registering-and-Mounting-a-Filesystem"><a href="#Registering-and-Mounting-a-Filesystem" class="headerlink" title="Registering and Mounting a Filesystem"></a>Registering and Mounting a Filesystem</h1><p>To register and unregister a filesystem, use the following API<br>functions:</p>
+<p>   #include &lt;linux/fs.h&gt;</p>
+<p>   extern int register_filesystem(struct file_system_type *);<br>   extern int unregister_filesystem(struct file_system_type *);</p>
+<p>The passed struct file_system_type describes your filesystem. When a<br>request is made to mount a filesystem onto a directory in your namespace,<br>the VFS will call the appropriate mount() method for the specific<br>filesystem.  New vfsmount referring to the tree returned by -&gt;mount()<br>will be attached to the mountpoint, so that when pathname resolution<br>reaches the mountpoint it will jump into the root of that vfsmount.</p>
+<p>You can see all filesystems that are registered to the kernel in the<br>file /proc/filesystems.</p>
+<h2 id="struct-file-system-type"><a href="#struct-file-system-type" class="headerlink" title="struct file_system_type"></a>struct file_system_type</h2><p>This describes the filesystem. As of kernel 2.6.39, the following<br>members are defined:</p>
+<p>struct file_system_type {<br>    const char *name;<br>    int fs_flags;<br>        struct dentry *(*mount) (struct file_system_type *, int,<br>                       const char *, void *);<br>        void (*kill_sb) (struct super_block *);<br>        struct module *owner;<br>        struct file_system_type * next;<br>        struct list_head fs_supers;<br>    struct lock_class_key s_lock_key;<br>    struct lock_class_key s_umount_key;<br>};</p>
+<p>  name: the name of the filesystem type, such as “ext2”, “iso9660”,<br>    “msdos” and so on</p>
+<p>  fs_flags: various flags (i.e. FS_REQUIRES_DEV, FS_NO_DCACHE, etc.)</p>
+<p>  mount: the method to call when a new instance of this<br>    filesystem should be mounted</p>
+<p>  kill_sb: the method to call when an instance of this filesystem<br>    should be shut down</p>
+<p>  owner: for internal VFS use: you should initialize this to THIS_MODULE in<br>      most cases.</p>
+<p>  next: for internal VFS use: you should initialize this to NULL</p>
+<p>  s_lock_key, s_umount_key: lockdep-specific</p>
+<p>The mount() method has the following arguments:</p>
+<p>  struct file_system_type *fs_type: describes the filesystem, partly initialized<br>      by the specific filesystem code</p>
+<p>  int flags: mount flags</p>
+<p>  const char *dev_name: the device name we are mounting.</p>
+<p>  void *data: arbitrary mount options, usually comes as an ASCII<br>    string (see “Mount Options” section)</p>
+<p>The mount() method must return the root dentry of the tree requested by<br>caller.  An active reference to its superblock must be grabbed and the<br>superblock must be locked.  On failure it should return ERR_PTR(error).</p>
+<p>The arguments match those of mount(2) and their interpretation<br>depends on filesystem type.  E.g. for block filesystems, dev_name is<br>interpreted as block device name, that device is opened and if it<br>contains a suitable filesystem image the method creates and initializes<br>struct super_block accordingly, returning its root dentry to caller.</p>
+<p>-&gt;mount() may choose to return a subtree of existing filesystem - it<br>doesn’t have to create a new one.  The main result from the caller’s<br>point of view is a reference to dentry at the root of (sub)tree to<br>be attached; creation of new superblock is a common side effect.</p>
+<p>The most interesting member of the superblock structure that the<br>mount() method fills in is the “s_op” field. This is a pointer to<br>a “struct super_operations” which describes the next level of the<br>filesystem implementation.</p>
+<p>Usually, a filesystem uses one of the generic mount() implementations<br>and provides a fill_super() callback instead. The generic variants are:</p>
+<p>  mount_bdev: mount a filesystem residing on a block device</p>
+<p>  mount_nodev: mount a filesystem that is not backed by a device</p>
+<p>  mount_single: mount a filesystem which shares the instance between<br>      all mounts</p>
+<p>A fill_super() callback implementation has the following arguments:</p>
+<p>  struct super_block *sb: the superblock structure. The callback<br>      must initialize this properly.</p>
+<p>  void *data: arbitrary mount options, usually comes as an ASCII<br>    string (see “Mount Options” section)</p>
+<p>  int silent: whether or not to be silent on error</p>
+<h1 id="The-Superblock-Object"><a href="#The-Superblock-Object" class="headerlink" title="The Superblock Object"></a>The Superblock Object</h1><p>A superblock object represents a mounted filesystem.</p>
+<h2 id="struct-super-operations"><a href="#struct-super-operations" class="headerlink" title="struct super_operations"></a>struct super_operations</h2><p>This describes how the VFS can manipulate the superblock of your<br>filesystem. As of kernel 2.6.22, the following members are defined:</p>
+<p>struct super_operations {<br>        struct inode *(*alloc_inode)(struct super_block *sb);<br>        void (*destroy_inode)(struct inode *);</p>
+<pre><code>    void (*dirty_inode) (struct inode *, int flags);
+    int (*write_inode) (struct inode *, int);
+    void (*drop_inode) (struct inode *);
+    void (*delete_inode) (struct inode *);
+    void (*put_super) (struct super_block *);
+    int (*sync_fs)(struct super_block *sb, int wait);
+    int (*freeze_fs) (struct super_block *);
+    int (*unfreeze_fs) (struct super_block *);
+    int (*statfs) (struct dentry *, struct kstatfs *);
+    int (*remount_fs) (struct super_block *, int *, char *);
+    void (*clear_inode) (struct inode *);
+    void (*umount_begin) (struct super_block *);
+
+    int (*show_options)(struct seq_file *, struct dentry *);
+
+    ssize_t (*quota_read)(struct super_block *, int, char *, size_t, loff_t);
+    ssize_t (*quota_write)(struct super_block *, int, const char *, size_t, loff_t);
+int (*nr_cached_objects)(struct super_block *);
+void (*free_cached_objects)(struct super_block *, int);
+</code></pre>
+<p>};</p>
+<p>All methods are called without any locks being held, unless otherwise<br>noted. This means that most methods can block safely. All methods are<br>only called from a process context (i.e. not from an interrupt handler<br>or bottom half).</p>
+<p>  alloc_inode: this method is called by inode_alloc() to allocate memory<br>     for struct inode and initialize it.  If this function is not<br>     defined, a simple ‘struct inode’ is allocated.  Normally<br>     alloc_inode will be used to allocate a larger structure which<br>     contains a ‘struct inode’ embedded within it.</p>
+<p>  destroy_inode: this method is called by destroy_inode() to release<br>      resources allocated for struct inode.  It is only required if<br>      -&gt;alloc_inode was defined and simply undoes anything done by<br>    -&gt;alloc_inode.</p>
+<p>  dirty_inode: this method is called by the VFS to mark an inode dirty.</p>
+<p>  write_inode: this method is called when the VFS needs to write an<br>    inode to disc.  The second parameter indicates whether the write<br>    should be synchronous or not, not all filesystems check this flag.</p>
+<p>  drop_inode: called when the last access to the inode is dropped,<br>    with the inode-&gt;i_lock spinlock held.</p>
+<pre><code>This method should be either NULL (normal UNIX filesystem
+semantics) or &quot;generic_delete_inode&quot; (for filesystems that do not
+want to cache inodes - causing &quot;delete_inode&quot; to always be
+called regardless of the value of i_nlink)
+
+The &quot;generic_delete_inode()&quot; behavior is equivalent to the
+old practice of using &quot;force_delete&quot; in the put_inode() case,
+but does not have the races that the &quot;force_delete()&quot; approach
+had. 
+</code></pre>
+<p>  delete_inode: called when the VFS wants to delete an inode</p>
+<p>  put_super: called when the VFS wishes to free the superblock<br>    (i.e. unmount). This is called with the superblock lock held</p>
+<p>  sync_fs: called when VFS is writing out all dirty data associated with<br>      a superblock. The second parameter indicates whether the method<br>    should wait until the write out has been completed. Optional.</p>
+<p>  freeze_fs: called when VFS is locking a filesystem and<br>      forcing it into a consistent state.  This method is currently<br>      used by the Logical Volume Manager (LVM).</p>
+<p>  unfreeze_fs: called when VFS is unlocking a filesystem and making it writable<br>      again.</p>
+<p>  statfs: called when the VFS needs to get filesystem statistics.</p>
+<p>  remount_fs: called when the filesystem is remounted. This is called<br>    with the kernel lock held</p>
+<p>  clear_inode: called then the VFS clears the inode. Optional</p>
+<p>  umount_begin: called when the VFS is unmounting a filesystem.</p>
+<p>  show_options: called by the VFS to show mount options for<br>    /proc/<pid>/mounts.  (see “Mount Options” section)</p>
+<p>  quota_read: called by the VFS to read from filesystem quota file.</p>
+<p>  quota_write: called by the VFS to write to filesystem quota file.</p>
+<p>  nr_cached_objects: called by the sb cache shrinking function for the<br>    filesystem to return the number of freeable cached objects it contains.<br>    Optional.</p>
+<p>  free_cache_objects: called by the sb cache shrinking function for the<br>    filesystem to scan the number of objects indicated to try to free them.<br>    Optional, but any filesystem implementing this method needs to also<br>    implement -&gt;nr_cached_objects for it to be called correctly.</p>
+<pre><code>We can&#39;t do anything with any errors that the filesystem might
+encountered, hence the void return type. This will never be called if
+the VM is trying to reclaim under GFP_NOFS conditions, hence this
+method does not need to handle that situation itself.
+
+Implementations must include conditional reschedule calls inside any
+scanning loop that is done. This allows the VFS to determine
+appropriate scan batch sizes without having to worry about whether
+implementations will cause holdoff problems due to large scan batch
+sizes.
+</code></pre>
+<p>Whoever sets up the inode is responsible for filling in the “i_op” field. This<br>is a pointer to a “struct inode_operations” which describes the methods that<br>can be performed on individual inodes.</p>
+<h1 id="The-Inode-Object-1"><a href="#The-Inode-Object-1" class="headerlink" title="The Inode Object"></a>The Inode Object</h1><p>An inode object represents an object within the filesystem.</p>
+<h2 id="struct-inode-operations"><a href="#struct-inode-operations" class="headerlink" title="struct inode_operations"></a>struct inode_operations</h2><p>This describes how the VFS can manipulate an inode in your<br>filesystem. As of kernel 2.6.22, the following members are defined:</p>
+<p>struct inode_operations {<br>    int (*create) (struct inode *,struct dentry *, umode_t, bool);<br>    struct dentry * (*lookup) (struct inode *,struct dentry *, unsigned int);<br>    int (*link) (struct dentry *,struct inode *,struct dentry *);<br>    int (*unlink) (struct inode *,struct dentry *);<br>    int (*symlink) (struct inode *,struct dentry *,const char *);<br>    int (*mkdir) (struct inode *,struct dentry *,umode_t);<br>    int (*rmdir) (struct inode *,struct dentry *);<br>    int (*mknod) (struct inode *,struct dentry *,umode_t,dev_t);<br>    int (*rename) (struct inode *, struct dentry *,<br>            struct inode *, struct dentry *);<br>    int (*rename2) (struct inode *, struct dentry *,<br>            struct inode *, struct dentry *, unsigned int);<br>    int (*readlink) (struct dentry *, char __user *,int);<br>        void * (*follow_link) (struct dentry *, struct nameidata *);<br>        void (*put_link) (struct dentry *, struct nameidata *, void *);<br>    int (*permission) (struct inode *, int);<br>    int (*get_acl)(struct inode *, int);<br>    int (*setattr) (struct dentry *, struct iattr *);<br>    int (*getattr) (struct vfsmount *mnt, struct dentry *, struct kstat *);<br>    int (*setxattr) (struct dentry *, const char *,const void *,size_t,int);<br>    ssize_t (*getxattr) (struct dentry *, const char *, void *, size_t);<br>    ssize_t (*listxattr) (struct dentry *, char *, size_t);<br>    int (*removexattr) (struct dentry *, const char *);<br>    void (*update_time)(struct inode *, struct timespec *, int);<br>    int (*atomic_open)(struct inode *, struct dentry *, struct file *,<br>                unsigned open_flag, umode_t create_mode, int *opened);<br>    int (*dentry_open)(struct dentry *, struct file *, const struct cred *);<br>};</p>
+<p>Again, all methods are called without any locks being held, unless<br>otherwise noted.</p>
+<p>  create: called by the open(2) and creat(2) system calls. Only<br>    required if you want to support regular files. The dentry you<br>    get should not have an inode (i.e. it should be a negative<br>    dentry). Here you will probably call d_instantiate() with the<br>    dentry and the newly created inode</p>
+<p>  lookup: called when the VFS needs to look up an inode in a parent<br>    directory. The name to look for is found in the dentry. This<br>    method must call d_add() to insert the found inode into the<br>    dentry. The “i_count” field in the inode structure should be<br>    incremented. If the named inode does not exist a NULL inode<br>    should be inserted into the dentry (this is called a negative<br>    dentry). Returning an error code from this routine must only<br>    be done on a real error, otherwise creating inodes with system<br>    calls like create(2), mknod(2), mkdir(2) and so on will fail.<br>    If you wish to overload the dentry methods then you should<br>    initialise the “d_dop” field in the dentry; this is a pointer<br>    to a struct “dentry_operations”.<br>    This method is called with the directory inode semaphore held</p>
+<p>  link: called by the link(2) system call. Only required if you want<br>    to support hard links. You will probably need to call<br>    d_instantiate() just as you would in the create() method</p>
+<p>  unlink: called by the unlink(2) system call. Only required if you<br>    want to support deleting inodes</p>
+<p>  symlink: called by the symlink(2) system call. Only required if you<br>    want to support symlinks. You will probably need to call<br>    d_instantiate() just as you would in the create() method</p>
+<p>  mkdir: called by the mkdir(2) system call. Only required if you want<br>    to support creating subdirectories. You will probably need to<br>    call d_instantiate() just as you would in the create() method</p>
+<p>  rmdir: called by the rmdir(2) system call. Only required if you want<br>    to support deleting subdirectories</p>
+<p>  mknod: called by the mknod(2) system call to create a device (char,<br>    block) inode or a named pipe (FIFO) or socket. Only required<br>    if you want to support creating these types of inodes. You<br>    will probably need to call d_instantiate() just as you would<br>    in the create() method</p>
+<p>  rename: called by the rename(2) system call to rename the object to<br>    have the parent and name given by the second inode and dentry.</p>
+<p>  rename2: this has an additional flags argument compared to rename.<br>    If no flags are supported by the filesystem then this method<br>    need not be implemented.  If some flags are supported then the<br>    filesystem must return -EINVAL for any unsupported or unknown<br>    flags.  Currently the following flags are implemented:<br>    (1) RENAME_NOREPLACE: this flag indicates that if the target<br>    of the rename exists the rename should fail with -EEXIST<br>    instead of replacing the target.  The VFS already checks for<br>    existence, so for local filesystems the RENAME_NOREPLACE<br>    implementation is equivalent to plain rename.<br>    (2) RENAME_EXCHANGE: exchange source and target.  Both must<br>    exist; this is checked by the VFS.  Unlike plain rename,<br>    source and target may be of different type.</p>
+<p>  readlink: called by the readlink(2) system call. Only required if<br>    you want to support reading symbolic links</p>
+<p>  follow_link: called by the VFS to follow a symbolic link to the<br>    inode it points to.  Only required if you want to support<br>    symbolic links.  This method returns a void pointer cookie<br>    that is passed to put_link().</p>
+<p>  put_link: called by the VFS to release resources allocated by<br>      follow_link().  The cookie returned by follow_link() is passed<br>      to this method as the last parameter.  It is used by<br>      filesystems such as NFS where page cache is not stable<br>      (i.e. page that was installed when the symbolic link walk<br>      started might not be in the page cache at the end of the<br>      walk).</p>
+<p>  permission: called by the VFS to check for access rights on a POSIX-like<br>      filesystem.</p>
+<pre><code>May be called in rcu-walk mode (mask &amp; MAY_NOT_BLOCK). If in rcu-walk
+    mode, the filesystem must check the permission without blocking or
+storing to the inode.
+
+If a situation is encountered that rcu-walk cannot handle, return
+-ECHILD and it will be called again in ref-walk mode.
+</code></pre>
+<p>  setattr: called by the VFS to set attributes for a file. This method<br>      is called by chmod(2) and related system calls.</p>
+<p>  getattr: called by the VFS to get attributes of a file. This method<br>      is called by stat(2) and related system calls.</p>
+<p>  setxattr: called by the VFS to set an extended attribute for a file.<br>      Extended attribute is a name:value pair associated with an<br>      inode. This method is called by setxattr(2) system call.</p>
+<p>  getxattr: called by the VFS to retrieve the value of an extended<br>      attribute name. This method is called by getxattr(2) function<br>      call.</p>
+<p>  listxattr: called by the VFS to list all extended attributes for a<br>      given file. This method is called by listxattr(2) system call.</p>
+<p>  removexattr: called by the VFS to remove an extended attribute from<br>      a file. This method is called by removexattr(2) system call.</p>
+<p>  update_time: called by the VFS to update a specific time or the i_version of<br>      an inode.  If this is not defined the VFS will update the inode itself<br>      and call mark_inode_dirty_sync.</p>
+<p>  atomic_open: called on the last component of an open.  Using this optional<br>      method the filesystem can look up, possibly create and open the file in<br>      one atomic operation.  If it cannot perform this (e.g. the file type<br>      turned out to be wrong) it may signal this by returning 1 instead of<br>    usual 0 or -ve .  This method is only called if the last component is<br>    negative or needs lookup.  Cached positive dentries are still handled by<br>    f_op-&gt;open().  If the file was created, the FILE_CREATED flag should be<br>    set in “opened”.  In case of O_EXCL the method must only succeed if the<br>    file didn’t exist and hence FILE_CREATED shall always be set on success.</p>
+<h1 id="The-Address-Space-Object"><a href="#The-Address-Space-Object" class="headerlink" title="The Address Space Object"></a>The Address Space Object</h1><p>The address space object is used to group and manage pages in the page<br>cache.  It can be used to keep track of the pages in a file (or<br>anything else) and also track the mapping of sections of the file into<br>process address spaces.</p>
+<p>There are a number of distinct yet related services that an<br>address-space can provide.  These include communicating memory<br>pressure, page lookup by address, and keeping track of pages tagged as<br>Dirty or Writeback.</p>
+<p>The first can be used independently to the others.  The VM can try to<br>either write dirty pages in order to clean them, or release clean<br>pages in order to reuse them.  To do this it can call the -&gt;writepage<br>method on dirty pages, and -&gt;releasepage on clean pages with<br>PagePrivate set. Clean pages without PagePrivate and with no external<br>references will be released without notice being given to the<br>address_space.</p>
+<p>To achieve this functionality, pages need to be placed on an LRU with<br>lru_cache_add and mark_page_active needs to be called whenever the<br>page is used.</p>
+<p>Pages are normally kept in a radix tree index by -&gt;index. This tree<br>maintains information about the PG_Dirty and PG_Writeback status of<br>each page, so that pages with either of these flags can be found<br>quickly.</p>
+<p>The Dirty tag is primarily used by mpage_writepages - the default<br>-&gt;writepages method.  It uses the tag to find dirty pages to call<br>-&gt;writepage on.  If mpage_writepages is not used (i.e. the address<br>provides its own -&gt;writepages) , the PAGECACHE_TAG_DIRTY tag is<br>almost unused.  write_inode_now and sync_inode do use it (through<br>__sync_single_inode) to check if -&gt;writepages has been successful in<br>writing out the whole address_space.</p>
+<p>The Writeback tag is used by filemap<em>wait</em> and sync_page* functions,<br>via filemap_fdatawait_range, to wait for all writeback to<br>complete.  While waiting -&gt;sync_page (if defined) will be called on<br>each page that is found to require writeback.</p>
+<p>An address_space handler may attach extra information to a page,<br>typically using the ‘private’ field in the ‘struct page’.  If such<br>information is attached, the PG_Private flag should be set.  This will<br>cause various VM routines to make extra calls into the address_space<br>handler to deal with that data.</p>
+<p>An address space acts as an intermediate between storage and<br>application.  Data is read into the address space a whole page at a<br>time, and provided to the application either by copying of the page,<br>or by memory-mapping the page.<br>Data is written into the address space by the application, and then<br>written-back to storage typically in whole pages, however the<br>address_space has finer control of write sizes.</p>
+<p>The read process essentially only requires ‘readpage’.  The write<br>process is more complicated and uses write_begin/write_end or<br>set_page_dirty to write data into the address_space, and writepage,<br>sync_page, and writepages to writeback data to storage.</p>
+<p>Adding and removing pages to/from an address_space is protected by the<br>inode’s i_mutex.</p>
+<p>When data is written to a page, the PG_Dirty flag should be set.  It<br>typically remains set until writepage asks for it to be written.  This<br>should clear PG_Dirty and set PG_Writeback.  It can be actually<br>written at any point after PG_Dirty is clear.  Once it is known to be<br>safe, PG_Writeback is cleared.</p>
+<p>Writeback makes use of a writeback_control structure…</p>
+<h2 id="struct-address-space-operations"><a href="#struct-address-space-operations" class="headerlink" title="struct address_space_operations"></a>struct address_space_operations</h2><p>This describes how the VFS can manipulate mapping of a file to page cache in<br>your filesystem. As of kernel 2.6.22, the following members are defined:</p>
+<p>struct address_space_operations {<br>    int (<em>writepage)(struct page *page, struct writeback_control *wbc);<br>    int (*readpage)(struct file *, struct page *);<br>    int (*sync_page)(struct page *);<br>    int (*writepages)(struct address_space *, struct writeback_control *);<br>    int (*set_page_dirty)(struct page *page);<br>    int (*readpages)(struct file *filp, struct address_space *mapping,<br>            struct list_head *pages, unsigned nr_pages);<br>    int (*write_begin)(struct file *, struct address_space *mapping,<br>                loff_t pos, unsigned len, unsigned flags,<br>                struct page *</em>pagep, void *<em>fsdata);<br>    int (*write_end)(struct file *, struct address_space *mapping,<br>                loff_t pos, unsigned len, unsigned copied,<br>                struct page *page, void *fsdata);<br>    sector_t (*bmap)(struct address_space *, sector_t);<br>    int (*invalidatepage) (struct page *, unsigned long);<br>    int (*releasepage) (struct page *, int);<br>    void (*freepage)(struct page *);<br>    ssize_t (*direct_IO)(int, struct kiocb *, const struct iovec *iov,<br>            loff_t offset, unsigned long nr_segs);<br>    /</em> migrate the contents of a page to the specified target */<br>    int (*migratepage) (struct page *, struct page *);<br>    int (*launder_page) (struct page *);<br>    int (*error_remove_page) (struct mapping *mapping, struct page *page);<br>    int (*swap_activate)(struct file *);<br>    int (*swap_deactivate)(struct file *);<br>};</p>
+<p>  writepage: called by the VM to write a dirty page to backing store.<br>      This may happen for data integrity reasons (i.e. ‘sync’), or<br>      to free up memory (flush).  The difference can be seen in<br>      wbc-&gt;sync_mode.<br>      The PG_Dirty flag has been cleared and PageLocked is true.<br>      writepage should start writeout, should set PG_Writeback,<br>      and should make sure the page is unlocked, either synchronously<br>      or asynchronously when the write operation completes.</p>
+<pre><code>  If wbc-&gt;sync_mode is WB_SYNC_NONE, -&gt;writepage doesn&#39;t have to
+  try too hard if there are problems, and may choose to write out
+  other pages from the mapping if that is easier (e.g. due to
+  internal dependencies).  If it chooses not to start writeout, it
+  should return AOP_WRITEPAGE_ACTIVATE so that the VM will not keep
+  calling -&gt;writepage on that page.
+
+  See the file &quot;Locking&quot; for more details.
+</code></pre>
+<p>  readpage: called by the VM to read a page from backing store.<br>       The page will be Locked when readpage is called, and should be<br>       unlocked and marked uptodate once the read completes.<br>       If -&gt;readpage discovers that it needs to unlock the page for<br>       some reason, it can do so, and then return AOP_TRUNCATED_PAGE.<br>       In this case, the page will be relocated, relocked and if<br>       that all succeeds, -&gt;readpage will be called again.</p>
+<p>  sync_page: called by the VM to notify the backing store to perform all<br>      queued I/O operations for a page. I/O operations for other pages<br>    associated with this address_space object may also be performed.</p>
+<pre><code>This function is optional and is called only for pages with
+  PG_Writeback set while waiting for the writeback to complete.
+</code></pre>
+<p>  writepages: called by the VM to write out pages associated with the<br>      address_space object.  If wbc-&gt;sync_mode is WBC_SYNC_ALL, then<br>      the writeback_control will specify a range of pages that must be<br>      written out.  If it is WBC_SYNC_NONE, then a nr_to_write is given<br>    and that many pages should be written if possible.<br>    If no -&gt;writepages is given, then mpage_writepages is used<br>      instead.  This will choose pages from the address space that are<br>      tagged as DIRTY and will pass them to -&gt;writepage.</p>
+<p>  set_page_dirty: called by the VM to set a page dirty.<br>        This is particularly needed if an address space attaches<br>        private data to a page, and that data needs to be updated when<br>        a page is dirtied.  This is called, for example, when a memory<br>    mapped page gets modified.<br>    If defined, it should set the PageDirty flag, and the<br>        PAGECACHE_TAG_DIRTY tag in the radix tree.</p>
+<p>  readpages: called by the VM to read pages associated with the address_space<br>      object. This is essentially just a vector version of<br>      readpage.  Instead of just one page, several pages are<br>      requested.<br>    readpages is only used for read-ahead, so read errors are<br>      ignored.  If anything goes wrong, feel free to give up.</p>
+<p>  write_begin:<br>    Called by the generic buffered write code to ask the filesystem to<br>    prepare to write len bytes at the given offset in the file. The<br>    address_space should check that the write will be able to complete,<br>    by allocating space if necessary and doing any other internal<br>    housekeeping.  If the write will update parts of any basic-blocks on<br>    storage, then those blocks should be pre-read (if they haven’t been<br>    read already) so that the updated blocks can be written out properly.</p>
+<pre><code>    The filesystem must return the locked pagecache page for the specified
+offset, in *pagep, for the caller to write into.
+
+It must be able to cope with short writes (where the length passed to
+write_begin is greater than the number of bytes copied into the page).
+
+flags is a field for AOP_FLAG_xxx flags, described in
+include/linux/fs.h.
+
+    A void * may be returned in fsdata, which then gets passed into
+    write_end.
+
+    Returns 0 on success; &lt; 0 on failure (which is the error code), in
+which case write_end is not called.
+</code></pre>
+<p>  write_end: After a successful write_begin, and data copy, write_end must<br>        be called. len is the original len passed to write_begin, and copied<br>        is the amount that was able to be copied (copied == len is always true<br>    if write_begin was called with the AOP_FLAG_UNINTERRUPTIBLE flag).</p>
+<pre><code>    The filesystem must take care of unlocking the page and releasing it
+    refcount, and updating i_size.
+
+    Returns &lt; 0 on failure, otherwise the number of bytes (&lt;= &#39;copied&#39;)
+    that were able to be copied into pagecache.
+</code></pre>
+<p>  bmap: called by the VFS to map a logical block offset within object to<br>      physical block number. This method is used by the FIBMAP<br>      ioctl and for working with swap-files.  To be able to swap to<br>      a file, the file must have a stable mapping to a block<br>      device.  The swap system does not go through the filesystem<br>      but instead uses bmap to find out where the blocks in the file<br>      are and uses those addresses directly.</p>
+<p>  dentry_open: <em>WARNING: probably going away soon, do not use!</em> This is an<br>    alternative to f_op-&gt;open(), the difference is that this method may open<br>    a file not necessarily originating from the same filesystem as the one<br>    i_op-&gt;open() was called on.  It may be useful for stacking filesystems<br>    which want to allow native I/O directly on underlying files.</p>
+<p>  invalidatepage: If a page has PagePrivate set, then invalidatepage<br>        will be called when part or all of the page is to be removed<br>    from the address space.  This generally corresponds to either a<br>    truncation or a complete invalidation of the address space<br>    (in the latter case ‘offset’ will always be 0).<br>    Any private data associated with the page should be updated<br>    to reflect this truncation.  If offset is 0, then<br>    the private data should be released, because the page<br>    must be able to be completely discarded.  This may be done by<br>        calling the -&gt;releasepage function, but in this case the<br>        release MUST succeed.</p>
+<p>  releasepage: releasepage is called on PagePrivate pages to indicate<br>        that the page should be freed if possible.  -&gt;releasepage<br>        should remove any private data from the page and clear the<br>        PagePrivate flag. If releasepage() fails for some reason, it must<br>    indicate failure with a 0 return value.<br>    releasepage() is used in two distinct though related cases.  The<br>    first is when the VM finds a clean page with no active users and<br>        wants to make it a free page.  If -&gt;releasepage succeeds, the<br>        page will be removed from the address_space and become free.</p>
+<pre><code>The second case is when a request has been made to invalidate
+    some or all pages in an address_space.  This can happen
+    through the fadvice(POSIX_FADV_DONTNEED) system call or by the
+    filesystem explicitly requesting it as nfs and 9fs do (when
+    they believe the cache may be out of date with storage) by
+    calling invalidate_inode_pages2().
+If the filesystem makes such a call, and needs to be certain
+    that all pages are invalidated, then its releasepage will
+    need to ensure this.  Possibly it can clear the PageUptodate
+    bit if it cannot free private data yet.
+</code></pre>
+<p>  freepage: freepage is called once the page is no longer visible in<br>        the page cache in order to allow the cleanup of any private<br>    data. Since it may be called by the memory reclaimer, it<br>    should not assume that the original address_space mapping still<br>    exists, and it should not block.</p>
+<p>  direct_IO: called by the generic read/write routines to perform<br>        direct_IO - that is IO requests which bypass the page cache<br>        and transfer data directly between the storage and the<br>        application’s address space.</p>
+<p>  migrate_page:  This is used to compact the physical memory usage.<br>        If the VM wants to relocate a page (maybe off a memory card<br>        that is signalling imminent failure) it will pass a new page<br>    and an old page to this function.  migrate_page should<br>    transfer any private data across and update any references<br>        that it has to the page.</p>
+<p>  launder_page: Called before freeing a page - it writes back the dirty page. To<br>      prevent redirtying the page, it is kept locked during the whole<br>    operation.</p>
+<p>  error_remove_page: normally set to generic_error_remove_page if truncation<br>    is ok for this address space. Used for memory failure handling.<br>    Setting this implies you deal with pages going away under you,<br>    unless you have them locked or reference counts increased.</p>
+<p>  swap_activate: Called when swapon is used on a file to allocate<br>    space if necessary and pin the block lookup information in<br>    memory. A return value of zero indicates success,<br>    in which case this file can be used to back swapspace. The<br>    swapspace operations will be proxied to this address space’s<br>    -&gt;swap_{out,in} methods.</p>
+<p>  swap_deactivate: Called during swapoff on files where swap_activate<br>    was successful.</p>
+<h1 id="The-File-Object-1"><a href="#The-File-Object-1" class="headerlink" title="The File Object"></a>The File Object</h1><p>A file object represents a file opened by a process.</p>
+<h2 id="struct-file-operations"><a href="#struct-file-operations" class="headerlink" title="struct file_operations"></a>struct file_operations</h2><p>This describes how the VFS can manipulate an open file. As of kernel<br>3.5, the following members are defined:</p>
+<p>struct file_operations {<br>    struct module *owner;<br>    loff_t (<em>llseek) (struct file *, loff_t, int);<br>    ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);<br>    ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);<br>    ssize_t (*aio_read) (struct kiocb *, const struct iovec *, unsigned long, loff_t);<br>    ssize_t (*aio_write) (struct kiocb *, const struct iovec *, unsigned long, loff_t);<br>    int (*readdir) (struct file *, void *, filldir_t);<br>    unsigned int (*poll) (struct file *, struct poll_table_struct *);<br>    long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long);<br>    long (*compat_ioctl) (struct file *, unsigned int, unsigned long);<br>    int (*mmap) (struct file *, struct vm_area_struct *);<br>    int (*open) (struct inode *, struct file *);<br>    int (*flush) (struct file *);<br>    int (*release) (struct inode *, struct file *);<br>    int (*fsync) (struct file *, loff_t, loff_t, int datasync);<br>    int (*aio_fsync) (struct kiocb *, int datasync);<br>    int (*fasync) (int, struct file *, int);<br>    int (*lock) (struct file *, int, struct file_lock *);<br>    ssize_t (*readv) (struct file *, const struct iovec *, unsigned long, loff_t *);<br>    ssize_t (*writev) (struct file *, const struct iovec *, unsigned long, loff_t *);<br>    ssize_t (*sendfile) (struct file *, loff_t *, size_t, read_actor_t, void *);<br>    ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int);<br>    unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);<br>    int (*check_flags)(int);<br>    int (*flock) (struct file *, int, struct file_lock *);<br>    ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, size_t, unsigned int);<br>    ssize_t (*splice_read)(struct file *, struct pipe_inode_info *, size_t, unsigned int);<br>    int (*setlease)(struct file *, long arg, struct file_lock *</em>, void **);<br>    long (*fallocate)(struct file *, int mode, loff_t offset, loff_t len);<br>};</p>
+<p>Again, all methods are called without any locks being held, unless<br>otherwise noted.</p>
+<p>  llseek: called when the VFS needs to move the file position index</p>
+<p>  read: called by read(2) and related system calls</p>
+<p>  aio_read: called by io_submit(2) and other asynchronous I/O operations</p>
+<p>  write: called by write(2) and related system calls</p>
+<p>  aio_write: called by io_submit(2) and other asynchronous I/O operations</p>
+<p>  readdir: called when the VFS needs to read the directory contents</p>
+<p>  poll: called by the VFS when a process wants to check if there is<br>    activity on this file and (optionally) go to sleep until there<br>    is activity. Called by the select(2) and poll(2) system calls</p>
+<p>  unlocked_ioctl: called by the ioctl(2) system call.</p>
+<p>  compat_ioctl: called by the ioctl(2) system call when 32 bit system calls<br>      are used on 64 bit kernels.</p>
+<p>  mmap: called by the mmap(2) system call</p>
+<p>  open: called by the VFS when an inode should be opened. When the VFS<br>    opens a file, it creates a new “struct file”. It then calls the<br>    open method for the newly allocated file structure. You might<br>    think that the open method really belongs in<br>    “struct inode_operations”, and you may be right. I think it’s<br>    done the way it is because it makes filesystems simpler to<br>    implement. The open() method is a good place to initialize the<br>    “private_data” member in the file structure if you want to point<br>    to a device structure</p>
+<p>  flush: called by the close(2) system call to flush a file</p>
+<p>  release: called when the last reference to an open file is closed</p>
+<p>  fsync: called by the fsync(2) system call</p>
+<p>  fasync: called by the fcntl(2) system call when asynchronous<br>    (non-blocking) mode is enabled for a file</p>
+<p>  lock: called by the fcntl(2) system call for F_GETLK, F_SETLK, and F_SETLKW<br>      commands</p>
+<p>  readv: called by the readv(2) system call</p>
+<p>  writev: called by the writev(2) system call</p>
+<p>  sendfile: called by the sendfile(2) system call</p>
+<p>  get_unmapped_area: called by the mmap(2) system call</p>
+<p>  check_flags: called by the fcntl(2) system call for F_SETFL command</p>
+<p>  flock: called by the flock(2) system call</p>
+<p>  splice_write: called by the VFS to splice data from a pipe to a file. This<br>        method is used by the splice(2) system call</p>
+<p>  splice_read: called by the VFS to splice data from file to a pipe. This<br>           method is used by the splice(2) system call</p>
+<p>  setlease: called by the VFS to set or release a file lock lease.<br>        setlease has the file_lock_lock held and must not sleep.</p>
+<p>  fallocate: called by the VFS to preallocate blocks or punch a hole.</p>
+<p>Note that the file operations are implemented by the specific<br>filesystem in which the inode resides. When opening a device node<br>(character or block special) most filesystems will call special<br>support routines in the VFS which will locate the required device<br>driver information. These support routines replace the filesystem file<br>operations with those for the device driver, and then proceed to call<br>the new open() method for the file. This is how opening a device file<br>in the filesystem eventually ends up calling the device driver open()<br>method.</p>
+<h1 id="Directory-Entry-Cache-dcache-1"><a href="#Directory-Entry-Cache-dcache-1" class="headerlink" title="Directory Entry Cache (dcache)"></a>Directory Entry Cache (dcache)</h1><h2 id="struct-dentry-operations"><a href="#struct-dentry-operations" class="headerlink" title="struct dentry_operations"></a>struct dentry_operations</h2><p>This describes how a filesystem can overload the standard dentry<br>operations. Dentries and the dcache are the domain of the VFS and the<br>individual filesystem implementations. Device drivers have no business<br>here. These methods may be set to NULL, as they are either optional or<br>the VFS uses a default. As of kernel 2.6.22, the following members are<br>defined:</p>
+<p>struct dentry_operations {<br>    int (*d_revalidate)(struct dentry *, unsigned int);<br>    int (*d_weak_revalidate)(struct dentry *, unsigned int);<br>    int (*d_hash)(const struct dentry *, struct qstr *);<br>    int (*d_compare)(const struct dentry *, const struct dentry *,<br>            unsigned int, const char *, const struct qstr *);<br>    int (*d_delete)(const struct dentry *);<br>    void (*d_release)(struct dentry *);<br>    void (*d_iput)(struct dentry *, struct inode *);<br>    char *(*d_dname)(struct dentry *, char *, int);<br>    struct vfsmount *(*d_automount)(struct path *);<br>    int (*d_manage)(const struct path *, bool);<br>    struct dentry *(*d_real)(struct dentry *, const struct inode *,<br>                 unsigned int);<br>};</p>
+<p>  d_revalidate: called when the VFS needs to revalidate a dentry. This<br>    is called whenever a name look-up finds a dentry in the<br>    dcache. Most local filesystems leave this as NULL, because all their<br>    dentries in the dcache are valid. Network filesystems are different<br>    since things can change on the server without the client necessarily<br>    being aware of it.</p>
+<pre><code>This function should return a positive value if the dentry is still
+valid, and zero or a negative error code if it isn&#39;t.
+
+d_revalidate may be called in rcu-walk mode (flags &amp; LOOKUP_RCU).
+If in rcu-walk mode, the filesystem must revalidate the dentry without
+blocking or storing to the dentry, d_parent and d_inode should not be
+used without care (because they can change and, in d_inode case, even
+become NULL under us).
+
+If a situation is encountered that rcu-walk cannot handle, return
+-ECHILD and it will be called again in ref-walk mode.
+</code></pre>
+<p> d_weak_revalidate: called when the VFS needs to revalidate a “jumped” dentry.<br>    This is called when a path-walk ends at dentry that was not acquired by<br>    doing a lookup in the parent directory. This includes “/“, “.” and “..”,<br>    as well as procfs-style symlinks and mountpoint traversal.</p>
+<pre><code>In this case, we are less concerned with whether the dentry is still
+fully correct, but rather that the inode is still valid. As with
+d_revalidate, most local filesystems will set this to NULL since their
+dcache entries are always valid.
+
+This function has the same return code semantics as d_revalidate.
+
+d_weak_revalidate is only called after leaving rcu-walk mode.
+</code></pre>
+<p>  d_hash: called when the VFS adds a dentry to the hash table. The first<br>    dentry passed to d_hash is the parent directory that the name is<br>    to be hashed into.</p>
+<pre><code>Same locking and synchronisation rules as d_compare regarding
+what is safe to dereference etc.
+</code></pre>
+<p>  d_compare: called to compare a dentry name with a given name. The first<br>    dentry is the parent of the dentry to be compared, the second is<br>    the child dentry. len and name string are properties of the dentry<br>    to be compared. qstr is the name to compare it with.</p>
+<pre><code>Must be constant and idempotent, and should not take locks if
+possible, and should not or store into the dentry.
+Should not dereference pointers outside the dentry without
+lots of care (eg.  d_parent, d_inode, d_name should not be used).
+
+However, our vfsmount is pinned, and RCU held, so the dentries and
+inodes won&#39;t disappear, neither will our sb or filesystem module.
+-&gt;d_sb may be used.
+
+It is a tricky calling convention because it needs to be called under
+&quot;rcu-walk&quot;, ie. without any locks or references on things.
+</code></pre>
+<p>  d_delete: called when the last reference to a dentry is dropped and the<br>    dcache is deciding whether or not to cache it. Return 1 to delete<br>    immediately, or 0 to cache the dentry. Default is NULL which means to<br>    always cache a reachable dentry. d_delete must be constant and<br>    idempotent.</p>
+<p>  d_release: called when a dentry is really deallocated</p>
+<p>  d_iput: called when a dentry loses its inode (just prior to its<br>    being deallocated). The default when this is NULL is that the<br>    VFS calls iput(). If you define this method, you must call<br>    iput() yourself</p>
+<p>  d_dname: called when the pathname of a dentry should be generated.<br>    Useful for some pseudo filesystems (sockfs, pipefs, …) to delay<br>    pathname generation. (Instead of doing it when dentry is created,<br>    it’s done only when the path is needed.). Real filesystems probably<br>    dont want to use it, because their dentries are present in global<br>    dcache hash, so their hash should be an invariant. As no lock is<br>    held, d_dname() should not try to modify the dentry itself, unless<br>    appropriate SMP safety is used. CAUTION : d_path() logic is quite<br>    tricky. The correct way to return for example “Hello” is to put it<br>    at the end of the buffer, and returns a pointer to the first char.<br>    dynamic_dname() helper function is provided to take care of this.</p>
+<p>  d_automount: called when an automount dentry is to be traversed (optional).<br>    This should create a new VFS mount record and return the record to the<br>    caller.  The caller is supplied with a path parameter giving the<br>    automount directory to describe the automount target and the parent<br>    VFS mount record to provide inheritable mount parameters.  NULL should<br>    be returned if someone else managed to make the automount first.  If<br>    the vfsmount creation failed, then an error code should be returned.<br>    If -EISDIR is returned, then the directory will be treated as an<br>    ordinary directory and returned to pathwalk to continue walking.</p>
+<pre><code>If a vfsmount is returned, the caller will attempt to mount it on the
+mountpoint and will remove the vfsmount from its expiration list in
+the case of failure.  The vfsmount should be returned with 2 refs on
+it to prevent automatic expiration - the caller will clean up the
+additional ref.
+
+This function is only used if DCACHE_NEED_AUTOMOUNT is set on the
+dentry.  This is set by __d_instantiate() if S_AUTOMOUNT is set on the
+inode being added.
+</code></pre>
+<p>  d_manage: called to allow the filesystem to manage the transition from a<br>    dentry (optional).  This allows autofs, for example, to hold up clients<br>    waiting to explore behind a ‘mountpoint’ whilst letting the daemon go<br>    past and construct the subtree there.  0 should be returned to let the<br>    calling process continue.  -EISDIR can be returned to tell pathwalk to<br>    use this directory as an ordinary directory and to ignore anything<br>    mounted on it and not to check the automount flag.  Any other error<br>    code will abort pathwalk completely.</p>
+<pre><code>If the &#39;rcu_walk&#39; parameter is true, then the caller is doing a
+pathwalk in RCU-walk mode.  Sleeping is not permitted in this mode,
+and the caller can be asked to leave it and call again by returning
+-ECHILD.  -EISDIR may also be returned to tell pathwalk to
+ignore d_automount or any mounts.
+
+This function is only used if DCACHE_MANAGE_TRANSIT is set on the
+dentry being transited from.
+</code></pre>
+<p>  d_real: overlay/union type filesystems implement this method to return one of<br>    the underlying dentries hidden by the overlay.  It is used in three<br>    different modes:</p>
+<pre><code>Called from open it may need to copy-up the file depending on the
+supplied open flags.  This mode is selected with a non-zero flags
+argument.  In this mode the d_real method can return an error.
+
+Called from file_dentry() it returns the real dentry matching the inode
+argument.  The real dentry may be from a lower layer already copied up,
+but still referenced from the file.  This mode is selected with a
+non-NULL inode argument.  This will always succeed.
+
+With NULL inode and zero flags the topmost real underlying dentry is
+returned.  This will always succeed.
+
+This method is never called with both non-NULL inode and non-zero flags.
+</code></pre>
+<p>Example :</p>
+<p>static char *pipefs_dname(struct dentry *dent, char *buffer, int buflen)<br>{<br>    return dynamic_dname(dentry, buffer, buflen, “pipe:[%lu]”,<br>                dentry-&gt;d_inode-&gt;i_ino);<br>}</p>
+<p>Each dentry has a pointer to its parent dentry, as well as a hash list<br>of child dentries. Child dentries are basically like files in a<br>directory.</p>
+<h2 id="Directory-Entry-Cache-API"><a href="#Directory-Entry-Cache-API" class="headerlink" title="Directory Entry Cache API"></a>Directory Entry Cache API</h2><p>There are a number of functions defined which permit a filesystem to<br>manipulate dentries:</p>
+<p>  dget: open a new handle for an existing dentry (this just increments<br>    the usage count)</p>
+<p>  dput: close a handle for a dentry (decrements the usage count). If<br>    the usage count drops to 0, and the dentry is still in its<br>    parent’s hash, the “d_delete” method is called to check whether<br>    it should be cached. If it should not be cached, or if the dentry<br>    is not hashed, it is deleted. Otherwise cached dentries are put<br>    into an LRU list to be reclaimed on memory shortage.</p>
+<p>  d_drop: this unhashes a dentry from its parents hash list. A<br>    subsequent call to dput() will deallocate the dentry if its<br>    usage count drops to 0</p>
+<p>  d_delete: delete a dentry. If there are no other open references to<br>    the dentry then the dentry is turned into a negative dentry<br>    (the d_iput() method is called). If there are other<br>    references, then d_drop() is called instead</p>
+<p>  d_add: add a dentry to its parents hash list and then calls<br>    d_instantiate()</p>
+<p>  d_instantiate: add a dentry to the alias hash list for the inode and<br>    updates the “d_inode” member. The “i_count” member in the<br>    inode structure should be set/incremented. If the inode<br>    pointer is NULL, the dentry is called a “negative<br>    dentry”. This function is commonly called when an inode is<br>    created for an existing negative dentry</p>
+<p>  d_lookup: look up a dentry given its parent and path name component<br>    It looks up the child of that given name from the dcache<br>    hash table. If it is found, the reference count is incremented<br>    and the dentry is returned. The caller must use dput()<br>    to free the dentry when it finishes using it.</p>
+<h1 id="Mount-Options"><a href="#Mount-Options" class="headerlink" title="Mount Options"></a>Mount Options</h1><h2 id="Parsing-options"><a href="#Parsing-options" class="headerlink" title="Parsing options"></a>Parsing options</h2><p>On mount and remount the filesystem is passed a string containing a<br>comma separated list of mount options.  The options can have either of<br>these forms:</p>
+<p>  option<br>  option=value</p>
+<p>The &lt;linux/parser.h&gt; header defines an API that helps parse these<br>options.  There are plenty of examples on how to use it in existing<br>filesystems.</p>
+<h2 id="Showing-options"><a href="#Showing-options" class="headerlink" title="Showing options"></a>Showing options</h2><p>If a filesystem accepts mount options, it must define show_options()<br>to show all the currently active options.  The rules are:</p>
+<ul>
+<li><p>options MUST be shown which are not default or their values differ<br>from the default</p>
+</li>
+<li><p>options MAY be shown which are enabled by default or have their<br>default value</p>
+</li>
+</ul>
+<p>Options used only internally between a mount helper and the kernel<br>(such as file descriptors), or which only have an effect during the<br>mounting (such as ones controlling the creation of a journal) are exempt<br>from the above rules.</p>
+<p>The underlying reason for the above rules is to make sure, that a<br>mount can be accurately replicated (e.g. umounting and mounting again)<br>based on the information found in /proc/mounts.</p>
+<p>A simple method of saving options at mount/remount time and showing<br>them is provided with the save_mount_options() and<br>generic_show_options() helper functions.  Please note, that using<br>these may have drawbacks.  For more info see header comments for these<br>functions in fs/namespace.c.</p>
+<h1 id="Resources"><a href="#Resources" class="headerlink" title="Resources"></a>Resources</h1><p>(Note some of these resources are not up-to-date with the latest kernel<br> version.)</p>
+<p>Creating Linux virtual filesystems. 2002<br>    <a target="_blank" rel="noopener" href="http://lwn.net/Articles/13325/">http://lwn.net/Articles/13325/</a></p>
+<p>The Linux Virtual File-system Layer by Neil Brown. 1999<br>    <a target="_blank" rel="noopener" href="http://www.cse.unsw.edu.au/~neilb/oss/linux-commentary/vfs.html">http://www.cse.unsw.edu.au/~neilb/oss/linux-commentary/vfs.html</a></p>
+<p>A tour of the Linux VFS by Michael K. Johnson. 1996<br>    <a target="_blank" rel="noopener" href="http://www.tldp.org/LDP/khg/HyperNews/get/fs/vfstour.html">http://www.tldp.org/LDP/khg/HyperNews/get/fs/vfstour.html</a></p>
+<p>A small trail through the Linux kernel by Andries Brouwer. 2001<br>    <a target="_blank" rel="noopener" href="http://www.win.tue.nl/~aeb/linux/vfs/trail.html">http://www.win.tue.nl/~aeb/linux/vfs/trail.html</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfs/" title="Kernel-3.10.0-957.el7_vfs" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_thinkpad-acpi/" title="Kernel-3.10.0-957.el7_thinkpad-acpi"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_ALSA-Configuration/" title="Kernel-3.10.0-957.el7_ALSA-Configuration"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

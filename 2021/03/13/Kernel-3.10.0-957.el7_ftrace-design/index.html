@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_ftrace-design | oosTech.com</title>
+  <meta name="description" content="function tracer guts     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;     By Mike Frysinger  IntroductionHere we will cover the architecture pieces that the common function tracingcode relies on for proper functioning.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_ftrace-design">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="function tracer guts     &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;     By Mike Frysinger  IntroductionHere we will cover the architecture pieces that the common function tracingcode relies on for proper functioning.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Prerequisites"><span class="toc-number">2.</span> <span class="toc-text">Prerequisites</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-FUNCTION-TRACER"><span class="toc-number">3.</span> <span class="toc-text">HAVE_FUNCTION_TRACER</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-FUNCTION-GRAPH-TRACER"><span class="toc-number">4.</span> <span class="toc-text">HAVE_FUNCTION_GRAPH_TRACER</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-FUNCTION-GRAPH-FP-TEST"><span class="toc-number">5.</span> <span class="toc-text">HAVE_FUNCTION_GRAPH_FP_TEST</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-FUNCTION-GRAPH-RET-ADDR-PTR"><span class="toc-number">6.</span> <span class="toc-text">HAVE_FUNCTION_GRAPH_RET_ADDR_PTR</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-FTRACE-NMI-ENTER"><span class="toc-number">7.</span> <span class="toc-text">HAVE_FTRACE_NMI_ENTER</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-SYSCALL-TRACEPOINTS"><span class="toc-number">8.</span> <span class="toc-text">HAVE_SYSCALL_TRACEPOINTS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-FTRACE-MCOUNT-RECORD"><span class="toc-number">9.</span> <span class="toc-text">HAVE_FTRACE_MCOUNT_RECORD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-DYNAMIC-FTRACE"><span class="toc-number">10.</span> <span class="toc-text">HAVE_DYNAMIC_FTRACE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HAVE-DYNAMIC-FTRACE-HAVE-FUNCTION-GRAPH-TRACER"><span class="toc-number">11.</span> <span class="toc-text">HAVE_DYNAMIC_FTRACE + HAVE_FUNCTION_GRAPH_TRACER</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_ftrace-design" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_ftrace-design
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    function tracer guts
+    ====================
+    By Mike Frysinger
+</code></pre>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Here we will cover the architecture pieces that the common function tracing<br>code relies on for proper functioning.  Things are broken down into increasing<br>complexity so that you can start simple and at least get basic functionality.</p>
+<p>Note that this focuses on architecture implementation details only.  If you<br>want more explanation of a feature in terms of common code, review the common<br>ftrace.txt file.</p>
+<p>Ideally, everyone who wishes to retain performance while supporting tracing in<br>their kernel should make it all the way to dynamic ftrace support.</p>
+<h2 id="Prerequisites"><a href="#Prerequisites" class="headerlink" title="Prerequisites"></a>Prerequisites</h2><p>Ftrace relies on these features being implemented:<br> STACKTRACE_SUPPORT - implement save_stack_trace()<br> TRACE_IRQFLAGS_SUPPORT - implement include/asm/irqflags.h</p>
+<h2 id="HAVE-FUNCTION-TRACER"><a href="#HAVE-FUNCTION-TRACER" class="headerlink" title="HAVE_FUNCTION_TRACER"></a>HAVE_FUNCTION_TRACER</h2><p>You will need to implement the mcount and the ftrace_stub functions.</p>
+<p>The exact mcount symbol name will depend on your toolchain.  Some call it<br>“mcount”, “_mcount”, or even “__mcount”.  You can probably figure it out by<br>running something like:<br>    $ echo ‘main(){}’ | gcc -x c -S -o - - -pg | grep mcount<br>            call    mcount<br>We’ll make the assumption below that the symbol is “mcount” just to keep things<br>nice and simple in the examples.</p>
+<p>Keep in mind that the ABI that is in effect inside of the mcount function is<br><em>highly</em> architecture/toolchain specific.  We cannot help you in this regard,<br>sorry.  Dig up some old documentation and/or find someone more familiar than<br>you to bang ideas off of.  Typically, register usage (argument/scratch/etc…)<br>is a major issue at this point, especially in relation to the location of the<br>mcount call (before/after function prologue).  You might also want to look at<br>how glibc has implemented the mcount function for your architecture.  It might<br>be (semi-)relevant.</p>
+<p>The mcount function should check the function pointer ftrace_trace_function<br>to see if it is set to ftrace_stub.  If it is, there is nothing for you to do,<br>so return immediately.  If it isn’t, then call that function in the same way<br>the mcount function normally calls __mcount_internal – the first argument is<br>the “frompc” while the second argument is the “selfpc” (adjusted to remove the<br>size of the mcount call that is embedded in the function).</p>
+<p>For example, if the function foo() calls bar(), when the bar() function calls<br>mcount(), the arguments mcount() will pass to the tracer are:<br>    “frompc” - the address bar() will use to return to foo()<br>    “selfpc” - the address bar() (with mcount() size adjustment)</p>
+<p>Also keep in mind that this mcount function will be called <em>a lot</em>, so<br>optimizing for the default case of no tracer will help the smooth running of<br>your system when tracing is disabled.  So the start of the mcount function is<br>typically the bare minimum with checking things before returning.  That also<br>means the code flow should usually be kept linear (i.e. no branching in the nop<br>case).  This is of course an optimization and not a hard requirement.</p>
+<p>Here is some pseudo code that should help (these functions should actually be<br>implemented in assembly):</p>
+<p>void ftrace_stub(void)<br>{<br>    return;<br>}</p>
+<p>void mcount(void)<br>{<br>    /* save any bare state needed in order to do initial checking */</p>
+<pre><code>extern void (*ftrace_trace_function)(unsigned long, unsigned long);
+if (ftrace_trace_function != ftrace_stub)
+    goto do_trace;
+
+/* restore any bare state */
+
+return;
+</code></pre>
+<p>do_trace:</p>
+<pre><code>/* save all state needed by the ABI (see paragraph above) */
+
+unsigned long frompc = ...;
+unsigned long selfpc = &lt;return address&gt; - MCOUNT_INSN_SIZE;
+ftrace_trace_function(frompc, selfpc);
+
+/* restore all state needed by the ABI */
+</code></pre>
+<p>}</p>
+<p>Don’t forget to export mcount for modules !<br>extern void mcount(void);<br>EXPORT_SYMBOL(mcount);</p>
+<h2 id="HAVE-FUNCTION-GRAPH-TRACER"><a href="#HAVE-FUNCTION-GRAPH-TRACER" class="headerlink" title="HAVE_FUNCTION_GRAPH_TRACER"></a>HAVE_FUNCTION_GRAPH_TRACER</h2><p>Deep breath … time to do some real work.  Here you will need to update the<br>mcount function to check ftrace graph function pointers, as well as implement<br>some functions to save (hijack) and restore the return address.</p>
+<p>The mcount function should check the function pointers ftrace_graph_return<br>(compare to ftrace_stub) and ftrace_graph_entry (compare to<br>ftrace_graph_entry_stub).  If either of those is not set to the relevant stub<br>function, call the arch-specific function ftrace_graph_caller which in turn<br>calls the arch-specific function prepare_ftrace_return.  Neither of these<br>function names is strictly required, but you should use them anyway to stay<br>consistent across the architecture ports – easier to compare &amp; contrast<br>things.</p>
+<p>The arguments to prepare_ftrace_return are slightly different than what are<br>passed to ftrace_trace_function.  The second argument “selfpc” is the same,<br>but the first argument should be a pointer to the “frompc”.  Typically this is<br>located on the stack.  This allows the function to hijack the return address<br>temporarily to have it point to the arch-specific function return_to_handler.<br>That function will simply call the common ftrace_return_to_handler function and<br>that will return the original return address with which you can return to the<br>original call site.</p>
+<p>Here is the updated mcount pseudo code:<br>void mcount(void)<br>{<br>…<br>    if (ftrace_trace_function != ftrace_stub)<br>        goto do_trace;</p>
+<p>+#ifdef CONFIG_FUNCTION_GRAPH_TRACER</p>
+<ul>
+<li><p>   extern void (*ftrace_graph_return)(…);</p>
+</li>
+<li><p>   extern void (*ftrace_graph_entry)(…);</p>
+</li>
+<li><p>   if (ftrace_graph_return != ftrace_stub ||</p>
+</li>
+<li><pre><code>   ftrace_graph_entry != ftrace_graph_entry_stub)
+</code></pre>
+</li>
+<li><pre><code>   ftrace_graph_caller();
+</code></pre>
+</li>
+<li><p>#endif</p>
+<p>   /* restore any bare state */<br>…</p>
+</li>
+</ul>
+<p>Here is the pseudo code for the new ftrace_graph_caller assembly function:<br>#ifdef CONFIG_FUNCTION_GRAPH_TRACER<br>void ftrace_graph_caller(void)<br>{<br>    /* save all state needed by the ABI */</p>
+<pre><code>unsigned long *frompc = &amp;...;
+unsigned long selfpc = &lt;return address&gt; - MCOUNT_INSN_SIZE;
+/* passing frame pointer up is optional -- see below */
+prepare_ftrace_return(frompc, selfpc, frame_pointer);
+
+/* restore all state needed by the ABI */
+</code></pre>
+<p>}<br>#endif</p>
+<p>For information on how to implement prepare_ftrace_return(), simply look at the<br>x86 version (the frame pointer passing is optional; see the next section for<br>more information).  The only architecture-specific piece in it is the setup of<br>the fault recovery table (the asm(…) code).  The rest should be the same<br>across architectures.</p>
+<p>Here is the pseudo code for the new return_to_handler assembly function.  Note<br>that the ABI that applies here is different from what applies to the mcount<br>code.  Since you are returning from a function (after the epilogue), you might<br>be able to skimp on things saved/restored (usually just registers used to pass<br>return values).</p>
+<p>#ifdef CONFIG_FUNCTION_GRAPH_TRACER<br>void return_to_handler(void)<br>{<br>    /* save all state needed by the ABI (see paragraph above) */</p>
+<pre><code>void (*original_return_point)(void) = ftrace_return_to_handler();
+
+/* restore all state needed by the ABI */
+
+/* this is usually either a return or a jump */
+original_return_point();
+</code></pre>
+<p>}<br>#endif</p>
+<h2 id="HAVE-FUNCTION-GRAPH-FP-TEST"><a href="#HAVE-FUNCTION-GRAPH-FP-TEST" class="headerlink" title="HAVE_FUNCTION_GRAPH_FP_TEST"></a>HAVE_FUNCTION_GRAPH_FP_TEST</h2><p>An arch may pass in a unique value (frame pointer) to both the entering and<br>exiting of a function.  On exit, the value is compared and if it does not<br>match, then it will panic the kernel.  This is largely a sanity check for bad<br>code generation with gcc.  If gcc for your port sanely updates the frame<br>pointer under different optimization levels, then ignore this option.</p>
+<p>However, adding support for it isn’t terribly difficult.  In your assembly code<br>that calls prepare_ftrace_return(), pass the frame pointer as the 3rd argument.<br>Then in the C version of that function, do what the x86 port does and pass it<br>along to ftrace_push_return_trace() instead of a stub value of 0.</p>
+<p>Similarly, when you call ftrace_return_to_handler(), pass it the frame pointer.</p>
+<h2 id="HAVE-FUNCTION-GRAPH-RET-ADDR-PTR"><a href="#HAVE-FUNCTION-GRAPH-RET-ADDR-PTR" class="headerlink" title="HAVE_FUNCTION_GRAPH_RET_ADDR_PTR"></a>HAVE_FUNCTION_GRAPH_RET_ADDR_PTR</h2><p>An arch may pass in a pointer to the return address on the stack.  This<br>prevents potential stack unwinding issues where the unwinder gets out of<br>sync with ret_stack and the wrong addresses are reported by<br>ftrace_graph_ret_addr().</p>
+<p>Adding support for it is easy: just define the macro in asm/ftrace.h and<br>pass the return address pointer as the ‘retp’ argument to<br>ftrace_push_return_trace().</p>
+<h2 id="HAVE-FTRACE-NMI-ENTER"><a href="#HAVE-FTRACE-NMI-ENTER" class="headerlink" title="HAVE_FTRACE_NMI_ENTER"></a>HAVE_FTRACE_NMI_ENTER</h2><p>If you can’t trace NMI functions, then skip this option.</p>
+<details to be filled>
+
+
+<h2 id="HAVE-SYSCALL-TRACEPOINTS"><a href="#HAVE-SYSCALL-TRACEPOINTS" class="headerlink" title="HAVE_SYSCALL_TRACEPOINTS"></a>HAVE_SYSCALL_TRACEPOINTS</h2><p>You need very few things to get the syscalls tracing in an arch.</p>
+<ul>
+<li>Support HAVE_ARCH_TRACEHOOK (see arch/Kconfig).</li>
+<li>Have a NR_syscalls variable in &lt;asm/unistd.h&gt; that provides the number<br>of syscalls supported by the arch.</li>
+<li>Support the TIF_SYSCALL_TRACEPOINT thread flags.</li>
+<li>Put the trace_sys_enter() and trace_sys_exit() tracepoints calls from ptrace<br>in the ptrace syscalls tracing path.</li>
+<li>If the system call table on this arch is more complicated than a simple array<br>of addresses of the system calls, implement an arch_syscall_addr to return<br>the address of a given system call.</li>
+<li>If the symbol names of the system calls do not match the function names on<br>this arch, define ARCH_HAS_SYSCALL_MATCH_SYM_NAME in asm/ftrace.h and<br>implement arch_syscall_match_sym_name with the appropriate logic to return<br>true if the function name corresponds with the symbol name.</li>
+<li>Tag this arch as HAVE_SYSCALL_TRACEPOINTS.</li>
+</ul>
+<h2 id="HAVE-FTRACE-MCOUNT-RECORD"><a href="#HAVE-FTRACE-MCOUNT-RECORD" class="headerlink" title="HAVE_FTRACE_MCOUNT_RECORD"></a>HAVE_FTRACE_MCOUNT_RECORD</h2><p>See scripts/recordmcount.pl for more info.  Just fill in the arch-specific<br>details for how to locate the addresses of mcount call sites via objdump.<br>This option doesn’t make much sense without also implementing dynamic ftrace.</p>
+<h2 id="HAVE-DYNAMIC-FTRACE"><a href="#HAVE-DYNAMIC-FTRACE" class="headerlink" title="HAVE_DYNAMIC_FTRACE"></a>HAVE_DYNAMIC_FTRACE</h2><p>You will first need HAVE_FTRACE_MCOUNT_RECORD and HAVE_FUNCTION_TRACER, so<br>scroll your reader back up if you got over eager.</p>
+<p>Once those are out of the way, you will need to implement:<br>    - asm/ftrace.h:<br>        - MCOUNT_ADDR<br>        - ftrace_call_adjust()<br>        - struct dyn_arch_ftrace{}<br>    - asm code:<br>        - mcount() (new stub)<br>        - ftrace_caller()<br>        - ftrace_call()<br>        - ftrace_stub()<br>    - C code:<br>        - ftrace_dyn_arch_init()<br>        - ftrace_make_nop()<br>        - ftrace_make_call()<br>        - ftrace_update_ftrace_func()</p>
+<p>First you will need to fill out some arch details in your asm/ftrace.h.</p>
+<p>Define MCOUNT_ADDR as the address of your mcount symbol similar to:<br>    #define MCOUNT_ADDR ((unsigned long)mcount)<br>Since no one else will have a decl for that function, you will need to:<br>    extern void mcount(void);</p>
+<p>You will also need the helper function ftrace_call_adjust().  Most people<br>will be able to stub it out like so:<br>    static inline unsigned long ftrace_call_adjust(unsigned long addr)<br>    {<br>        return addr;<br>    }</p>
+<details to be filled>
+
+<p>Lastly you will need the custom dyn_arch_ftrace structure.  If you need<br>some extra state when runtime patching arbitrary call sites, this is the<br>place.  For now though, create an empty struct:<br>    struct dyn_arch_ftrace {<br>        /* No extra data needed */<br>    };</p>
+<p>With the header out of the way, we can fill out the assembly code.  While we<br>did already create a mcount() function earlier, dynamic ftrace only wants a<br>stub function.  This is because the mcount() will only be used during boot<br>and then all references to it will be patched out never to return.  Instead,<br>the guts of the old mcount() will be used to create a new ftrace_caller()<br>function.  Because the two are hard to merge, it will most likely be a lot<br>easier to have two separate definitions split up by #ifdefs.  Same goes for<br>the ftrace_stub() as that will now be inlined in ftrace_caller().</p>
+<p>Before we get confused anymore, let’s check out some pseudo code so you can<br>implement your own stuff in assembly:</p>
+<p>void mcount(void)<br>{<br>    return;<br>}</p>
+<p>void ftrace_caller(void)<br>{<br>    /* save all state needed by the ABI (see paragraph above) */</p>
+<pre><code>unsigned long frompc = ...;
+unsigned long selfpc = &lt;return address&gt; - MCOUNT_INSN_SIZE;
+</code></pre>
+<p>ftrace_call:<br>    ftrace_stub(frompc, selfpc);</p>
+<pre><code>/* restore all state needed by the ABI */
+</code></pre>
+<p>ftrace_stub:<br>    return;<br>}</p>
+<p>This might look a little odd at first, but keep in mind that we will be runtime<br>patching multiple things.  First, only functions that we actually want to trace<br>will be patched to call ftrace_caller().  Second, since we only have one tracer<br>active at a time, we will patch the ftrace_caller() function itself to call the<br>specific tracer in question.  That is the point of the ftrace_call label.</p>
+<p>With that in mind, let’s move on to the C code that will actually be doing the<br>runtime patching.  You’ll need a little knowledge of your arch’s opcodes in<br>order to make it through the next section.</p>
+<p>Every arch has an init callback function.  If you need to do something early on<br>to initialize some state, this is the time to do that.  Otherwise, this simple<br>function below should be sufficient for most people:</p>
+<p>int __init ftrace_dyn_arch_init(void <em>data)<br>{<br>    /</em> return value is done indirectly via data */<br>    *(unsigned long *)data = 0;</p>
+<pre><code>return 0;
+</code></pre>
+<p>}</p>
+<p>There are two functions that are used to do runtime patching of arbitrary<br>functions.  The first is used to turn the mcount call site into a nop (which<br>is what helps us retain runtime performance when not tracing).  The second is<br>used to turn the mcount call site into a call to an arbitrary location (but<br>typically that is ftracer_caller()).  See the general function definition in<br>linux/ftrace.h for the functions:<br>    ftrace_make_nop()<br>    ftrace_make_call()<br>The rec-&gt;ip value is the address of the mcount call site that was collected<br>by the scripts/recordmcount.pl during build time.</p>
+<p>The last function is used to do runtime patching of the active tracer.  This<br>will be modifying the assembly code at the location of the ftrace_call symbol<br>inside of the ftrace_caller() function.  So you should have sufficient padding<br>at that location to support the new function calls you’ll be inserting.  Some<br>people will be using a “call” type instruction while others will be using a<br>“branch” type instruction.  Specifically, the function is:<br>    ftrace_update_ftrace_func()</p>
+<h2 id="HAVE-DYNAMIC-FTRACE-HAVE-FUNCTION-GRAPH-TRACER"><a href="#HAVE-DYNAMIC-FTRACE-HAVE-FUNCTION-GRAPH-TRACER" class="headerlink" title="HAVE_DYNAMIC_FTRACE + HAVE_FUNCTION_GRAPH_TRACER"></a>HAVE_DYNAMIC_FTRACE + HAVE_FUNCTION_GRAPH_TRACER</h2><p>The function grapher needs a few tweaks in order to work with dynamic ftrace.<br>Basically, you will need to:<br>    - update:<br>        - ftrace_caller()<br>        - ftrace_graph_call()<br>        - ftrace_graph_caller()<br>    - implement:<br>        - ftrace_enable_ftrace_graph_caller()<br>        - ftrace_disable_ftrace_graph_caller()</p>
+<details to be filled>
+Quick notes:
+    - add a nop stub after the ftrace_call location named ftrace_graph_call;
+      stub needs to be large enough to support a call to ftrace_graph_caller()
+    - update ftrace_graph_caller() to work with being called by the new
+      ftrace_caller() since some semantics may have changed
+    - ftrace_enable_ftrace_graph_caller() will runtime patch the
+      ftrace_graph_call location with a call to ftrace_graph_caller()
+    - ftrace_disable_ftrace_graph_caller() will runtime patch the
+      ftrace_graph_call location with nops
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/" title="Kernel-3.10.0-957.el7_ftrace-design" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_ftrace-design/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_fsys/" title="Kernel-3.10.0-957.el7_fsys"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_functionfs/" title="Kernel-3.10.0-957.el7_functionfs"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

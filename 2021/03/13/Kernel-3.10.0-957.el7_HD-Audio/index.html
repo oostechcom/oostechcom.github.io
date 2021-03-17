@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_HD-Audio | oosTech.com</title>
+  <meta name="description" content="MORE NOTES ON HD-AUDIO DRIVER                Takashi Iwai &lt;tiwai@suse.de&gt;  GENERALHD-audio is the new standard on-board audio component on modern PCsafter AC97.  Although Linux has been supporti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_HD-Audio">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="MORE NOTES ON HD-AUDIO DRIVER                Takashi Iwai &lt;tiwai@suse.de&gt;  GENERALHD-audio is the new standard on-board audio component on modern PCsafter AC97.  Although Linux has been supporti">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MORE-NOTES-ON-HD-AUDIO-DRIVER"><span class="toc-number">1.</span> <span class="toc-text">MORE NOTES ON HD-AUDIO DRIVER</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#GENERAL"><span class="toc-number">1.1.</span> <span class="toc-text">GENERAL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HD-AUDIO-CONTROLLER"><span class="toc-number">1.2.</span> <span class="toc-text">HD-AUDIO CONTROLLER</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_HD-Audio" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_HD-Audio
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="MORE-NOTES-ON-HD-AUDIO-DRIVER"><a href="#MORE-NOTES-ON-HD-AUDIO-DRIVER" class="headerlink" title="MORE NOTES ON HD-AUDIO DRIVER"></a>MORE NOTES ON HD-AUDIO DRIVER</h1><pre><code>                Takashi Iwai &lt;tiwai@suse.de&gt;
+</code></pre>
+<h2 id="GENERAL"><a href="#GENERAL" class="headerlink" title="GENERAL"></a>GENERAL</h2><p>HD-audio is the new standard on-board audio component on modern PCs<br>after AC97.  Although Linux has been supporting HD-audio since long<br>time ago, there are often problems with new machines.  A part of the<br>problem is broken BIOS, and the rest is the driver implementation.<br>This document explains the brief trouble-shooting and debugging<br>methods for the    HD-audio hardware.</p>
+<p>The HD-audio component consists of two parts: the controller chip and<br>the codec chips on the HD-audio bus.  Linux provides a single driver<br>for all controllers, snd-hda-intel.  Although the driver name contains<br>a word of a well-known hardware vendor, it’s not specific to it but for<br>all controller chips by other companies.  Since the HD-audio<br>controllers are supposed to be compatible, the single snd-hda-driver<br>should work in most cases.  But, not surprisingly, there are known<br>bugs and issues specific to each controller type.  The snd-hda-intel<br>driver has a bunch of workarounds for these as described below.</p>
+<p>A controller may have multiple codecs.  Usually you have one audio<br>codec and optionally one modem codec.  In theory, there might be<br>multiple audio codecs, e.g. for analog and digital outputs, and the<br>driver might not work properly because of conflict of mixer elements.<br>This should be fixed in future if such hardware really exists.</p>
+<p>The snd-hda-intel driver has several different codec parsers depending<br>on the codec.  It has a generic parser as a fallback, but this<br>functionality is fairly limited until now.  Instead of the generic<br>parser, usually the codec-specific parser (coded in patch_*.c) is used<br>for the codec-specific implementations.  The details about the<br>codec-specific problems are explained in the later sections.</p>
+<p>If you are interested in the deep debugging of HD-audio, read the<br>HD-audio specification at first.  The specification is found on<br>Intel’s web page, for example:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.intel.com/standards/hdaudio/">http://www.intel.com/standards/hdaudio/</a></li>
+</ul>
+<h2 id="HD-AUDIO-CONTROLLER"><a href="#HD-AUDIO-CONTROLLER" class="headerlink" title="HD-AUDIO CONTROLLER"></a>HD-AUDIO CONTROLLER</h2><p>DMA-Position Problem</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br></pre></td><td class="code"><pre><span class="line">The most common problem of the controller is the inaccurate DMA</span><br><span class="line">pointer reporting.  The DMA pointer for playback and capture can be</span><br><span class="line">read in two ways, either via a LPIB register or via a position-buffer</span><br><span class="line">map.  As default the driver tries to read from the io-mapped</span><br><span class="line">position-buffer, and falls back to LPIB if the position-buffer appears</span><br><span class="line">dead.  However, this detection isn&#39;t perfect on some devices.  In such</span><br><span class="line">a case, you can change the default method via &#96;position_fix&#96; option.</span><br><span class="line"></span><br><span class="line">&#96;position_fix&#x3D;1&#96; means to use LPIB method explicitly.</span><br><span class="line">&#96;position_fix&#x3D;2&#96; means to use the position-buffer.</span><br><span class="line">&#96;position_fix&#x3D;3&#96; means to use a combination of both methods, needed</span><br><span class="line">for some VIA controllers.  The capture stream position is corrected</span><br><span class="line">by comparing both LPIB and position-buffer values.</span><br><span class="line">&#96;position_fix&#x3D;4&#96; is another combination available for all controllers,</span><br><span class="line">and uses LPIB for the playback and the position-buffer for the capture</span><br><span class="line">streams.</span><br><span class="line">0 is the default value for all other</span><br><span class="line">controllers, the automatic check and fallback to LPIB as described in</span><br><span class="line">the above.  If you get a problem of repeated sounds, this option might</span><br><span class="line">help.</span><br><span class="line"></span><br><span class="line">In addition to that, every controller is known to be broken regarding</span><br><span class="line">the wake-up timing.  It wakes up a few samples before actually</span><br><span class="line">processing the data on the buffer.  This caused a lot of problems, for</span><br><span class="line">example, with ALSA dmix or JACK.  Since 2.6.27 kernel, the driver puts</span><br><span class="line">an artificial delay to the wake up timing.  This delay is controlled</span><br><span class="line">via &#96;bdl_pos_adj&#96; option. </span><br><span class="line"></span><br><span class="line">When &#96;bdl_pos_adj&#96; is a negative value (as default), it&#39;s assigned to</span><br><span class="line">an appropriate value depending on the controller chip.  For Intel</span><br><span class="line">chips, it&#39;d be 1 while it&#39;d be 32 for others.  Usually this works.</span><br><span class="line">Only in case it doesn&#39;t work and you get warning messages, you should</span><br><span class="line">change this parameter to other values.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Codec-Probing Problem</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">A less often but a more severe problem is the codec probing.  When</span><br><span class="line">BIOS reports the available codec slots wrongly, the driver gets</span><br><span class="line">confused and tries to access the non-existing codec slot.  This often</span><br><span class="line">results in the total screw-up, and destructs the further communication</span><br><span class="line">with the codec chips.  The symptom appears usually as error messages</span><br><span class="line">like:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  hda_intel: azx_get_response timeout, switching to polling mode:</span><br><span class="line">        last cmd&#x3D;0x12345678</span><br><span class="line">  hda_intel: azx_get_response timeout, switching to single_cmd mode:</span><br><span class="line">        last cmd&#x3D;0x12345678</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">The first line is a warning, and this is usually relatively harmless.</span><br><span class="line">It means that the codec response isn&#39;t notified via an IRQ.  The</span><br><span class="line">driver uses explicit polling method to read the response.  It gives</span><br><span class="line">very slight CPU overhead, but you&#39;d unlikely notice it.</span><br><span class="line"></span><br><span class="line">The second line is, however, a fatal error.  If this happens, usually</span><br><span class="line">it means that something is really wrong.  Most likely you are</span><br><span class="line">accessing a non-existing codec slot.</span><br><span class="line"></span><br><span class="line">Thus, if the second error message appears, try to narrow the probed</span><br><span class="line">codec slots via &#96;probe_mask&#96; option.  It&#39;s a bitmask, and each bit</span><br><span class="line">corresponds to the codec slot.  For example, to probe only the first</span><br><span class="line">slot, pass &#96;probe_mask&#x3D;1&#96;.  For the first and the third slots, pass</span><br><span class="line">&#96;probe_mask&#x3D;5&#96; (where 5 &#x3D; 1 | 4), and so on.</span><br><span class="line"></span><br><span class="line">Since 2.6.29 kernel, the driver has a more robust probing method, so</span><br><span class="line">this error might happen rarely, though.</span><br><span class="line"></span><br><span class="line">On a machine with a broken BIOS, sometimes you need to force the</span><br><span class="line">driver to probe the codec slots the hardware doesn&#39;t report for use.</span><br><span class="line">In such a case, turn the bit 8 (0x100) of &#96;probe_mask&#96; option on.</span><br><span class="line">Then the rest 8 bits are passed as the codec slots to probe</span><br><span class="line">unconditionally.  For example, &#96;probe_mask&#x3D;0x103&#96; will force to probe</span><br><span class="line">the codec slots 0 and 1 no matter what the hardware reports.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Interrupt Handling</span><br><span class="line">~~~~~~~~~~~~~~~~~~</span><br><span class="line">HD-audio driver uses MSI as default (if available) since 2.6.33</span><br><span class="line">kernel as MSI works better on some machines, and in general, it&#39;s</span><br><span class="line">better for performance.  However, Nvidia controllers showed bad</span><br><span class="line">regressions with MSI (especially in a combination with AMD chipset),</span><br><span class="line">thus we disabled MSI for them.</span><br><span class="line"></span><br><span class="line">There seem also still other devices that don&#39;t work with MSI.  If you</span><br><span class="line">see a regression wrt the sound quality (stuttering, etc) or a lock-up</span><br><span class="line">in the recent kernel, try to pass &#96;enable_msi&#x3D;0&#96; option to disable</span><br><span class="line">MSI.  If it works, you can add the known bad device to the blacklist</span><br><span class="line">defined in hda_intel.c.  In such a case, please report and give the</span><br><span class="line">patch back to the upstream developer. </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">HD-AUDIO CODEC</span><br><span class="line">--------------</span><br><span class="line"></span><br><span class="line">Model Option</span><br><span class="line">~~~~~~~~~~~~</span><br><span class="line">The most common problem regarding the HD-audio driver is the</span><br><span class="line">unsupported codec features or the mismatched device configuration.</span><br><span class="line">Most of codec-specific code has several preset models, either to</span><br><span class="line">override the BIOS setup or to provide more comprehensive features.</span><br><span class="line"></span><br><span class="line">The driver checks PCI SSID and looks through the static configuration</span><br><span class="line">table until any matching entry is found.  If you have a new machine,</span><br><span class="line">you may see a message like below:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">    hda_codec: ALC880: BIOS auto-probing.</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">Meanwhile, in the earlier versions, you would see a message like:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">    hda_codec: Unknown model for ALC880, trying auto-probe from BIOS...</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">Even if you see such a message, DON&#39;T PANIC.  Take a deep breath and</span><br><span class="line">keep your towel.  First of all, it&#39;s an informational message, no</span><br><span class="line">warning, no error.  This means that the PCI SSID of your device isn&#39;t</span><br><span class="line">listed in the known preset model (white-)list.  But, this doesn&#39;t mean</span><br><span class="line">that the driver is broken.  Many codec-drivers provide the automatic</span><br><span class="line">configuration mechanism based on the BIOS setup.</span><br><span class="line"></span><br><span class="line">The HD-audio codec has usually &quot;pin&quot; widgets, and BIOS sets the default</span><br><span class="line">configuration of each pin, which indicates the location, the</span><br><span class="line">connection type, the jack color, etc.  The HD-audio driver can guess</span><br><span class="line">the right connection judging from these default configuration values.</span><br><span class="line">However -- some codec-support codes, such as patch_analog.c, don&#39;t</span><br><span class="line">support the automatic probing (yet as of 2.6.28).  And, BIOS is often,</span><br><span class="line">yes, pretty often broken.  It sets up wrong values and screws up the</span><br><span class="line">driver.</span><br><span class="line"></span><br><span class="line">The preset model (or recently called as &quot;fix-up&quot;) is provided</span><br><span class="line">basically to overcome such a situation.  When the matching preset</span><br><span class="line">model is found in the white-list, the driver assumes the static</span><br><span class="line">configuration of that preset with the correct pin setup, etc.</span><br><span class="line">Thus, if you have a newer machine with a slightly different PCI SSID</span><br><span class="line">(or codec SSID) from the existing one, you may have a good chance to</span><br><span class="line">re-use the same model.  You can pass the &#96;model&#96; option to specify the</span><br><span class="line">preset model instead of PCI (and codec-) SSID look-up.</span><br><span class="line"></span><br><span class="line">What &#96;model&#96; option values are available depends on the codec chip.</span><br><span class="line">Check your codec chip from the codec proc file (see &quot;Codec Proc-File&quot;</span><br><span class="line">section below).  It will show the vendor&#x2F;product name of your codec</span><br><span class="line">chip.  Then, see Documentation&#x2F;sound&#x2F;alsa&#x2F;HD-Audio-Models.txt file,</span><br><span class="line">the section of HD-audio driver.  You can find a list of codecs</span><br><span class="line">and &#96;model&#96; options belonging to each codec.  For example, for Realtek</span><br><span class="line">ALC262 codec chip, pass &#96;model&#x3D;ultra&#96; for devices that are compatible</span><br><span class="line">with Samsung Q1 Ultra.</span><br><span class="line"></span><br><span class="line">Thus, the first thing you can do for any brand-new, unsupported and</span><br><span class="line">non-working HD-audio hardware is to check HD-audio codec and several</span><br><span class="line">different &#96;model&#96; option values.  If you have any luck, some of them</span><br><span class="line">might suit with your device well.</span><br><span class="line"></span><br><span class="line">There are a few special model option values:</span><br><span class="line">- when &#39;nofixup&#39; is passed, the device-specific fixups in the codec</span><br><span class="line">  parser are skipped.</span><br><span class="line">- when &#96;generic&#96; is passed, the codec-specific parser is skipped and</span><br><span class="line">  only the generic parser is used.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Speaker and Headphone Output</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">One of the most frequent (and obvious) bugs with HD-audio is the</span><br><span class="line">silent output from either or both of a built-in speaker and a</span><br><span class="line">headphone jack.  In general, you should try a headphone output at</span><br><span class="line">first.  A speaker output often requires more additional controls like</span><br><span class="line">the external amplifier bits.  Thus a headphone output has a slightly</span><br><span class="line">better chance.</span><br><span class="line"></span><br><span class="line">Before making a bug report, double-check whether the mixer is set up</span><br><span class="line">correctly.  The recent version of snd-hda-intel driver provides mostly</span><br><span class="line">&quot;Master&quot; volume control as well as &quot;Front&quot; volume (where Front</span><br><span class="line">indicates the front-channels).  In addition, there can be individual</span><br><span class="line">&quot;Headphone&quot; and &quot;Speaker&quot; controls.</span><br><span class="line"></span><br><span class="line">Ditto for the speaker output.  There can be &quot;External Amplifier&quot;</span><br><span class="line">switch on some codecs.  Turn on this if present.</span><br><span class="line"></span><br><span class="line">Another related problem is the automatic mute of speaker output by</span><br><span class="line">headphone plugging.  This feature is implemented in most cases, but</span><br><span class="line">not on every preset model or codec-support code.</span><br><span class="line"></span><br><span class="line">In anyway, try a different model option if you have such a problem.</span><br><span class="line">Some other models may match better and give you more matching</span><br><span class="line">functionality.  If none of the available models works, send a bug</span><br><span class="line">report.  See the bug report section for details.</span><br><span class="line"></span><br><span class="line">If you are masochistic enough to debug the driver problem, note the</span><br><span class="line">following:</span><br><span class="line"></span><br><span class="line">- The speaker (and the headphone, too) output often requires the</span><br><span class="line">  external amplifier.  This can be set usually via EAPD verb or a</span><br><span class="line">  certain GPIO.  If the codec pin supports EAPD, you have a better</span><br><span class="line">  chance via SET_EAPD_BTL verb (0x70c).  On others, GPIO pin (mostly</span><br><span class="line">  it&#39;s either GPIO0 or GPIO1) may turn on&#x2F;off EAPD.</span><br><span class="line">- Some Realtek codecs require special vendor-specific coefficients to</span><br><span class="line">  turn on the amplifier.  See patch_realtek.c.</span><br><span class="line">- IDT codecs may have extra power-enable&#x2F;disable controls on each</span><br><span class="line">  analog pin.  See patch_sigmatel.c.</span><br><span class="line">- Very rare but some devices don&#39;t accept the pin-detection verb until</span><br><span class="line">  triggered.  Issuing GET_PIN_SENSE verb (0xf09) may result in the</span><br><span class="line">  codec-communication stall.  Some examples are found in</span><br><span class="line">  patch_realtek.c.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Capture Problems</span><br><span class="line">~~~~~~~~~~~~~~~~</span><br><span class="line">The capture problems are often because of missing setups of mixers.</span><br><span class="line">Thus, before submitting a bug report, make sure that you set up the</span><br><span class="line">mixer correctly.  For example, both &quot;Capture Volume&quot; and &quot;Capture</span><br><span class="line">Switch&quot; have to be set properly in addition to the right &quot;Capture</span><br><span class="line">Source&quot; or &quot;Input Source&quot; selection.  Some devices have &quot;Mic Boost&quot;</span><br><span class="line">volume or switch.</span><br><span class="line"></span><br><span class="line">When the PCM device is opened via &quot;default&quot; PCM (without pulse-audio</span><br><span class="line">plugin), you&#39;ll likely have &quot;Digital Capture Volume&quot; control as well.</span><br><span class="line">This is provided for the extra gain&#x2F;attenuation of the signal in</span><br><span class="line">software, especially for the inputs without the hardware volume</span><br><span class="line">control such as digital microphones.  Unless really needed, this</span><br><span class="line">should be set to exactly 50%, corresponding to 0dB -- neither extra</span><br><span class="line">gain nor attenuation.  When you use &quot;hw&quot; PCM, i.e., a raw access PCM,</span><br><span class="line">this control will have no influence, though.</span><br><span class="line"></span><br><span class="line">It&#39;s known that some codecs &#x2F; devices have fairly bad analog circuits,</span><br><span class="line">and the recorded sound contains a certain DC-offset.  This is no bug</span><br><span class="line">of the driver.</span><br><span class="line"></span><br><span class="line">Most of modern laptops have no analog CD-input connection.  Thus, the</span><br><span class="line">recording from CD input won&#39;t work in many cases although the driver</span><br><span class="line">provides it as the capture source.  Use CDDA instead.</span><br><span class="line"></span><br><span class="line">The automatic switching of the built-in and external mic per plugging</span><br><span class="line">is implemented on some codec models but not on every model.  Partly</span><br><span class="line">because of my laziness but mostly lack of testers.  Feel free to</span><br><span class="line">submit the improvement patch to the author.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Direct Debugging</span><br><span class="line">~~~~~~~~~~~~~~~~</span><br><span class="line">If no model option gives you a better result, and you are a tough guy</span><br><span class="line">to fight against evil, try debugging via hitting the raw HD-audio</span><br><span class="line">codec verbs to the device.  Some tools are available: hda-emu and</span><br><span class="line">hda-analyzer.  The detailed description is found in the sections</span><br><span class="line">below.  You&#39;d need to enable hwdep for using these tools.  See &quot;Kernel</span><br><span class="line">Configuration&quot; section.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">OTHER ISSUES</span><br><span class="line">------------</span><br><span class="line"></span><br><span class="line">Kernel Configuration</span><br></pre></td></tr></table></figure>
+<p>In general, I recommend you to enable the sound debug option,<br><code>CONFIG_SND_DEBUG=y</code>, no matter whether you are debugging or not.<br>This enables snd_printd() macro and others, and you’ll get additional<br>kernel messages at probing.</p>
+<p>In addition, you can enable <code>CONFIG_SND_DEBUG_VERBOSE=y</code>.  But this<br>will give you far more messages.  Thus turn this on only when you are<br>sure to want it.</p>
+<p>Don’t forget to turn on the appropriate <code>CONFIG_SND_HDA_CODEC_*</code><br>options.  Note that each of them corresponds to the codec chip, not<br>the controller chip.  Thus, even if lspci shows the Nvidia controller,<br>you may need to choose the option for other vendors.  If you are<br>unsure, just select all yes.</p>
+<p><code>CONFIG_SND_HDA_HWDEP</code> is a useful option for debugging the driver.<br>When this is enabled, the driver creates hardware-dependent devices<br>(one per each codec), and you have a raw access to the device via<br>these device files.  For example, <code>hwC0D2</code> will be created for the<br>codec slot #2 of the first card (#0).  For debug-tools such as<br>hda-verb and hda-analyzer, the hwdep device has to be enabled.<br>Thus, it’d be better to turn this on always.</p>
+<p><code>CONFIG_SND_HDA_RECONFIG</code> is a new option, and this depends on the<br>hwdep option above.  When enabled, you’ll have some sysfs files under<br>the corresponding hwdep directory.  See “HD-audio reconfiguration”<br>section below.</p>
+<p><code>CONFIG_SND_HDA_POWER_SAVE</code> option enables the power-saving feature.<br>See “Power-saving” section below.</p>
+<p>Codec Proc-File</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br></pre></td><td class="code"><pre><span class="line">The codec proc-file is a treasure-chest for debugging HD-audio.</span><br><span class="line">It shows most of useful information of each codec widget.</span><br><span class="line"></span><br><span class="line">The proc file is located in &#x2F;proc&#x2F;asound&#x2F;card*&#x2F;codec#*, one file per</span><br><span class="line">each codec slot.  You can know the codec vendor, product id and</span><br><span class="line">names, the type of each widget, capabilities and so on.</span><br><span class="line">This file, however, doesn&#39;t show the jack sensing state, so far.  This</span><br><span class="line">is because the jack-sensing might be depending on the trigger state.</span><br><span class="line"></span><br><span class="line">This file will be picked up by the debug tools, and also it can be fed</span><br><span class="line">to the emulator as the primary codec information.  See the debug tools</span><br><span class="line">section below.</span><br><span class="line"></span><br><span class="line">This proc file can be also used to check whether the generic parser is</span><br><span class="line">used.  When the generic parser is used, the vendor&#x2F;product ID name</span><br><span class="line">will appear as &quot;Realtek ID 0262&quot;, instead of &quot;Realtek ALC262&quot;.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">HD-Audio Reconfiguration</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">This is an experimental feature to allow you re-configure the HD-audio</span><br><span class="line">codec dynamically without reloading the driver.  The following sysfs</span><br><span class="line">files are available under each codec-hwdep device directory (e.g. </span><br><span class="line">&#x2F;sys&#x2F;class&#x2F;sound&#x2F;hwC0D0):</span><br><span class="line"></span><br><span class="line">vendor_id::</span><br><span class="line">  Shows the 32bit codec vendor-id hex number.  You can change the</span><br><span class="line">  vendor-id value by writing to this file.</span><br><span class="line">subsystem_id::</span><br><span class="line">  Shows the 32bit codec subsystem-id hex number.  You can change the</span><br><span class="line">  subsystem-id value by writing to this file.</span><br><span class="line">revision_id::</span><br><span class="line">  Shows the 32bit codec revision-id hex number.  You can change the</span><br><span class="line">  revision-id value by writing to this file.</span><br><span class="line">afg::</span><br><span class="line">  Shows the AFG ID.  This is read-only.</span><br><span class="line">mfg::</span><br><span class="line">  Shows the MFG ID.  This is read-only.</span><br><span class="line">name::</span><br><span class="line">  Shows the codec name string.  Can be changed by writing to this</span><br><span class="line">  file.</span><br><span class="line">modelname::</span><br><span class="line">  Shows the currently set &#96;model&#96; option.  Can be changed by writing</span><br><span class="line">  to this file.</span><br><span class="line">init_verbs::</span><br><span class="line">  The extra verbs to execute at initialization.  You can add a verb by</span><br><span class="line">  writing to this file.  Pass three numbers: nid, verb and parameter</span><br><span class="line">  (separated with a space).</span><br><span class="line">hints::</span><br><span class="line">  Shows &#x2F; stores hint strings for codec parsers for any use.</span><br><span class="line">  Its format is &#96;key &#x3D; value&#96;.  For example, passing &#96;jack_detect &#x3D; no&#96;</span><br><span class="line">  will disable the jack detection of the machine completely.</span><br><span class="line">init_pin_configs::</span><br><span class="line">  Shows the initial pin default config values set by BIOS.</span><br><span class="line">driver_pin_configs::</span><br><span class="line">  Shows the pin default values set by the codec parser explicitly.</span><br><span class="line">  This doesn&#39;t show all pin values but only the changed values by</span><br><span class="line">  the parser.  That is, if the parser doesn&#39;t change the pin default</span><br><span class="line">  config values by itself, this will contain nothing.</span><br><span class="line">user_pin_configs::</span><br><span class="line">  Shows the pin default config values to override the BIOS setup.</span><br><span class="line">  Writing this (with two numbers, NID and value) appends the new</span><br><span class="line">  value.  The given will be used instead of the initial BIOS value at</span><br><span class="line">  the next reconfiguration time.  Note that this config will override</span><br><span class="line">  even the driver pin configs, too.</span><br><span class="line">reconfig::</span><br><span class="line">  Triggers the codec re-configuration.  When any value is written to</span><br><span class="line">  this file, the driver re-initialize and parses the codec tree</span><br><span class="line">  again.  All the changes done by the sysfs entries above are taken</span><br><span class="line">  into account.</span><br><span class="line">clear::</span><br><span class="line">  Resets the codec, removes the mixer elements and PCM stuff of the</span><br><span class="line">  specified codec, and clear all init verbs and hints.</span><br><span class="line"></span><br><span class="line">For example, when you want to change the pin default configuration</span><br><span class="line">value of the pin widget 0x14 to 0x9993013f, and let the driver</span><br><span class="line">re-configure based on that state, run like below:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  # echo 0x14 0x9993013f &gt; &#x2F;sys&#x2F;class&#x2F;sound&#x2F;hwC0D0&#x2F;user_pin_configs</span><br><span class="line">  # echo 1 &gt; &#x2F;sys&#x2F;class&#x2F;sound&#x2F;hwC0D0&#x2F;reconfig  </span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Hint Strings</span><br><span class="line">~~~~~~~~~~~~</span><br><span class="line">The codec parser have several switches and adjustment knobs for</span><br><span class="line">matching better with the actual codec or device behavior.  Many of</span><br><span class="line">them can be adjusted dynamically via &quot;hints&quot; strings as mentioned in</span><br><span class="line">the section above.  For example, by passing &#96;jack_detect &#x3D; no&#96; string</span><br><span class="line">via sysfs or a patch file, you can disable the jack detection, thus</span><br><span class="line">the codec parser will skip the features like auto-mute or mic</span><br><span class="line">auto-switch.  As a boolean value, either &#96;yes&#96;, &#96;no&#96;, &#96;true&#96;, &#96;false&#96;,</span><br><span class="line">&#96;1&#96; or &#96;0&#96; can be passed.</span><br><span class="line"></span><br><span class="line">The generic parser supports the following hints:</span><br><span class="line"></span><br><span class="line">- jack_detect (bool): specify whether the jack detection is available</span><br><span class="line">  at all on this machine; default true</span><br><span class="line">- inv_jack_detect (bool): indicates that the jack detection logic is</span><br><span class="line">  inverted</span><br><span class="line">- trigger_sense (bool): indicates that the jack detection needs the</span><br><span class="line">  explicit call of AC_VERB_SET_PIN_SENSE verb</span><br><span class="line">- inv_eapd (bool): indicates that the EAPD is implemented in the</span><br><span class="line">  inverted logic</span><br><span class="line">- pcm_format_first (bool): sets the PCM format before the stream tag</span><br><span class="line">  and channel ID</span><br><span class="line">- sticky_stream (bool): keep the PCM format, stream tag and ID as long</span><br><span class="line">  as possible; default true</span><br><span class="line">- spdif_status_reset (bool): reset the SPDIF status bits at each time</span><br><span class="line">  the SPDIF stream is set up</span><br><span class="line">-  pin_amp_workaround (bool): the output pin may have multiple amp</span><br><span class="line">  values</span><br><span class="line">- single_adc_amp (bool): ADCs can have only single input amps</span><br><span class="line">- auto_mute (bool): enable&#x2F;disable the headphone auto-mute feature;</span><br><span class="line">  default true</span><br><span class="line">- auto_mic (bool): enable&#x2F;disable the mic auto-switch feature; default</span><br><span class="line">  true</span><br><span class="line">- line_in_auto_switch (bool): enable&#x2F;disable the line-in auto-switch</span><br><span class="line">  feature; default false</span><br><span class="line">- need_dac_fix (bool): limits the DACs depending on the channel count</span><br><span class="line">- primary_hp (bool): probe headphone jacks as the primary outputs;</span><br><span class="line">  default true</span><br><span class="line">- multi_io (bool): try probing multi-I&#x2F;O config (e.g. shared</span><br><span class="line">  line-in&#x2F;surround, mic&#x2F;clfe jacks)</span><br><span class="line">- multi_cap_vol (bool): provide multiple capture volumes</span><br><span class="line">- inv_dmic_split (bool): provide split internal mic volume&#x2F;switch for</span><br><span class="line">  phase-inverted digital mics</span><br><span class="line">- indep_hp (bool): provide the independent headphone PCM stream and</span><br><span class="line">  the corresponding mixer control, if available</span><br><span class="line">- add_stereo_mix_input (bool): add the stereo mix (analog-loopback</span><br><span class="line">  mix) to the input mux if available</span><br><span class="line">- add_jack_modes (bool): add &quot;xxx Jack Mode&quot; enum controls to each</span><br><span class="line">  I&#x2F;O jack for allowing to change the headphone amp and mic bias VREF</span><br><span class="line">  capabilities</span><br><span class="line">- power_save_node (bool): advanced power management for each widget,</span><br><span class="line">  controlling the power sate (D0&#x2F;D3) of each widget node depending on</span><br><span class="line">  the actual pin and stream states</span><br><span class="line">- power_down_unused (bool): power down the unused widgets, a subset of</span><br><span class="line">  power_save_node, and will be dropped in future</span><br><span class="line">- add_hp_mic (bool): add the headphone to capture source if possible</span><br><span class="line">- hp_mic_detect (bool): enable&#x2F;disable the hp&#x2F;mic shared input for a</span><br><span class="line">  single built-in mic case; default true</span><br><span class="line">- mixer_nid (int): specifies the widget NID of the analog-loopback</span><br><span class="line">  mixer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Early Patching</span><br><span class="line">~~~~~~~~~~~~~~</span><br><span class="line">When CONFIG_SND_HDA_PATCH_LOADER&#x3D;y is set, you can pass a &quot;patch&quot; as a</span><br><span class="line">firmware file for modifying the HD-audio setup before initializing the</span><br><span class="line">codec.  This can work basically like the reconfiguration via sysfs in</span><br><span class="line">the above, but it does it before the first codec configuration.</span><br><span class="line"></span><br><span class="line">A patch file is a plain text file which looks like below:</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  [codec]</span><br><span class="line">  0x12345678 0xabcd1234 2</span><br><span class="line"></span><br><span class="line">  [model]</span><br><span class="line">  auto</span><br><span class="line"></span><br><span class="line">  [pincfg]</span><br><span class="line">  0x12 0x411111f0</span><br><span class="line"></span><br><span class="line">  [verb]</span><br><span class="line">  0x20 0x500 0x03</span><br><span class="line">  0x20 0x400 0xff</span><br><span class="line"></span><br><span class="line">  [hint]</span><br><span class="line">  jack_detect &#x3D; no</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">The file needs to have a line &#96;[codec]&#96;.  The next line should contain</span><br><span class="line">three numbers indicating the codec vendor-id (0x12345678 in the</span><br><span class="line">example), the codec subsystem-id (0xabcd1234) and the address (2) of</span><br><span class="line">the codec.  The rest patch entries are applied to this specified codec</span><br><span class="line">until another codec entry is given.  Passing 0 or a negative number to</span><br><span class="line">the first or the second value will make the check of the corresponding</span><br><span class="line">field be skipped.  It&#39;ll be useful for really broken devices that don&#39;t</span><br><span class="line">initialize SSID properly.</span><br><span class="line"></span><br><span class="line">The &#96;[model]&#96; line allows to change the model name of the each codec.</span><br><span class="line">In the example above, it will be changed to model&#x3D;auto.</span><br><span class="line">Note that this overrides the module option.</span><br><span class="line"></span><br><span class="line">After the &#96;[pincfg]&#96; line, the contents are parsed as the initial</span><br><span class="line">default pin-configurations just like &#96;user_pin_configs&#96; sysfs above.</span><br><span class="line">The values can be shown in user_pin_configs sysfs file, too.</span><br><span class="line"></span><br><span class="line">Similarly, the lines after &#96;[verb]&#96; are parsed as &#96;init_verbs&#96;</span><br><span class="line">sysfs entries, and the lines after &#96;[hint]&#96; are parsed as &#96;hints&#96;</span><br><span class="line">sysfs entries, respectively.</span><br><span class="line"></span><br><span class="line">Another example to override the codec vendor id from 0x12345678 to</span><br><span class="line">0xdeadbeef is like below:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  [codec]</span><br><span class="line">  0x12345678 0xabcd1234 2</span><br><span class="line"></span><br><span class="line">  [vendor_id]</span><br><span class="line">  0xdeadbeef</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">In the similar way, you can override the codec subsystem_id via</span><br><span class="line">&#96;[subsystem_id]&#96;, the revision id via &#96;[revision_id]&#96; line.</span><br><span class="line">Also, the codec chip name can be rewritten via &#96;[chip_name]&#96; line.</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  [codec]</span><br><span class="line">  0x12345678 0xabcd1234 2</span><br><span class="line"></span><br><span class="line">  [subsystem_id]</span><br><span class="line">  0xffff1111</span><br><span class="line"></span><br><span class="line">  [revision_id]</span><br><span class="line">  0x10</span><br><span class="line"></span><br><span class="line">  [chip_name]</span><br><span class="line">  My-own NEWS-0002</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">The hd-audio driver reads the file via request_firmware().  Thus,</span><br><span class="line">a patch file has to be located on the appropriate firmware path,</span><br><span class="line">typically, &#x2F;lib&#x2F;firmware.  For example, when you pass the option</span><br><span class="line">&#96;patch&#x3D;hda-init.fw&#96;, the file &#x2F;lib&#x2F;firmware&#x2F;hda-init.fw must be</span><br><span class="line">present.</span><br><span class="line"></span><br><span class="line">The patch module option is specific to each card instance, and you</span><br><span class="line">need to give one file name for each instance, separated by commas.</span><br><span class="line">For example, if you have two cards, one for an on-board analog and one </span><br><span class="line">for an HDMI video board, you may pass patch option like below:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">    options snd-hda-intel patch&#x3D;on-board-patch,hdmi-patch</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Power-Saving</span><br><span class="line">~~~~~~~~~~~~</span><br><span class="line">The power-saving is a kind of auto-suspend of the device.  When the</span><br><span class="line">device is inactive for a certain time, the device is automatically</span><br><span class="line">turned off to save the power.  The time to go down is specified via</span><br><span class="line">&#96;power_save&#96; module option, and this option can be changed dynamically</span><br><span class="line">via sysfs.</span><br><span class="line"></span><br><span class="line">The power-saving won&#39;t work when the analog loopback is enabled on</span><br><span class="line">some codecs.  Make sure that you mute all unneeded signal routes when</span><br><span class="line">you want the power-saving.</span><br><span class="line"></span><br><span class="line">The power-saving feature might cause audible click noises at each</span><br><span class="line">power-down&#x2F;up depending on the device.  Some of them might be</span><br><span class="line">solvable, but some are hard, I&#39;m afraid.  Some distros such as</span><br><span class="line">openSUSE enables the power-saving feature automatically when the power</span><br><span class="line">cable is unplugged.  Thus, if you hear noises, suspect first the</span><br><span class="line">power-saving.  See &#x2F;sys&#x2F;module&#x2F;snd_hda_intel&#x2F;parameters&#x2F;power_save to</span><br><span class="line">check the current value.  If it&#39;s non-zero, the feature is turned on.</span><br><span class="line"></span><br><span class="line">The recent kernel supports the runtime PM for the HD-audio controller</span><br><span class="line">chip, too.  It means that the HD-audio controller is also powered up &#x2F;</span><br><span class="line">down dynamically.  The feature is enabled only for certain controller</span><br><span class="line">chips like Intel LynxPoint.  You can enable&#x2F;disable this feature</span><br><span class="line">forcibly by setting &#96;power_save_controller&#96; option, which is also</span><br><span class="line">available at &#x2F;sys&#x2F;module&#x2F;snd_hda_intel&#x2F;parameters directory.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Tracepoints</span><br><span class="line">~~~~~~~~~~~</span><br><span class="line">The hd-audio driver gives a few basic tracepoints.</span><br><span class="line">&#96;hda:hda_send_cmd&#96; traces each CORB write while &#96;hda:hda_get_response&#96;</span><br><span class="line">traces the response from RIRB (only when read from the codec driver).</span><br><span class="line">&#96;hda:hda_bus_reset&#96; traces the bus-reset due to fatal error, etc,</span><br><span class="line">&#96;hda:hda_unsol_event&#96; traces the unsolicited events, and</span><br><span class="line">&#96;hda:hda_power_down&#96; and &#96;hda:hda_power_up&#96; trace the power down&#x2F;up</span><br><span class="line">via power-saving behavior.</span><br><span class="line"></span><br><span class="line">Enabling all tracepoints can be done like</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  # echo 1 &gt; &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;tracing&#x2F;events&#x2F;hda&#x2F;enable</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">then after some commands, you can traces from</span><br><span class="line">&#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;tracing&#x2F;trace file.  For example, when you want to</span><br><span class="line">trace what codec command is sent, enable the tracepoint like:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  # cat &#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;tracing&#x2F;trace</span><br><span class="line">  # tracer: nop</span><br><span class="line">  #</span><br><span class="line">  #       TASK-PID    CPU#    TIMESTAMP  FUNCTION</span><br><span class="line">  #          | |       |          |         |</span><br><span class="line">         &lt;...&gt;-7807  [002] 105147.774889: hda_send_cmd: [0:0] val&#x3D;e3a019</span><br><span class="line">         &lt;...&gt;-7807  [002] 105147.774893: hda_send_cmd: [0:0] val&#x3D;e39019</span><br><span class="line">         &lt;...&gt;-7807  [002] 105147.999542: hda_send_cmd: [0:0] val&#x3D;e3a01a</span><br><span class="line">         &lt;...&gt;-7807  [002] 105147.999543: hda_send_cmd: [0:0] val&#x3D;e3901a</span><br><span class="line">         &lt;...&gt;-26764 [001] 349222.837143: hda_send_cmd: [0:0] val&#x3D;e3a019</span><br><span class="line">         &lt;...&gt;-26764 [001] 349222.837148: hda_send_cmd: [0:0] val&#x3D;e39019</span><br><span class="line">         &lt;...&gt;-26764 [001] 349223.058539: hda_send_cmd: [0:0] val&#x3D;e3a01a</span><br><span class="line">         &lt;...&gt;-26764 [001] 349223.058541: hda_send_cmd: [0:0] val&#x3D;e3901a</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">Here &#96;[0:0]&#96; indicates the card number and the codec address, and</span><br><span class="line">&#96;val&#96; shows the value sent to the codec, respectively.  The value is</span><br><span class="line">a packed value, and you can decode it via hda-decode-verb program</span><br><span class="line">included in hda-emu package below.  For example, the value e3a019 is</span><br><span class="line">to set the left output-amp value to 25.</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  % hda-decode-verb 0xe3a019</span><br><span class="line">  raw value &#x3D; 0x00e3a019</span><br><span class="line">  cid &#x3D; 0, nid &#x3D; 0x0e, verb &#x3D; 0x3a0, parm &#x3D; 0x19</span><br><span class="line">  raw value: verb &#x3D; 0x3a0, parm &#x3D; 0x19</span><br><span class="line">  verbname &#x3D; set_amp_gain_mute</span><br><span class="line">  amp raw val &#x3D; 0xa019</span><br><span class="line">  output, left, idx&#x3D;0, mute&#x3D;0, val&#x3D;25</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Development Tree</span><br><span class="line">~~~~~~~~~~~~~~~~</span><br><span class="line">The latest development codes for HD-audio are found on sound git tree:</span><br><span class="line"></span><br><span class="line">- git:&#x2F;&#x2F;git.kernel.org&#x2F;pub&#x2F;scm&#x2F;linux&#x2F;kernel&#x2F;git&#x2F;tiwai&#x2F;sound.git</span><br><span class="line"></span><br><span class="line">The master branch or for-next branches can be used as the main</span><br><span class="line">development branches in general while the development for the current</span><br><span class="line">and next kernels are found in for-linus and for-next branches,</span><br><span class="line">respectively.</span><br><span class="line"></span><br><span class="line">If you are using the latest Linus tree, it&#39;d be better to pull the</span><br><span class="line">above GIT tree onto it.  If you are using the older kernels, an easy</span><br><span class="line">way to try the latest ALSA code is to build from the snapshot</span><br><span class="line">tarball.  There are daily tarballs and the latest snapshot tarball.</span><br><span class="line">All can be built just like normal alsa-driver release packages, that</span><br><span class="line">is, installed via the usual spells: configure, make and make</span><br><span class="line">install(-modules).  See INSTALL in the package.  The snapshot tarballs</span><br><span class="line">are found at:</span><br><span class="line"></span><br><span class="line">- ftp:&#x2F;&#x2F;ftp.suse.com&#x2F;pub&#x2F;people&#x2F;tiwai&#x2F;snapshot&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Sending a Bug Report</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">If any model or module options don&#39;t work for your device, it&#39;s time</span><br><span class="line">to send a bug report to the developers.  Give the following in your</span><br><span class="line">bug report:</span><br><span class="line"></span><br><span class="line">- Hardware vendor, product and model names</span><br><span class="line">- Kernel version (and ALSA-driver version if you built externally)</span><br><span class="line">- &#96;alsa-info.sh&#96; output; run with &#96;--no-upload&#96; option.  See the</span><br><span class="line">  section below about alsa-info</span><br><span class="line"></span><br><span class="line">If it&#39;s a regression, at best, send alsa-info outputs of both working</span><br><span class="line">and non-working kernels.  This is really helpful because we can</span><br><span class="line">compare the codec registers directly.</span><br><span class="line"></span><br><span class="line">Send a bug report either the followings:</span><br><span class="line"></span><br><span class="line">kernel-bugzilla::</span><br><span class="line">  https:&#x2F;&#x2F;bugzilla.kernel.org&#x2F;</span><br><span class="line">alsa-devel ML::</span><br><span class="line">  alsa-devel@alsa-project.org</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEBUG TOOLS</span><br><span class="line">-----------</span><br><span class="line"></span><br><span class="line">This section describes some tools available for debugging HD-audio</span><br><span class="line">problems.</span><br><span class="line"></span><br><span class="line">alsa-info</span><br><span class="line">~~~~~~~~~</span><br><span class="line">The script &#96;alsa-info.sh&#96; is a very useful tool to gather the audio</span><br><span class="line">device information.  You can fetch the latest version from:</span><br><span class="line"></span><br><span class="line">- http:&#x2F;&#x2F;www.alsa-project.org&#x2F;alsa-info.sh</span><br><span class="line"></span><br><span class="line">Run this script as root, and it will gather the important information</span><br><span class="line">such as the module lists, module parameters, proc file contents</span><br><span class="line">including the codec proc files, mixer outputs and the control</span><br><span class="line">elements.  As default, it will store the information onto a web server</span><br><span class="line">on alsa-project.org.  But, if you send a bug report, it&#39;d be better to</span><br><span class="line">run with &#96;--no-upload&#96; option, and attach the generated file.</span><br><span class="line"></span><br><span class="line">There are some other useful options.  See &#96;--help&#96; option output for</span><br><span class="line">details.</span><br><span class="line"></span><br><span class="line">When a probe error occurs or when the driver obviously assigns a</span><br><span class="line">mismatched model, it&#39;d be helpful to load the driver with</span><br><span class="line">&#96;probe_only&#x3D;1&#96; option (at best after the cold reboot) and run</span><br><span class="line">alsa-info at this state.  With this option, the driver won&#39;t configure</span><br><span class="line">the mixer and PCM but just tries to probe the codec slot.  After</span><br><span class="line">probing, the proc file is available, so you can get the raw codec</span><br><span class="line">information before modified by the driver.  Of course, the driver</span><br><span class="line">isn&#39;t usable with &#96;probe_only&#x3D;1&#96;.  But you can continue the</span><br><span class="line">configuration via hwdep sysfs file if hda-reconfig option is enabled.</span><br><span class="line">Using &#96;probe_only&#96; mask 2 skips the reset of HDA codecs (use</span><br><span class="line">&#96;probe_only&#x3D;3&#96; as module option). The hwdep interface can be used</span><br><span class="line">to determine the BIOS codec initialization.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">hda-verb</span><br><span class="line">~~~~~~~~</span><br><span class="line">hda-verb is a tiny program that allows you to access the HD-audio</span><br><span class="line">codec directly.  You can execute a raw HD-audio codec verb with this.</span><br><span class="line">This program accesses the hwdep device, thus you need to enable the</span><br><span class="line">kernel config &#96;CONFIG_SND_HDA_HWDEP&#x3D;y&#96; beforehand.</span><br><span class="line"></span><br><span class="line">The hda-verb program takes four arguments: the hwdep device file, the</span><br><span class="line">widget NID, the verb and the parameter.  When you access to the codec</span><br><span class="line">on the slot 2 of the card 0, pass &#x2F;dev&#x2F;snd&#x2F;hwC0D2 to the first</span><br><span class="line">argument, typically.  (However, the real path name depends on the</span><br><span class="line">system.)</span><br><span class="line"></span><br><span class="line">The second parameter is the widget number-id to access.  The third</span><br><span class="line">parameter can be either a hex&#x2F;digit number or a string corresponding</span><br><span class="line">to a verb.  Similarly, the last parameter is the value to write, or</span><br><span class="line">can be a string for the parameter type.</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  % hda-verb &#x2F;dev&#x2F;snd&#x2F;hwC0D0 0x12 0x701 2</span><br><span class="line">  nid &#x3D; 0x12, verb &#x3D; 0x701, param &#x3D; 0x2</span><br><span class="line">  value &#x3D; 0x0</span><br><span class="line"></span><br><span class="line">  % hda-verb &#x2F;dev&#x2F;snd&#x2F;hwC0D0 0x0 PARAMETERS VENDOR_ID</span><br><span class="line">  nid &#x3D; 0x0, verb &#x3D; 0xf00, param &#x3D; 0x0</span><br><span class="line">  value &#x3D; 0x10ec0262</span><br><span class="line"></span><br><span class="line">  % hda-verb &#x2F;dev&#x2F;snd&#x2F;hwC0D0 2 set_a 0xb080</span><br><span class="line">  nid &#x3D; 0x2, verb &#x3D; 0x300, param &#x3D; 0xb080</span><br><span class="line">  value &#x3D; 0x0</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">Although you can issue any verbs with this program, the driver state</span><br><span class="line">won&#39;t be always updated.  For example, the volume values are usually</span><br><span class="line">cached in the driver, and thus changing the widget amp value directly</span><br><span class="line">via hda-verb won&#39;t change the mixer value.</span><br><span class="line"></span><br><span class="line">The hda-verb program is included now in alsa-tools:</span><br><span class="line"></span><br><span class="line">- git:&#x2F;&#x2F;git.alsa-project.org&#x2F;alsa-tools.git</span><br><span class="line"></span><br><span class="line">Also, the old stand-alone package is found in the ftp directory:</span><br><span class="line"></span><br><span class="line">- ftp:&#x2F;&#x2F;ftp.suse.com&#x2F;pub&#x2F;people&#x2F;tiwai&#x2F;misc&#x2F;</span><br><span class="line"></span><br><span class="line">Also a git repository is available:</span><br><span class="line"></span><br><span class="line">- git:&#x2F;&#x2F;git.kernel.org&#x2F;pub&#x2F;scm&#x2F;linux&#x2F;kernel&#x2F;git&#x2F;tiwai&#x2F;hda-verb.git</span><br><span class="line"></span><br><span class="line">See README file in the tarball for more details about hda-verb</span><br><span class="line">program.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">hda-analyzer</span><br><span class="line">~~~~~~~~~~~~</span><br><span class="line">hda-analyzer provides a graphical interface to access the raw HD-audio</span><br><span class="line">control, based on pyGTK2 binding.  It&#39;s a more powerful version of</span><br><span class="line">hda-verb.  The program gives you an easy-to-use GUI stuff for showing</span><br><span class="line">the widget information and adjusting the amp values, as well as the</span><br><span class="line">proc-compatible output.</span><br><span class="line"></span><br><span class="line">The hda-analyzer:</span><br><span class="line"></span><br><span class="line">- http:&#x2F;&#x2F;git.alsa-project.org&#x2F;?p&#x3D;alsa.git;a&#x3D;tree;f&#x3D;hda-analyzer</span><br><span class="line"></span><br><span class="line">is a part of alsa.git repository in alsa-project.org:</span><br><span class="line"></span><br><span class="line">- git:&#x2F;&#x2F;git.alsa-project.org&#x2F;alsa.git</span><br><span class="line"></span><br><span class="line">Codecgraph</span><br><span class="line">~~~~~~~~~~</span><br><span class="line">Codecgraph is a utility program to generate a graph and visualizes the</span><br><span class="line">codec-node connection of a codec chip.  It&#39;s especially useful when</span><br><span class="line">you analyze or debug a codec without a proper datasheet.  The program</span><br><span class="line">parses the given codec proc file and converts to SVG via graphiz</span><br><span class="line">program.</span><br><span class="line"></span><br><span class="line">The tarball and GIT trees are found in the web page at:</span><br><span class="line"></span><br><span class="line">- http:&#x2F;&#x2F;helllabs.org&#x2F;codecgraph&#x2F;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">hda-emu</span><br><span class="line">~~~~~~~</span><br><span class="line">hda-emu is an HD-audio emulator.  The main purpose of this program is</span><br><span class="line">to debug an HD-audio codec without the real hardware.  Thus, it</span><br><span class="line">doesn&#39;t emulate the behavior with the real audio I&#x2F;O, but it just</span><br><span class="line">dumps the codec register changes and the ALSA-driver internal changes</span><br><span class="line">at probing and operating the HD-audio driver.</span><br><span class="line"></span><br><span class="line">The program requires a codec proc-file to simulate.  Get a proc file</span><br><span class="line">for the target codec beforehand, or pick up an example codec from the</span><br><span class="line">codec proc collections in the tarball.  Then, run the program with the</span><br><span class="line">proc file, and the hda-emu program will start parsing the codec file</span><br><span class="line">and simulates the HD-audio driver:</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">  % hda-emu codecs&#x2F;stac9200-dell-d820-laptop</span><br><span class="line">  # Parsing..</span><br><span class="line">  hda_codec: Unknown model for STAC9200, using BIOS defaults</span><br><span class="line">  hda_codec: pin nid 08 bios pin config 40c003fa</span><br><span class="line">  ....</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">The program gives you only a very dumb command-line interface.  You</span><br><span class="line">can get a proc-file dump at the current state, get a list of control</span><br><span class="line">(mixer) elements, set&#x2F;get the control element value, simulate the PCM</span><br><span class="line">operation, the jack plugging simulation, etc.</span><br><span class="line"></span><br><span class="line">The package is found in:</span><br><span class="line"></span><br><span class="line">- ftp:&#x2F;&#x2F;ftp.suse.com&#x2F;pub&#x2F;people&#x2F;tiwai&#x2F;misc&#x2F;</span><br><span class="line"></span><br><span class="line">A git repository is available:</span><br><span class="line"></span><br><span class="line">- git:&#x2F;&#x2F;git.kernel.org&#x2F;pub&#x2F;scm&#x2F;linux&#x2F;kernel&#x2F;git&#x2F;tiwai&#x2F;hda-emu.git</span><br><span class="line"></span><br><span class="line">See README file in the tarball for more details about hda-emu</span><br><span class="line">program.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">hda-jack-retask</span><br></pre></td></tr></table></figure>
+<p>hda-jack-retask is a user-friendly GUI program to manipulate the<br>HD-audio pin control for jack retasking.  If you have a problem about<br>the jack assignment, try this program and check whether you can get<br>useful results.  Once when you figure out the proper pin assignment,<br>it can be fixed either in the driver code statically or via passing a<br>firmware patch file (see “Early Patching” section).</p>
+<p>The program is included in alsa-tools now:</p>
+<ul>
+<li>git://git.alsa-project.org/alsa-tools.git</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/" title="Kernel-3.10.0-957.el7_HD-Audio" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_HD-Audio/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_DMA-API-HOWTO/" title="Kernel-3.10.0-957.el7_DMA-API-HOWTO"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_boot/" title="Kernel-3.10.0-957.el7_boot"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

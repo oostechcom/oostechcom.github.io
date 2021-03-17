@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_suspend-and-cpuhotplug | oosTech.com</title>
+  <meta name="description" content="Interaction of Suspend code (S3) with the CPU hotplug infrastructure  (C) 2011 Srivatsa S. Bhat &lt;srivatsa.bhat@linux.vnet.ibm.com&gt;  I. How does the regular CPU hotplug code differ from how the S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_suspend-and-cpuhotplug">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Interaction of Suspend code (S3) with the CPU hotplug infrastructure  (C) 2011 Srivatsa S. Bhat &lt;srivatsa.bhat@linux.vnet.ibm.com&gt;  I. How does the regular CPU hotplug code differ from how the S">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Important-files-and-functions-entry-points"><span class="toc-number">1.</span> <span class="toc-text">Important files and functions&#x2F;entry points:</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_suspend-and-cpuhotplug" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_suspend-and-cpuhotplug
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Interaction of Suspend code (S3) with the CPU hotplug infrastructure</p>
+<pre><code> (C) 2011 Srivatsa S. Bhat &lt;srivatsa.bhat@linux.vnet.ibm.com&gt;
+</code></pre>
+<p>I. How does the regular CPU hotplug code differ from how the Suspend-to-RAM<br>   infrastructure uses it internally? And where do they share common code?</p>
+<p>Well, a picture is worth a thousand words… So ASCII art follows :-)</p>
+<p>[This depicts the current design in the kernel, and focusses only on the<br>interactions involving the freezer and CPU hotplug and also tries to explain<br>the locking involved. It outlines the notifications involved as well.<br>But please note that here, only the call paths are illustrated, with the aim<br>of describing where they take different paths and where they share code.<br>What happens when regular CPU hotplug and Suspend-to-RAM race with each other<br>is not depicted here.]</p>
+<p>On a high level, the suspend-resume cycle goes like this:</p>
+<p>|Freeze| -&gt; |Disable nonboot| -&gt; |Do suspend| -&gt; |Enable nonboot| -&gt; |Thaw |<br>|tasks |    |     cpus      |    |          |    |     cpus     |    |tasks|</p>
+<p>More details follow:</p>
+<pre><code>                            Suspend call path
+                            -----------------
+
+                              Write &#39;mem&#39; to
+                            /sys/power/state
+                                sysfs file
+                                    |
+                                    v
+                           Acquire pm_mutex lock
+                                    |
+                                    v
+                         Send PM_SUSPEND_PREPARE
+                               notifications
+                                    |
+                                    v
+                               Freeze tasks
+                                    |
+                                    |
+                                    v
+                          disable_nonboot_cpus()
+                               /* start */
+                                    |
+                                    v
+                        Acquire cpu_add_remove_lock
+                                    |
+                                    v
+                         Iterate over CURRENTLY
+                               online CPUs
+                                    |
+                                    |
+                                    |                ----------
+                                    v                          | L
+         ======&gt;               _cpu_down()                     |
+        |              [This takes cpuhotplug.lock             |
+</code></pre>
+<p>  Common    |               before taking down the CPU             |<br>   code     |               and releases it when done]             | O<br>            |            While it is at it, notifications          |<br>            |            are sent when notable events occur,       |<br>             ======&gt;     by running all registered callbacks.      |<br>                                        |                          | O<br>                                        |                          |<br>                                        |                          |<br>                                        v                          |<br>                            Note down these cpus in                | P<br>                                frozen_cpus mask         ———-<br>                                        |<br>                                        v<br>                           Disable regular cpu hotplug<br>                        by setting cpu_hotplug_disabled=1<br>                                        |<br>                                        v<br>                            Release cpu_add_remove_lock<br>                                        |<br>                                        v<br>                       /* disable_nonboot_cpus() complete */<br>                                        |<br>                                        v<br>                                   Do suspend</p>
+<p>Resuming back is likewise, with the counterparts being (in the order of<br>execution during resume):</p>
+<ul>
+<li><p>enable_nonboot_cpus() which involves:<br> |  Acquire cpu_add_remove_lock<br> |  Reset cpu_hotplug_disabled to 0, thereby enabling regular cpu hotplug<br> |  Call _cpu_up() [for all those cpus in the frozen_cpus mask, in a loop]<br> |  Release cpu_add_remove_lock<br> v</p>
+</li>
+<li><p>thaw tasks</p>
+</li>
+<li><p>send PM_POST_SUSPEND notifications</p>
+</li>
+<li><p>Release pm_mutex lock.</p>
+</li>
+</ul>
+<p>It is to be noted here that the pm_mutex lock is acquired at the very<br>beginning, when we are just starting out to suspend, and then released only<br>after the entire cycle is complete (i.e., suspend + resume).</p>
+<pre><code>                      Regular CPU hotplug call path
+                      -----------------------------
+
+                            Write 0 (or 1) to
+                   /sys/devices/system/cpu/cpu*/online
+                                sysfs file
+                                    |
+                                    |
+                                    v
+                                cpu_down()
+                                    |
+                                    v
+                       Acquire cpu_add_remove_lock
+                                    |
+                                    v
+                      If cpu_hotplug_disabled is 1
+                            return gracefully
+                                    |
+                                    |
+                                    v
+         ======&gt;                _cpu_down()
+        |              [This takes cpuhotplug.lock
+</code></pre>
+<p>  Common    |               before taking down the CPU<br>   code     |               and releases it when done]<br>            |            While it is at it, notifications<br>            |           are sent when notable events occur,<br>             ======&gt;    by running all registered callbacks.<br>                                        |<br>                                        |<br>                                        v<br>                          Release cpu_add_remove_lock<br>                               [That’s it!, for<br>                              regular CPU hotplug]</p>
+<p>So, as can be seen from the two diagrams (the parts marked as “Common code”),<br>regular CPU hotplug and the suspend code path converge at the _cpu_down() and<br>_cpu_up() functions. They differ in the arguments passed to these functions,<br>in that during regular CPU hotplug, 0 is passed for the ‘tasks_frozen’<br>argument. But during suspend, since the tasks are already frozen by the time<br>the non-boot CPUs are offlined or onlined, the <em>cpu</em>*() functions are called<br>with the ‘tasks_frozen’ argument set to 1.<br>[See below for some known issues regarding this.]</p>
+<h2 id="Important-files-and-functions-entry-points"><a href="#Important-files-and-functions-entry-points" class="headerlink" title="Important files and functions/entry points:"></a>Important files and functions/entry points:</h2><p>kernel/power/process.c : freeze_processes(), thaw_processes()<br>kernel/power/suspend.c : suspend_prepare(), suspend_enter(), suspend_finish()<br>kernel/cpu.c: cpu_<a href="">up|down</a>, <em>cpu</em><a href="">up|down</a>, [disable|enable]_nonboot_cpus()</p>
+<p>II. What are the issues involved in CPU hotplug?<br>    ——————————————-</p>
+<p>There are some interesting situations involving CPU hotplug and microcode<br>update on the CPUs, as discussed below:</p>
+<p>[Please bear in mind that the kernel requests the microcode images from<br>userspace, using the request_firmware() function defined in<br>drivers/base/firmware_class.c]</p>
+<p>a. When all the CPUs are identical:</p>
+<p>   This is the most common situation and it is quite straightforward: we want<br>   to apply the same microcode revision to each of the CPUs.<br>   To give an example of x86, the collect_cpu_info() function defined in<br>   arch/x86/kernel/microcode_core.c helps in discovering the type of the CPU<br>   and thereby in applying the correct microcode revision to it.<br>   But note that the kernel does not maintain a common microcode image for the<br>   all CPUs, in order to handle case ‘b’ described below.</p>
+<p>b. When some of the CPUs are different than the rest:</p>
+<p>   In this case since we probably need to apply different microcode revisions<br>   to different CPUs, the kernel maintains a copy of the correct microcode<br>   image for each CPU (after appropriate CPU type/model discovery using<br>   functions such as collect_cpu_info()).</p>
+<p>c. When a CPU is physically hot-unplugged and a new (and possibly different<br>   type of) CPU is hot-plugged into the system:</p>
+<p>   In the current design of the kernel, whenever a CPU is taken offline during<br>   a regular CPU hotplug operation, upon receiving the CPU_DEAD notification<br>   (which is sent by the CPU hotplug code), the microcode update driver’s<br>   callback for that event reacts by freeing the kernel’s copy of the<br>   microcode image for that CPU.</p>
+<p>   Hence, when a new CPU is brought online, since the kernel finds that it<br>   doesn’t have the microcode image, it does the CPU type/model discovery<br>   afresh and then requests the userspace for the appropriate microcode image<br>   for that CPU, which is subsequently applied.</p>
+<p>   For example, in x86, the mc_cpu_callback() function (which is the microcode<br>   update driver’s callback registered for CPU hotplug events) calls<br>   microcode_update_cpu() which would call microcode_init_cpu() in this case,<br>   instead of microcode_resume_cpu() when it finds that the kernel doesn’t<br>   have a valid microcode image. This ensures that the CPU type/model<br>   discovery is performed and the right microcode is applied to the CPU after<br>   getting it from userspace.</p>
+<p>d. Handling microcode update during suspend/hibernate:</p>
+<p>   Strictly speaking, during a CPU hotplug operation which does not involve<br>   physically removing or inserting CPUs, the CPUs are not actually powered<br>   off during a CPU offline. They are just put to the lowest C-states possible.<br>   Hence, in such a case, it is not really necessary to re-apply microcode<br>   when the CPUs are brought back online, since they wouldn’t have lost the<br>   image during the CPU offline operation.</p>
+<p>   This is the usual scenario encountered during a resume after a suspend.<br>   However, in the case of hibernation, since all the CPUs are completely<br>   powered off, during restore it becomes necessary to apply the microcode<br>   images to all the CPUs.</p>
+<p>   [Note that we don’t expect someone to physically pull out nodes and insert<br>   nodes with a different type of CPUs in-between a suspend-resume or a<br>   hibernate/restore cycle.]</p>
+<p>   In the current design of the kernel however, during a CPU offline operation<br>   as part of the suspend/hibernate cycle (the CPU_DEAD_FROZEN notification),<br>   the existing copy of microcode image in the kernel is not freed up.<br>   And during the CPU online operations (during resume/restore), since the<br>   kernel finds that it already has copies of the microcode images for all the<br>   CPUs, it just applies them to the CPUs, avoiding any re-discovery of CPU<br>   type/model and the need for validating whether the microcode revisions are<br>   right for the CPUs or not (due to the above assumption that physical CPU<br>   hotplug will not be done in-between suspend/resume or hibernate/restore<br>   cycles).</p>
+<p>III. Are there any known problems when regular CPU hotplug and suspend race<br>     with each other?</p>
+<p>Yes, they are listed below:</p>
+<ol>
+<li><p>When invoking regular CPU hotplug, the ‘tasks_frozen’ argument passed to<br>the _cpu_down() and _cpu_up() functions is <em>always</em> 0.<br>This might not reflect the true current state of the system, since the<br>tasks could have been frozen by an out-of-band event such as a suspend<br>operation in progress. Hence, it will lead to wrong notifications being<br>sent during the cpu online/offline events (eg, CPU_ONLINE notification<br>instead of CPU_ONLINE_FROZEN) which in turn will lead to execution of<br>inappropriate code by the callbacks registered for such CPU hotplug events.</p>
+</li>
+<li><p>If a regular CPU hotplug stress test happens to race with the freezer due<br>to a suspend operation in progress at the same time, then we could hit the<br>situation described below:</p>
+<ul>
+<li>A regular cpu online operation continues its journey from userspace<br>into the kernel, since the freezing has not yet begun.</li>
+<li>Then freezer gets to work and freezes userspace.</li>
+<li>If cpu online has not yet completed the microcode update stuff by now,<br>it will now start waiting on the frozen userspace in the<br>TASK_UNINTERRUPTIBLE state, in order to get the microcode image.</li>
+<li>Now the freezer continues and tries to freeze the remaining tasks. But<br>due to this wait mentioned above, the freezer won’t be able to freeze<br>the cpu online hotplug task and hence freezing of tasks fails.</li>
+</ul>
+<p>As a result of this task freezing failure, the suspend operation gets<br>aborted.</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/" title="Kernel-3.10.0-957.el7_suspend-and-cpuhotplug" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_suspend-and-cpuhotplug/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_sunxi/" title="Kernel-3.10.0-957.el7_sunxi"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_svga/" title="Kernel-3.10.0-957.el7_svga"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

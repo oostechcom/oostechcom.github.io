@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_watchdog-kernel-api | oosTech.com</title>
+  <meta name="description" content="The Linux WatchDog Timer Driver Core kernel API.Last reviewed: 12-Feb-2013 Wim Van Sebroeck &amp;#119;&amp;#x69;&amp;#109;&amp;#64;&amp;#x69;&amp;#x67;&amp;#117;&amp;#97;&amp;#x6e;&amp;#97;&amp;#x2e;&amp;#98;&amp;#x65; IntroductionThis document does no">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_watchdog-kernel-api">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The Linux WatchDog Timer Driver Core kernel API.Last reviewed: 12-Feb-2013 Wim Van Sebroeck &amp;#119;&amp;#x69;&amp;#109;&amp;#64;&amp;#x69;&amp;#x67;&amp;#117;&amp;#97;&amp;#x6e;&amp;#97;&amp;#x2e;&amp;#98;&amp;#x65; IntroductionThis document does no">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Linux-WatchDog-Timer-Driver-Core-kernel-API"><span class="toc-number">1.</span> <span class="toc-text">The Linux WatchDog Timer Driver Core kernel API.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-API"><span class="toc-number">1.2.</span> <span class="toc-text">The API</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_watchdog-kernel-api" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_watchdog-kernel-api
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="The-Linux-WatchDog-Timer-Driver-Core-kernel-API"><a href="#The-Linux-WatchDog-Timer-Driver-Core-kernel-API" class="headerlink" title="The Linux WatchDog Timer Driver Core kernel API."></a>The Linux WatchDog Timer Driver Core kernel API.</h1><p>Last reviewed: 12-Feb-2013</p>
+<p>Wim Van Sebroeck <a href="mailto:&#119;&#x69;&#109;&#64;&#x69;&#x67;&#117;&#97;&#x6e;&#97;&#x2e;&#98;&#x65;">&#119;&#x69;&#109;&#64;&#x69;&#x67;&#117;&#97;&#x6e;&#97;&#x2e;&#98;&#x65;</a></p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>This document does not describe what a WatchDog Timer (WDT) Driver or Device is.<br>It also does not describe the API which can be used by user space to communicate<br>with a WatchDog Timer. If you want to know this then please read the following<br>file: Documentation/watchdog/watchdog-api.txt .</p>
+<p>So what does this document describe? It describes the API that can be used by<br>WatchDog Timer Drivers that want to use the WatchDog Timer Driver Core<br>Framework. This framework provides all interfacing towards user space so that<br>the same code does not have to be reproduced each time. This also means that<br>a watchdog timer driver then only needs to provide the different routines<br>(operations) that control the watchdog timer (WDT).</p>
+<h2 id="The-API"><a href="#The-API" class="headerlink" title="The API"></a>The API</h2><p>Each watchdog timer driver that wants to use the WatchDog Timer Driver Core<br>must #include &lt;linux/watchdog.h&gt; (you would have to do this anyway when<br>writing a watchdog device driver). This include file contains following<br>register/unregister routines:</p>
+<p>extern int watchdog_register_device(struct watchdog_device *);<br>extern void watchdog_unregister_device(struct watchdog_device *);</p>
+<p>The watchdog_register_device routine registers a watchdog timer device.<br>The parameter of this routine is a pointer to a watchdog_device structure.<br>This routine returns zero on success and a negative errno code for failure.</p>
+<p>The watchdog_unregister_device routine deregisters a registered watchdog timer<br>device. The parameter of this routine is the pointer to the registered<br>watchdog_device structure.</p>
+<p>The watchdog subsystem includes an registration deferral mechanism,<br>which allows you to register an watchdog as early as you wish during<br>the boot process.</p>
+<p>The watchdog device structure looks like this:</p>
+<p>struct watchdog_device {<br>    int id;<br>    struct device *parent;<br>    const struct attribute_group **groups;<br>    const struct watchdog_info *info;<br>    const struct watchdog_ops *ops;<br>    const struct watchdog_governor *gov;<br>    unsigned int bootstatus;<br>    unsigned int timeout;<br>    unsigned int pretimeout;<br>    unsigned int min_timeout;<br>    unsigned int max_timeout;<br>    unsigned int min_hw_heartbeat_ms;<br>    unsigned int max_hw_heartbeat_ms;<br>    struct notifier_block reboot_nb;<br>    struct notifier_block restart_nb;<br>    void *driver_data;<br>    struct watchdog_core_data *wd_data;<br>    unsigned long status;<br>    struct list_head deferred;<br>};</p>
+<p>It contains following fields:</p>
+<ul>
+<li>id: set by watchdog_register_device, id 0 is special. It has both a<br>/dev/watchdog0 cdev (dynamic major, minor 0) as well as the old<br>/dev/watchdog miscdev. The id is set automatically when calling<br>watchdog_register_device.</li>
+<li>parent: set this to the parent device (or NULL) before calling<br>watchdog_register_device.</li>
+<li>groups: List of sysfs attribute groups to create when creating the watchdog<br>device.</li>
+<li>info: a pointer to a watchdog_info structure. This structure gives some<br>additional information about the watchdog timer itself. (Like it’s unique name)</li>
+<li>ops: a pointer to the list of watchdog operations that the watchdog supports.</li>
+<li>gov: a pointer to the assigned watchdog device pretimeout governor or NULL.</li>
+<li>timeout: the watchdog timer’s timeout value (in seconds).<br>This is the time after which the system will reboot if user space does<br>not send a heartbeat request if WDOG_ACTIVE is set.</li>
+<li>pretimeout: the watchdog timer’s pretimeout value (in seconds).</li>
+<li>min_timeout: the watchdog timer’s minimum timeout value (in seconds).<br>If set, the minimum configurable value for ‘timeout’.</li>
+<li>max_timeout: the watchdog timer’s maximum timeout value (in seconds),<br>as seen from userspace. If set, the maximum configurable value for<br>‘timeout’. Not used if max_hw_heartbeat_ms is non-zero.</li>
+<li>min_hw_heartbeat_ms: Hardware limit for minimum time between heartbeats,<br>in milli-seconds. This value is normally 0; it should only be provided<br>if the hardware can not tolerate lower intervals between heartbeats.</li>
+<li>max_hw_heartbeat_ms: Maximum hardware heartbeat, in milli-seconds.<br>If set, the infrastructure will send heartbeats to the watchdog driver<br>if ‘timeout’ is larger than max_hw_heartbeat_ms, unless WDOG_ACTIVE<br>is set and userspace failed to send a heartbeat for at least ‘timeout’<br>seconds. max_hw_heartbeat_ms must be set if a driver does not implement<br>the stop function.</li>
+<li>reboot_nb: notifier block that is registered for reboot notifications, for<br>internal use only. If the driver calls watchdog_stop_on_reboot, watchdog core<br>will stop the watchdog on such notifications.</li>
+<li>restart_nb: notifier block that is registered for machine restart, for<br>internal use only. If a watchdog is capable of restarting the machine, it<br>should define ops-&gt;restart. Priority can be changed through<br>watchdog_set_restart_priority.</li>
+<li>bootstatus: status of the device after booting (reported with watchdog<br>WDIOF_* status bits).</li>
+<li>driver_data: a pointer to the drivers private data of a watchdog device.<br>This data should only be accessed via the watchdog_set_drvdata and<br>watchdog_get_drvdata routines.</li>
+<li>wd_data: a pointer to watchdog core internal data.</li>
+<li>status: this field contains a number of status bits that give extra<br>information about the status of the device (Like: is the watchdog timer<br>running/active, or is the nowayout bit set).</li>
+<li>deferred: entry in wtd_deferred_reg_list which is used to<br>register early initialized watchdogs.</li>
+</ul>
+<p>The list of watchdog operations is defined as:</p>
+<p>struct watchdog_ops {<br>    struct module <em>owner;<br>    /</em> mandatory operations <em>/<br>    int (*start)(struct watchdog_device *);<br>    int (*stop)(struct watchdog_device *);<br>    /</em> optional operations */<br>    int (*ping)(struct watchdog_device *);<br>    unsigned int (*status)(struct watchdog_device *);<br>    int (*set_timeout)(struct watchdog_device *, unsigned int);<br>    int (*set_pretimeout)(struct watchdog_device *, unsigned int);<br>    unsigned int (*get_timeleft)(struct watchdog_device *);<br>    int (*restart)(struct watchdog_device *);<br>    void (*ref)(struct watchdog_device *) __deprecated;<br>    void (*unref)(struct watchdog_device *) __deprecated;<br>    long (*ioctl)(struct watchdog_device *, unsigned int, unsigned long);<br>};</p>
+<p>It is important that you first define the module owner of the watchdog timer<br>driver’s operations. This module owner will be used to lock the module when<br>the watchdog is active. (This to avoid a system crash when you unload the<br>module and /dev/watchdog is still open).</p>
+<p>Some operations are mandatory and some are optional. The mandatory operations<br>are:</p>
+<ul>
+<li>start: this is a pointer to the routine that starts the watchdog timer<br>device.<br>The routine needs a pointer to the watchdog timer device structure as a<br>parameter. It returns zero on success or a negative errno code for failure.</li>
+</ul>
+<p>Not all watchdog timer hardware supports the same functionality. That’s why<br>all other routines/operations are optional. They only need to be provided if<br>they are supported. These optional routines/operations are:</p>
+<ul>
+<li>stop: with this routine the watchdog timer device is being stopped.<br>The routine needs a pointer to the watchdog timer device structure as a<br>parameter. It returns zero on success or a negative errno code for failure.<br>Some watchdog timer hardware can only be started and not be stopped. A<br>driver supporting such hardware does not have to implement the stop routine.<br>If a driver has no stop function, the watchdog core will set WDOG_HW_RUNNING<br>and start calling the driver’s keepalive pings function after the watchdog<br>device is closed.<br>If a watchdog driver does not implement the stop function, it must set<br>max_hw_heartbeat_ms.</li>
+<li>ping: this is the routine that sends a keepalive ping to the watchdog timer<br>hardware.<br>The routine needs a pointer to the watchdog timer device structure as a<br>parameter. It returns zero on success or a negative errno code for failure.<br>Most hardware that does not support this as a separate function uses the<br>start function to restart the watchdog timer hardware. And that’s also what<br>the watchdog timer driver core does: to send a keepalive ping to the watchdog<br>timer hardware it will either use the ping operation (when available) or the<br>start operation (when the ping operation is not available).<br>(Note: the WDIOC_KEEPALIVE ioctl call will only be active when the<br>WDIOF_KEEPALIVEPING bit has been set in the option field on the watchdog’s<br>info structure).</li>
+<li>status: this routine checks the status of the watchdog timer device. The<br>status of the device is reported with watchdog WDIOF_* status flags/bits.<br>WDIOF_MAGICCLOSE and WDIOF_KEEPALIVEPING are reported by the watchdog core;<br>it is not necessary to report those bits from the driver. Also, if no status<br>function is provided by the driver, the watchdog core reports the status bits<br>provided in the bootstatus variable of struct watchdog_device.</li>
+<li>set_timeout: this routine checks and changes the timeout of the watchdog<br>timer device. It returns 0 on success, -EINVAL for “parameter out of range”<br>and -EIO for “could not write value to the watchdog”. On success this<br>routine should set the timeout value of the watchdog_device to the<br>achieved timeout value (which may be different from the requested one<br>because the watchdog does not necessarily have a 1 second resolution).<br>Drivers implementing max_hw_heartbeat_ms set the hardware watchdog heartbeat<br>to the minimum of timeout and max_hw_heartbeat_ms. Those drivers set the<br>timeout value of the watchdog_device either to the requested timeout value<br>(if it is larger than max_hw_heartbeat_ms), or to the achieved timeout value.<br>(Note: the WDIOF_SETTIMEOUT needs to be set in the options field of the<br>watchdog’s info structure).<br>If the watchdog driver does not have to perform any action but setting the<br>watchdog_device.timeout, this callback can be omitted.<br>If set_timeout is not provided but, WDIOF_SETTIMEOUT is set, the watchdog<br>infrastructure updates the timeout value of the watchdog_device internally<br>to the requested value.<br>If the pretimeout feature is used (WDIOF_PRETIMEOUT), then set_timeout must<br>also take care of checking if pretimeout is still valid and set up the timer<br>accordingly. This can’t be done in the core without races, so it is the<br>duty of the driver.</li>
+<li>set_pretimeout: this routine checks and changes the pretimeout value of<br>the watchdog. It is optional because not all watchdogs support pretimeout<br>notification. The timeout value is not an absolute time, but the number of<br>seconds before the actual timeout would happen. It returns 0 on success,<br>-EINVAL for “parameter out of range” and -EIO for “could not write value to<br>the watchdog”. A value of 0 disables pretimeout notification.<br>(Note: the WDIOF_PRETIMEOUT needs to be set in the options field of the<br>watchdog’s info structure).<br>If the watchdog driver does not have to perform any action but setting the<br>watchdog_device.pretimeout, this callback can be omitted. That means if<br>set_pretimeout is not provided but WDIOF_PRETIMEOUT is set, the watchdog<br>infrastructure updates the pretimeout value of the watchdog_device internally<br>to the requested value.</li>
+<li>get_timeleft: this routines returns the time that’s left before a reset.</li>
+<li>restart: this routine restarts the machine. It returns 0 on success or a<br>negative errno code for failure.</li>
+<li>ioctl: if this routine is present then it will be called first before we do<br>our own internal ioctl call handling. This routine should return -ENOIOCTLCMD<br>if a command is not supported. The parameters that are passed to the ioctl<br>call are: watchdog_device, cmd and arg.</li>
+</ul>
+<p>The ‘ref’ and ‘unref’ operations are no longer used and deprecated.</p>
+<p>The status bits should (preferably) be set with the set_bit and clear_bit alike<br>bit-operations. The status bits that are defined are:</p>
+<ul>
+<li><p>WDOG_ACTIVE: this status bit indicates whether or not a watchdog timer device<br>is active or not from user perspective. User space is expected to send<br>heartbeat requests to the driver while this flag is set.</p>
+</li>
+<li><p>WDOG_NO_WAY_OUT: this bit stores the nowayout setting for the watchdog.<br>If this bit is set then the watchdog timer will not be able to stop.</p>
+</li>
+<li><p>WDOG_HW_RUNNING: Set by the watchdog driver if the hardware watchdog is<br>running. The bit must be set if the watchdog timer hardware can not be<br>stopped. The bit may also be set if the watchdog timer is running after<br>booting, before the watchdog device is opened. If set, the watchdog<br>infrastructure will send keepalives to the watchdog hardware while<br>WDOG_ACTIVE is not set.<br>Note: when you register the watchdog timer device with this bit set,<br>then opening /dev/watchdog will skip the start operation but send a keepalive<br>request instead.</p>
+<p>To set the WDOG_NO_WAY_OUT status bit (before registering your watchdog<br>timer device) you can either:</p>
+<ul>
+<li>set it statically in your watchdog_device struct with<br>.status = WATCHDOG_NOWAYOUT_INIT_STATUS,<br>(this will set the value the same as CONFIG_WATCHDOG_NOWAYOUT) or</li>
+<li>use the following helper function:<br>static inline void watchdog_set_nowayout(struct watchdog_device *wdd, int nowayout)</li>
+</ul>
+</li>
+</ul>
+<p>Note: The WatchDog Timer Driver Core supports the magic close feature and<br>the nowayout feature. To use the magic close feature you must set the<br>WDIOF_MAGICCLOSE bit in the options field of the watchdog’s info structure.<br>The nowayout feature will overrule the magic close feature.</p>
+<p>To get or set driver specific data the following two helper functions should be<br>used:</p>
+<p>static inline void watchdog_set_drvdata(struct watchdog_device *wdd, void *data)<br>static inline void *watchdog_get_drvdata(struct watchdog_device *wdd)</p>
+<p>The watchdog_set_drvdata function allows you to add driver specific data. The<br>arguments of this function are the watchdog device where you want to add the<br>driver specific data to and a pointer to the data itself.</p>
+<p>The watchdog_get_drvdata function allows you to retrieve driver specific data.<br>The argument of this function is the watchdog device where you want to retrieve<br>data from. The function returns the pointer to the driver specific data.</p>
+<p>To initialize the timeout field, the following function can be used:</p>
+<p>extern int watchdog_init_timeout(struct watchdog_device *wdd,<br>                                  unsigned int timeout_parm, struct device *dev);</p>
+<p>The watchdog_init_timeout function allows you to initialize the timeout field<br>using the module timeout parameter or by retrieving the timeout-sec property from<br>the device tree (if the module timeout parameter is invalid). Best practice is<br>to set the default timeout value as timeout value in the watchdog_device and<br>then use this function to set the user “preferred” timeout value.<br>This routine returns zero on success and a negative errno code for failure.</p>
+<p>To disable the watchdog on reboot, the user must call the following helper:</p>
+<p>static inline void watchdog_stop_on_reboot(struct watchdog_device *wdd);</p>
+<p>To disable the watchdog when unregistering the watchdog, the user must call<br>the following helper. Note that this will only stop the watchdog if the<br>nowayout flag is not set.</p>
+<p>static inline void watchdog_stop_on_unregister(struct watchdog_device *wdd);</p>
+<p>To change the priority of the restart handler the following helper should be<br>used:</p>
+<p>void watchdog_set_restart_priority(struct watchdog_device *wdd, int priority);</p>
+<p>User should follow the following guidelines for setting the priority:</p>
+<ul>
+<li>0: should be called in last resort, has limited restart capabilities</li>
+<li>128: default restart handler, use if no other handler is expected to be<br>available, and/or if restart is sufficient to restart the entire system</li>
+<li>255: highest priority, will preempt all other restart handlers</li>
+</ul>
+<p>To raise a pretimeout notification, the following function should be used:</p>
+<p>void watchdog_notify_pretimeout(struct watchdog_device *wdd)</p>
+<p>The function can be called in the interrupt context. If watchdog pretimeout<br>governor framework (kbuild CONFIG_WATCHDOG_PRETIMEOUT_GOV symbol) is enabled,<br>an action is taken by a preconfigured pretimeout governor preassigned to<br>the watchdog device. If watchdog pretimeout governor framework is not<br>enabled, watchdog_notify_pretimeout() prints a notification message to<br>the kernel log buffer.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/" title="Kernel-4.18.0-80.el8_watchdog-kernel-api" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_watchdog-kernel-api/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_usbip_protocol/" title="Kernel-4.18.0-80.el8_usbip_protocol"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_watchdog-parameters/" title="Kernel-4.18.0-80.el8_watchdog-parameters"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

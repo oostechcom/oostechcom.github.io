@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_lockstat | oosTech.com</title>
+  <meta name="description" content="LOCK STATISTICS  WHAT  As the name suggests, it provides statistics on locks.  WHY  Because things like lock contention can severely impact performance.  HOW  Lockdep already has hooks in the lock fun">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_lockstat">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_lockstat/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="LOCK STATISTICS  WHAT  As the name suggests, it provides statistics on locks.  WHY  Because things like lock contention can severely impact performance.  HOW  Lockdep already has hooks in the lock fun">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_lockstat/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-1-gt-proc-sys-kernel-lock-stat"><span class="toc-number">1.</span> <span class="toc-text">echo 1 &gt;&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;lock_stat</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-0-gt-proc-sys-kernel-lock-stat"><span class="toc-number">2.</span> <span class="toc-text">echo 0 &gt;&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;lock_stat</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#less-proc-lock-stat"><span class="toc-number">3.</span> <span class="toc-text">less &#x2F;proc&#x2F;lock_stat</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#grep-proc-lock-stat-head"><span class="toc-number">4.</span> <span class="toc-text">grep : &#x2F;proc&#x2F;lock_stat | head</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-0-gt-proc-lock-stat"><span class="toc-number">5.</span> <span class="toc-text">echo 0 &gt; &#x2F;proc&#x2F;lock_stat</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_lockstat" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_lockstat
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_lockstat/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_lockstat/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_lockstat/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>LOCK STATISTICS</p>
+<ul>
+<li>WHAT</li>
+</ul>
+<p>As the name suggests, it provides statistics on locks.</p>
+<ul>
+<li>WHY</li>
+</ul>
+<p>Because things like lock contention can severely impact performance.</p>
+<ul>
+<li>HOW</li>
+</ul>
+<p>Lockdep already has hooks in the lock functions and maps lock instances to<br>lock classes. We build on that (see Documentation/locking/lockdep-design.txt).<br>The graph below shows the relation between the lock functions and the various<br>hooks therein.</p>
+<pre><code>    __acquire
+        |
+       lock _____
+        |        \
+        |    __contended
+        |         |
+        |       &lt;wait&gt;
+        | _______/
+        |/
+        |
+   __acquired
+        |
+        .
+      &lt;hold&gt;
+        .
+        |
+   __release
+        |
+     unlock
+</code></pre>
+<p>lock, unlock    - the regular lock functions<br>__*        - the hooks<br>&lt;&gt;         - states</p>
+<p>With these hooks we provide the following statistics:</p>
+<p> con-bounces       - number of lock contention that involved x-cpu data<br> contentions       - number of lock acquisitions that had to wait<br> wait time min     - shortest (non-0) time we ever had to wait for a lock<br>           max     - longest time we ever had to wait for a lock<br>       total   - total time we spend waiting on this lock<br>       avg     - average time spent waiting on this lock<br> acq-bounces       - number of lock acquisitions that involved x-cpu data<br> acquisitions      - number of times we took the lock<br> hold time min     - shortest (non-0) time we ever held the lock<br>       max     - longest time we ever held the lock<br>       total   - total time this lock was held<br>       avg     - average time this lock was held</p>
+<p>These numbers are gathered per lock class, per read/write state (when<br>applicable).</p>
+<p>It also tracks 4 contention points per class. A contention point is a call site<br>that had to wait on lock acquisition.</p>
+<ul>
+<li>CONFIGURATION</li>
+</ul>
+<p>Lock statistics are enabled via CONFIG_LOCK_STAT.</p>
+<ul>
+<li>USAGE</li>
+</ul>
+<p>Enable collection of statistics:</p>
+<h1 id="echo-1-gt-proc-sys-kernel-lock-stat"><a href="#echo-1-gt-proc-sys-kernel-lock-stat" class="headerlink" title="echo 1 &gt;/proc/sys/kernel/lock_stat"></a>echo 1 &gt;/proc/sys/kernel/lock_stat</h1><p>Disable collection of statistics:</p>
+<h1 id="echo-0-gt-proc-sys-kernel-lock-stat"><a href="#echo-0-gt-proc-sys-kernel-lock-stat" class="headerlink" title="echo 0 &gt;/proc/sys/kernel/lock_stat"></a>echo 0 &gt;/proc/sys/kernel/lock_stat</h1><p>Look at the current lock statistics:</p>
+<p>( line numbers not part of actual output, done for clarity in the explanation<br>  below )</p>
+<h1 id="less-proc-lock-stat"><a href="#less-proc-lock-stat" class="headerlink" title="less /proc/lock_stat"></a>less /proc/lock_stat</h1><p>01 lock_stat version 0.4<br>02—————————————————————————————————————————————————————————————————————————–<br>03                              class name    con-bounces    contentions   waittime-min   waittime-max waittime-total   waittime-avg    acq-bounces   acquisitions   holdtime-min   holdtime-max holdtime-total   holdtime-avg<br>04—————————————————————————————————————————————————————————————————————————–<br>05<br>06                         &amp;mm-&gt;mmap_sem-W:            46             84           0.26         939.10       16371.53         194.90          47291        2922365           0.16     2220301.69 17464026916.32        5975.99<br>07                         &amp;mm-&gt;mmap_sem-R:            37            100           1.31      299502.61      325629.52        3256.30         212344       34316685           0.10        7744.91    95016910.20           2.77<br>08                         —————<br>09                           &amp;mm-&gt;mmap_sem              1          [<ffffffff811502a7>] khugepaged_scan_mm_slot+0x57/0x280<br>19                           &amp;mm-&gt;mmap_sem             96          [<ffffffff815351c4>] __do_page_fault+0x1d4/0x510<br>11                           &amp;mm-&gt;mmap_sem             34          [<ffffffff81113d77>] vm_mmap_pgoff+0x87/0xd0<br>12                           &amp;mm-&gt;mmap_sem             17          [<ffffffff81127e71>] vm_munmap+0x41/0x80<br>13                         —————<br>14                           &amp;mm-&gt;mmap_sem              1          [<ffffffff81046fda>] dup_mmap+0x2a/0x3f0<br>15                           &amp;mm-&gt;mmap_sem             60          [<ffffffff81129e29>] SyS_mprotect+0xe9/0x250<br>16                           &amp;mm-&gt;mmap_sem             41          [<ffffffff815351c4>] __do_page_fault+0x1d4/0x510<br>17                           &amp;mm-&gt;mmap_sem             68          [<ffffffff81113d77>] vm_mmap_pgoff+0x87/0xd0<br>18<br>19…………………………………………………………………………………………………………………………………………………………………………………………………..<br>20<br>21                         unix_table_lock:           110            112           0.21          49.24         163.91           1.46          21094          66312           0.12         624.42       31589.81           0.48<br>22                         —————<br>23                         unix_table_lock             45          [<ffffffff8150ad8e>] unix_create1+0x16e/0x1b0<br>24                         unix_table_lock             47          [<ffffffff8150b111>] unix_release_sock+0x31/0x250<br>25                         unix_table_lock             15          [<ffffffff8150ca37>] unix_find_other+0x117/0x230<br>26                         unix_table_lock              5          [<ffffffff8150a09f>] unix_autobind+0x11f/0x1b0<br>27                         —————<br>28                         unix_table_lock             39          [<ffffffff8150b111>] unix_release_sock+0x31/0x250<br>29                         unix_table_lock             49          [<ffffffff8150ad8e>] unix_create1+0x16e/0x1b0<br>30                         unix_table_lock             20          [<ffffffff8150ca37>] unix_find_other+0x117/0x230<br>31                         unix_table_lock              4          [<ffffffff8150a09f>] unix_autobind+0x11f/0x1b0</p>
+<p>This excerpt shows the first two lock class statistics. Line 01 shows the<br>output version - each time the format changes this will be updated. Line 02-04<br>show the header with column descriptions. Lines 05-18 and 20-31 show the actual<br>statistics. These statistics come in two parts; the actual stats separated by a<br>short separator (line 08, 13) from the contention points.</p>
+<p>Lines 09-12 show the first 4 recorded contention points (the code<br>which tries to get the lock) and lines 14-17 show the first 4 recorded<br>contended points (the lock holder). It is possible that the max<br>con-bounces point is missing in the statistics.</p>
+<p>The first lock (05-18) is a read/write lock, and shows two lines above the<br>short separator. The contention points don’t match the column descriptors,<br>they have two: contentions and [<IP>] symbol. The second set of contention<br>points are the points we’re contending with.</p>
+<p>The integer part of the time values is in us.</p>
+<p>Dealing with nested locks, subclasses may appear:</p>
+<p>32…………………………………………………………………………………………………………………………………………………………………………………………………<br>33<br>34                               &amp;rq-&gt;lock:       13128          13128           0.43         190.53      103881.26           7.91          97454        3453404           0.00         401.11    13224683.11           3.82<br>35                               ———<br>36                               &amp;rq-&gt;lock          645          [<ffffffff8103bfc4>] task_rq_lock+0x43/0x75<br>37                               &amp;rq-&gt;lock          297          [<ffffffff8104ba65>] try_to_wake_up+0x127/0x25a<br>38                               &amp;rq-&gt;lock          360          [<ffffffff8103c4c5>] select_task_rq_fair+0x1f0/0x74a<br>39                               &amp;rq-&gt;lock          428          [<ffffffff81045f98>] scheduler_tick+0x46/0x1fb<br>40                               ———<br>41                               &amp;rq-&gt;lock           77          [<ffffffff8103bfc4>] task_rq_lock+0x43/0x75<br>42                               &amp;rq-&gt;lock          174          [<ffffffff8104ba65>] try_to_wake_up+0x127/0x25a<br>43                               &amp;rq-&gt;lock         4715          [<ffffffff8103ed4b>] double_rq_lock+0x42/0x54<br>44                               &amp;rq-&gt;lock          893          [<ffffffff81340524>] schedule+0x157/0x7b8<br>45<br>46…………………………………………………………………………………………………………………………………………………………………………………………………<br>47<br>48                             &amp;rq-&gt;lock/1:        1526          11488           0.33         388.73      136294.31          11.86          21461          38404           0.00          37.93      109388.53           2.84<br>49                             ———–<br>50                             &amp;rq-&gt;lock/1        11526          [<ffffffff8103ed58>] double_rq_lock+0x4f/0x54<br>51                             ———–<br>52                             &amp;rq-&gt;lock/1         5645          [<ffffffff8103ed4b>] double_rq_lock+0x42/0x54<br>53                             &amp;rq-&gt;lock/1         1224          [<ffffffff81340524>] schedule+0x157/0x7b8<br>54                             &amp;rq-&gt;lock/1         4336          [<ffffffff8103ed58>] double_rq_lock+0x4f/0x54<br>55                             &amp;rq-&gt;lock/1          181          [<ffffffff8104ba65>] try_to_wake_up+0x127/0x25a</p>
+<p>Line 48 shows statistics for the second subclass (/1) of &amp;rq-&gt;lock class<br>(subclass starts from 0), since in this case, as line 50 suggests,<br>double_rq_lock actually acquires a nested lock of two spinlocks.</p>
+<p>View the top contending locks:</p>
+<h1 id="grep-proc-lock-stat-head"><a href="#grep-proc-lock-stat-head" class="headerlink" title="grep : /proc/lock_stat | head"></a>grep : /proc/lock_stat | head</h1><pre><code>        clockevents_lock:       2926159        2947636           0.15       46882.81  1784540466.34         605.41        3381345        3879161           0.00        2260.97    53178395.68          13.71
+         tick_broadcast_lock:        346460         346717           0.18        2257.43    39364622.71         113.54        3642919        4242696           0.00        2263.79    49173646.60          11.59
+      &amp;mapping-&gt;i_mmap_mutex:        203896         203899           3.36      645530.05 31767507988.39      155800.21        3361776        8893984           0.17        2254.15    14110121.02           1.59
+               &amp;rq-&gt;lock:        135014         136909           0.18         606.09      842160.68           6.15        1540728       10436146           0.00         728.72    17606683.41           1.69
+       &amp;(&amp;zone-&gt;lru_lock)-&gt;rlock:         93000          94934           0.16          59.18      188253.78           1.98        1199912        3809894           0.15         391.40     3559518.81           0.93
+         tasklist_lock-W:         40667          41130           0.23        1189.42      428980.51          10.43         270278         510106           0.16         653.51     3939674.91           7.72
+         tasklist_lock-R:         21298          21305           0.20        1310.05      215511.12          10.12         186204         241258           0.14        1162.33     1179779.23           4.89
+              rcu_node_1:         47656          49022           0.16         635.41      193616.41           3.95         844888        1865423           0.00         764.26     1656226.96           0.89
+   &amp;(&amp;dentry-&gt;d_lockref.lock)-&gt;rlock:         39791          40179           0.15        1302.08       88851.96           2.21        2790851       12527025           0.10        1910.75     3379714.27           0.27
+              rcu_node_0:         29203          30064           0.16         786.55     1555573.00          51.74          88963         244254           0.00         398.87      428872.51           1.76
+</code></pre>
+<p>Clear the statistics:</p>
+<h1 id="echo-0-gt-proc-lock-stat"><a href="#echo-0-gt-proc-lock-stat" class="headerlink" title="echo 0 &gt; /proc/lock_stat"></a>echo 0 &gt; /proc/lock_stat</h1>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_lockstat/" title="Kernel-4.18.0-80.el8_lockstat" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_lockstat/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_locks/" title="Kernel-4.18.0-80.el8_locks"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_locktorture/" title="Kernel-4.18.0-80.el8_locktorture"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

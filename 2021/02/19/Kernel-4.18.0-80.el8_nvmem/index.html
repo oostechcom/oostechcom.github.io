@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_nvme | oosTech.com</title>
+  <meta name="description" content="NVMEM SUBSYSTEM   Srinivas Kandagatla &lt;srinivas.kandagatla@linaro.org&gt;  This document explains the NVMEM Framework along with the APIs provided,and how to use it.  Introduction  NVME">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_nvme">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_nvmem/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="NVMEM SUBSYSTEM   Srinivas Kandagatla &lt;srinivas.kandagatla@linaro.org&gt;  This document explains the NVMEM Framework along with the APIs provided,and how to use it.  Introduction  NVME">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_nvmem/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Registering-Unregistering-the-NVMEM-provider"><span class="toc-number">2.</span> <span class="toc-text">Registering&#x2F;Unregistering the NVMEM provider</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#NVMEM-cell-based-consumer-APIs"><span class="toc-number">3.</span> <span class="toc-text">NVMEM cell based consumer APIs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Direct-NVMEM-device-based-consumer-APIs"><span class="toc-number">4.</span> <span class="toc-text">Direct NVMEM device based consumer APIs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Releasing-a-reference-to-the-NVMEM"><span class="toc-number">5.</span> <span class="toc-text">Releasing a reference to the NVMEM</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Userspace-binary-interface"><span class="toc-number">6.</span> <span class="toc-text">Userspace binary interface</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DeviceTree-Binding"><span class="toc-number">7.</span> <span class="toc-text">DeviceTree Binding</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_nvmem" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_nvme
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_nvmem/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_nvmem/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_nvmem/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>            NVMEM SUBSYSTEM
+  Srinivas Kandagatla &lt;srinivas.kandagatla@linaro.org&gt;
+</code></pre>
+<p>This document explains the NVMEM Framework along with the APIs provided,<br>and how to use it.</p>
+<ol>
+<li><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1></li>
+</ol>
+<p><em>NVMEM</em> is the abbreviation for Non Volatile Memory layer. It is used to<br>retrieve configuration of SOC or Device specific data from non volatile<br>memories like eeprom, efuses and so on.</p>
+<p>Before this framework existed, NVMEM drivers like eeprom were stored in<br>drivers/misc, where they all had to duplicate pretty much the same code to<br>register a sysfs file, allow in-kernel users to access the content of the<br>devices they were driving, etc.</p>
+<p>This was also a problem as far as other in-kernel users were involved, since<br>the solutions used were pretty much different from one driver to another, there<br>was a rather big abstraction leak.</p>
+<p>This framework aims at solve these problems. It also introduces DT<br>representation for consumer devices to go get the data they require (MAC<br>Addresses, SoC/Revision ID, part numbers, and so on) from the NVMEMs. This<br>framework is based on regmap, so that most of the abstraction available in<br>regmap can be reused, across multiple types of buses.</p>
+<p>NVMEM Providers<br>+++++++++++++++</p>
+<p>NVMEM provider refers to an entity that implements methods to initialize, read<br>and write the non-volatile memory.</p>
+<ol start="2">
+<li><h1 id="Registering-Unregistering-the-NVMEM-provider"><a href="#Registering-Unregistering-the-NVMEM-provider" class="headerlink" title="Registering/Unregistering the NVMEM provider"></a>Registering/Unregistering the NVMEM provider</h1></li>
+</ol>
+<p>A NVMEM provider can register with NVMEM core by supplying relevant<br>nvmem configuration to nvmem_register(), on success core would return a valid<br>nvmem_device pointer.</p>
+<p>nvmem_unregister(nvmem) is used to unregister a previously registered provider.</p>
+<p>For example, a simple qfprom case:</p>
+<p>static struct nvmem_config econfig = {<br>    .name = “qfprom”,<br>    .owner = THIS_MODULE,<br>};</p>
+<p>static int qfprom_probe(struct platform_device *pdev)<br>{<br>    …<br>    econfig.dev = &amp;pdev-&gt;dev;<br>    nvmem = nvmem_register(&amp;econfig);<br>    …<br>}</p>
+<p>It is mandatory that the NVMEM provider has a regmap associated with its<br>struct device. Failure to do would return error code from nvmem_register().</p>
+<p>NVMEM Consumers<br>+++++++++++++++</p>
+<p>NVMEM consumers are the entities which make use of the NVMEM provider to<br>read from and to NVMEM.</p>
+<ol start="3">
+<li><h1 id="NVMEM-cell-based-consumer-APIs"><a href="#NVMEM-cell-based-consumer-APIs" class="headerlink" title="NVMEM cell based consumer APIs"></a>NVMEM cell based consumer APIs</h1></li>
+</ol>
+<p>NVMEM cells are the data entries/fields in the NVMEM.<br>The NVMEM framework provides 3 APIs to read/write NVMEM cells.</p>
+<p>struct nvmem_cell *nvmem_cell_get(struct device *dev, const char *name);<br>struct nvmem_cell *devm_nvmem_cell_get(struct device *dev, const char *name);</p>
+<p>void nvmem_cell_put(struct nvmem_cell *cell);<br>void devm_nvmem_cell_put(struct device *dev, struct nvmem_cell *cell);</p>
+<p>void *nvmem_cell_read(struct nvmem_cell *cell, ssize_t *len);<br>int nvmem_cell_write(struct nvmem_cell *cell, void *buf, ssize_t len);</p>
+<p>*nvmem_cell_get() apis will get a reference to nvmem cell for a given id,<br>and nvmem_cell_read/write() can then read or write to the cell.<br>Once the usage of the cell is finished the consumer should call *nvmem_cell_put()<br>to free all the allocation memory for the cell.</p>
+<ol start="4">
+<li><h1 id="Direct-NVMEM-device-based-consumer-APIs"><a href="#Direct-NVMEM-device-based-consumer-APIs" class="headerlink" title="Direct NVMEM device based consumer APIs"></a>Direct NVMEM device based consumer APIs</h1></li>
+</ol>
+<p>In some instances it is necessary to directly read/write the NVMEM.<br>To facilitate such consumers NVMEM framework provides below apis.</p>
+<p>struct nvmem_device *nvmem_device_get(struct device *dev, const char *name);<br>struct nvmem_device *devm_nvmem_device_get(struct device *dev,<br>                       const char *name);<br>void nvmem_device_put(struct nvmem_device *nvmem);<br>int nvmem_device_read(struct nvmem_device *nvmem, unsigned int offset,<br>              size_t bytes, void *buf);<br>int nvmem_device_write(struct nvmem_device *nvmem, unsigned int offset,<br>               size_t bytes, void *buf);<br>int nvmem_device_cell_read(struct nvmem_device *nvmem,<br>               struct nvmem_cell_info *info, void *buf);<br>int nvmem_device_cell_write(struct nvmem_device *nvmem,<br>                struct nvmem_cell_info *info, void *buf);</p>
+<p>Before the consumers can read/write NVMEM directly, it should get hold<br>of nvmem_controller from one of the *nvmem_device_get() api.</p>
+<p>The difference between these apis and cell based apis is that these apis always<br>take nvmem_device as parameter.</p>
+<ol start="5">
+<li><h1 id="Releasing-a-reference-to-the-NVMEM"><a href="#Releasing-a-reference-to-the-NVMEM" class="headerlink" title="Releasing a reference to the NVMEM"></a>Releasing a reference to the NVMEM</h1></li>
+</ol>
+<p>When a consumer no longer needs the NVMEM, it has to release the reference<br>to the NVMEM it has obtained using the APIs mentioned in the above section.<br>The NVMEM framework provides 2 APIs to release a reference to the NVMEM.</p>
+<p>void nvmem_cell_put(struct nvmem_cell *cell);<br>void devm_nvmem_cell_put(struct device *dev, struct nvmem_cell *cell);<br>void nvmem_device_put(struct nvmem_device *nvmem);<br>void devm_nvmem_device_put(struct device *dev, struct nvmem_device *nvmem);</p>
+<p>Both these APIs are used to release a reference to the NVMEM and<br>devm_nvmem_cell_put and devm_nvmem_device_put destroys the devres associated<br>with this NVMEM.</p>
+<p>Userspace<br>+++++++++</p>
+<ol start="6">
+<li><h1 id="Userspace-binary-interface"><a href="#Userspace-binary-interface" class="headerlink" title="Userspace binary interface"></a>Userspace binary interface</h1></li>
+</ol>
+<p>Userspace can read/write the raw NVMEM file located at<br>/sys/bus/nvmem/devices/*/nvmem</p>
+<p>ex:</p>
+<p>hexdump /sys/bus/nvmem/devices/qfprom0/nvmem</p>
+<p>0000000 0000 0000 0000 0000 0000 0000 0000 0000<br>*<br>00000a0 db10 2240 0000 e000 0c00 0c00 0000 0c00<br>0000000 0000 0000 0000 0000 0000 0000 0000 0000<br>…<br>*<br>0001000</p>
+<ol start="7">
+<li><h1 id="DeviceTree-Binding"><a href="#DeviceTree-Binding" class="headerlink" title="DeviceTree Binding"></a>DeviceTree Binding</h1></li>
+</ol>
+<p>See Documentation/devicetree/bindings/nvmem/nvmem.txt</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_nvmem/" title="Kernel-4.18.0-80.el8_nvme" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_nvmem/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_nvme-fault-injection/" title="Kernel-4.18.0-80.el8_nvme-fault-injection"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_nxp,lpc1788-rtc/" title="Kernel-4.18.0-80.el8_nxp,lpc1788-rtc"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

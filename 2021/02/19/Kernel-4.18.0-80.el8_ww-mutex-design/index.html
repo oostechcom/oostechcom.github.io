@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_ww-mutex-design | oosTech.com</title>
+  <meta name="description" content="Wait&#x2F;Wound Deadlock-Proof Mutex DesignPlease read mutex-design.txt first, as it applies to wait&#x2F;wound mutexes too. Motivation for WW-MutexesGPU’s do operations that commonly involve many buffers.  Tho">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_ww-mutex-design">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Wait&#x2F;Wound Deadlock-Proof Mutex DesignPlease read mutex-design.txt first, as it applies to wait&#x2F;wound mutexes too. Motivation for WW-MutexesGPU’s do operations that commonly involve many buffers.  Tho">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Wait-Wound-Deadlock-Proof-Mutex-Design"><span class="toc-number">1.</span> <span class="toc-text">Wait&#x2F;Wound Deadlock-Proof Mutex Design</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Motivation-for-WW-Mutexes"><span class="toc-number">1.1.</span> <span class="toc-text">Motivation for WW-Mutexes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Concepts"><span class="toc-number">1.2.</span> <span class="toc-text">Concepts</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Usage"><span class="toc-number">1.3.</span> <span class="toc-text">Usage</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implementation-Details"><span class="toc-number">1.4.</span> <span class="toc-text">Implementation Details</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_ww-mutex-design" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_ww-mutex-design
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Wait-Wound-Deadlock-Proof-Mutex-Design"><a href="#Wait-Wound-Deadlock-Proof-Mutex-Design" class="headerlink" title="Wait/Wound Deadlock-Proof Mutex Design"></a>Wait/Wound Deadlock-Proof Mutex Design</h1><p>Please read mutex-design.txt first, as it applies to wait/wound mutexes too.</p>
+<h2 id="Motivation-for-WW-Mutexes"><a href="#Motivation-for-WW-Mutexes" class="headerlink" title="Motivation for WW-Mutexes"></a>Motivation for WW-Mutexes</h2><p>GPU’s do operations that commonly involve many buffers.  Those buffers<br>can be shared across contexts/processes, exist in different memory<br>domains (for example VRAM vs system memory), and so on.  And with<br>PRIME / dmabuf, they can even be shared across devices.  So there are<br>a handful of situations where the driver needs to wait for buffers to<br>become ready.  If you think about this in terms of waiting on a buffer<br>mutex for it to become available, this presents a problem because<br>there is no way to guarantee that buffers appear in a execbuf/batch in<br>the same order in all contexts.  That is directly under control of<br>userspace, and a result of the sequence of GL calls that an application<br>makes.    Which results in the potential for deadlock.  The problem gets<br>more complex when you consider that the kernel may need to migrate the<br>buffer(s) into VRAM before the GPU operates on the buffer(s), which<br>may in turn require evicting some other buffers (and you don’t want to<br>evict other buffers which are already queued up to the GPU), but for a<br>simplified understanding of the problem you can ignore this.</p>
+<p>The algorithm that the TTM graphics subsystem came up with for dealing with<br>this problem is quite simple.  For each group of buffers (execbuf) that need<br>to be locked, the caller would be assigned a unique reservation id/ticket,<br>from a global counter.  In case of deadlock while locking all the buffers<br>associated with a execbuf, the one with the lowest reservation ticket (i.e.<br>the oldest task) wins, and the one with the higher reservation id (i.e. the<br>younger task) unlocks all of the buffers that it has already locked, and then<br>tries again.</p>
+<p>In the RDBMS literature this deadlock handling approach is called wait/wound:<br>The older tasks waits until it can acquire the contended lock. The younger tasks<br>needs to back off and drop all the locks it is currently holding, i.e. the<br>younger task is wounded.</p>
+<h2 id="Concepts"><a href="#Concepts" class="headerlink" title="Concepts"></a>Concepts</h2><p>Compared to normal mutexes two additional concepts/objects show up in the lock<br>interface for w/w mutexes:</p>
+<p>Acquire context: To ensure eventual forward progress it is important the a task<br>trying to acquire locks doesn’t grab a new reservation id, but keeps the one it<br>acquired when starting the lock acquisition. This ticket is stored in the<br>acquire context. Furthermore the acquire context keeps track of debugging state<br>to catch w/w mutex interface abuse.</p>
+<p>W/w class: In contrast to normal mutexes the lock class needs to be explicit for<br>w/w mutexes, since it is required to initialize the acquire context.</p>
+<p>Furthermore there are three different class of w/w lock acquire functions:</p>
+<ul>
+<li><p>Normal lock acquisition with a context, using ww_mutex_lock.</p>
+</li>
+<li><p>Slowpath lock acquisition on the contending lock, used by the wounded task<br>after having dropped all already acquired locks. These functions have the<br>_slow postfix.</p>
+<p>From a simple semantics point-of-view the _slow functions are not strictly<br>required, since simply calling the normal ww_mutex_lock functions on the<br>contending lock (after having dropped all other already acquired locks) will<br>work correctly. After all if no other ww mutex has been acquired yet there’s<br>no deadlock potential and hence the ww_mutex_lock call will block and not<br>prematurely return -EDEADLK. The advantage of the _slow functions is in<br>interface safety:</p>
+<ul>
+<li>ww_mutex_lock has a __must_check int return type, whereas ww_mutex_lock_slow<br>has a void return type. Note that since ww mutex code needs loops/retries<br>anyway the __must_check doesn’t result in spurious warnings, even though the<br>very first lock operation can never fail.</li>
+<li>When full debugging is enabled ww_mutex_lock_slow checks that all acquired<br>ww mutex have been released (preventing deadlocks) and makes sure that we<br>block on the contending lock (preventing spinning through the -EDEADLK<br>slowpath until the contended lock can be acquired).</li>
+</ul>
+</li>
+<li><p>Functions to only acquire a single w/w mutex, which results in the exact same<br>semantics as a normal mutex. This is done by calling ww_mutex_lock with a NULL<br>context.</p>
+<p>Again this is not strictly required. But often you only want to acquire a<br>single lock in which case it’s pointless to set up an acquire context (and so<br>better to avoid grabbing a deadlock avoidance ticket).</p>
+</li>
+</ul>
+<p>Of course, all the usual variants for handling wake-ups due to signals are also<br>provided.</p>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>Three different ways to acquire locks within the same w/w class. Common<br>definitions for methods #1 and #2:</p>
+<p>static DEFINE_WW_CLASS(ww_class);</p>
+<p>struct obj {<br>    struct ww_mutex lock;<br>    /* obj data */<br>};</p>
+<p>struct obj_entry {<br>    struct list_head head;<br>    struct obj *obj;<br>};</p>
+<p>Method 1, using a list in execbuf-&gt;buffers that’s not allowed to be reordered.<br>This is useful if a list of required objects is already tracked somewhere.<br>Furthermore the lock helper can use propagate the -EALREADY return code back to<br>the caller as a signal that an object is twice on the list. This is useful if<br>the list is constructed from userspace input and the ABI requires userspace to<br>not have duplicate entries (e.g. for a gpu commandbuffer submission ioctl).</p>
+<p>int lock_objs(struct list_head *list, struct ww_acquire_ctx *ctx)<br>{<br>    struct obj *res_obj = NULL;<br>    struct obj_entry *contended_entry = NULL;<br>    struct obj_entry *entry;</p>
+<pre><code>ww_acquire_init(ctx, &amp;ww_class);
+</code></pre>
+<p>retry:<br>    list_for_each_entry (entry, list, head) {<br>        if (entry-&gt;obj == res_obj) {<br>            res_obj = NULL;<br>            continue;<br>        }<br>        ret = ww_mutex_lock(&amp;entry-&gt;obj-&gt;lock, ctx);<br>        if (ret &lt; 0) {<br>            contended_entry = entry;<br>            goto err;<br>        }<br>    }</p>
+<pre><code>ww_acquire_done(ctx);
+return 0;
+</code></pre>
+<p>err:<br>    list_for_each_entry_continue_reverse (entry, list, head)<br>        ww_mutex_unlock(&amp;entry-&gt;obj-&gt;lock);</p>
+<pre><code>if (res_obj)
+    ww_mutex_unlock(&amp;res_obj-&gt;lock);
+
+if (ret == -EDEADLK) &#123;
+    /* we lost out in a seqno race, lock and retry.. */
+    ww_mutex_lock_slow(&amp;contended_entry-&gt;obj-&gt;lock, ctx);
+    res_obj = contended_entry-&gt;obj;
+    goto retry;
+&#125;
+ww_acquire_fini(ctx);
+
+return ret;
+</code></pre>
+<p>}</p>
+<p>Method 2, using a list in execbuf-&gt;buffers that can be reordered. Same semantics<br>of duplicate entry detection using -EALREADY as method 1 above. But the<br>list-reordering allows for a bit more idiomatic code.</p>
+<p>int lock_objs(struct list_head *list, struct ww_acquire_ctx *ctx)<br>{<br>    struct obj_entry *entry, *entry2;</p>
+<pre><code>ww_acquire_init(ctx, &amp;ww_class);
+
+list_for_each_entry (entry, list, head) &#123;
+    ret = ww_mutex_lock(&amp;entry-&gt;obj-&gt;lock, ctx);
+    if (ret &lt; 0) &#123;
+        entry2 = entry;
+
+        list_for_each_entry_continue_reverse (entry2, list, head)
+            ww_mutex_unlock(&amp;entry2-&gt;obj-&gt;lock);
+
+        if (ret != -EDEADLK) &#123;
+            ww_acquire_fini(ctx);
+            return ret;
+        &#125;
+
+        /* we lost out in a seqno race, lock and retry.. */
+        ww_mutex_lock_slow(&amp;entry-&gt;obj-&gt;lock, ctx);
+
+        /*
+         * Move buf to head of the list, this will point
+         * buf-&gt;next to the first unlocked entry,
+         * restarting the for loop.
+         */
+        list_del(&amp;entry-&gt;head);
+        list_add(&amp;entry-&gt;head, list);
+    &#125;
+&#125;
+
+ww_acquire_done(ctx);
+return 0;
+</code></pre>
+<p>}</p>
+<p>Unlocking works the same way for both methods #1 and #2:</p>
+<p>void unlock_objs(struct list_head *list, struct ww_acquire_ctx *ctx)<br>{<br>    struct obj_entry *entry;</p>
+<pre><code>list_for_each_entry (entry, list, head)
+    ww_mutex_unlock(&amp;entry-&gt;obj-&gt;lock);
+
+ww_acquire_fini(ctx);
+</code></pre>
+<p>}</p>
+<p>Method 3 is useful if the list of objects is constructed ad-hoc and not upfront,<br>e.g. when adjusting edges in a graph where each node has its own ww_mutex lock,<br>and edges can only be changed when holding the locks of all involved nodes. w/w<br>mutexes are a natural fit for such a case for two reasons:</p>
+<ul>
+<li>They can handle lock-acquisition in any order which allows us to start walking<br>a graph from a starting point and then iteratively discovering new edges and<br>locking down the nodes those edges connect to.</li>
+<li>Due to the -EALREADY return code signalling that a given objects is already<br>held there’s no need for additional book-keeping to break cycles in the graph<br>or keep track off which looks are already held (when using more than one node<br>as a starting point).</li>
+</ul>
+<p>Note that this approach differs in two important ways from the above methods:</p>
+<ul>
+<li>Since the list of objects is dynamically constructed (and might very well be<br>different when retrying due to hitting the -EDEADLK wound condition) there’s<br>no need to keep any object on a persistent list when it’s not locked. We can<br>therefore move the list_head into the object itself.</li>
+<li>On the other hand the dynamic object list construction also means that the -EALREADY return<br>code can’t be propagated.</li>
+</ul>
+<p>Note also that methods #1 and #2 and method #3 can be combined, e.g. to first lock a<br>list of starting nodes (passed in from userspace) using one of the above<br>methods. And then lock any additional objects affected by the operations using<br>method #3 below. The backoff/retry procedure will be a bit more involved, since<br>when the dynamic locking step hits -EDEADLK we also need to unlock all the<br>objects acquired with the fixed list. But the w/w mutex debug checks will catch<br>any interface misuse for these cases.</p>
+<p>Also, method 3 can’t fail the lock acquisition step since it doesn’t return<br>-EALREADY. Of course this would be different when using the _interruptible<br>variants, but that’s outside of the scope of these examples here.</p>
+<p>struct obj {<br>    struct ww_mutex ww_mutex;<br>    struct list_head locked_list;<br>};</p>
+<p>static DEFINE_WW_CLASS(ww_class);</p>
+<p>void __unlock_objs(struct list_head *list)<br>{<br>    struct obj *entry, *temp;</p>
+<pre><code>list_for_each_entry_safe (entry, temp, list, locked_list) &#123;
+    /* need to do that before unlocking, since only the current lock holder is
+    allowed to use object */
+    list_del(&amp;entry-&gt;locked_list);
+    ww_mutex_unlock(entry-&gt;ww_mutex)
+&#125;
+</code></pre>
+<p>}</p>
+<p>void lock_objs(struct list_head *list, struct ww_acquire_ctx *ctx)<br>{<br>    struct obj *obj;</p>
+<pre><code>ww_acquire_init(ctx, &amp;ww_class);
+</code></pre>
+<p>retry:<br>    /* re-init loop start state <em>/<br>    loop {<br>        /</em> magic code which walks over a graph and decides which objects<br>         * to lock */</p>
+<pre><code>    ret = ww_mutex_lock(obj-&gt;ww_mutex, ctx);
+    if (ret == -EALREADY) &#123;
+        /* we have that one already, get to the next object */
+        continue;
+    &#125;
+    if (ret == -EDEADLK) &#123;
+        __unlock_objs(list);
+
+        ww_mutex_lock_slow(obj, ctx);
+        list_add(&amp;entry-&gt;locked_list, list);
+        goto retry;
+    &#125;
+
+    /* locked a new object, add it to the list */
+    list_add_tail(&amp;entry-&gt;locked_list, list);
+&#125;
+
+ww_acquire_done(ctx);
+return 0;
+</code></pre>
+<p>}</p>
+<p>void unlock_objs(struct list_head *list, struct ww_acquire_ctx *ctx)<br>{<br>    __unlock_objs(list);<br>    ww_acquire_fini(ctx);<br>}</p>
+<p>Method 4: Only lock one single objects. In that case deadlock detection and<br>prevention is obviously overkill, since with grabbing just one lock you can’t<br>produce a deadlock within just one class. To simplify this case the w/w mutex<br>api can be used with a NULL context.</p>
+<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><p>Design:<br>  ww_mutex currently encapsulates a struct mutex, this means no extra overhead for<br>  normal mutex locks, which are far more common. As such there is only a small<br>  increase in code size if wait/wound mutexes are not used.</p>
+<p>  We maintain the following invariants for the wait list:<br>  (1) Waiters with an acquire context are sorted by stamp order; waiters<br>      without an acquire context are interspersed in FIFO order.<br>  (2) Among waiters with contexts, only the first one can have other locks<br>      acquired already (ctx-&gt;acquired &gt; 0). Note that this waiter may come<br>      after other waiters without contexts in the list.</p>
+<p>  In general, not much contention is expected. The locks are typically used to<br>  serialize access to resources for devices.</p>
+<p>Lockdep:<br>  Special care has been taken to warn for as many cases of api abuse<br>  as possible. Some common api abuses will be caught with<br>  CONFIG_DEBUG_MUTEXES, but CONFIG_PROVE_LOCKING is recommended.</p>
+<p>  Some of the errors which will be warned about:</p>
+<ul>
+<li><p>Forgetting to call ww_acquire_fini or ww_acquire_init.</p>
+</li>
+<li><p>Attempting to lock more mutexes after ww_acquire_done.</p>
+</li>
+<li><p>Attempting to lock the wrong mutex after -EDEADLK and<br>unlocking all mutexes.</p>
+</li>
+<li><p>Attempting to lock the right mutex after -EDEADLK,<br>before unlocking all mutexes.</p>
+</li>
+<li><p>Calling ww_mutex_lock_slow before -EDEADLK was returned.</p>
+</li>
+<li><p>Unlocking mutexes with the wrong unlock function.</p>
+</li>
+<li><p>Calling one of the ww_acquire_* twice on the same context.</p>
+</li>
+<li><p>Using a different ww_class for the mutex than for the ww_acquire_ctx.</p>
+</li>
+<li><p>Normal lockdep errors that can result in deadlocks.</p>
+<p>Some of the lockdep errors that can result in deadlocks:</p>
+</li>
+<li><p>Calling ww_acquire_init to initialize a second ww_acquire_ctx before<br>having called ww_acquire_fini on the first.</p>
+</li>
+<li><p>‘normal’ deadlocks that can occur.</p>
+</li>
+</ul>
+<p>FIXME: Update this section once we have the TASK_DEADLOCK task state flag magic<br>implemented.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/" title="Kernel-4.18.0-80.el8_ww-mutex-design" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_ww-mutex-design/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_writecache/" title="Kernel-4.18.0-80.el8_writecache"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_x25-iface/" title="Kernel-4.18.0-80.el8_x25-iface"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

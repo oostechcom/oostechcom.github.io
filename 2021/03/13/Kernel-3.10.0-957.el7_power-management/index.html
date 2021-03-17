@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_power-management | oosTech.com</title>
+  <meta name="description" content="Power Management for USB       Alan Stern &lt;stern@rowland.harvard.edu&gt;              October 28, 2010    What is Power Management? -------------------------  Power Management (PM) is the p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_power-management">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_power-management/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Power Management for USB       Alan Stern &lt;stern@rowland.harvard.edu&gt;              October 28, 2010    What is Power Management? -------------------------  Power Management (PM) is the p">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_power-management/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_power-management" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_power-management
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_power-management/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_power-management/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_power-management/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>        Power Management for USB
+
+     Alan Stern &lt;stern@rowland.harvard.edu&gt;
+
+            October 28, 2010
+
+
+
+What is Power Management?
+-------------------------
+</code></pre>
+<p>Power Management (PM) is the practice of saving energy by suspending<br>parts of a computer system when they aren’t being used.  While a<br>component is “suspended” it is in a nonfunctional low-power state; it<br>might even be turned off completely.  A suspended component can be<br>“resumed” (returned to a functional full-power state) when the kernel<br>needs to use it.  (There also are forms of PM in which components are<br>placed in a less functional but still usable state instead of being<br>suspended; an example would be reducing the CPU’s clock rate.  This<br>document will not discuss those other forms.)</p>
+<p>When the parts being suspended include the CPU and most of the rest of<br>the system, we speak of it as a “system suspend”.  When a particular<br>device is turned off while the system as a whole remains running, we<br>call it a “dynamic suspend” (also known as a “runtime suspend” or<br>“selective suspend”).  This document concentrates mostly on how<br>dynamic PM is implemented in the USB subsystem, although system PM is<br>covered to some extent (see Documentation/power/*.txt for more<br>information about system PM).</p>
+<p>System PM support is present only if the kernel was built with CONFIG_SUSPEND<br>or CONFIG_HIBERNATION enabled.  Dynamic PM support for USB is present whenever<br>the kernel was built with CONFIG_PM enabled.</p>
+<p>[Historically, dynamic PM support for USB was present only if the<br>kernel had been built with CONFIG_USB_SUSPEND enabled (which depended on<br>CONFIG_PM_RUNTIME).  Starting with the 3.10 kernel release, dynamic PM support<br>for USB was present whenever the kernel was built with CONFIG_PM_RUNTIME<br>enabled.  The CONFIG_USB_SUSPEND option had been eliminated.]</p>
+<pre><code>What is Remote Wakeup?
+----------------------
+</code></pre>
+<p>When a device has been suspended, it generally doesn’t resume until<br>the computer tells it to.  Likewise, if the entire computer has been<br>suspended, it generally doesn’t resume until the user tells it to, say<br>by pressing a power button or opening the cover.</p>
+<p>However some devices have the capability of resuming by themselves, or<br>asking the kernel to resume them, or even telling the entire computer<br>to resume.  This capability goes by several names such as “Wake On<br>LAN”; we will refer to it generically as “remote wakeup”.  When a<br>device is enabled for remote wakeup and it is suspended, it may resume<br>itself (or send a request to be resumed) in response to some external<br>event.  Examples include a suspended keyboard resuming when a key is<br>pressed, or a suspended USB hub resuming when a device is plugged in.</p>
+<pre><code>When is a USB device idle?
+--------------------------
+</code></pre>
+<p>A device is idle whenever the kernel thinks it’s not busy doing<br>anything important and thus is a candidate for being suspended.  The<br>exact definition depends on the device’s driver; drivers are allowed<br>to declare that a device isn’t idle even when there’s no actual<br>communication taking place.  (For example, a hub isn’t considered idle<br>unless all the devices plugged into that hub are already suspended.)<br>In addition, a device isn’t considered idle so long as a program keeps<br>its usbfs file open, whether or not any I/O is going on.</p>
+<p>If a USB device has no driver, its usbfs file isn’t open, and it isn’t<br>being accessed through sysfs, then it definitely is idle.</p>
+<pre><code>Forms of dynamic PM
+-------------------
+</code></pre>
+<p>Dynamic suspends occur when the kernel decides to suspend an idle<br>device.  This is called “autosuspend” for short.  In general, a device<br>won’t be autosuspended unless it has been idle for some minimum period<br>of time, the so-called idle-delay time.</p>
+<p>Of course, nothing the kernel does on its own initiative should<br>prevent the computer or its devices from working properly.  If a<br>device has been autosuspended and a program tries to use it, the<br>kernel will automatically resume the device (autoresume).  For the<br>same reason, an autosuspended device will usually have remote wakeup<br>enabled, if the device supports remote wakeup.</p>
+<p>It is worth mentioning that many USB drivers don’t support<br>autosuspend.  In fact, at the time of this writing (Linux 2.6.23) the<br>only drivers which do support it are the hub driver, kaweth, asix,<br>usblp, usblcd, and usb-skeleton (which doesn’t count).  If a<br>non-supporting driver is bound to a device, the device won’t be<br>autosuspended.  In effect, the kernel pretends the device is never<br>idle.</p>
+<p>We can categorize power management events in two broad classes:<br>external and internal.  External events are those triggered by some<br>agent outside the USB stack: system suspend/resume (triggered by<br>userspace), manual dynamic resume (also triggered by userspace), and<br>remote wakeup (triggered by the device).  Internal events are those<br>triggered within the USB stack: autosuspend and autoresume.  Note that<br>all dynamic suspend events are internal; external agents are not<br>allowed to issue dynamic suspends.</p>
+<pre><code>The user interface for dynamic PM
+---------------------------------
+</code></pre>
+<p>The user interface for controlling dynamic PM is located in the power/<br>subdirectory of each USB device’s sysfs directory, that is, in<br>/sys/bus/usb/devices/…/power/ where “…” is the device’s ID.  The<br>relevant attribute files are: wakeup, control, and<br>autosuspend_delay_ms.  (There may also be a file named “level”; this<br>file was deprecated as of the 2.6.35 kernel and replaced by the<br>“control” file.  In 2.6.38 the “autosuspend” file will be deprecated<br>and replaced by the “autosuspend_delay_ms” file.  The only difference<br>is that the newer file expresses the delay in milliseconds whereas the<br>older file uses seconds.  Confusingly, both files are present in 2.6.37<br>but only “autosuspend” works.)</p>
+<pre><code>power/wakeup
+
+    This file is empty if the device does not support
+    remote wakeup.  Otherwise the file contains either the
+    word &quot;enabled&quot; or the word &quot;disabled&quot;, and you can
+    write those words to the file.  The setting determines
+    whether or not remote wakeup will be enabled when the
+    device is next suspended.  (If the setting is changed
+    while the device is suspended, the change won&#39;t take
+    effect until the following suspend.)
+
+power/control
+
+    This file contains one of two words: &quot;on&quot; or &quot;auto&quot;.
+    You can write those words to the file to change the
+    device&#39;s setting.
+
+    &quot;on&quot; means that the device should be resumed and
+    autosuspend is not allowed.  (Of course, system
+    suspends are still allowed.)
+
+    &quot;auto&quot; is the normal state in which the kernel is
+    allowed to autosuspend and autoresume the device.
+
+    (In kernels up to 2.6.32, you could also specify
+    &quot;suspend&quot;, meaning that the device should remain
+    suspended and autoresume was not allowed.  This
+    setting is no longer supported.)
+
+power/autosuspend_delay_ms
+
+    This file contains an integer value, which is the
+    number of milliseconds the device should remain idle
+    before the kernel will autosuspend it (the idle-delay
+    time).  The default is 2000.  0 means to autosuspend
+    as soon as the device becomes idle, and negative
+    values mean never to autosuspend.  You can write a
+    number to the file to change the autosuspend
+    idle-delay time.
+</code></pre>
+<p>Writing “-1” to power/autosuspend_delay_ms and writing “on” to<br>power/control do essentially the same thing – they both prevent the<br>device from being autosuspended.  Yes, this is a redundancy in the<br>API.</p>
+<p>(In 2.6.21 writing “0” to power/autosuspend would prevent the device<br>from being autosuspended; the behavior was changed in 2.6.22.  The<br>power/autosuspend attribute did not exist prior to 2.6.21, and the<br>power/level attribute did not exist prior to 2.6.22.  power/control<br>was added in 2.6.34, and power/autosuspend_delay_ms was added in<br>2.6.37 but did not become functional until 2.6.38.)</p>
+<pre><code>Changing the default idle-delay time
+------------------------------------
+</code></pre>
+<p>The default autosuspend idle-delay time (in seconds) is controlled by<br>a module parameter in usbcore.  You can specify the value when usbcore<br>is loaded.  For example, to set it to 5 seconds instead of 2 you would<br>do:</p>
+<pre><code>modprobe usbcore autosuspend=5
+</code></pre>
+<p>Equivalently, you could add to a configuration file in /etc/modprobe.d<br>a line saying:</p>
+<pre><code>options usbcore autosuspend=5
+</code></pre>
+<p>Some distributions load the usbcore module very early during the boot<br>process, by means of a program or script running from an initramfs<br>image.  To alter the parameter value you would have to rebuild that<br>image.</p>
+<p>If usbcore is compiled into the kernel rather than built as a loadable<br>module, you can add</p>
+<pre><code>usbcore.autosuspend=5
+</code></pre>
+<p>to the kernel’s boot command line.</p>
+<p>Finally, the parameter value can be changed while the system is<br>running.  If you do:</p>
+<pre><code>echo 5 &gt;/sys/module/usbcore/parameters/autosuspend
+</code></pre>
+<p>then each new USB device will have its autosuspend idle-delay<br>initialized to 5.  (The idle-delay values for already existing devices<br>will not be affected.)</p>
+<p>Setting the initial default idle-delay to -1 will prevent any<br>autosuspend of any USB device.  This has the benefit of allowing you<br>then to enable autosuspend for selected devices.</p>
+<pre><code>Warnings
+--------
+</code></pre>
+<p>The USB specification states that all USB devices must support power<br>management.  Nevertheless, the sad fact is that many devices do not<br>support it very well.  You can suspend them all right, but when you<br>try to resume them they disconnect themselves from the USB bus or<br>they stop working entirely.  This seems to be especially prevalent<br>among printers and scanners, but plenty of other types of device have<br>the same deficiency.</p>
+<p>For this reason, by default the kernel disables autosuspend (the<br>power/control attribute is initialized to “on”) for all devices other<br>than hubs.  Hubs, at least, appear to be reasonably well-behaved in<br>this regard.</p>
+<p>(In 2.6.21 and 2.6.22 this wasn’t the case.  Autosuspend was enabled<br>by default for almost all USB devices.  A number of people experienced<br>problems as a result.)</p>
+<p>This means that non-hub devices won’t be autosuspended unless the user<br>or a program explicitly enables it.  As of this writing there aren’t<br>any widespread programs which will do this; we hope that in the near<br>future device managers such as HAL will take on this added<br>responsibility.  In the meantime you can always carry out the<br>necessary operations by hand or add them to a udev script.  You can<br>also change the idle-delay time; 2 seconds is not the best choice for<br>every device.</p>
+<p>If a driver knows that its device has proper suspend/resume support,<br>it can enable autosuspend all by itself.  For example, the video<br>driver for a laptop’s webcam might do this (in recent kernels they<br>do), since these devices are rarely used and so should normally be<br>autosuspended.</p>
+<p>Sometimes it turns out that even when a device does work okay with<br>autosuspend there are still problems.  For example, the usbhid driver,<br>which manages keyboards and mice, has autosuspend support.  Tests with<br>a number of keyboards show that typing on a suspended keyboard, while<br>causing the keyboard to do a remote wakeup all right, will nonetheless<br>frequently result in lost keystrokes.  Tests with mice show that some<br>of them will issue a remote-wakeup request in response to button<br>presses but not to motion, and some in response to neither.</p>
+<p>The kernel will not prevent you from enabling autosuspend on devices<br>that can’t handle it.  It is even possible in theory to damage a<br>device by suspending it at the wrong time.  (Highly unlikely, but<br>possible.)  Take care.</p>
+<pre><code>The driver interface for Power Management
+-----------------------------------------
+</code></pre>
+<p>The requirements for a USB driver to support external power management<br>are pretty modest; the driver need only define</p>
+<pre><code>.suspend
+.resume
+.reset_resume
+</code></pre>
+<p>methods in its usb_driver structure, and the reset_resume method is<br>optional.  The methods’ jobs are quite simple:</p>
+<pre><code>The suspend method is called to warn the driver that the
+device is going to be suspended.  If the driver returns a
+negative error code, the suspend will be aborted.  Normally
+the driver will return 0, in which case it must cancel all
+outstanding URBs (usb_kill_urb()) and not submit any more.
+
+The resume method is called to tell the driver that the
+device has been resumed and the driver can return to normal
+operation.  URBs may once more be submitted.
+
+The reset_resume method is called to tell the driver that
+the device has been resumed and it also has been reset.
+The driver should redo any necessary device initialization,
+since the device has probably lost most or all of its state
+(although the interfaces will be in the same altsettings as
+before the suspend).
+</code></pre>
+<p>If the device is disconnected or powered down while it is suspended,<br>the disconnect method will be called instead of the resume or<br>reset_resume method.  This is also quite likely to happen when<br>waking up from hibernation, as many systems do not maintain suspend<br>current to the USB host controllers during hibernation.  (It’s<br>possible to work around the hibernation-forces-disconnect problem by<br>using the USB Persist facility.)</p>
+<p>The reset_resume method is used by the USB Persist facility (see<br>Documentation/usb/persist.txt) and it can also be used under certain<br>circumstances when CONFIG_USB_PERSIST is not enabled.  Currently, if a<br>device is reset during a resume and the driver does not have a<br>reset_resume method, the driver won’t receive any notification about<br>the resume.  Later kernels will call the driver’s disconnect method;<br>2.6.23 doesn’t do this.</p>
+<p>USB drivers are bound to interfaces, so their suspend and resume<br>methods get called when the interfaces are suspended or resumed.  In<br>principle one might want to suspend some interfaces on a device (i.e.,<br>force the drivers for those interface to stop all activity) without<br>suspending the other interfaces.  The USB core doesn’t allow this; all<br>interfaces are suspended when the device itself is suspended and all<br>interfaces are resumed when the device is resumed.  It isn’t possible<br>to suspend or resume some but not all of a device’s interfaces.  The<br>closest you can come is to unbind the interfaces’ drivers.</p>
+<pre><code>The driver interface for autosuspend and autoresume
+---------------------------------------------------
+</code></pre>
+<p>To support autosuspend and autoresume, a driver should implement all<br>three of the methods listed above.  In addition, a driver indicates<br>that it supports autosuspend by setting the .supports_autosuspend flag<br>in its usb_driver structure.  It is then responsible for informing the<br>USB core whenever one of its interfaces becomes busy or idle.  The<br>driver does so by calling these six functions:</p>
+<pre><code>int  usb_autopm_get_interface(struct usb_interface *intf);
+void usb_autopm_put_interface(struct usb_interface *intf);
+int  usb_autopm_get_interface_async(struct usb_interface *intf);
+void usb_autopm_put_interface_async(struct usb_interface *intf);
+void usb_autopm_get_interface_no_resume(struct usb_interface *intf);
+void usb_autopm_put_interface_no_suspend(struct usb_interface *intf);
+</code></pre>
+<p>The functions work by maintaining a usage counter in the<br>usb_interface’s embedded device structure.  When the counter is &gt; 0<br>then the interface is deemed to be busy, and the kernel will not<br>autosuspend the interface’s device.  When the usage counter is = 0<br>then the interface is considered to be idle, and the kernel may<br>autosuspend the device.</p>
+<p>Drivers need not be concerned about balancing changes to the usage<br>counter; the USB core will undo any remaining “get”s when a driver<br>is unbound from its interface.  As a corollary, drivers must not call<br>any of the usb_autopm_* functions after their disconnect() routine has<br>returned.</p>
+<p>Drivers using the async routines are responsible for their own<br>synchronization and mutual exclusion.</p>
+<pre><code>usb_autopm_get_interface() increments the usage counter and
+does an autoresume if the device is suspended.  If the
+autoresume fails, the counter is decremented back.
+
+usb_autopm_put_interface() decrements the usage counter and
+attempts an autosuspend if the new value is = 0.
+
+usb_autopm_get_interface_async() and
+usb_autopm_put_interface_async() do almost the same things as
+their non-async counterparts.  The big difference is that they
+use a workqueue to do the resume or suspend part of their
+jobs.  As a result they can be called in an atomic context,
+such as an URB&#39;s completion handler, but when they return the
+device will generally not yet be in the desired state.
+
+usb_autopm_get_interface_no_resume() and
+usb_autopm_put_interface_no_suspend() merely increment or
+decrement the usage counter; they do not attempt to carry out
+an autoresume or an autosuspend.  Hence they can be called in
+an atomic context.
+</code></pre>
+<p>The simplest usage pattern is that a driver calls<br>usb_autopm_get_interface() in its open routine and<br>usb_autopm_put_interface() in its close or release routine.  But other<br>patterns are possible.</p>
+<p>The autosuspend attempts mentioned above will often fail for one<br>reason or another.  For example, the power/control attribute might be<br>set to “on”, or another interface in the same device might not be<br>idle.  This is perfectly normal.  If the reason for failure was that<br>the device hasn’t been idle for long enough, a timer is scheduled to<br>carry out the operation automatically when the autosuspend idle-delay<br>has expired.</p>
+<p>Autoresume attempts also can fail, although failure would mean that<br>the device is no longer present or operating properly.  Unlike<br>autosuspend, there’s no idle-delay for an autoresume.</p>
+<pre><code>Other parts of the driver interface
+-----------------------------------
+</code></pre>
+<p>Drivers can enable autosuspend for their devices by calling</p>
+<pre><code>usb_enable_autosuspend(struct usb_device *udev);
+</code></pre>
+<p>in their probe() routine, if they know that the device is capable of<br>suspending and resuming correctly.  This is exactly equivalent to<br>writing “auto” to the device’s power/control attribute.  Likewise,<br>drivers can disable autosuspend by calling</p>
+<pre><code>usb_disable_autosuspend(struct usb_device *udev);
+</code></pre>
+<p>This is exactly the same as writing “on” to the power/control attribute.</p>
+<p>Sometimes a driver needs to make sure that remote wakeup is enabled<br>during autosuspend.  For example, there’s not much point<br>autosuspending a keyboard if the user can’t cause the keyboard to do a<br>remote wakeup by typing on it.  If the driver sets<br>intf-&gt;needs_remote_wakeup to 1, the kernel won’t autosuspend the<br>device if remote wakeup isn’t available.  (If the device is already<br>autosuspended, though, setting this flag won’t cause the kernel to<br>autoresume it.  Normally a driver would set this flag in its probe<br>method, at which time the device is guaranteed not to be<br>autosuspended.)</p>
+<p>If a driver does its I/O asynchronously in interrupt context, it<br>should call usb_autopm_get_interface_async() before starting output and<br>usb_autopm_put_interface_async() when the output queue drains.  When<br>it receives an input event, it should call</p>
+<pre><code>usb_mark_last_busy(struct usb_device *udev);
+</code></pre>
+<p>in the event handler.  This tells the PM core that the device was just<br>busy and therefore the next autosuspend idle-delay expiration should<br>be pushed back.  Many of the usb_autopm_* routines also make this call,<br>so drivers need to worry only when interrupt-driven input arrives.</p>
+<p>Asynchronous operation is always subject to races.  For example, a<br>driver may call the usb_autopm_get_interface_async() routine at a time<br>when the core has just finished deciding the device has been idle for<br>long enough but not yet gotten around to calling the driver’s suspend<br>method.  The suspend method must be responsible for synchronizing with<br>the I/O request routine and the URB completion handler; it should<br>cause autosuspends to fail with -EBUSY if the driver needs to use the<br>device.</p>
+<p>External suspend calls should never be allowed to fail in this way,<br>only autosuspend calls.  The driver can tell them apart by applying<br>the PMSG_IS_AUTO() macro to the message argument to the suspend<br>method; it will return True for internal PM events (autosuspend) and<br>False for external PM events.</p>
+<pre><code>Mutual exclusion
+----------------
+</code></pre>
+<p>For external events – but not necessarily for autosuspend or<br>autoresume – the device semaphore (udev-&gt;dev.sem) will be held when a<br>suspend or resume method is called.  This implies that external<br>suspend/resume events are mutually exclusive with calls to probe,<br>disconnect, pre_reset, and post_reset; the USB core guarantees that<br>this is true of autosuspend/autoresume events as well.</p>
+<p>If a driver wants to block all suspend/resume calls during some<br>critical section, the best way is to lock the device and call<br>usb_autopm_get_interface() (and do the reverse at the end of the<br>critical section).  Holding the device semaphore will block all<br>external PM calls, and the usb_autopm_get_interface() will prevent any<br>internal PM calls, even if it fails.  (Exercise: Why?)</p>
+<pre><code>Interaction between dynamic PM and system PM
+--------------------------------------------
+</code></pre>
+<p>Dynamic power management and system power management can interact in<br>a couple of ways.</p>
+<p>Firstly, a device may already be autosuspended when a system suspend<br>occurs.  Since system suspends are supposed to be as transparent as<br>possible, the device should remain suspended following the system<br>resume.  But this theory may not work out well in practice; over time<br>the kernel’s behavior in this regard has changed.  As of 2.6.37 the<br>policy is to resume all devices during a system resume and let them<br>handle their own runtime suspends afterward.</p>
+<p>Secondly, a dynamic power-management event may occur as a system<br>suspend is underway.  The window for this is short, since system<br>suspends don’t take long (a few seconds usually), but it can happen.<br>For example, a suspended device may send a remote-wakeup signal while<br>the system is suspending.  The remote wakeup may succeed, which would<br>cause the system suspend to abort.  If the remote wakeup doesn’t<br>succeed, it may still remain active and thus cause the system to<br>resume as soon as the system suspend is complete.  Or the remote<br>wakeup may fail and get lost.  Which outcome occurs depends on timing<br>and on the hardware and firmware design.</p>
+<pre><code>xHCI hardware link PM
+---------------------
+</code></pre>
+<p>xHCI host controller provides hardware link power management to usb2.0<br>(xHCI 1.0 feature) and usb3.0 devices which support link PM. By<br>enabling hardware LPM, the host can automatically put the device into<br>lower power state(L1 for usb2.0 devices, or U1/U2 for usb3.0 devices),<br>which state device can enter and resume very quickly.</p>
+<p>The user interface for controlling hardware LPM is located in the<br>power/ subdirectory of each USB device’s sysfs directory, that is, in<br>/sys/bus/usb/devices/…/power/ where “…” is the device’s ID. The<br>relevant attribute files are usb2_hardware_lpm and usb3_hardware_lpm.</p>
+<pre><code>power/usb2_hardware_lpm
+
+    When a USB2 device which support LPM is plugged to a
+    xHCI host root hub which support software LPM, the
+    host will run a software LPM test for it; if the device
+    enters L1 state and resume successfully and the host
+    supports USB2 hardware LPM, this file will show up and
+    driver will enable hardware LPM    for the device. You
+    can write y/Y/1 or n/N/0 to the file to    enable/disable
+    USB2 hardware LPM manually. This is for    test purpose mainly.
+
+power/usb3_hardware_lpm_u1
+power/usb3_hardware_lpm_u2
+
+    When a USB 3.0 lpm-capable device is plugged in to a
+    xHCI host which supports link PM, it will check if U1
+    and U2 exit latencies have been set in the BOS
+    descriptor; if the check is is passed and the host
+    supports USB3 hardware LPM, USB3 hardware LPM will be
+    enabled for the device and these files will be created.
+    The files hold a string value (enable or disable)
+    indicating whether or not USB3 hardware LPM U1 or U2
+    is enabled for the device.
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_power-management/" title="Kernel-3.10.0-957.el7_power-management" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_power-management/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pci-error-recovery/" title="Kernel-3.10.0-957.el7_pci-error-recovery"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_ppp_generic/" title="Kernel-3.10.0-957.el7_ppp_generic"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

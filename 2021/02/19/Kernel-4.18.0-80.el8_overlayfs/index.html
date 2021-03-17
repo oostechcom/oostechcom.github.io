@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_overlayfs | oosTech.com</title>
+  <meta name="description" content="Written by: Neil BrownPlease see MAINTAINERS file for where to send questions. Overlay FilesystemThis document describes a prototype for a new approach to providingoverlay-filesystem functionality in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_overlayfs">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Written by: Neil BrownPlease see MAINTAINERS file for where to send questions. Overlay FilesystemThis document describes a prototype for a new approach to providingoverlay-filesystem functionality in">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Overlay-Filesystem"><span class="toc-number">1.</span> <span class="toc-text">Overlay Filesystem</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overlay-objects"><span class="toc-number">1.1.</span> <span class="toc-text">Overlay objects</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Upper-and-Lower"><span class="toc-number">1.2.</span> <span class="toc-text">Upper and Lower</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Directories"><span class="toc-number">1.3.</span> <span class="toc-text">Directories</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#whiteouts-and-opaque-directories"><span class="toc-number">1.4.</span> <span class="toc-text">whiteouts and opaque directories</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#readdir"><span class="toc-number">1.5.</span> <span class="toc-text">readdir</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#renaming-directories"><span class="toc-number">1.6.</span> <span class="toc-text">renaming directories</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Non-directories"><span class="toc-number">1.7.</span> <span class="toc-text">Non-directories</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Multiple-lower-layers"><span class="toc-number">1.8.</span> <span class="toc-text">Multiple lower layers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Metadata-only-copy-up"><span class="toc-number">1.9.</span> <span class="toc-text">Metadata only copy up</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sharing-and-copying-layers"><span class="toc-number">1.10.</span> <span class="toc-text">Sharing and copying layers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Non-standard-behavior"><span class="toc-number">1.11.</span> <span class="toc-text">Non-standard behavior</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Changes-to-underlying-filesystems"><span class="toc-number">1.12.</span> <span class="toc-text">Changes to underlying filesystems</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NFS-export"><span class="toc-number">1.13.</span> <span class="toc-text">NFS export</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Testsuite"><span class="toc-number">1.14.</span> <span class="toc-text">Testsuite</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cd-unionmount-testsuite"><span class="toc-number">2.</span> <span class="toc-text">cd unionmount-testsuite</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#run-%E2%80%93ov-%E2%80%93verify"><span class="toc-number">3.</span> <span class="toc-text">.&#x2F;run –ov –verify</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_overlayfs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_overlayfs
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Written by: Neil Brown<br>Please see MAINTAINERS file for where to send questions.</p>
+<h1 id="Overlay-Filesystem"><a href="#Overlay-Filesystem" class="headerlink" title="Overlay Filesystem"></a>Overlay Filesystem</h1><p>This document describes a prototype for a new approach to providing<br>overlay-filesystem functionality in Linux (sometimes referred to as<br>union-filesystems).  An overlay-filesystem tries to present a<br>filesystem which is the result over overlaying one filesystem on top<br>of the other.</p>
+<h2 id="Overlay-objects"><a href="#Overlay-objects" class="headerlink" title="Overlay objects"></a>Overlay objects</h2><p>The overlay filesystem approach is ‘hybrid’, because the objects that<br>appear in the filesystem do not always appear to belong to that filesystem.<br>In many cases, an object accessed in the union will be indistinguishable<br>from accessing the corresponding object from the original filesystem.<br>This is most obvious from the ‘st_dev’ field returned by stat(2).</p>
+<p>While directories will report an st_dev from the overlay-filesystem,<br>non-directory objects may report an st_dev from the lower filesystem or<br>upper filesystem that is providing the object.  Similarly st_ino will<br>only be unique when combined with st_dev, and both of these can change<br>over the lifetime of a non-directory object.  Many applications and<br>tools ignore these values and will not be affected.</p>
+<p>In the special case of all overlay layers on the same underlying<br>filesystem, all objects will report an st_dev from the overlay<br>filesystem and st_ino from the underlying filesystem.  This will<br>make the overlay mount more compliant with filesystem scanners and<br>overlay objects will be distinguishable from the corresponding<br>objects in the original filesystem.</p>
+<p>On 64bit systems, even if all overlay layers are not on the same<br>underlying filesystem, the same compliant behavior could be achieved<br>with the “xino” feature.  The “xino” feature composes a unique object<br>identifier from the real object st_ino and an underlying fsid index.<br>If all underlying filesystems support NFS file handles and export file<br>handles with 32bit inode number encoding (e.g. ext4), overlay filesystem<br>will use the high inode number bits for fsid.  Even when the underlying<br>filesystem uses 64bit inode numbers, users can still enable the “xino”<br>feature with the “-o xino=on” overlay mount option.  That is useful for the<br>case of underlying filesystems like xfs and tmpfs, which use 64bit inode<br>numbers, but are very unlikely to use the high inode number bit.</p>
+<h2 id="Upper-and-Lower"><a href="#Upper-and-Lower" class="headerlink" title="Upper and Lower"></a>Upper and Lower</h2><p>An overlay filesystem combines two filesystems - an ‘upper’ filesystem<br>and a ‘lower’ filesystem.  When a name exists in both filesystems, the<br>object in the ‘upper’ filesystem is visible while the object in the<br>‘lower’ filesystem is either hidden or, in the case of directories,<br>merged with the ‘upper’ object.</p>
+<p>It would be more correct to refer to an upper and lower ‘directory<br>tree’ rather than ‘filesystem’ as it is quite possible for both<br>directory trees to be in the same filesystem and there is no<br>requirement that the root of a filesystem be given for either upper or<br>lower.</p>
+<p>The lower filesystem can be any filesystem supported by Linux and does<br>not need to be writable.  The lower filesystem can even be another<br>overlayfs.  The upper filesystem will normally be writable and if it<br>is it must support the creation of trusted.* extended attributes, and<br>must provide valid d_type in readdir responses, so NFS is not suitable.</p>
+<p>A read-only overlay of two read-only filesystems may use any<br>filesystem type.</p>
+<h2 id="Directories"><a href="#Directories" class="headerlink" title="Directories"></a>Directories</h2><p>Overlaying mainly involves directories.  If a given name appears in both<br>upper and lower filesystems and refers to a non-directory in either,<br>then the lower object is hidden - the name refers only to the upper<br>object.</p>
+<p>Where both upper and lower objects are directories, a merged directory<br>is formed.</p>
+<p>At mount time, the two directories given as mount options “lowerdir” and<br>“upperdir” are combined into a merged directory:</p>
+<p>  mount -t overlay overlay -olowerdir=/lower,upperdir=/upper,<br>  workdir=/work /merged</p>
+<p>The “workdir” needs to be an empty directory on the same filesystem<br>as upperdir.</p>
+<p>Then whenever a lookup is requested in such a merged directory, the<br>lookup is performed in each actual directory and the combined result<br>is cached in the dentry belonging to the overlay filesystem.  If both<br>actual lookups find directories, both are stored and a merged<br>directory is created, otherwise only one is stored: the upper if it<br>exists, else the lower.</p>
+<p>Only the lists of names from directories are merged.  Other content<br>such as metadata and extended attributes are reported for the upper<br>directory only.  These attributes of the lower directory are hidden.</p>
+<h2 id="whiteouts-and-opaque-directories"><a href="#whiteouts-and-opaque-directories" class="headerlink" title="whiteouts and opaque directories"></a>whiteouts and opaque directories</h2><p>In order to support rm and rmdir without changing the lower<br>filesystem, an overlay filesystem needs to record in the upper filesystem<br>that files have been removed.  This is done using whiteouts and opaque<br>directories (non-directories are always opaque).</p>
+<p>A whiteout is created as a character device with 0/0 device number.<br>When a whiteout is found in the upper level of a merged directory, any<br>matching name in the lower level is ignored, and the whiteout itself<br>is also hidden.</p>
+<p>A directory is made opaque by setting the xattr “trusted.overlay.opaque”<br>to “y”.  Where the upper filesystem contains an opaque directory, any<br>directory in the lower filesystem with the same name is ignored.</p>
+<h2 id="readdir"><a href="#readdir" class="headerlink" title="readdir"></a>readdir</h2><p>When a ‘readdir’ request is made on a merged directory, the upper and<br>lower directories are each read and the name lists merged in the<br>obvious way (upper is read first, then lower - entries that already<br>exist are not re-added).  This merged name list is cached in the<br>‘struct file’ and so remains as long as the file is kept open.  If the<br>directory is opened and read by two processes at the same time, they<br>will each have separate caches.  A seekdir to the start of the<br>directory (offset 0) followed by a readdir will cause the cache to be<br>discarded and rebuilt.</p>
+<p>This means that changes to the merged directory do not appear while a<br>directory is being read.  This is unlikely to be noticed by many<br>programs.</p>
+<p>seek offsets are assigned sequentially when the directories are read.<br>Thus if</p>
+<ul>
+<li>read part of a directory</li>
+<li>remember an offset, and close the directory</li>
+<li>re-open the directory some time later</li>
+<li>seek to the remembered offset</li>
+</ul>
+<p>there may be little correlation between the old and new locations in<br>the list of filenames, particularly if anything has changed in the<br>directory.</p>
+<p>Readdir on directories that are not merged is simply handled by the<br>underlying directory (upper or lower).</p>
+<h2 id="renaming-directories"><a href="#renaming-directories" class="headerlink" title="renaming directories"></a>renaming directories</h2><p>When renaming a directory that is on the lower layer or merged (i.e. the<br>directory was not created on the upper layer to start with) overlayfs can<br>handle it in two different ways:</p>
+<ol>
+<li><p>return EXDEV error: this error is returned by rename(2) when trying to<br>move a file or directory across filesystem boundaries.  Hence<br>applications are usually prepared to hande this error (mv(1) for example<br>recursively copies the directory tree).  This is the default behavior.</p>
+</li>
+<li><p>If the “redirect_dir” feature is enabled, then the directory will be<br>copied up (but not the contents).  Then the “trusted.overlay.redirect”<br>extended attribute is set to the path of the original location from the<br>root of the overlay.  Finally the directory is moved to the new<br>location.</p>
+</li>
+</ol>
+<p>There are several ways to tune the “redirect_dir” feature.</p>
+<p>Kernel config options:</p>
+<ul>
+<li>OVERLAY_FS_REDIRECT_DIR:<br>  If this is enabled, then redirect_dir is turned on by  default.</li>
+<li>OVERLAY_FS_REDIRECT_ALWAYS_FOLLOW:<br>  If this is enabled, then redirects are always followed by default. Enabling<br>  this results in a less secure configuration.  Enable this option only when<br>  worried about backward compatibility with kernels that have the redirect_dir<br>  feature and follow redirects even if turned off.</li>
+</ul>
+<p>Module options (can also be changed through /sys/module/overlay/parameters/*):</p>
+<ul>
+<li>“redirect_dir=BOOL”:<br>  See OVERLAY_FS_REDIRECT_DIR kernel config option above.</li>
+<li>“redirect_always_follow=BOOL”:<br>  See OVERLAY_FS_REDIRECT_ALWAYS_FOLLOW kernel config option above.</li>
+<li>“redirect_max=NUM”:<br>  The maximum number of bytes in an absolute redirect (default is 256).</li>
+</ul>
+<p>Mount options:</p>
+<ul>
+<li>“redirect_dir=on”:<br>  Redirects are enabled.</li>
+<li>“redirect_dir=follow”:<br>  Redirects are not created, but followed.</li>
+<li>“redirect_dir=off”:<br>  Redirects are not created and only followed if “redirect_always_follow”<br>  feature is enabled in the kernel/module config.</li>
+<li>“redirect_dir=nofollow”:<br>  Redirects are not created and not followed (equivalent to “redirect_dir=off”<br>  if “redirect_always_follow” feature is not enabled).</li>
+</ul>
+<p>When the NFS export feature is enabled, every copied up directory is<br>indexed by the file handle of the lower inode and a file handle of the<br>upper directory is stored in a “trusted.overlay.upper” extended attribute<br>on the index entry.  On lookup of a merged directory, if the upper<br>directory does not match the file handle stores in the index, that is an<br>indication that multiple upper directories may be redirected to the same<br>lower directory.  In that case, lookup returns an error and warns about<br>a possible inconsistency.</p>
+<p>Because lower layer redirects cannot be verified with the index, enabling<br>NFS export support on an overlay filesystem with no upper layer requires<br>turning off redirect follow (e.g. “redirect_dir=nofollow”).</p>
+<h2 id="Non-directories"><a href="#Non-directories" class="headerlink" title="Non-directories"></a>Non-directories</h2><p>Objects that are not directories (files, symlinks, device-special<br>files etc.) are presented either from the upper or lower filesystem as<br>appropriate.  When a file in the lower filesystem is accessed in a way<br>the requires write-access, such as opening for write access, changing<br>some metadata etc., the file is first copied from the lower filesystem<br>to the upper filesystem (copy_up).  Note that creating a hard-link<br>also requires copy_up, though of course creation of a symlink does<br>not.</p>
+<p>The copy_up may turn out to be unnecessary, for example if the file is<br>opened for read-write but the data is not modified.</p>
+<p>The copy_up process first makes sure that the containing directory<br>exists in the upper filesystem - creating it and any parents as<br>necessary.  It then creates the object with the same metadata (owner,<br>mode, mtime, symlink-target etc.) and then if the object is a file, the<br>data is copied from the lower to the upper filesystem.  Finally any<br>extended attributes are copied up.</p>
+<p>Once the copy_up is complete, the overlay filesystem simply<br>provides direct access to the newly created file in the upper<br>filesystem - future operations on the file are barely noticed by the<br>overlay filesystem (though an operation on the name of the file such as<br>rename or unlink will of course be noticed and handled).</p>
+<h2 id="Multiple-lower-layers"><a href="#Multiple-lower-layers" class="headerlink" title="Multiple lower layers"></a>Multiple lower layers</h2><p>Multiple lower layers can now be given using the the colon (“:”) as a<br>separator character between the directory names.  For example:</p>
+<p>  mount -t overlay overlay -olowerdir=/lower1:/lower2:/lower3 /merged</p>
+<p>As the example shows, “upperdir=” and “workdir=” may be omitted.  In<br>that case the overlay will be read-only.</p>
+<p>The specified lower directories will be stacked beginning from the<br>rightmost one and going left.  In the above example lower1 will be the<br>top, lower2 the middle and lower3 the bottom layer.</p>
+<h2 id="Metadata-only-copy-up"><a href="#Metadata-only-copy-up" class="headerlink" title="Metadata only copy up"></a>Metadata only copy up</h2><p>When metadata only copy up feature is enabled, overlayfs will only copy<br>up metadata (as opposed to whole file), when a metadata specific operation<br>like chown/chmod is performed. Full file will be copied up later when<br>file is opened for WRITE operation.</p>
+<p>In other words, this is delayed data copy up operation and data is copied<br>up when there is a need to actually modify data.</p>
+<p>There are multiple ways to enable/disable this feature. A config option<br>CONFIG_OVERLAY_FS_METACOPY can be set/unset to enable/disable this feature<br>by default. Or one can enable/disable it at module load time with module<br>parameter metacopy=on/off. Lastly, there is also a per mount option<br>metacopy=on/off to enable/disable this feature per mount.</p>
+<p>Do not use metacopy=on with untrusted upper/lower directories. Otherwise<br>it is possible that an attacker can create a handcrafted file with<br>appropriate REDIRECT and METACOPY xattrs, and gain access to file on lower<br>pointed by REDIRECT. This should not be possible on local system as setting<br>“trusted.” xattrs will require CAP_SYS_ADMIN. But it should be possible<br>for untrusted layers like from a pen drive.</p>
+<p>Note: redirect_dir={off|nofollow|follow(*)} conflicts with metacopy=on, and<br>results in an error.</p>
+<p>(*) redirect_dir=follow only conflicts with metacopy=on if upperdir=… is<br>given.</p>
+<h2 id="Sharing-and-copying-layers"><a href="#Sharing-and-copying-layers" class="headerlink" title="Sharing and copying layers"></a>Sharing and copying layers</h2><p>Lower layers may be shared among several overlay mounts and that is indeed<br>a very common practice.  An overlay mount may use the same lower layer<br>path as another overlay mount and it may use a lower layer path that is<br>beneath or above the path of another overlay lower layer path.</p>
+<p>Using an upper layer path and/or a workdir path that are already used by<br>another overlay mount is not allowed and may fail with EBUSY.  Using<br>partially overlapping paths is not allowed but will not fail with EBUSY.<br>If files are accessed from two overlayfs mounts which share or overlap the<br>upper layer and/or workdir path the behavior of the overlay is undefined,<br>though it will not result in a crash or deadlock.</p>
+<p>Mounting an overlay using an upper layer path, where the upper layer path<br>was previously used by another mounted overlay in combination with a<br>different lower layer path, is allowed, unless the “inodes index” feature<br>or “metadata only copy up” feature is enabled.</p>
+<p>With the “inodes index” feature, on the first time mount, an NFS file<br>handle of the lower layer root directory, along with the UUID of the lower<br>filesystem, are encoded and stored in the “trusted.overlay.origin” extended<br>attribute on the upper layer root directory.  On subsequent mount attempts,<br>the lower root directory file handle and lower filesystem UUID are compared<br>to the stored origin in upper root directory.  On failure to verify the<br>lower root origin, mount will fail with ESTALE.  An overlayfs mount with<br>“inodes index” enabled will fail with EOPNOTSUPP if the lower filesystem<br>does not support NFS export, lower filesystem does not have a valid UUID or<br>if the upper filesystem does not support extended attributes.</p>
+<p>For “metadata only copy up” feature there is no verification mechanism at<br>mount time. So if same upper is mounted with different set of lower, mount<br>probably will succeed but expect the unexpected later on. So don’t do it.</p>
+<p>It is quite a common practice to copy overlay layers to a different<br>directory tree on the same or different underlying filesystem, and even<br>to a different machine.  With the “inodes index” feature, trying to mount<br>the copied layers will fail the verification of the lower root file handle.</p>
+<h2 id="Non-standard-behavior"><a href="#Non-standard-behavior" class="headerlink" title="Non-standard behavior"></a>Non-standard behavior</h2><p>Overlayfs can now act as a POSIX compliant filesystem with the following<br>features turned on:</p>
+<ol>
+<li>“redirect_dir”</li>
+</ol>
+<p>Enabled with the mount option or module option: “redirect_dir=on” or with<br>the kernel config option CONFIG_OVERLAY_FS_REDIRECT_DIR=y.</p>
+<p>If this feature is disabled, then rename(2) on a lower or merged directory<br>will fail with EXDEV (“Invalid cross-device link”).</p>
+<ol start="2">
+<li>“inode index”</li>
+</ol>
+<p>Enabled with the mount option or module option “index=on” or with the<br>kernel config option CONFIG_OVERLAY_FS_INDEX=y.</p>
+<p>If this feature is disabled and a file with multiple hard links is copied<br>up, then this will “break” the link.  Changes will not be propagated to<br>other names referring to the same inode.</p>
+<ol start="3">
+<li>“xino”</li>
+</ol>
+<p>Enabled with the mount option “xino=auto” or “xino=on”, with the module<br>option “xino_auto=on” or with the kernel config option<br>CONFIG_OVERLAY_FS_XINO_AUTO=y.  Also implicitly enabled by using the same<br>underlying filesystem for all layers making up the overlay.</p>
+<p>If this feature is disabled or the underlying filesystem doesn’t have<br>enough free bits in the inode number, then overlayfs will not be able to<br>guarantee that the values of st_ino and st_dev returned by stat(2) and the<br>value of d_ino returned by readdir(3) will act like on a normal filesystem.<br>E.g. the value of st_dev may be different for two objects in the same<br>overlay filesystem and the value of st_ino for directory objects may not be<br>persistent and could change even while the overlay filesystem is mounted.</p>
+<h2 id="Changes-to-underlying-filesystems"><a href="#Changes-to-underlying-filesystems" class="headerlink" title="Changes to underlying filesystems"></a>Changes to underlying filesystems</h2><p>Offline changes, when the overlay is not mounted, are allowed to either<br>the upper or the lower trees.</p>
+<p>Changes to the underlying filesystems while part of a mounted overlay<br>filesystem are not allowed.  If the underlying filesystem is changed,<br>the behavior of the overlay is undefined, though it will not result in<br>a crash or deadlock.</p>
+<p>When the overlay NFS export feature is enabled, overlay filesystems<br>behavior on offline changes of the underlying lower layer is different<br>than the behavior when NFS export is disabled.</p>
+<p>On every copy_up, an NFS file handle of the lower inode, along with the<br>UUID of the lower filesystem, are encoded and stored in an extended<br>attribute “trusted.overlay.origin” on the upper inode.</p>
+<p>When the NFS export feature is enabled, a lookup of a merged directory,<br>that found a lower directory at the lookup path or at the path pointed<br>to by the “trusted.overlay.redirect” extended attribute, will verify<br>that the found lower directory file handle and lower filesystem UUID<br>match the origin file handle that was stored at copy_up time.  If a<br>found lower directory does not match the stored origin, that directory<br>will not be merged with the upper directory.</p>
+<h2 id="NFS-export"><a href="#NFS-export" class="headerlink" title="NFS export"></a>NFS export</h2><p>When the underlying filesystems supports NFS export and the “nfs_export”<br>feature is enabled, an overlay filesystem may be exported to NFS.</p>
+<p>With the “nfs_export” feature, on copy_up of any lower object, an index<br>entry is created under the index directory.  The index entry name is the<br>hexadecimal representation of the copy up origin file handle.  For a<br>non-directory object, the index entry is a hard link to the upper inode.<br>For a directory object, the index entry has an extended attribute<br>“trusted.overlay.upper” with an encoded file handle of the upper<br>directory inode.</p>
+<p>When encoding a file handle from an overlay filesystem object, the<br>following rules apply:</p>
+<ol>
+<li>For a non-upper object, encode a lower file handle from lower inode</li>
+<li>For an indexed object, encode a lower file handle from copy_up origin</li>
+<li>For a pure-upper object and for an existing non-indexed upper object,<br>encode an upper file handle from upper inode</li>
+</ol>
+<p>The encoded overlay file handle includes:</p>
+<ul>
+<li>Header including path type information (e.g. lower/upper)</li>
+<li>UUID of the underlying filesystem</li>
+<li>Underlying filesystem encoding of underlying inode</li>
+</ul>
+<p>This encoding format is identical to the encoding format file handles that<br>are stored in extended attribute “trusted.overlay.origin”.</p>
+<p>When decoding an overlay file handle, the following steps are followed:</p>
+<ol>
+<li>Find underlying layer by UUID and path type information.</li>
+<li>Decode the underlying filesystem file handle to underlying dentry.</li>
+<li>For a lower file handle, lookup the handle in index directory by name.</li>
+<li>If a whiteout is found in index, return ESTALE. This represents an<br>overlay object that was deleted after its file handle was encoded.</li>
+<li>For a non-directory, instantiate a disconnected overlay dentry from the<br>decoded underlying dentry, the path type and index inode, if found.</li>
+<li>For a directory, use the connected underlying decoded dentry, path type<br>and index, to lookup a connected overlay dentry.</li>
+</ol>
+<p>Decoding a non-directory file handle may return a disconnected dentry.<br>copy_up of that disconnected dentry will create an upper index entry with<br>no upper alias.</p>
+<p>When overlay filesystem has multiple lower layers, a middle layer<br>directory may have a “redirect” to lower directory.  Because middle layer<br>“redirects” are not indexed, a lower file handle that was encoded from the<br>“redirect” origin directory, cannot be used to find the middle or upper<br>layer directory.  Similarly, a lower file handle that was encoded from a<br>descendant of the “redirect” origin directory, cannot be used to<br>reconstruct a connected overlay path.  To mitigate the cases of<br>directories that cannot be decoded from a lower file handle, these<br>directories are copied up on encode and encoded as an upper file handle.<br>On an overlay filesystem with no upper layer this mitigation cannot be<br>used NFS export in this setup requires turning off redirect follow (e.g.<br>“redirect_dir=nofollow”).</p>
+<p>The overlay filesystem does not support non-directory connectable file<br>handles, so exporting with the ‘subtree_check’ exportfs configuration will<br>cause failures to lookup files over NFS.</p>
+<p>When the NFS export feature is enabled, all directory index entries are<br>verified on mount time to check that upper file handles are not stale.<br>This verification may cause significant overhead in some cases.</p>
+<h2 id="Testsuite"><a href="#Testsuite" class="headerlink" title="Testsuite"></a>Testsuite</h2><p>There’s a testsuite originally developed by David Howells and currently<br>maintained by Amir Goldstein at:</p>
+<p>  <a target="_blank" rel="noopener" href="https://github.com/amir73il/unionmount-testsuite.git">https://github.com/amir73il/unionmount-testsuite.git</a></p>
+<p>Run as root:</p>
+<h1 id="cd-unionmount-testsuite"><a href="#cd-unionmount-testsuite" class="headerlink" title="cd unionmount-testsuite"></a>cd unionmount-testsuite</h1><h1 id="run-–ov-–verify"><a href="#run-–ov-–verify" class="headerlink" title="./run –ov –verify"></a>./run –ov –verify</h1>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/" title="Kernel-4.18.0-80.el8_overlayfs" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_overlayfs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_orangefs/" title="Kernel-4.18.0-80.el8_orangefs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_paride/" title="Kernel-4.18.0-80.el8_paride"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_vfio-ccw | oosTech.com</title>
+  <meta name="description" content="vfio-ccw: the basic infrastructureIntroductionHere we describe the vfio support for I&#x2F;O subchannel devices forLinux&#x2F;s390. Motivation for vfio-ccw is to passthrough subchannels to avirtual machine, whi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_vfio-ccw">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="vfio-ccw: the basic infrastructureIntroductionHere we describe the vfio support for I&#x2F;O subchannel devices forLinux&#x2F;s390. Motivation for vfio-ccw is to passthrough subchannels to avirtual machine, whi">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#vfio-ccw-the-basic-infrastructure"><span class="toc-number">1.</span> <span class="toc-text">vfio-ccw: the basic infrastructure</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Motivation-of-vfio-ccw"><span class="toc-number">1.2.</span> <span class="toc-text">Motivation of vfio-ccw</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Access-patterns-of-CCW-devices"><span class="toc-number">1.3.</span> <span class="toc-text">Access patterns of CCW devices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Physical-vfio-ccw-device-and-its-child-mdev"><span class="toc-number">1.4.</span> <span class="toc-text">Physical vfio ccw device and its child mdev</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#vfio-ccw-I-O-region"><span class="toc-number">1.5.</span> <span class="toc-text">vfio-ccw I&#x2F;O region</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#vfio-ccw-operation-details"><span class="toc-number">1.6.</span> <span class="toc-text">vfio-ccw operation details</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Limitations"><span class="toc-number">1.7.</span> <span class="toc-text">Limitations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">1.8.</span> <span class="toc-text">Reference</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_vfio-ccw" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_vfio-ccw
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="vfio-ccw-the-basic-infrastructure"><a href="#vfio-ccw-the-basic-infrastructure" class="headerlink" title="vfio-ccw: the basic infrastructure"></a>vfio-ccw: the basic infrastructure</h1><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Here we describe the vfio support for I/O subchannel devices for<br>Linux/s390. Motivation for vfio-ccw is to passthrough subchannels to a<br>virtual machine, while vfio is the means.</p>
+<p>Different than other hardware architectures, s390 has defined a unified<br>I/O access method, which is so called Channel I/O. It has its own access<br>patterns:</p>
+<ul>
+<li>Channel programs run asynchronously on a separate (co)processor.</li>
+<li>The channel subsystem will access any memory designated by the caller<br>in the channel program directly, i.e. there is no iommu involved.<br>Thus when we introduce vfio support for these devices, we realize it<br>with a mediated device (mdev) implementation. The vfio mdev will be<br>added to an iommu group, so as to make itself able to be managed by the<br>vfio framework. And we add read/write callbacks for special vfio I/O<br>regions to pass the channel programs from the mdev to its parent device<br>(the real I/O subchannel device) to do further address translation and<br>to perform I/O instructions.</li>
+</ul>
+<p>This document does not intend to explain the s390 I/O architecture in<br>every detail. More information/reference could be found here:</p>
+<ul>
+<li>A good start to know Channel I/O in general:<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Channel_I/O">https://en.wikipedia.org/wiki/Channel_I/O</a></li>
+<li>s390 architecture:<br>s390 Principles of Operation manual (IBM Form. No. SA22-7832)</li>
+<li>The existing QEMU code which implements a simple emulated channel<br>subsystem could also be a good reference. It makes it easier to follow<br>the flow.<br>qemu/hw/s390x/css.c</li>
+</ul>
+<p>For vfio mediated device framework:</p>
+<ul>
+<li>Documentation/vfio-mediated-device.txt</li>
+</ul>
+<h2 id="Motivation-of-vfio-ccw"><a href="#Motivation-of-vfio-ccw" class="headerlink" title="Motivation of vfio-ccw"></a>Motivation of vfio-ccw</h2><p>Typically, a guest virtualized via QEMU/KVM on s390 only sees<br>paravirtualized virtio devices via the “Virtio Over Channel I/O<br>(virtio-ccw)” transport. This makes virtio devices discoverable via<br>standard operating system algorithms for handling channel devices.</p>
+<p>However this is not enough. On s390 for the majority of devices, which<br>use the standard Channel I/O based mechanism, we also need to provide<br>the functionality of passing through them to a QEMU virtual machine.<br>This includes devices that don’t have a virtio counterpart (e.g. tape<br>drives) or that have specific characteristics which guests want to<br>exploit.</p>
+<p>For passing a device to a guest, we want to use the same interface as<br>everybody else, namely vfio. We implement this vfio support for channel<br>devices via the vfio mediated device framework and the subchannel device<br>driver “vfio_ccw”.</p>
+<h2 id="Access-patterns-of-CCW-devices"><a href="#Access-patterns-of-CCW-devices" class="headerlink" title="Access patterns of CCW devices"></a>Access patterns of CCW devices</h2><p>s390 architecture has implemented a so called channel subsystem, that<br>provides a unified view of the devices physically attached to the<br>systems. Though the s390 hardware platform knows about a huge variety of<br>different peripheral attachments like disk devices (aka. DASDs), tapes,<br>communication controllers, etc. They can all be accessed by a well<br>defined access method and they are presenting I/O completion a unified<br>way: I/O interruptions.</p>
+<p>All I/O requires the use of channel command words (CCWs). A CCW is an<br>instruction to a specialized I/O channel processor. A channel program is<br>a sequence of CCWs which are executed by the I/O channel subsystem.  To<br>issue a channel program to the channel subsystem, it is required to<br>build an operation request block (ORB), which can be used to point out<br>the format of the CCW and other control information to the system. The<br>operating system signals the I/O channel subsystem to begin executing<br>the channel program with a SSCH (start sub-channel) instruction. The<br>central processor is then free to proceed with non-I/O instructions<br>until interrupted. The I/O completion result is received by the<br>interrupt handler in the form of interrupt response block (IRB).</p>
+<p>Back to vfio-ccw, in short:</p>
+<ul>
+<li>ORBs and channel programs are built in guest kernel (with guest<br>physical addresses).</li>
+<li>ORBs and channel programs are passed to the host kernel.</li>
+<li>Host kernel translates the guest physical addresses to real addresses<br>and starts the I/O with issuing a privileged Channel I/O instruction<br>(e.g SSCH).</li>
+<li>channel programs run asynchronously on a separate processor.</li>
+<li>I/O completion will be signaled to the host with I/O interruptions.<br>And it will be copied as IRB to user space to pass it back to the<br>guest.</li>
+</ul>
+<h2 id="Physical-vfio-ccw-device-and-its-child-mdev"><a href="#Physical-vfio-ccw-device-and-its-child-mdev" class="headerlink" title="Physical vfio ccw device and its child mdev"></a>Physical vfio ccw device and its child mdev</h2><p>As mentioned above, we realize vfio-ccw with a mdev implementation.</p>
+<p>Channel I/O does not have IOMMU hardware support, so the physical<br>vfio-ccw device does not have an IOMMU level translation or isolation.</p>
+<p>Subchannel I/O instructions are all privileged instructions. When<br>handling the I/O instruction interception, vfio-ccw has the software<br>policing and translation how the channel program is programmed before<br>it gets sent to hardware.</p>
+<p>Within this implementation, we have two drivers for two types of<br>devices:</p>
+<ul>
+<li><p>The vfio_ccw driver for the physical subchannel device.<br>This is an I/O subchannel driver for the real subchannel device.  It<br>realizes a group of callbacks and registers to the mdev framework as a<br>parent (physical) device. As a consequence, mdev provides vfio_ccw a<br>generic interface (sysfs) to create mdev devices. A vfio mdev could be<br>created by vfio_ccw then and added to the mediated bus. It is the vfio<br>device that added to an IOMMU group and a vfio group.<br>vfio_ccw also provides an I/O region to accept channel program<br>request from user space and store I/O interrupt result for user<br>space to retrieve. To notify user space an I/O completion, it offers<br>an interface to setup an eventfd fd for asynchronous signaling.</p>
+</li>
+<li><p>The vfio_mdev driver for the mediated vfio ccw device.<br>This is provided by the mdev framework. It is a vfio device driver for<br>the mdev that created by vfio_ccw.<br>It realizes a group of vfio device driver callbacks, adds itself to a<br>vfio group, and registers itself to the mdev framework as a mdev<br>driver.<br>It uses a vfio iommu backend that uses the existing map and unmap<br>ioctls, but rather than programming them into an IOMMU for a device,<br>it simply stores the translations for use by later requests. This<br>means that a device programmed in a VM with guest physical addresses<br>can have the vfio kernel convert that address to process virtual<br>address, pin the page and program the hardware with the host physical<br>address in one step.<br>For a mdev, the vfio iommu backend will not pin the pages during the<br>VFIO_IOMMU_MAP_DMA ioctl. Mdev framework will only maintain a database<br>of the iova&lt;-&gt;vaddr mappings in this operation. And they export a<br>vfio_pin_pages and a vfio_unpin_pages interfaces from the vfio iommu<br>backend for the physical devices to pin and unpin pages by demand.</p>
+</li>
+</ul>
+<p>Below is a high Level block diagram.</p>
+<p> +————-+<br> |             |<br> | +———+ | mdev_register_driver() +————–+<br> | |  Mdev   | +&lt;———————–+              |<br> | |  bus    | |                        | vfio_mdev.ko |<br> | | driver  | +———————–&gt;+              |&lt;-&gt; VFIO user<br> | +———+ |    probe()/remove()    +————–+    APIs<br> |             |<br> |  MDEV CORE  |<br> |   MODULE    |<br> |   mdev.ko   |<br> | +———+ | mdev_register_device() +————–+<br> | |Physical | +&lt;———————–+              |<br> | | device  | |                        |  vfio_ccw.ko |&lt;-&gt; subchannel<br> | |interface| +———————–&gt;+              |     device<br> | +———+ |       callback         +————–+<br> +————-+</p>
+<p>The process of how these work together.</p>
+<ol>
+<li>vfio_ccw.ko drives the physical I/O subchannel, and registers the<br>physical device (with callbacks) to mdev framework.<br>When vfio_ccw probing the subchannel device, it registers device<br>pointer and callbacks to the mdev framework. Mdev related file nodes<br>under the device node in sysfs would be created for the subchannel<br>device, namely ‘mdev_create’, ‘mdev_destroy’ and<br>‘mdev_supported_types’.</li>
+<li>Create a mediated vfio ccw device.<br>Use the ‘mdev_create’ sysfs file, we need to manually create one (and<br>only one for our case) mediated device.</li>
+<li>vfio_mdev.ko drives the mediated ccw device.<br>vfio_mdev is also the vfio device drvier. It will probe the mdev and<br>add it to an iommu_group and a vfio_group. Then we could pass through<br>the mdev to a guest.</li>
+</ol>
+<h2 id="vfio-ccw-I-O-region"><a href="#vfio-ccw-I-O-region" class="headerlink" title="vfio-ccw I/O region"></a>vfio-ccw I/O region</h2><p>An I/O region is used to accept channel program request from user<br>space and store I/O interrupt result for user space to retrieve. The<br>definition of the region is:</p>
+<p>struct ccw_io_region {<br>#define ORB_AREA_SIZE 12<br>    __u8    orb_area[ORB_AREA_SIZE];<br>#define SCSW_AREA_SIZE 12<br>    __u8    scsw_area[SCSW_AREA_SIZE];<br>#define IRB_AREA_SIZE 96<br>    __u8    irb_area[IRB_AREA_SIZE];<br>    __u32    ret_code;<br>} __packed;</p>
+<p>While starting an I/O request, orb_area should be filled with the<br>guest ORB, and scsw_area should be filled with the SCSW of the Virtual<br>Subchannel.</p>
+<p>irb_area stores the I/O result.</p>
+<p>ret_code stores a return code for each access of the region.</p>
+<h2 id="vfio-ccw-operation-details"><a href="#vfio-ccw-operation-details" class="headerlink" title="vfio-ccw operation details"></a>vfio-ccw operation details</h2><p>vfio-ccw follows what vfio-pci did on the s390 platform and uses<br>vfio-iommu-type1 as the vfio iommu backend.</p>
+<ul>
+<li><p>CCW translation APIs<br>A group of APIs (start with ‘cp_’) to do CCW translation. The CCWs<br>passed in by a user space program are organized with their guest<br>physical memory addresses. These APIs will copy the CCWs into kernel<br>space, and assemble a runnable kernel channel program by updating the<br>guest physical addresses with their corresponding host physical addresses.<br>Note that we have to use IDALs even for direct-access CCWs, as the<br>referenced memory can be located anywhere, including above 2G.</p>
+</li>
+<li><p>vfio_ccw device driver<br>This driver utilizes the CCW translation APIs and introduces<br>vfio_ccw, which is the driver for the I/O subchannel devices you want<br>to pass through.<br>vfio_ccw implements the following vfio ioctls:<br>  VFIO_DEVICE_GET_INFO<br>  VFIO_DEVICE_GET_IRQ_INFO<br>  VFIO_DEVICE_GET_REGION_INFO<br>  VFIO_DEVICE_RESET<br>  VFIO_DEVICE_SET_IRQS<br>This provides an I/O region, so that the user space program can pass a<br>channel program to the kernel, to do further CCW translation before<br>issuing them to a real device.<br>This also provides the SET_IRQ ioctl to setup an event notifier to<br>notify the user space program the I/O completion in an asynchronous<br>way.</p>
+</li>
+</ul>
+<p>The use of vfio-ccw is not limited to QEMU, while QEMU is definitely a<br>good example to get understand how these patches work. Here is a little<br>bit more detail how an I/O request triggered by the QEMU guest will be<br>handled (without error handling).</p>
+<p>Explanation:<br>Q1-Q7: QEMU side process.<br>K1-K5: Kernel side process.</p>
+<p>Q1. Get I/O region info during initialization.<br>Q2. Setup event notifier and handler to handle I/O completion.</p>
+<p>… …</p>
+<p>Q3. Intercept a ssch instruction.<br>Q4. Write the guest channel program and ORB to the I/O region.<br>    K1. Copy from guest to kernel.<br>    K2. Translate the guest channel program to a host kernel space<br>        channel program, which becomes runnable for a real device.<br>    K3. With the necessary information contained in the orb passed in<br>        by QEMU, issue the ccwchain to the device.<br>    K4. Return the ssch CC code.<br>Q5. Return the CC code to the guest.</p>
+<p>… …</p>
+<pre><code>K5. Interrupt handler gets the I/O result and write the result to
+    the I/O region.
+K6. Signal QEMU to retrieve the result.
+</code></pre>
+<p>Q6. Get the signal and event handler reads out the result from the I/O<br>    region.<br>Q7. Update the irb for the guest.</p>
+<h2 id="Limitations"><a href="#Limitations" class="headerlink" title="Limitations"></a>Limitations</h2><p>The current vfio-ccw implementation focuses on supporting basic commands<br>needed to implement block device functionality (read/write) of DASD/ECKD<br>device only. Some commands may need special handling in the future, for<br>example, anything related to path grouping.</p>
+<p>DASD is a kind of storage device. While ECKD is a data recording format.<br>More information for DASD and ECKD could be found here:<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Direct-access_storage_device">https://en.wikipedia.org/wiki/Direct-access_storage_device</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Count_key_data">https://en.wikipedia.org/wiki/Count_key_data</a></p>
+<p>Together with the corresponding work in QEMU, we can bring the passed<br>through DASD/ECKD device online in a guest now and use it as a block<br>device.</p>
+<p>While the current code allows the guest to start channel programs via<br>START SUBCHANNEL, support for HALT SUBCHANNEL or CLEAR SUBCHANNEL is<br>not yet implemented.</p>
+<p>vfio-ccw supports classic (command mode) channel I/O only. Transport<br>mode (HPF) is not supported.</p>
+<p>QDIO subchannels are currently not supported. Classic devices other than<br>DASD/ECKD might work, but have not been tested.</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
+<li>ESA/s390 Principles of Operation manual (IBM Form. No. SA22-7832)</li>
+<li>ESA/390 Common I/O Device Commands manual (IBM Form. No. SA22-7204)</li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Channel_I/O">https://en.wikipedia.org/wiki/Channel_I/O</a></li>
+<li>Documentation/s390/cds.txt</li>
+<li>Documentation/vfio.txt</li>
+<li>Documentation/vfio-mediated-device.txt</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/" title="Kernel-4.18.0-80.el8_vfio-ccw" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_vfio-ccw/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_vfat/" title="Kernel-4.18.0-80.el8_vfat"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_vfio-mediated-device/" title="Kernel-4.18.0-80.el8_vfio-mediated-device"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

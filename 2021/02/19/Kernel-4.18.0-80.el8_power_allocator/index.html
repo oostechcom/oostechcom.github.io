@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_power_allocator | oosTech.com</title>
+  <meta name="description" content="Power allocator governor tunablesTrip pointsThe governor works optimally with the following two passive trip points:  “switch on” trip point: temperature above which the governor control loop starts o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_power_allocator">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Power allocator governor tunablesTrip pointsThe governor works optimally with the following two passive trip points:  “switch on” trip point: temperature above which the governor control loop starts o">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Power-allocator-governor-tunables"><span class="toc-number">1.</span> <span class="toc-text">Power allocator governor tunables</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Trip-points"><span class="toc-number">1.1.</span> <span class="toc-text">Trip points</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PID-Controller"><span class="toc-number">1.2.</span> <span class="toc-text">PID Controller</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sustainable-power"><span class="toc-number">1.3.</span> <span class="toc-text">Sustainable power</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#k-po-and-k-pu"><span class="toc-number">1.4.</span> <span class="toc-text">k_po and k_pu</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#k-i-and-integral-cutoff"><span class="toc-number">1.5.</span> <span class="toc-text">k_i and integral_cutoff</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#k-d"><span class="toc-number">1.6.</span> <span class="toc-text">k_d</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Cooling-device-power-API"><span class="toc-number">2.</span> <span class="toc-text">Cooling device power API</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Cooling-device-weights"><span class="toc-number">2.1.</span> <span class="toc-text">Cooling device weights</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Limitations-of-the-power-allocator-governor"><span class="toc-number">3.</span> <span class="toc-text">Limitations of the power allocator governor</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_power_allocator" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_power_allocator
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Power-allocator-governor-tunables"><a href="#Power-allocator-governor-tunables" class="headerlink" title="Power allocator governor tunables"></a>Power allocator governor tunables</h1><h2 id="Trip-points"><a href="#Trip-points" class="headerlink" title="Trip points"></a>Trip points</h2><p>The governor works optimally with the following two passive trip points:</p>
+<ol>
+<li><p>“switch on” trip point: temperature above which the governor<br> control loop starts operating.  This is the first passive trip<br> point of the thermal zone.</p>
+</li>
+<li><p>“desired temperature” trip point: it should be higher than the<br> “switch on” trip point.  This the target temperature the governor<br> is controlling for.  This is the last passive trip point of the<br> thermal zone.</p>
+</li>
+</ol>
+<h2 id="PID-Controller"><a href="#PID-Controller" class="headerlink" title="PID Controller"></a>PID Controller</h2><p>The power allocator governor implements a<br>Proportional-Integral-Derivative controller (PID controller) with<br>temperature as the control input and power as the controlled output:</p>
+<pre><code>P_max = k_p * e + k_i * err_integral + k_d * diff_err + sustainable_power
+</code></pre>
+<p>where<br>    e = desired_temperature - current_temperature<br>    err_integral is the sum of previous errors<br>    diff_err = e - previous_error</p>
+<p>It is similar to the one depicted below:</p>
+<pre><code>                                  k_d
+                                   |
+</code></pre>
+<p>current_temp                           |<br>     |                                 v<br>     |                +———-+   +—+<br>     |         +—–&gt;| diff_err |–&gt;| X |——+<br>     |         |      +———-+   +—+      |<br>     |         |                                |      tdp        actor<br>     |         |                      k_i       |       |  get_requested_power()<br>     |         |                       |        |       |        |     |<br>     |         |                       |        |       |        |     | …<br>     v         |                       v        v       v        v     v<br>   +—+       |      +——-+      +—+    +—+   +—+   +———-+<br>   | S |——-+—–&gt;| sum e |—–&gt;| X |—&gt;| S |–&gt;| S |–&gt;|power     |<br>   +—+       |      +——-+      +—+    +—+   +—+   |allocation|<br>     ^         |                                ^             +———-+<br>     |         |                                |                |     |<br>     |         |        +—+                   |                |     |<br>     |         +——-&gt;| X |——————-+                v     v<br>     |                  +—+                               granted performance<br>desired_temperature       ^<br>                          |<br>                          |<br>                      k_po/k_pu</p>
+<h2 id="Sustainable-power"><a href="#Sustainable-power" class="headerlink" title="Sustainable power"></a>Sustainable power</h2><p>An estimate of the sustainable dissipatable power (in mW) should be<br>provided while registering the thermal zone.  This estimates the<br>sustained power that can be dissipated at the desired control<br>temperature.  This is the maximum sustained power for allocation at<br>the desired maximum temperature.  The actual sustained power can vary<br>for a number of reasons.  The closed loop controller will take care of<br>variations such as environmental conditions, and some factors related<br>to the speed-grade of the silicon.  <code>sustainable_power</code> is therefore<br>simply an estimate, and may be tuned to affect the aggressiveness of<br>the thermal ramp. For reference, the sustainable power of a 4” phone<br>is typically 2000mW, while on a 10” tablet is around 4500mW (may vary<br>depending on screen size).</p>
+<p>If you are using device tree, do add it as a property of the<br>thermal-zone.  For example:</p>
+<pre><code>thermal-zones &#123;
+    soc_thermal &#123;
+        polling-delay = &lt;1000&gt;;
+        polling-delay-passive = &lt;100&gt;;
+        sustainable-power = &lt;2500&gt;;
+        ...
+</code></pre>
+<p>Instead, if the thermal zone is registered from the platform code, pass a<br><code>thermal_zone_params</code> that has a <code>sustainable_power</code>.  If no<br><code>thermal_zone_params</code> were being passed, then something like below<br>will suffice:</p>
+<pre><code>static const struct thermal_zone_params tz_params = &#123;
+    .sustainable_power = 3500,
+&#125;;
+</code></pre>
+<p>and then pass <code>tz_params</code> as the 5th parameter to<br><code>thermal_zone_device_register()</code></p>
+<h2 id="k-po-and-k-pu"><a href="#k-po-and-k-pu" class="headerlink" title="k_po and k_pu"></a>k_po and k_pu</h2><p>The implementation of the PID controller in the power allocator<br>thermal governor allows the configuration of two proportional term<br>constants: <code>k_po</code> and <code>k_pu</code>.  <code>k_po</code> is the proportional term<br>constant during temperature overshoot periods (current temperature is<br>above “desired temperature” trip point).  Conversely, <code>k_pu</code> is the<br>proportional term constant during temperature undershoot periods<br>(current temperature below “desired temperature” trip point).</p>
+<p>These controls are intended as the primary mechanism for configuring<br>the permitted thermal “ramp” of the system.  For instance, a lower<br><code>k_pu</code> value will provide a slower ramp, at the cost of capping<br>available capacity at a low temperature.  On the other hand, a high<br>value of <code>k_pu</code> will result in the governor granting very high power<br>whilst temperature is low, and may lead to temperature overshooting.</p>
+<p>The default value for <code>k_pu</code> is:</p>
+<pre><code>2 * sustainable_power / (desired_temperature - switch_on_temp)
+</code></pre>
+<p>This means that at <code>switch_on_temp</code> the output of the controller’s<br>proportional term will be 2 * <code>sustainable_power</code>.  The default value<br>for <code>k_po</code> is:</p>
+<pre><code>sustainable_power / (desired_temperature - switch_on_temp)
+</code></pre>
+<p>Focusing on the proportional and feed forward values of the PID<br>controller equation we have:</p>
+<pre><code>P_max = k_p * e + sustainable_power
+</code></pre>
+<p>The proportional term is proportional to the difference between the<br>desired temperature and the current one.  When the current temperature<br>is the desired one, then the proportional component is zero and<br><code>P_max</code> = <code>sustainable_power</code>.  That is, the system should operate in<br>thermal equilibrium under constant load.  <code>sustainable_power</code> is only<br>an estimate, which is the reason for closed-loop control such as this.</p>
+<p>Expanding <code>k_pu</code> we get:<br>    P_max = 2 * sustainable_power * (T_set - T) / (T_set - T_on) +<br>        sustainable_power</p>
+<p>where<br>    T_set is the desired temperature<br>    T is the current temperature<br>    T_on is the switch on temperature</p>
+<p>When the current temperature is the switch_on temperature, the above<br>formula becomes:</p>
+<pre><code>P_max = 2 * sustainable_power * (T_set - T_on) / (T_set - T_on) +
+    sustainable_power = 2 * sustainable_power + sustainable_power =
+    3 * sustainable_power
+</code></pre>
+<p>Therefore, the proportional term alone linearly decreases power from<br>3 * <code>sustainable_power</code> to <code>sustainable_power</code> as the temperature<br>rises from the switch on temperature to the desired temperature.</p>
+<h2 id="k-i-and-integral-cutoff"><a href="#k-i-and-integral-cutoff" class="headerlink" title="k_i and integral_cutoff"></a>k_i and integral_cutoff</h2><p><code>k_i</code> configures the PID loop’s integral term constant.  This term<br>allows the PID controller to compensate for long term drift and for<br>the quantized nature of the output control: cooling devices can’t set<br>the exact power that the governor requests.  When the temperature<br>error is below <code>integral_cutoff</code>, errors are accumulated in the<br>integral term.  This term is then multiplied by <code>k_i</code> and the result<br>added to the output of the controller.  Typically <code>k_i</code> is set low (1<br>or 2) and <code>integral_cutoff</code> is 0.</p>
+<h2 id="k-d"><a href="#k-d" class="headerlink" title="k_d"></a>k_d</h2><p><code>k_d</code> configures the PID loop’s derivative term constant.  It’s<br>recommended to leave it as the default: 0.</p>
+<h1 id="Cooling-device-power-API"><a href="#Cooling-device-power-API" class="headerlink" title="Cooling device power API"></a>Cooling device power API</h1><p>Cooling devices controlled by this governor must supply the additional<br>“power” API in their <code>cooling_device_ops</code>.  It consists on three ops:</p>
+<ol>
+<li>int get_requested_power(struct thermal_cooling_device *cdev,<br> struct thermal_zone_device *tz, u32 *power);<br>@cdev: The <code>struct thermal_cooling_device</code> pointer<br>@tz: thermal zone in which we are currently operating<br>@power: pointer in which to store the calculated power</li>
+</ol>
+<p><code>get_requested_power()</code> calculates the power requested by the device<br>in milliwatts and stores it in @power .  It should return 0 on<br>success, -E* on failure.  This is currently used by the power<br>allocator governor to calculate how much power to give to each cooling<br>device.</p>
+<ol start="2">
+<li>int state2power(struct thermal_cooling_device *cdev, struct<pre><code> thermal_zone_device *tz, unsigned long state, u32 *power);
+</code></pre>
+@cdev: The <code>struct thermal_cooling_device</code> pointer<br>@tz: thermal zone in which we are currently operating<br>@state: A cooling device state<br>@power: pointer in which to store the equivalent power</li>
+</ol>
+<p>Convert cooling device state @state into power consumption in<br>milliwatts and store it in @power.  It should return 0 on success, -E*<br>on failure.  This is currently used by thermal core to calculate the<br>maximum power that an actor can consume.</p>
+<ol start="3">
+<li>int power2state(struct thermal_cooling_device *cdev, u32 power,<br> unsigned long *state);<br>@cdev: The <code>struct thermal_cooling_device</code> pointer<br>@power: power in milliwatts<br>@state: pointer in which to store the resulting state</li>
+</ol>
+<p>Calculate a cooling device state that would make the device consume at<br>most @power mW and store it in @state.  It should return 0 on success,<br>-E* on failure.  This is currently used by the thermal core to convert<br>a given power set by the power allocator governor to a state that the<br>cooling device can set.  It is a function because this conversion may<br>depend on external factors that may change so this function should the<br>best conversion given “current circumstances”.</p>
+<h2 id="Cooling-device-weights"><a href="#Cooling-device-weights" class="headerlink" title="Cooling device weights"></a>Cooling device weights</h2><p>Weights are a mechanism to bias the allocation among cooling<br>devices.  They express the relative power efficiency of different<br>cooling devices.  Higher weight can be used to express higher power<br>efficiency.  Weighting is relative such that if each cooling device<br>has a weight of one they are considered equal.  This is particularly<br>useful in heterogeneous systems where two cooling devices may perform<br>the same kind of compute, but with different efficiency.  For example,<br>a system with two different types of processors.</p>
+<p>If the thermal zone is registered using<br><code>thermal_zone_device_register()</code> (i.e., platform code), then weights<br>are passed as part of the thermal zone’s <code>thermal_bind_parameters</code>.<br>If the platform is registered using device tree, then they are passed<br>as the <code>contribution</code> property of each map in the <code>cooling-maps</code> node.</p>
+<h1 id="Limitations-of-the-power-allocator-governor"><a href="#Limitations-of-the-power-allocator-governor" class="headerlink" title="Limitations of the power allocator governor"></a>Limitations of the power allocator governor</h1><p>The power allocator governor’s PID controller works best if there is a<br>periodic tick.  If you have a driver that calls<br><code>thermal_zone_device_update()</code> (or anything that ends up calling the<br>governor’s <code>throttle()</code> function) repetitively, the governor response<br>won’t be very good.  Note that this is not particular to this<br>governor, step-wise will also misbehave if you call its throttle()<br>faster than the normal thermal framework tick (due to interrupts for<br>example) as it will overreact.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/" title="Kernel-4.18.0-80.el8_power_allocator" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_power_allocator/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_power-mgt/" title="Kernel-4.18.0-80.el8_power-mgt"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_power_domain/" title="Kernel-4.18.0-80.el8_power_domain"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

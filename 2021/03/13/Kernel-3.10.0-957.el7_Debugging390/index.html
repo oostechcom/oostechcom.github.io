@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_Debugging390 | oosTech.com</title>
+  <meta name="description" content="Debugging on Linux for s&#x2F;390 &amp; z&#x2F;Architecture                        by     Denis Joseph Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)     Copyright (C) 2000-2001 IBM Deut">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_Debugging390">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Debugging on Linux for s&#x2F;390 &amp; z&#x2F;Architecture                        by     Denis Joseph Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)     Copyright (C) 2000-2001 IBM Deut">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Overview-of-Document"><span class="toc-number">1.</span> <span class="toc-text">Overview of Document:</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Contents"><span class="toc-number">2.</span> <span class="toc-text">Contents</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Register-Set"><span class="toc-number">3.</span> <span class="toc-text">Register Set</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Prefix-Page-s"><span class="toc-number">3.1.</span> <span class="toc-text">Prefix Page(s)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Address-Spaces-on-Intel-Linux"><span class="toc-number">4.</span> <span class="toc-text">Address Spaces on Intel Linux</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Address-Spaces-on-Linux-for-s-390-amp-z-Architecture"><span class="toc-number">5.</span> <span class="toc-text">Address Spaces on Linux for s&#x2F;390 &amp; z&#x2F;Architecture</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Virtual-Addresses-on-s-390-amp-z-Architecture"><span class="toc-number">6.</span> <span class="toc-text">Virtual Addresses on s&#x2F;390 &amp; z&#x2F;Architecture</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Linux-for-s-390-amp-z-Architecture-Kernel-Task-Structure"><span class="toc-number">7.</span> <span class="toc-text">The Linux for s&#x2F;390 &amp; z&#x2F;Architecture Kernel Task Structure</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Register-Usage-amp-Stackframes-on-Linux-for-s-390-amp-z-Architecture"><span class="toc-number">8.</span> <span class="toc-text">Register Usage &amp; Stackframes on Linux for s&#x2F;390 &amp; z&#x2F;Architecture</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">8.1.</span> <span class="toc-text">Overview:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Glossary"><span class="toc-number">8.2.</span> <span class="toc-text">Glossary:</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#s-390-amp-z-Architecture-Register-usage"><span class="toc-number">9.</span> <span class="toc-text">s&#x2F;390 &amp; z&#x2F;Architecture Register usage</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes"><span class="toc-number">9.1.</span> <span class="toc-text">Notes:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Stack-Frame-Layout"><span class="toc-number">9.2.</span> <span class="toc-text">Stack Frame Layout</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#A-sample-program-with-comments"><span class="toc-number">10.</span> <span class="toc-text">A sample program with comments.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Comments-on-the-function-test"><span class="toc-number">10.1.</span> <span class="toc-text">Comments on the function test</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Comments-on-the-function-main"><span class="toc-number">10.2.</span> <span class="toc-text">Comments on the function main</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Compiler-updates"><span class="toc-number">10.3.</span> <span class="toc-text">Compiler updates</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#compiler-now-puts-constant-pool-in-code-to-so-it-saves-an-instruction"><span class="toc-number">11.</span> <span class="toc-text">compiler now puts constant pool in code to so it saves an instruction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#compiler-adds-1-extra-instruction-to-epilogue-this-is-done-to"><span class="toc-number">12.</span> <span class="toc-text">compiler adds 1 extra instruction to epilogue this is done to</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#avoid-processor-pipeline-stalls-owing-to-data-dependencies-on-g5-amp"><span class="toc-number">13.</span> <span class="toc-text">avoid processor pipeline stalls owing to data dependencies on g5 &amp;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#above-as-register-14-in-the-old-code-was-needed-directly-after-being-loaded"><span class="toc-number">14.</span> <span class="toc-text">above as register 14 in the old code was needed directly after being loaded</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#by-the-lm-r11-r15-140-r15-for-the-br-14"><span class="toc-number">15.</span> <span class="toc-text">by the lm    %r11,%r15,140(%r15) for the br %14.</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#64-bit-z-Architecture-code-disassembly"><span class="toc-number">15.1.</span> <span class="toc-text">64 bit z&#x2F;Architecture code disassembly</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Compiling-programs-for-debugging-on-Linux-for-s-390-amp-z-Architecture"><span class="toc-number">16.</span> <span class="toc-text">Compiling programs for debugging on Linux for s&#x2F;390 &amp; z&#x2F;Architecture</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Figuring-out-gcc-compile-errors"><span class="toc-number">17.</span> <span class="toc-text">Figuring out gcc compile errors</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E2%80%9C-home1-barrow-linux-include-asm-types-h%E2%80%9D-1"><span class="toc-number">18.</span> <span class="toc-text">1 “&#x2F;home1&#x2F;barrow&#x2F;linux&#x2F;include&#x2F;asm&#x2F;types.h” 1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#leaf-function-0"><span class="toc-number">19.</span> <span class="toc-text">leaf function           0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#automatics-16"><span class="toc-number">20.</span> <span class="toc-text">automatics              16</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#outgoing-args-0"><span class="toc-number">21.</span> <span class="toc-text">outgoing args           0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#need-frame-pointer-0"><span class="toc-number">22.</span> <span class="toc-text">need frame pointer      0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#call-alloca-0"><span class="toc-number">23.</span> <span class="toc-text">call alloca             0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#has-varargs-0"><span class="toc-number">24.</span> <span class="toc-text">has varargs             0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#incoming-args-stack-0"><span class="toc-number">25.</span> <span class="toc-text">incoming args (stack)   0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#function-length-168"><span class="toc-number">26.</span> <span class="toc-text">function length         168</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debugging-Tools"><span class="toc-number">27.</span> <span class="toc-text">Debugging Tools:</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#objdump"><span class="toc-number">28.</span> <span class="toc-text">objdump</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#strace"><span class="toc-number">28.1.</span> <span class="toc-text">strace:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example-1"><span class="toc-number">28.2.</span> <span class="toc-text">Example 1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example-2"><span class="toc-number">28.3.</span> <span class="toc-text">Example 2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example-3"><span class="toc-number">28.4.</span> <span class="toc-text">Example 3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Steps"><span class="toc-number">28.5.</span> <span class="toc-text">Steps</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Important-options"><span class="toc-number">28.6.</span> <span class="toc-text">Important options</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-hints"><span class="toc-number">28.7.</span> <span class="toc-text">Other hints:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#More-info"><span class="toc-number">28.8.</span> <span class="toc-text">More info</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Performance-Debugging"><span class="toc-number">29.</span> <span class="toc-text">Performance Debugging</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Using-top-to-find-out-where-processes-are-sleeping-in-the-kernel"><span class="toc-number">29.1.</span> <span class="toc-text">Using top to find out where processes are sleeping in the kernel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-time-command"><span class="toc-number">29.2.</span> <span class="toc-text">The time command</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debugging-under-VM"><span class="toc-number">30.</span> <span class="toc-text">Debugging under VM</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-1"><span class="toc-number">30.1.</span> <span class="toc-text">Notes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Useful-VM-debugger-commands"><span class="toc-number">30.2.</span> <span class="toc-text">Useful VM debugger commands</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-Tracing"><span class="toc-number">30.3.</span> <span class="toc-text">Instruction Tracing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Displaying-amp-modifying-Registers"><span class="toc-number">30.4.</span> <span class="toc-text">Displaying &amp; modifying Registers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Displaying-Memory"><span class="toc-number">30.5.</span> <span class="toc-text">Displaying Memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hints"><span class="toc-number">30.6.</span> <span class="toc-text">Hints</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tracing-particular-processes"><span class="toc-number">30.7.</span> <span class="toc-text">Tracing particular processes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tracing-Program-Exceptions"><span class="toc-number">30.8.</span> <span class="toc-text">Tracing Program Exceptions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Trace-Sets"><span class="toc-number">30.9.</span> <span class="toc-text">Trace Sets</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tracing-linux-syscalls-under-VM"><span class="toc-number">30.10.</span> <span class="toc-text">Tracing linux syscalls under VM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SMP-Specific-commands"><span class="toc-number">30.11.</span> <span class="toc-text">SMP Specific commands</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Help-for-displaying-ascii-textstrings"><span class="toc-number">30.12.</span> <span class="toc-text">Help for displaying ascii textstrings</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Alternatively"><span class="toc-number">31.</span> <span class="toc-text">Alternatively</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Stack-tracing-under-VM"><span class="toc-number">31.1.</span> <span class="toc-text">Stack tracing under VM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#A-basic-backtrace"><span class="toc-number">31.2.</span> <span class="toc-text">A basic backtrace</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#When-your-backchain-reaches-a-dead-end"><span class="toc-number">31.3.</span> <span class="toc-text">When your backchain reaches a dead end</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#s-390-amp-z-Architecture-IO-Overview"><span class="toc-number">32.</span> <span class="toc-text">s&#x2F;390 &amp; z&#x2F;Architecture IO Overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debugging-IO-on-s-390-amp-z-Architecture-under-VM"><span class="toc-number">33.</span> <span class="toc-text">Debugging IO on s&#x2F;390 &amp; z&#x2F;Architecture under VM</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-common-VM-device-related-commands"><span class="toc-number">33.1.</span> <span class="toc-text">Other common VM device related commands</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GDB-on-S390"><span class="toc-number">34.</span> <span class="toc-text">GDB on S390</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#invocation"><span class="toc-number">34.1.</span> <span class="toc-text">invocation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Online-help"><span class="toc-number">34.2.</span> <span class="toc-text">Online help</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Assembly"><span class="toc-number">34.3.</span> <span class="toc-text">Assembly</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Viewing-amp-modifying-variables"><span class="toc-number">34.4.</span> <span class="toc-text">Viewing &amp; modifying variables</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Modifying-execution"><span class="toc-number">34.5.</span> <span class="toc-text">Modifying execution</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#breakpoints"><span class="toc-number">34.6.</span> <span class="toc-text">breakpoints</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#User-defined-functions-macros"><span class="toc-number">34.7.</span> <span class="toc-text">User defined functions&#x2F;macros</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-hard-to-classify-stuff"><span class="toc-number">34.8.</span> <span class="toc-text">Other hard to classify stuff</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hints"><span class="toc-number">34.9.</span> <span class="toc-text">hints</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#stack-chaining-in-gdb-by-hand"><span class="toc-number">34.10.</span> <span class="toc-text">stack chaining in gdb by hand</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Disassembling-instructions-without-debug-info"><span class="toc-number">34.11.</span> <span class="toc-text">Disassembling instructions without debug info</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#For-more-info"><span class="toc-number">34.12.</span> <span class="toc-text">For more info</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#core-dumps"><span class="toc-number">34.13.</span> <span class="toc-text">core dumps</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#LDD"><span class="toc-number">35.</span> <span class="toc-text">LDD</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debugging-shared-libraries"><span class="toc-number">36.</span> <span class="toc-text">Debugging shared libraries</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debugging-modules"><span class="toc-number">37.</span> <span class="toc-text">Debugging modules</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-proc-file-system"><span class="toc-number">38.</span> <span class="toc-text">The proc file system</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Some-driver-debugging-techniques"><span class="toc-number">39.</span> <span class="toc-text">Some driver debugging techniques</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#debug-feature"><span class="toc-number">39.1.</span> <span class="toc-text">debug feature</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#high-level-debugging-network-drivers"><span class="toc-number">39.2.</span> <span class="toc-text">high level debugging network drivers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#chandev"><span class="toc-number">39.3.</span> <span class="toc-text">chandev</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Starting-points-for-debugging-scripting-languages-etc"><span class="toc-number">40.</span> <span class="toc-text">Starting points for debugging scripting languages etc.</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SysRq"><span class="toc-number">41.</span> <span class="toc-text">SysRq</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">42.</span> <span class="toc-text">References:</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Special-Thanks"><span class="toc-number">43.</span> <span class="toc-text">Special Thanks</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_Debugging390" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_Debugging390
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>                      Debugging on Linux for s/390 &amp; z/Architecture
+                       by
+    Denis Joseph Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
+    Copyright (C) 2000-2001 IBM Deutschland Entwicklung GmbH, IBM Corporation
+                          Best viewed with fixed width fonts 
+</code></pre>
+<h1 id="Overview-of-Document"><a href="#Overview-of-Document" class="headerlink" title="Overview of Document:"></a>Overview of Document:</h1><p>This document is intended to give a good overview of how to debug<br>Linux for s/390 &amp; z/Architecture. It isn’t intended as a complete reference &amp; not a<br>tutorial on the fundamentals of C &amp; assembly. It doesn’t go into<br>390 IO in any detail. It is intended to complement the documents in the<br>reference section below &amp; any other worthwhile references you get.</p>
+<p>It is intended like the Enterprise Systems Architecture/390 Reference Summary<br>to be printed out &amp; used as a quick cheat sheet self help style reference when<br>problems occur.</p>
+<h1 id="Contents"><a href="#Contents" class="headerlink" title="Contents"></a>Contents</h1><p>Register Set<br>Address Spaces on Intel Linux<br>Address Spaces on Linux for s/390 &amp; z/Architecture<br>The Linux for s/390 &amp; z/Architecture Kernel Task Structure<br>Register Usage &amp; Stackframes on Linux for s/390 &amp; z/Architecture<br>A sample program with comments<br>Compiling programs for debugging on Linux for s/390 &amp; z/Architecture<br>Figuring out gcc compile errors<br>Debugging Tools<br>objdump<br>strace<br>Performance Debugging<br>Debugging under VM<br>s/390 &amp; z/Architecture IO Overview<br>Debugging IO on s/390 &amp; z/Architecture under VM<br>GDB on s/390 &amp; z/Architecture<br>Stack chaining in gdb by hand<br>Examining core dumps<br>ldd<br>Debugging modules<br>The proc file system<br>Starting points for debugging scripting languages etc.<br>SysRq<br>References<br>Special Thanks</p>
+<h1 id="Register-Set"><a href="#Register-Set" class="headerlink" title="Register Set"></a>Register Set</h1><p>The current architectures have the following registers.</p>
+<p>16  General propose registers, 32 bit on s/390 64 bit on z/Architecture, r0-r15 or gpr0-gpr15 used for arithmetic &amp; addressing. </p>
+<p>16 Control registers, 32 bit on s/390 64 bit on z/Architecture, ( cr0-cr15 kernel usage only ) used for memory management,<br>interrupt control,debugging control etc.</p>
+<p>16 Access registers ( ar0-ar15 ) 32 bit on s/390 &amp; z/Architecture<br>not used by normal programs but potentially could<br>be used as temporary storage. Their main purpose is their 1 to 1<br>association with general purpose registers and are used in<br>the kernel for copying data between kernel &amp; user address spaces.<br>Access register 0 ( &amp; access register 1 on z/Architecture ( needs 64 bit<br>pointer ) ) is currently used by the pthread library as a pointer to<br>the current running threads private area.</p>
+<p>16 64 bit floating point registers (fp0-fp15 ) IEEE &amp; HFP floating<br>point format compliant on G5 upwards &amp; a Floating point control reg (FPC)<br>4  64 bit registers (fp0,fp2,fp4 &amp; fp6) HFP only on older machines.<br>Note:<br>Linux (currently) always uses IEEE &amp; emulates G5 IEEE format on older machines,<br>( provided the kernel is configured for this ).</p>
+<p>The PSW is the most important register on the machine it<br>is 64 bit on s/390 &amp; 128 bit on z/Architecture &amp; serves the roles of<br>a program counter (pc), condition code register,memory space designator.<br>In IBM standard notation I am counting bit 0 as the MSB.<br>It has several advantages over a normal program counter<br>in that you can change address translation &amp; program counter<br>in a single instruction. To change address translation,<br>e.g. switching address translation off requires that you<br>have a logical=physical mapping for the address you are<br>currently running at.</p>
+<pre><code>  Bit           Value
+</code></pre>
+<p>s/390 z/Architecture<br>0       0     Reserved ( must be 0 ) otherwise specification exception occurs.</p>
+<p>1       1     Program Event Recording 1 PER enabled,<br>          PER is used to facilitate debugging e.g. single stepping.</p>
+<p>2-4    2-4    Reserved ( must be 0 ). </p>
+<p>5       5     Dynamic address translation 1=DAT on.</p>
+<p>6       6     Input/Output interrupt Mask</p>
+<p>7       7     External interrupt Mask used primarily for interprocessor signalling &amp;<br>          clock interrupts.</p>
+<p>8-11  8-11    PSW Key used for complex memory protection mechanism not used under linux</p>
+<p>12      12    1 on s/390 0 on z/Architecture</p>
+<p>13      13    Machine Check Mask 1=enable machine check interrupts</p>
+<p>14      14    Wait State set this to 1 to stop the processor except for interrupts &amp; give<br>          time to other LPARS used in CPU idle in the kernel to increase overall<br>          usage of processor resources.</p>
+<p>15      15    Problem state ( if set to 1 certain instructions are disabled )<br>          all linux user programs run with this bit 1<br>          ( useful info for debugging under VM ).</p>
+<p>16-17 16-17   Address Space Control</p>
+<pre><code>      00 Primary Space Mode when DAT on
+      The linux kernel currently runs in this mode, CR1 is affiliated with 
+          this mode &amp; points to the primary segment table origin etc.
+
+      01 Access register mode this mode is used in functions to 
+      copy data between kernel &amp; user space.
+
+      10 Secondary space mode not used in linux however CR7 the
+      register affiliated with this mode is &amp; this &amp; normally
+      CR13=CR7 to allow us to copy data between kernel &amp; user space.
+      We do this as follows:
+      We set ar2 to 0 to designate its
+      affiliated gpr ( gpr2 )to point to primary=kernel space.
+      We set ar4 to 1 to designate its
+      affiliated gpr ( gpr4 ) to point to secondary=home=user space
+      &amp; then essentially do a memcopy(gpr2,gpr4,size) to
+      copy data between the address spaces, the reason we use home space for the
+      kernel &amp; don&#39;t keep secondary space free is that code will not run in 
+      secondary space.
+
+      11 Home Space Mode all user programs run in this mode.
+      it is affiliated with CR13.
+</code></pre>
+<p>18-19 18-19   Condition codes (CC)</p>
+<p>20    20      Fixed point overflow mask if 1=FPU exceptions for this event<br>              occur ( normally 0 ) </p>
+<p>21    21      Decimal overflow mask if 1=FPU exceptions for this event occur<br>              ( normally 0 )</p>
+<p>22    22      Exponent underflow mask if 1=FPU exceptions for this event occur<br>              ( normally 0 )</p>
+<p>23    23      Significance Mask if 1=FPU exceptions for this event occur<br>              ( normally 0 )</p>
+<p>24-31 24-30   Reserved Must be 0.</p>
+<pre><code>  31      Extended Addressing Mode
+  32      Basic Addressing Mode
+          Used to set addressing mode
+      PSW 31   PSW 32
+            0         0        24 bit
+            0         1        31 bit
+            1         1        64 bit
+</code></pre>
+<p>32             1=31 bit addressing mode 0=24 bit addressing mode (for backward<br>               compatibility), linux always runs with this bit set to 1</p>
+<p>33-64          Instruction address.<br>      33-63    Reserved must be 0<br>      64-127   Address<br>               In 24 bits mode bits 64-103=0 bits 104-127 Address<br>               In 31 bits mode bits 64-96=0 bits 97-127 Address<br>               Note: unlike 31 bit mode on s/390 bit 96 must be zero<br>           when loading the address with LPSWE otherwise a<br>               specification exception occurs, LPSW is fully backward<br>               compatible.</p>
+<h2 id="Prefix-Page-s"><a href="#Prefix-Page-s" class="headerlink" title="Prefix Page(s)"></a>Prefix Page(s)</h2><p>This per cpu memory area is too intimately tied to the processor not to mention.<br>It exists between the real addresses 0-4096 on s/390 &amp; 0-8192 z/Architecture &amp; is exchanged<br>with a 1 page on s/390 or 2 pages on z/Architecture in absolute storage by the set<br>prefix instruction in linux’es startup.<br>This page is mapped to a different prefix for each processor in an SMP configuration<br>( assuming the os designer is sane of course :-) ).<br>Bytes 0-512 ( 200 hex ) on s/390 &amp; 0-512,4096-4544,4604-5119 currently on z/Architecture<br>are used by the processor itself for holding such information as exception indications &amp;<br>entry points for exceptions.<br>Bytes after 0xc00 hex are used by linux for per processor globals on s/390 &amp; z/Architecture<br>( there is a gap on z/Architecture too currently between 0xc00 &amp; 1000 which linux uses ).<br>The closest thing to this on traditional architectures is the interrupt<br>vector table. This is a good thing &amp; does simplify some of the kernel coding<br>however it means that we now cannot catch stray NULL pointers in the<br>kernel without hard coded checks.</p>
+<h1 id="Address-Spaces-on-Intel-Linux"><a href="#Address-Spaces-on-Intel-Linux" class="headerlink" title="Address Spaces on Intel Linux"></a>Address Spaces on Intel Linux</h1><p>The traditional Intel Linux is approximately mapped as follows forgive<br>the ascii art.<br>0xFFFFFFFF 4GB Himem                        <strong><strong><strong><strong><strong><strong><strong><strong>*<br>                                            *               *<br>                                            * Kernel Space  *<br>                                            *               *<br>                                            *</strong></strong></strong></strong></strong></strong></strong></strong>          <strong><strong><strong>****</strong></strong></strong><br>User Space Himem (typically 0xC0000000 3GB )*  User Stack   *          *              *<br>                            <strong><strong><strong><strong><strong><strong><strong><strong>*          *              *<br>                        *  Shared Libs  *          * Next Process *<br>                                            *</strong></strong></strong></strong></strong></strong></strong></strong>          *     to       *<br>                        *               *    &lt;==   *     Run      *  &lt;==<br>                        *  User Program *          *              *<br>                        *   Data BSS    *          *              *<br>                                            *     Text       *          *              *<br>                                 *   Sections    *          *              *<br>0x00000000                         *<strong><strong><strong>****</strong></strong></strong>          <strong><strong><strong>****</strong></strong></strong></p>
+<p>Now it is easy to see that on Intel it is quite easy to recognise a kernel address<br>as being one greater than user space himem ( in this case 0xC0000000).<br>&amp; addresses of less than this are the ones in the current running program on this<br>processor ( if an smp box ).<br>If using the virtual machine ( VM ) as a debugger it is quite difficult to<br>know which user process is running as the address space you are looking at<br>could be from any process in the run queue.</p>
+<p>The limitation of Intels addressing technique is that the linux<br>kernel uses a very simple real address to virtual addressing technique<br>of Real Address=Virtual Address-User Space Himem.<br>This means that on Intel the kernel linux can typically only address<br>Himem=0xFFFFFFFF-0xC0000000=1GB &amp; this is all the RAM these machines<br>can typically use.<br>They can lower User Himem to 2GB or lower &amp; thus be<br>able to use 2GB of RAM however this shrinks the maximum size<br>of User Space from 3GB to 2GB they have a no win limit of 4GB unless<br>they go to 64 Bit.</p>
+<p>On 390 our limitations &amp; strengths make us slightly different.<br>For backward compatibility we are only allowed use 31 bits (2GB)<br>of our 32 bit addresses, however, we use entirely separate address<br>spaces for the user &amp; kernel.</p>
+<p>This means we can support 2GB of non Extended RAM on s/390, &amp; more<br>with the Extended memory management swap device &amp;<br>currently 4TB of physical memory currently on z/Architecture.</p>
+<h1 id="Address-Spaces-on-Linux-for-s-390-amp-z-Architecture"><a href="#Address-Spaces-on-Linux-for-s-390-amp-z-Architecture" class="headerlink" title="Address Spaces on Linux for s/390 &amp; z/Architecture"></a>Address Spaces on Linux for s/390 &amp; z/Architecture</h1><p>Our addressing scheme is as follows</p>
+<p>Himem 0x7fffffff 2GB on s/390    <strong><strong><strong><strong><strong><strong><strong><strong>*          <strong><strong><strong>****</strong></strong></strong><br>currently 0x3ffffffffff (2^42)-1 *  User Stack   *          *              *<br>on z/Architecture.         *</strong></strong></strong></strong></strong></strong></strong></strong>          *              *<br>                         *  Shared Libs  *          *              *<br>                                 <strong><strong><strong><strong><strong><strong><strong><strong>*          *              *<br>                     *               *          *    Kernel    *<br>                         *  User Program *          *              *<br>                         *   Data BSS    *          *              *<br>                                 *    Text       *          *              *<br>                         *   Sections    *          *              *<br>0x00000000                       *</strong></strong></strong></strong></strong></strong></strong></strong>          <strong><strong><strong>****</strong></strong></strong></p>
+<p>This also means that we need to look at the PSW problem state bit<br>or the addressing mode to decide whether we are looking at<br>user or kernel space.</p>
+<h1 id="Virtual-Addresses-on-s-390-amp-z-Architecture"><a href="#Virtual-Addresses-on-s-390-amp-z-Architecture" class="headerlink" title="Virtual Addresses on s/390 &amp; z/Architecture"></a>Virtual Addresses on s/390 &amp; z/Architecture</h1><p>A virtual address on s/390 is made up of 3 parts<br>The SX ( segment index, roughly corresponding to the PGD &amp; PMD in linux terminology )<br>being bits 1-11.<br>The PX ( page index, corresponding to the page table entry (pte) in linux terminology )<br>being bits 12-19.<br>The remaining bits BX (the byte index are the offset in the page )<br>i.e. bits 20 to 31.</p>
+<p>On z/Architecture in linux we currently make up an address from 4 parts.<br>The region index bits (RX) 0-32 we currently use bits 22-32<br>The segment index (SX) being bits 33-43<br>The page index (PX) being bits  44-51<br>The byte index (BX) being bits  52-63</p>
+<p>Notes:</p>
+<ol>
+<li><p>s/390 has no PMD so the PMD is really the PGD also.<br>A lot of this stuff is defined in pgtable.h.</p>
+</li>
+<li><p>Also seeing as s/390’s page indexes are only 1k  in size<br>(bits 12-19 x 4 bytes per pte ) we use 1 ( page 4k )<br>to make the best use of memory by updating 4 segment indices<br>entries each time we mess with a PMD &amp; use offsets<br>0,1024,2048 &amp; 3072 in this page as for our segment indexes.<br>On z/Architecture our page indexes are now 2k in size<br>( bits 12-19 x 8 bytes per pte ) we do a similar trick<br>but only mess with 2 segment indices each time we mess with<br>a PMD.</p>
+</li>
+<li><p>As z/Architecture supports up to a massive 5-level page table lookup we<br>can only use 3 currently on Linux ( as this is all the generic kernel<br>currently supports ) however this may change in future<br>this allows us to access ( according to my sums )<br>4TB of virtual storage per process i.e.<br>4096*512(PTES)*1024(PMDS)*2048(PGD) = 4398046511104 bytes,<br>enough for another 2 or 3 of years I think :-).<br>to do this we use a region-third-table designation type in<br>our address space control registers.</p>
+</li>
+</ol>
+<h1 id="The-Linux-for-s-390-amp-z-Architecture-Kernel-Task-Structure"><a href="#The-Linux-for-s-390-amp-z-Architecture-Kernel-Task-Structure" class="headerlink" title="The Linux for s/390 &amp; z/Architecture Kernel Task Structure"></a>The Linux for s/390 &amp; z/Architecture Kernel Task Structure</h1><p>Each process/thread under Linux for S390 has its own kernel task_struct<br>defined in linux/include/linux/sched.h<br>The S390 on initialisation &amp; resuming of a process on a cpu sets<br>the __LC_KERNEL_STACK variable in the spare prefix area for this cpu<br>(which we use for per-processor globals).</p>
+<p>The kernel stack pointer is intimately tied with the task structure for<br>each processor as follows.</p>
+<pre><code>                  s/390
+        ************************
+        *  1 page kernel stack *
+    *        ( 4K )        *
+        ************************
+        *   1 page task_struct *        
+        *        ( 4K )        *
+</code></pre>
+<p>8K aligned  <strong><strong><strong><strong><strong>****</strong></strong></strong></strong></strong> </p>
+<pre><code>             z/Architecture
+        ************************
+        *  2 page kernel stack *
+    *        ( 8K )        *
+        ************************
+        *  2 page task_struct  *        
+        *        ( 8K )        *
+</code></pre>
+<p>16K aligned <strong><strong><strong><strong><strong>****</strong></strong></strong></strong></strong> </p>
+<p>What this means is that we don’t need to dedicate any register or global variable<br>to point to the current running process &amp; can retrieve it with the following<br>very simple construct for s/390 &amp; one very similar for z/Architecture.</p>
+<p>static inline struct task_struct * get_current(void)<br>{<br>        struct task_struct *current;<br>        <strong>asm</strong>(“lhi   %0,-8192\n\t”<br>                “nr    %0,15”<br>                : “=r” (current) );<br>        return current;<br>}</p>
+<p>i.e. just anding the current kernel stack pointer with the mask -8192.<br>Thankfully because Linux doesn’t have support for nested IO interrupts<br>&amp; our devices have large buffers can survive interrupts being shut for<br>short amounts of time we don’t need a separate stack for interrupts.</p>
+<h1 id="Register-Usage-amp-Stackframes-on-Linux-for-s-390-amp-z-Architecture"><a href="#Register-Usage-amp-Stackframes-on-Linux-for-s-390-amp-z-Architecture" class="headerlink" title="Register Usage &amp; Stackframes on Linux for s/390 &amp; z/Architecture"></a>Register Usage &amp; Stackframes on Linux for s/390 &amp; z/Architecture</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview:"></a>Overview:</h2><p>This is the code that gcc produces at the top &amp; the bottom of<br>each function. It usually is fairly consistent &amp; similar from<br>function to function &amp; if you know its layout you can probably<br>make some headway in finding the ultimate cause of a problem<br>after a crash without a source level debugger.</p>
+<p>Note: To follow stackframes requires a knowledge of C or Pascal &amp;<br>limited knowledge of one assembly language.</p>
+<p>It should be noted that there are some differences between the<br>s/390 &amp; z/Architecture stack layouts as the z/Architecture stack layout didn’t have<br>to maintain compatibility with older linkage formats.</p>
+<h2 id="Glossary"><a href="#Glossary" class="headerlink" title="Glossary:"></a>Glossary:</h2><p>alloca:<br>This is a built in compiler function for runtime allocation<br>of extra space on the callers stack which is obviously freed<br>up on function exit ( e.g. the caller may choose to allocate nothing<br>of a buffer of 4k if required for temporary purposes ), it generates<br>very efficient code ( a few cycles  ) when compared to alternatives<br>like malloc.</p>
+<p>automatics: These are local variables on the stack,<br>i.e they aren’t in registers &amp; they aren’t static.</p>
+<p>back-chain:<br>This is a pointer to the stack pointer before entering a<br>framed functions ( see frameless function ) prologue got by<br>dereferencing the address of the current stack pointer,<br> i.e. got by accessing the 32 bit value at the stack pointers<br>current location.</p>
+<p>base-pointer:<br>This is a pointer to the back of the literal pool which<br>is an area just behind each procedure used to store constants<br>in each function.</p>
+<p>call-clobbered: The caller probably needs to save these registers if there<br>is something of value in them, on the stack or elsewhere before making a<br>call to another procedure so that it can restore it later.</p>
+<p>epilogue:<br>The code generated by the compiler to return to the caller.</p>
+<p>frameless-function<br>A frameless function in Linux for s390 &amp; z/Architecture is one which doesn’t<br>need more than the register save area ( 96 bytes on s/390, 160 on z/Architecture )<br>given to it by the caller.<br>A frameless function never:</p>
+<ol>
+<li>Sets up a back chain.</li>
+<li>Calls alloca.</li>
+<li>Calls other normal functions</li>
+<li>Has automatics.</li>
+</ol>
+<p>GOT-pointer:<br>This is a pointer to the global-offset-table in ELF<br>( Executable Linkable Format, Linux’es most common executable format ),<br>all globals &amp; shared library objects are found using this pointer.</p>
+<p>lazy-binding<br>ELF shared libraries are typically only loaded when routines in the shared<br>library are actually first called at runtime. This is lazy binding.</p>
+<p>procedure-linkage-table<br>This is a table found from the GOT which contains pointers to routines<br>in other shared libraries which can’t be called to by easier means.</p>
+<p>prologue:<br>The code generated by the compiler to set up the stack frame.</p>
+<p>outgoing-args:<br>This is extra area allocated on the stack of the calling function if the<br>parameters for the callee’s cannot all be put in registers, the same<br>area can be reused by each function the caller calls.</p>
+<p>routine-descriptor:<br>A COFF  executable format based concept of a procedure reference<br>actually being 8 bytes or more as opposed to a simple pointer to the routine.<br>This is typically defined as follows<br>Routine Descriptor offset 0=Pointer to Function<br>Routine Descriptor offset 4=Pointer to Table of Contents<br>The table of contents/TOC is roughly equivalent to a GOT pointer.<br>&amp; it means that shared libraries etc. can be shared between several<br>environments each with their own TOC.</p>
+<p>static-chain: This is used in nested functions a concept adopted from pascal<br>by gcc not used in ansi C or C++ ( although quite useful ), basically it<br>is a pointer used to reference local variables of enclosing functions.<br>You might come across this stuff once or twice in your lifetime.</p>
+<p>e.g.<br>The function below should return 11 though gcc may get upset &amp; toss warnings<br>about unused variables.<br>int FunctionA(int a)<br>{<br>    int b;<br>    FunctionC(int c)<br>    {<br>        b=c+1;<br>    }<br>    FunctionC(10);<br>    return(b);<br>}</p>
+<h1 id="s-390-amp-z-Architecture-Register-usage"><a href="#s-390-amp-z-Architecture-Register-usage" class="headerlink" title="s/390 &amp; z/Architecture Register usage"></a>s/390 &amp; z/Architecture Register usage</h1><p>r0       used by syscalls/assembly                  call-clobbered<br>r1     used by syscalls/assembly                  call-clobbered<br>r2       argument 0 / return value 0                call-clobbered<br>r3       argument 1 / return value 1 (if long long) call-clobbered<br>r4       argument 2                                 call-clobbered<br>r5       argument 3                                 call-clobbered<br>r6     argument 4                    saved<br>r7       pointer-to arguments 5 to …              saved<br>r8       this &amp; that                                saved<br>r9       this &amp; that                                saved<br>r10      static-chain ( if nested function )        saved<br>r11      frame-pointer ( if function used alloca )  saved<br>r12      got-pointer                                saved<br>r13      base-pointer                               saved<br>r14      return-address                             saved<br>r15      stack-pointer                              saved</p>
+<p>f0       argument 0 / return value ( float/double ) call-clobbered<br>f2       argument 1                                 call-clobbered<br>f4       z/Architecture argument 2                  saved<br>f6       z/Architecture argument 3                  saved<br>The remaining floating points<br>f1,f3,f5 f7-f15 are call-clobbered.</p>
+<h2 id="Notes"><a href="#Notes" class="headerlink" title="Notes:"></a>Notes:</h2><ol>
+<li>The only requirement is that registers which are used<br>by the callee are saved, e.g. the compiler is perfectly<br>capable of using r11 for purposes other than a frame a<br>frame pointer if a frame pointer is not needed.</li>
+<li>In functions with variable arguments e.g. printf the calling procedure<br>is identical to one without variable arguments &amp; the same number of<br>parameters. However, the prologue of this function is somewhat more<br>hairy owing to it having to move these parameters to the stack to<br>get va_start, va_arg &amp; va_end to work.</li>
+<li>Access registers are currently unused by gcc but are used in<br>the kernel. Possibilities exist to use them at the moment for<br>temporary storage but it isn’t recommended.</li>
+<li>Only 4 of the floating point registers are used for<br>parameter passing as older machines such as G3 only have only 4<br>&amp; it keeps the stack frame compatible with other compilers.<br>However with IEEE floating point emulation under linux on the<br>older machines you are free to use the other 12.</li>
+<li>A long long or double parameter cannot be have the<br>first 4 bytes in a register &amp; the second four bytes in the<br>outgoing args area. It must be purely in the outgoing args<br>area if crossing this boundary.</li>
+<li>Floating point parameters are mixed with outgoing args<br>on the outgoing args area in the order the are passed in as parameters.</li>
+<li>Floating point arguments 2 &amp; 3 are saved in the outgoing args area for<br>z/Architecture</li>
+</ol>
+<h2 id="Stack-Frame-Layout"><a href="#Stack-Frame-Layout" class="headerlink" title="Stack Frame Layout"></a>Stack Frame Layout</h2><p>s/390     z/Architecture<br>0         0             back chain ( a 0 here signifies end of back chain )<br>4         8             eos ( end of stack, not used on Linux for S390 used in other linkage formats )<br>8         16            glue used in other s/390 linkage formats for saved routine descriptors etc.<br>12        24            glue used in other s/390 linkage formats for saved routine descriptors etc.<br>16        32            scratch area<br>20        40            scratch area<br>24        48            saved r6 of caller function<br>28        56            saved r7 of caller function<br>32        64            saved r8 of caller function<br>36        72            saved r9 of caller function<br>40        80            saved r10 of caller function<br>44        88            saved r11 of caller function<br>48        96            saved r12 of caller function<br>52        104           saved r13 of caller function<br>56        112           saved r14 of caller function<br>60        120           saved r15 of caller function<br>64        128           saved f4 of caller function<br>72        132           saved f6 of caller function<br>80                      undefined<br>96        160           outgoing args passed from caller to callee<br>96+x      160+x         possible stack alignment ( 8 bytes desirable )<br>96+x+y    160+x+y       alloca space of caller ( if used )<br>96+x+y+z  160+x+y+z     automatics of caller ( if used )<br>0                       back-chain</p>
+<h1 id="A-sample-program-with-comments"><a href="#A-sample-program-with-comments" class="headerlink" title="A sample program with comments."></a>A sample program with comments.</h1><h2 id="Comments-on-the-function-test"><a href="#Comments-on-the-function-test" class="headerlink" title="Comments on the function test"></a>Comments on the function test</h2><ol>
+<li>It didn’t need to set up a pointer to the constant pool gpr13 as it isn’t used<br>( :-( ).</li>
+<li>This is a frameless function &amp; no stack is bought.</li>
+<li>The compiler was clever enough to recognise that it could return the<br>value in r2 as well as use it for the passed in parameter ( :-) ).</li>
+<li>The basr ( branch relative &amp; save ) trick works as follows the instruction<br>has a special case with r0,r0 with some instruction operands is understood as<br>the literal value 0, some risc architectures also do this ). So now<br>we are branching to the next address &amp; the address new program counter is<br>in r13,so now we subtract the size of the function prologue we have executed</li>
+</ol>
+<ul>
+<li><p>the size of the literal pool to get to the top of the literal pool<br>0040037c int test(int b)<br>{                                                          # Function prologue below<br>40037c:    90 de f0 34     stm    %r13,%r14,52(%r15) # Save registers r13 &amp; r14<br>400380:    0d d0           basr    %r13,%r0           # Set up pointer to constant pool using<br>400382:    a7 da ff fa     ahi    %r13,-6            # basr trick<br>  return(5+b);</p>
+<pre><code>                                                 # Huge main program
+</code></pre>
+<p>400386:    a7 2a 00 05     ahi    %r2,5              # add 5 to r2</p>
+<pre><code>                                                     # Function epilogue below 
+</code></pre>
+<p>40038a:    98 de f0 34     lm    %r13,%r14,52(%r15) # restore registers r13 &amp; 14<br>40038e:    07 fe           br    %r14               # return<br>}</p>
+</li>
+</ul>
+<h2 id="Comments-on-the-function-main"><a href="#Comments-on-the-function-main" class="headerlink" title="Comments on the function main"></a>Comments on the function main</h2><ol>
+<li>The compiler did this function optimally ( 8-) )</li>
+</ol>
+<p>Literal pool for main.<br>400390:    ff ff ff ec     .long 0xffffffec<br>main(int argc,char *argv[])<br>{                                                          # Function prologue below<br>  400394:    90 bf f0 2c     stm    %r11,%r15,44(%r15) # Save necessary registers<br>  400398:    18 0f           lr    %r0,%r15           # copy stack pointer to r0<br>  40039a:    a7 fa ff a0     ahi    %r15,-96           # Make area for callee saving<br>  40039e:    0d d0           basr    %r13,%r0           # Set up r13 to point to<br>  4003a0:    a7 da ff f0     ahi    %r13,-16           # literal pool<br>  4003a4:    50 00 f0 00     st    %r0,0(%r15)        # Save backchain</p>
+<pre><code>return(test(5));                                   # Main Program Below
+</code></pre>
+<p>  4003a8:    58 e0 d0 00     l    %r14,0(%r13)       # load relative address of test from<br>                                   # literal pool<br>  4003ac:    a7 28 00 05     lhi    %r2,5              # Set first parameter to 5<br>  4003b0:    4d ee d0 00     bas    %r14,0(%r14,%r13)  # jump to test setting r14 as return<br>                               # address using branch &amp; save instruction.</p>
+<pre><code>                           # Function Epilogue below
+</code></pre>
+<p>  4003b4:    98 bf f0 8c     lm    %r11,%r15,140(%r15)# Restore necessary registers.<br>  4003b8:    07 fe           br    %r14               # return to do program exit<br>}</p>
+<h2 id="Compiler-updates"><a href="#Compiler-updates" class="headerlink" title="Compiler updates"></a>Compiler updates</h2><p>main(int argc,char *argv[])<br>{<br>  4004fc:    90 7f f0 1c           stm    %r7,%r15,28(%r15)<br>  400500:    a7 d5 00 04           bras    %r13,400508 &lt;main+0xc&gt;<br>  400504:    00 40 04 f4           .long    0x004004f4 </p>
+<h1 id="compiler-now-puts-constant-pool-in-code-to-so-it-saves-an-instruction"><a href="#compiler-now-puts-constant-pool-in-code-to-so-it-saves-an-instruction" class="headerlink" title="compiler now puts constant pool in code to so it saves an instruction"></a>compiler now puts constant pool in code to so it saves an instruction</h1><p>  400508:    18 0f                 lr    %r0,%r15<br>  40050a:    a7 fa ff a0           ahi    %r15,-96<br>  40050e:    50 00 f0 00           st    %r0,0(%r15)<br>    return(test(5));<br>  400512:    58 10 d0 00           l    %r1,0(%r13)<br>  400516:    a7 28 00 05           lhi    %r2,5<br>  40051a:    0d e1                 basr    %r14,%r1</p>
+<h1 id="compiler-adds-1-extra-instruction-to-epilogue-this-is-done-to"><a href="#compiler-adds-1-extra-instruction-to-epilogue-this-is-done-to" class="headerlink" title="compiler adds 1 extra instruction to epilogue this is done to"></a>compiler adds 1 extra instruction to epilogue this is done to</h1><h1 id="avoid-processor-pipeline-stalls-owing-to-data-dependencies-on-g5-amp"><a href="#avoid-processor-pipeline-stalls-owing-to-data-dependencies-on-g5-amp" class="headerlink" title="avoid processor pipeline stalls owing to data dependencies on g5 &amp;"></a>avoid processor pipeline stalls owing to data dependencies on g5 &amp;</h1><h1 id="above-as-register-14-in-the-old-code-was-needed-directly-after-being-loaded"><a href="#above-as-register-14-in-the-old-code-was-needed-directly-after-being-loaded" class="headerlink" title="above as register 14 in the old code was needed directly after being loaded"></a>above as register 14 in the old code was needed directly after being loaded</h1><h1 id="by-the-lm-r11-r15-140-r15-for-the-br-14"><a href="#by-the-lm-r11-r15-140-r15-for-the-br-14" class="headerlink" title="by the lm    %r11,%r15,140(%r15) for the br %14."></a>by the lm    %r11,%r15,140(%r15) for the br %14.</h1><p>  40051c:    58 40 f0 98           l    %r4,152(%r15)<br>  400520:    98 7f f0 7c           lm    %r7,%r15,124(%r15)<br>  400524:    07 f4                 br    %r4<br>}</p>
+<p>Hartmut ( our compiler developer ) also has been threatening to take out the<br>stack backchain in optimised code as this also causes pipeline stalls, you<br>have been warned.</p>
+<h2 id="64-bit-z-Architecture-code-disassembly"><a href="#64-bit-z-Architecture-code-disassembly" class="headerlink" title="64 bit z/Architecture code disassembly"></a>64 bit z/Architecture code disassembly</h2><p>If you understand the stuff above you’ll understand the stuff<br>below too so I’ll avoid repeating myself &amp; just say that<br>some of the instructions have g’s on the end of them to indicate<br>they are 64 bit &amp; the stack offsets are a bigger,<br>the only other difference you’ll find between 32 &amp; 64 bit is that<br>we now use f4 &amp; f6 for floating point arguments on 64 bit.<br>00000000800005b0 <test>:<br>int test(int b)<br>{<br>    return(5+b);<br>    800005b0:    a7 2a 00 05           ahi    %r2,5<br>    800005b4:    b9 14 00 22           lgfr    %r2,%r2 # downcast to integer<br>    800005b8:    07 fe                 br    %r14<br>    800005ba:    07 07                 bcr    0,%r7</p>
+<p>}</p>
+<p>00000000800005bc <main>:<br>main(int argc,char *argv[])<br>{<br>    800005bc:    eb bf f0 58 00 24     stmg    %r11,%r15,88(%r15)<br>    800005c2:    b9 04 00 1f           lgr    %r1,%r15<br>    800005c6:    a7 fb ff 60           aghi    %r15,-160<br>    800005ca:    e3 10 f0 00 00 24     stg    %r1,0(%r15)<br>    return(test(5));<br>    800005d0:    a7 29 00 05           lghi    %r2,5<br>    # brasl allows jumps &gt; 64k &amp; is overkill here bras would do fune<br>    800005d4:    c0 e5 ff ff ff ee     brasl    %r14,800005b0 <test><br>    800005da:    e3 40 f1 10 00 04     lg    %r4,272(%r15)<br>    800005e0:    eb bf f0 f8 00 04     lmg    %r11,%r15,248(%r15)<br>    800005e6:    07 f4                 br    %r4<br>}</p>
+<h1 id="Compiling-programs-for-debugging-on-Linux-for-s-390-amp-z-Architecture"><a href="#Compiling-programs-for-debugging-on-Linux-for-s-390-amp-z-Architecture" class="headerlink" title="Compiling programs for debugging on Linux for s/390 &amp; z/Architecture"></a>Compiling programs for debugging on Linux for s/390 &amp; z/Architecture</h1><p>-gdwarf-2 now works it should be considered the default debugging<br>format for s/390 &amp; z/Architecture as it is more reliable for debugging<br>shared libraries,  normal -g debugging works much better now<br>Thanks to the IBM java compiler developers bug reports. </p>
+<p>This is typically done adding/appending the flags -g or -gdwarf-2 to the<br>CFLAGS &amp; LDFLAGS variables Makefile of the program concerned.</p>
+<p>If using gdb &amp; you would like accurate displays of registers &amp;<br> stack traces compile without optimisation i.e make sure<br>that there is no -O2 or similar on the CFLAGS line of the Makefile &amp;<br>the emitted gcc commands, obviously this will produce worse code<br>( not advisable for shipment ) but it is an  aid to the debugging process.</p>
+<p>This aids debugging because the compiler will copy parameters passed in<br>in registers onto the stack so backtracing &amp; looking at passed in<br>parameters will work, however some larger programs which use inline functions<br>will not compile without optimisation.</p>
+<p>Debugging with optimisation has since much improved after fixing<br>some bugs, please make sure you are using gdb-5.0 or later developed<br>after Nov’2000.</p>
+<h1 id="Figuring-out-gcc-compile-errors"><a href="#Figuring-out-gcc-compile-errors" class="headerlink" title="Figuring out gcc compile errors"></a>Figuring out gcc compile errors</h1><p>If you are getting a lot of syntax errors compiling a program &amp; the problem<br>isn’t blatantly obvious from the source.<br>It often helps to just preprocess the file, this is done with the -E<br>option in gcc.<br>What this does is that it runs through the very first phase of compilation<br>( compilation in gcc is done in several stages &amp; gcc calls many programs to<br>achieve its end result ) with the -E option gcc just calls the gcc preprocessor (cpp).<br>The c preprocessor does the following, it joins all the files #included together<br>recursively ( #include files can #include other files ) &amp; also the c file you wish to compile.<br>It puts a fully qualified path of the #included files in a comment &amp; it<br>does macro expansion.<br>This is useful for debugging because</p>
+<ol>
+<li>You can double check whether the files you expect to be included are the ones<br>that are being included ( e.g. double check that you aren’t going to the i386 asm directory ).</li>
+<li>Check that macro definitions aren’t clashing with typedefs,</li>
+<li>Check that definitions aren’t being used before they are being included.</li>
+<li>Helps put the line emitting the error under the microscope if it contains macros.</li>
+</ol>
+<p>For convenience the Linux kernel’s makefile will do preprocessing automatically for you<br>by suffixing the file you want built with .i ( instead of .o )</p>
+<p>e.g.<br>from the linux directory type<br>make arch/s390/kernel/signal.i<br>this will build</p>
+<p>s390-gcc -D__KERNEL__ -I/home1/barrow/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer<br>-fno-strict-aliasing -D__SMP__ -pipe -fno-strength-reduce   -E arch/s390/kernel/signal.c</p>
+<blockquote>
+<p>arch/s390/kernel/signal.i  </p>
+</blockquote>
+<p>Now look at signal.i you should see something like.</p>
+<h1 id="1-“-home1-barrow-linux-include-asm-types-h”-1"><a href="#1-“-home1-barrow-linux-include-asm-types-h”-1" class="headerlink" title="1 “/home1/barrow/linux/include/asm/types.h” 1"></a>1 “/home1/barrow/linux/include/asm/types.h” 1</h1><p>typedef unsigned short umode_t;<br>typedef <strong>signed</strong> char <strong>s8;<br>typedef unsigned char __u8;<br>typedef __signed</strong> short __s16;<br>typedef unsigned short __u16;</p>
+<p>If instead you are getting errors further down e.g.<br>unknown instruction:2515 “move.l” or better still unknown instruction:2515<br>“Fixme not implemented yet, call Martin” you are probably are attempting to compile some code<br>meant for another architecture or code that is simply not implemented, with a fixme statement<br>stuck into the inline assembly code so that the author of the file now knows he has work to do.<br>To look at the assembly emitted by gcc just before it is about to call gas ( the gnu assembler )<br>use the -S option.<br>Again for your convenience the Linux kernel’s Makefile will hold your hand &amp;<br>do all this donkey work for you also by building the file with the .s suffix.<br>e.g.<br>from the Linux directory type<br>make arch/s390/kernel/signal.s </p>
+<p>s390-gcc -D__KERNEL__ -I/home1/barrow/linux/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer<br>-fno-strict-aliasing -D__SMP__ -pipe -fno-strength-reduce  -S arch/s390/kernel/signal.c<br>-o arch/s390/kernel/signal.s  </p>
+<p>This will output something like, ( please note the constant pool &amp; the useful comments<br>in the prologue to give you a hand at interpreting it ).</p>
+<p>.LC54:<br>    .string    “misaligned (__u16 *) in __xchg\n”<br>.LC57:<br>    .string    “misaligned (__u32 *) in __xchg\n”<br>.L$PG1: # Pool sys_sigsuspend<br>.LC192:<br>    .long    -262401<br>.LC193:<br>    .long    -1<br>.LC194:<br>    .long    schedule-.L$PG1<br>.LC195:<br>    .long    do_signal-.L$PG1<br>    .align 4<br>.globl sys_sigsuspend<br>    .type     sys_sigsuspend,@function<br>sys_sigsuspend:</p>
+<h1 id="leaf-function-0"><a href="#leaf-function-0" class="headerlink" title="leaf function           0"></a>leaf function           0</h1><h1 id="automatics-16"><a href="#automatics-16" class="headerlink" title="automatics              16"></a>automatics              16</h1><h1 id="outgoing-args-0"><a href="#outgoing-args-0" class="headerlink" title="outgoing args           0"></a>outgoing args           0</h1><h1 id="need-frame-pointer-0"><a href="#need-frame-pointer-0" class="headerlink" title="need frame pointer      0"></a>need frame pointer      0</h1><h1 id="call-alloca-0"><a href="#call-alloca-0" class="headerlink" title="call alloca             0"></a>call alloca             0</h1><h1 id="has-varargs-0"><a href="#has-varargs-0" class="headerlink" title="has varargs             0"></a>has varargs             0</h1><h1 id="incoming-args-stack-0"><a href="#incoming-args-stack-0" class="headerlink" title="incoming args (stack)   0"></a>incoming args (stack)   0</h1><h1 id="function-length-168"><a href="#function-length-168" class="headerlink" title="function length         168"></a>function length         168</h1><pre><code>STM    8,15,32(15)
+LR    0,15
+AHI    15,-112
+BASR    13,0
+</code></pre>
+<p>.L$CO1:    AHI    13,.L$PG1-.L$CO1<br>    ST    0,0(15)<br>    LR    8,2<br>    N     5,.LC192-.L$PG1(13) </p>
+<p>Adding -g to the above output makes the output even more useful<br>e.g. typing<br>make CC:=”s390-gcc -g” kernel/sched.s</p>
+<p>which compiles.<br>s390-gcc -g -D__KERNEL__ -I/home/barrow/linux-2.3/include -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce   -S kernel/sched.c -o kernel/sched.s </p>
+<p>also outputs stabs ( debugger ) info, from this info you can find out the<br>offsets &amp; sizes of various elements in structures.<br>e.g. the stab for the structure<br>struct rlimit {<br>    unsigned long    rlim_cur;<br>    unsigned long    rlim_max;<br>};<br>is<br>.stabs “rlimit:T(151,2)=s8rlim_cur:(0,5),0,32;rlim_max:(0,5),32,32;;”,128,0,0,0<br>from this stab you can see that<br>rlimit_cur starts at bit offset 0 &amp; is 32 bits in size<br>rlimit_max starts at bit offset 32 &amp; is 32 bits in size.</p>
+<h1 id="Debugging-Tools"><a href="#Debugging-Tools" class="headerlink" title="Debugging Tools:"></a>Debugging Tools:</h1><h1 id="objdump"><a href="#objdump" class="headerlink" title="objdump"></a>objdump</h1><p>This is a tool with many options the most useful being ( if compiled with -g).<br>objdump –source <victim program or object file> &gt; <victims debug listing ></p>
+<p>The whole kernel can be compiled like this ( Doing this will make a 17MB kernel<br>&amp; a 200 MB listing ) however you have to strip it before building the image<br>using the strip command to make it a more reasonable size to boot it.</p>
+<p>A source/assembly mixed dump of the kernel can be done with the line<br>objdump –source vmlinux &gt; vmlinux.lst<br>Also, if the file isn’t compiled -g, this will output as much debugging information<br>as it can (e.g. function names). This is very slow as it spends lots<br>of time searching for debugging info. The following self explanatory line should be used<br>instead if the code isn’t compiled -g, as it is much faster:<br>objdump –disassemble-all –syms vmlinux &gt; vmlinux.lst  </p>
+<p>As hard drive space is valuable most of us use the following approach.</p>
+<ol>
+<li>Look at the emitted psw on the console to find the crash address in the kernel.</li>
+<li>Look at the file System.map ( in the linux directory ) produced when building<br>the kernel to find the closest address less than the current PSW to find the<br>offending function.</li>
+<li>use grep or similar to search the source tree looking for the source file<br>with this function if you don’t know where it is.</li>
+<li>rebuild this object file with -g on, as an example suppose the file was<br>( /arch/s390/kernel/signal.o ) </li>
+<li>Assuming the file with the erroneous function is signal.c Move to the base of the<br>Linux source tree.</li>
+<li>rm /arch/s390/kernel/signal.o</li>
+<li>make /arch/s390/kernel/signal.o</li>
+<li>watch the gcc command line emitted</li>
+<li>type it in again or alternatively cut &amp; paste it on the console adding the -g option.</li>
+<li>objdump –source arch/s390/kernel/signal.o &gt; signal.lst<br>This will output the source &amp; the assembly intermixed, as the snippet below shows<br>This will unfortunately output addresses which aren’t the same<br>as the kernel ones you should be able to get around the mental arithmetic<br>by playing with the –adjust-vma parameter to objdump.</li>
+</ol>
+<p>static inline void spin_lock(spinlock_t *lp)<br>{<br>      a0:       18 34           lr      %r3,%r4<br>      a2:       a7 3a 03 bc     ahi     %r3,956<br>        <strong>asm</strong> __volatile(“    lhi   1,-1\n”<br>      a6:       a7 18 ff ff     lhi     %r1,-1<br>      aa:       1f 00           slr     %r0,%r0<br>      ac:       ba 01 30 00     cs      %r0,%r1,0(%r3)<br>      b0:       a7 44 ff fd     jm      aa &lt;sys_sigsuspend+0x2e&gt;<br>        saveset = current-&gt;blocked;<br>      b4:       d2 07 f0 68     mvc     104(8,%r15),972(%r4)<br>      b8:       43 cc<br>        return (set-&gt;sig[0] &amp; mask) != 0;<br>} </p>
+<ol start="6">
+<li>If debugging under VM go down to that section in the document for more info.</li>
+</ol>
+<p>I now have a tool which takes the pain out of –adjust-vma<br>&amp; you are able to do something like<br>make /arch/s390/kernel/traps.lst<br>&amp; it automatically generates the correctly relocated entries for<br>the text segment in traps.lst.<br>This tool is now standard in linux distro’s in scripts/makelst</p>
+<h2 id="strace"><a href="#strace" class="headerlink" title="strace:"></a>strace:</h2><p>Q. What is it ?<br>A. It is a tool for intercepting calls to the kernel &amp; logging them<br>to a file &amp; on the screen.</p>
+<p>Q. What use is it ?<br>A. You can use it to find out what files a particular program opens.</p>
+<h2 id="Example-1"><a href="#Example-1" class="headerlink" title="Example 1"></a>Example 1</h2><p>If you wanted to know does ping work but didn’t have the source<br>strace ping -c 1 127.0.0.1<br>&amp; then look at the man pages for each of the syscalls below,<br>( In fact this is sometimes easier than looking at some spaghetti<br>source which conditionally compiles for several architectures ).<br>Not everything that it throws out needs to make sense immediately.</p>
+<p>Just looking quickly you can see that it is making up a RAW socket<br>for the ICMP protocol.<br>Doing an alarm(10) for a 10 second timeout<br>&amp; doing a gettimeofday call before &amp; after each read to see<br>how long the replies took, &amp; writing some text to stdout so the user<br>has an idea what is going on.</p>
+<p>socket(PF_INET, SOCK_RAW, IPPROTO_ICMP) = 3<br>getuid()                                = 0<br>setuid(0)                               = 0<br>stat(“/usr/share/locale/C/libc.cat”, 0xbffff134) = -1 ENOENT (No such file or directory)<br>stat(“/usr/share/locale/libc/C”, 0xbffff134) = -1 ENOENT (No such file or directory)<br>stat(“/usr/local/share/locale/C/libc.cat”, 0xbffff134) = -1 ENOENT (No such file or directory)<br>getpid()                                = 353<br>setsockopt(3, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0<br>setsockopt(3, SOL_SOCKET, SO_RCVBUF, [49152], 4) = 0<br>fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(3, 1), …}) = 0<br>mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x40008000<br>ioctl(1, TCGETS, {B9600 opost isig icanon echo …}) = 0<br>write(1, “PING 127.0.0.1 (127.0.0.1): 56 d”…, 42PING 127.0.0.1 (127.0.0.1): 56 data bytes<br>) = 42<br>sigaction(SIGINT, {0x8049ba0, [], SA_RESTART}, {SIG_DFL}) = 0<br>sigaction(SIGALRM, {0x8049600, [], SA_RESTART}, {SIG_DFL}) = 0<br>gettimeofday({948904719, 138951}, NULL) = 0<br>sendto(3, “\10\0D\201a\1\0\0\17#\2178\307\36”…, 64, 0, {sin_family=AF_INET,<br>sin_port=htons(0), sin_addr=inet_addr(“127.0.0.1”)}, 16) = 64<br>sigaction(SIGALRM, {0x8049600, [], SA_RESTART}, {0x8049600, [], SA_RESTART}) = 0<br>sigaction(SIGALRM, {0x8049ba0, [], SA_RESTART}, {0x8049600, [], SA_RESTART}) = 0<br>alarm(10)                               = 0<br>recvfrom(3, “E\0\0T\0005\0\0@\1|r\177\0\0\1\177”…, 192, 0,<br>{sin_family=AF_INET, sin_port=htons(50882), sin_addr=inet_addr(“127.0.0.1”)}, [16]) = 84<br>gettimeofday({948904719, 160224}, NULL) = 0<br>recvfrom(3, “E\0\0T\0006\0\0\377\1\275p\177\0”…, 192, 0,<br>{sin_family=AF_INET, sin_port=htons(50882), sin_addr=inet_addr(“127.0.0.1”)}, [16]) = 84<br>gettimeofday({948904719, 166952}, NULL) = 0<br>write(1, “64 bytes from 127.0.0.1: icmp_se”…,<br>5764 bytes from 127.0.0.1: icmp_seq=0 ttl=255 time=28.0 ms</p>
+<h2 id="Example-2"><a href="#Example-2" class="headerlink" title="Example 2"></a>Example 2</h2><p>strace passwd 2&gt;&amp;1 | grep open<br>produces the following output<br>open(“/etc/ld.so.cache”, O_RDONLY)      = 3<br>open(“/opt/kde/lib/libc.so.5”, O_RDONLY) = -1 ENOENT (No such file or directory)<br>open(“/lib/libc.so.5”, O_RDONLY)        = 3<br>open(“/dev”, O_RDONLY)                  = 3<br>open(“/var/run/utmp”, O_RDONLY)         = 3<br>open(“/etc/passwd”, O_RDONLY)           = 3<br>open(“/etc/shadow”, O_RDONLY)           = 3<br>open(“/etc/login.defs”, O_RDONLY)       = 4<br>open(“/dev/tty”, O_RDONLY)              = 4 </p>
+<p>The 2&gt;&amp;1 is done to redirect stderr to stdout &amp; grep is then filtering this input<br>through the pipe for each line containing the string open.</p>
+<h2 id="Example-3"><a href="#Example-3" class="headerlink" title="Example 3"></a>Example 3</h2><p>Getting sophisticated<br>telnetd crashes &amp; I don’t know why</p>
+<h2 id="Steps"><a href="#Steps" class="headerlink" title="Steps"></a>Steps</h2><ol>
+<li><p>Replace the following line in /etc/inetd.conf<br>telnet  stream  tcp     nowait  root    /usr/sbin/in.telnetd -h<br>with<br>telnet  stream  tcp     nowait  root    /blah</p>
+</li>
+<li><p>Create the file /blah with the following contents to start tracing telnetd<br>#!/bin/bash<br>/usr/bin/strace -o/t1 -f /usr/sbin/in.telnetd -h </p>
+</li>
+<li><p>chmod 700 /blah to make it executable only to root</p>
+</li>
+<li><p>killall -HUP inetd<br>or ps aux | grep inetd<br>get inetd’s process id<br>&amp; kill -HUP inetd to restart it.</p>
+</li>
+</ol>
+<h2 id="Important-options"><a href="#Important-options" class="headerlink" title="Important options"></a>Important options</h2><p>-o is used to tell strace to output to a file in our case t1 in the root directory<br>-f is to follow children i.e.<br>e.g in our case above telnetd will start the login process &amp; subsequently a shell like bash.<br>You will be able to tell which is which from the process ID’s listed on the left hand side<br>of the strace output.<br>-p<pid> will tell strace to attach to a running process, yup this can be done provided<br> it isn’t being traced or debugged already &amp; you have enough privileges,<br>the reason 2 processes cannot trace or debug the same program is that strace<br>becomes the parent process of the one being debugged &amp; processes ( unlike people )<br>can have only one parent.</p>
+<p>However the file /t1 will get big quite quickly<br>to test it telnet 127.0.0.1</p>
+<p>now look at what files in.telnetd execve’d<br>413   execve(“/usr/sbin/in.telnetd”, [“/usr/sbin/in.telnetd”, “-h”], [/* 17 vars <em>/]) = 0<br>414   execve(“/bin/login”, [“/bin/login”, “-h”, “localhost”, “-p”], [/</em> 2 vars */]) = 0 </p>
+<p>Whey it worked!.</p>
+<h2 id="Other-hints"><a href="#Other-hints" class="headerlink" title="Other hints:"></a>Other hints:</h2><p>If the program is not very interactive ( i.e. not much keyboard input )<br>&amp; is crashing in one architecture but not in another you can do<br>an strace of both programs under as identical a scenario as you can<br>on both architectures outputting to a file then.<br>do a diff of the two traces using the diff program<br>i.e.<br>diff output1 output2<br>&amp; maybe you’ll be able to see where the call paths differed, this<br>is possibly near the cause of the crash. </p>
+<h2 id="More-info"><a href="#More-info" class="headerlink" title="More info"></a>More info</h2><p>Look at man pages for strace &amp; the various syscalls<br>e.g. man strace, man alarm, man socket.</p>
+<h1 id="Performance-Debugging"><a href="#Performance-Debugging" class="headerlink" title="Performance Debugging"></a>Performance Debugging</h1><p>gcc is capable of compiling in profiling code just add the -p option<br>to the CFLAGS, this obviously affects program size &amp; performance.<br>This can be used by the gprof gnu profiling tool or the<br>gcov the gnu code coverage tool ( code coverage is a means of testing<br>code quality by checking if all the code in an executable in exercised by<br>a tester ).</p>
+<h2 id="Using-top-to-find-out-where-processes-are-sleeping-in-the-kernel"><a href="#Using-top-to-find-out-where-processes-are-sleeping-in-the-kernel" class="headerlink" title="Using top to find out where processes are sleeping in the kernel"></a>Using top to find out where processes are sleeping in the kernel</h2><p>To do this copy the System.map from the root directory where<br>the linux kernel was built to the /boot directory on your<br>linux machine.<br>Start top<br>Now type fU<return><br>You should see a new field called WCHAN which<br>tells you where each process is sleeping here is a typical output.</p>
+<p> 6:59pm  up 41 min,  1 user,  load average: 0.00, 0.00, 0.00<br>28 processes: 27 sleeping, 1 running, 0 zombie, 0 stopped<br>CPU states:  0.0% user,  0.1% system,  0.0% nice, 99.8% idle<br>Mem:   254900K av,   45976K used,  208924K free,       0K shrd,   28636K buff<br>Swap:       0K av,       0K used,       0K free                    8620K cached</p>
+<p>  PID USER     PRI  NI  SIZE  RSS SHARE WCHAN     STAT  LIB %CPU %MEM   TIME COMMAND<br>  750 root      12   0   848  848   700 do_select S       0  0.1  0.3   0:00 in.telnetd<br>  767 root      16   0  1140 1140   964           R       0  0.1  0.4   0:00 top<br>    1 root       8   0   212  212   180 do_select S       0  0.0  0.0   0:00 init<br>    2 root       9   0     0    0     0 down_inte SW      0  0.0  0.0   0:00 kmcheck</p>
+<h2 id="The-time-command"><a href="#The-time-command" class="headerlink" title="The time command"></a>The time command</h2><p>Another related command is the time command which gives you an indication<br>of where a process is spending the majority of its time.<br>e.g.<br>time ping -c 5 nc<br>outputs<br>real    0m4.054s<br>user    0m0.010s<br>sys    0m0.010s</p>
+<h1 id="Debugging-under-VM"><a href="#Debugging-under-VM" class="headerlink" title="Debugging under VM"></a>Debugging under VM</h1><h2 id="Notes-1"><a href="#Notes-1" class="headerlink" title="Notes"></a>Notes</h2><p>Addresses &amp; values in the VM debugger are always hex never decimal<br>Address ranges are of the format <HexValue1>-<HexValue2> or <HexValue1>.<HexValue2><br>e.g. The address range  0x2000 to 0x3000 can be described as 2000-3000 or 2000.1000</p>
+<p>The VM Debugger is case insensitive.</p>
+<p>VM’s strengths are usually other debuggers weaknesses you can get at any resource<br>no matter how sensitive e.g. memory management resources,change address translation<br>in the PSW. For kernel hacking you will reap dividends if you get good at it.</p>
+<p>The VM Debugger displays operators but not operands, probably because some<br>of it was written when memory was expensive &amp; the programmer was probably proud that<br>it fitted into 2k of memory &amp; the programmers &amp; didn’t want to shock hardcore VM’ers by<br>changing the interface :-), also the debugger displays useful information on the same line &amp;<br>the author of the code probably felt that it was a good idea not to go over<br>the 80 columns on the screen. </p>
+<p>As some of you are probably in a panic now this isn’t as unintuitive as it may seem<br>as the 390 instructions are easy to decode mentally &amp; you can make a good guess at a lot<br>of them as all the operands are nibble ( half byte aligned ) &amp; if you have an objdump listing<br>also it is quite easy to follow, if you don’t have an objdump listing keep a copy of<br>the s/390 Reference Summary &amp; look at between pages 2 &amp; 7 or alternatively the<br>s/390 principles of operation.<br>e.g. even I can guess that<br>0001AFF8’ LR    180F        CC 0<br>is a ( load register ) lr r0,r15 </p>
+<p>Also it is very easy to tell the length of a 390 instruction from the 2 most significant<br>bits in the instruction ( not that this info is really useful except if you are trying to<br>make sense of a hexdump of code ).<br>Here is a table<br>Bits                    Instruction Length</p>
+<hr>
+<p>00                          2 Bytes<br>01                          4 Bytes<br>10                          4 Bytes<br>11                          6 Bytes</p>
+<p>The debugger also displays other useful info on the same line such as the<br>addresses being operated on destination addresses of branches &amp; condition codes.<br>e.g.<br>00019736’ AHI   A7DAFF0E    CC 1<br>000198BA’ BRC   A7840004 -&gt; 000198C2’   CC 0<br>000198CE’ STM   900EF068 &gt;&gt; 0FA95E78    CC 2</p>
+<h2 id="Useful-VM-debugger-commands"><a href="#Useful-VM-debugger-commands" class="headerlink" title="Useful VM debugger commands"></a>Useful VM debugger commands</h2><p>I suppose I’d better mention this before I start<br>to list the current active traces do<br>Q TR<br>there can be a maximum of 255 of these per set<br>( more about trace sets later ).<br>To stop traces issue a<br>TR END.<br>To delete a particular breakpoint issue<br>TR DEL <breakpoint number></p>
+<p>The PA1 key drops to CP mode so you can issue debugger commands,<br>Doing alt c (on my 3270 console at least ) clears the screen.<br>hitting b <enter> comes back to the running operating system<br>from cp mode ( in our case linux ).<br>It is typically useful to add shortcuts to your profile.exec file<br>if you have one ( this is roughly equivalent to autoexec.bat in DOS ).<br>file here are a few from mine.<br>/* this gives me command history on issuing f12 <em>/<br>set pf12 retrieve<br>/</em> this continues <em>/<br>set pf8 imm b<br>/</em> goes to trace set a <em>/<br>set pf1 imm tr goto a<br>/</em> goes to trace set b <em>/<br>set pf2 imm tr goto b<br>/</em> goes to trace set c */<br>set pf3 imm tr goto c</p>
+<h2 id="Instruction-Tracing"><a href="#Instruction-Tracing" class="headerlink" title="Instruction Tracing"></a>Instruction Tracing</h2><p>Setting a simple breakpoint<br>TR I PSWA <address><br>To debug a particular function try<br>TR I R <function address range><br>TR I on its own will single step.<br>TR I DATA <MNEMONIC> <OPTIONAL RANGE> will trace for particular mnemonics<br>e.g.<br>TR I DATA 4D R 0197BC.4000<br>will trace for BAS’es ( opcode 4D ) in the range 0197BC.4000<br>if you were inclined you could add traces for all branch instructions &amp;<br>suffix them with the run prefix so you would have a backtrace on screen<br>when a program crashes.<br>TR BR <INTO OR FROM> will trace branches into or out of an address.<br>e.g.<br>TR BR INTO 0 is often quite useful if a program is getting awkward &amp; deciding<br>to branch to 0 &amp; crashing as this will stop at the address before in jumps to 0.<br>TR I R <address range> RUN cmd d g<br>single steps a range of addresses but stays running &amp;<br>displays the gprs on each step.</p>
+<h2 id="Displaying-amp-modifying-Registers"><a href="#Displaying-amp-modifying-Registers" class="headerlink" title="Displaying &amp; modifying Registers"></a>Displaying &amp; modifying Registers</h2><p>D G will display all the gprs<br>Adding a extra G to all the commands is necessary to access the full 64 bit<br>content in VM on z/Architecture obviously this isn’t required for access registers<br>as these are still 32 bit.<br>e.g. DGG instead of DG<br>D X will display all the control registers<br>D AR will display all the access registers<br>D AR4-7 will display access registers 4 to 7<br>CPU ALL D G will display the GRPS of all CPUS in the configuration<br>D PSW will display the current PSW<br>st PSW 2000 will put the value 2000 into the PSW &amp;<br>cause crash your machine.<br>D PREFIX displays the prefix offset</p>
+<h2 id="Displaying-Memory"><a href="#Displaying-Memory" class="headerlink" title="Displaying Memory"></a>Displaying Memory</h2><p>To display memory mapped using the current PSW’s mapping try<br>D <range><br>To make VM display a message each time it hits a particular address &amp; continue try<br>D I<range> will disassemble/display a range of instructions.<br>ST addr 32 bit word will store a 32 bit aligned address<br>D T<range> will display the EBCDIC in an address ( if you are that way inclined )<br>D R<range> will display real addresses ( without DAT ) but with prefixing.<br>There are other complex options to display if you need to get at say home space<br>but are in primary space the easiest thing to do is to temporarily<br>modify the PSW to the other addressing mode, display the stuff &amp; then<br>restore it.</p>
+<h2 id="Hints"><a href="#Hints" class="headerlink" title="Hints"></a>Hints</h2><p>If you want to issue a debugger command without halting your virtual machine with the<br>PA1 key try prefixing the command with #CP e.g.<br>#cp tr i pswa 2000<br>also suffixing most debugger commands with RUN will cause them not<br>to stop just display the mnemonic at the current instruction on the console.<br>If you have several breakpoints you want to put into your program &amp;<br>you get fed up of cross referencing with System.map<br>you can do the following trick for several symbols.<br>grep do_signal System.map<br>which emits the following among other things<br>0001f4e0 T do_signal<br>now you can do</p>
+<p>TR I PSWA 0001f4e0 cmd msg * do_signal<br>This sends a message to your own console each time do_signal is entered.<br>( As an aside I wrote a perl script once which automatically generated a REXX<br>script with breakpoints on every kernel procedure, this isn’t a good idea<br>because there are thousands of these routines &amp; VM can only set 255 breakpoints<br>at a time so you nearly had to spend as long pruning the file down as you would<br>entering the msg’s by hand ),however, the trick might be useful for a single object file.<br>On linux’es 3270 emulator x3270 there is a very useful option under the file ment<br>Save Screens In File this is very good of keeping a copy of traces. </p>
+<p>From CMS help <command name> will give you online help on a particular command.<br>e.g.<br>HELP DISPLAY</p>
+<p>Also CP has a file called profile.exec which automatically gets called<br>on startup of CMS ( like autoexec.bat ), keeping on a DOS analogy session<br>CP has a feature similar to doskey, it may be useful for you to<br>use profile.exec to define some keystrokes.<br>e.g.<br>SET PF9 IMM B<br>This does a single step in VM on pressing F8.<br>SET PF10  ^<br>This sets up the ^ key.<br>which can be used for ^c (ctrl-c),^z (ctrl-z) which can’t be typed directly into some 3270 consoles.<br>SET PF11 ^-<br>This types the starting keystrokes for a sysrq see SysRq below.<br>SET PF12 RETRIEVE<br>This retrieves command history on pressing F12.</p>
+<p>Sometimes in VM the display is set up to scroll automatically this<br>can be very annoying if there are messages you wish to look at<br>to stop this do<br>TERM MORE 255 255<br>This will nearly stop automatic screen updates, however it will<br>cause a denial of service if lots of messages go to the 3270 console,<br>so it would be foolish to use this as the default on a production machine.</p>
+<h2 id="Tracing-particular-processes"><a href="#Tracing-particular-processes" class="headerlink" title="Tracing particular processes"></a>Tracing particular processes</h2><p>The kernel’s text segment is intentionally at an address in memory that it will<br>very seldom collide with text segments of user programs ( thanks Martin ),<br>this simplifies debugging the kernel.<br>However it is quite common for user processes to have addresses which collide<br>this can make debugging a particular process under VM painful under normal<br>circumstances as the process may change when doing a<br>TR I R <address range>.<br>Thankfully after reading VM’s online help I figured out how to debug<br>I particular process.</p>
+<p>Your first problem is to find the STD ( segment table designation )<br>of the program you wish to debug.<br>There are several ways you can do this here are a few</p>
+<ol>
+<li>objdump –syms <program to be debugged> | grep main<br>To get the address of main in the program.<br>tr i pswa <address of main><br>Start the program, if VM drops to CP on what looks like the entry<br>point of the main function this is most likely the process you wish to debug.<br>Now do a D X13 or D XG13 on z/Architecture.<br>On 31 bit the STD is bits 1-19 ( the STO segment table origin )<br>&amp; 25-31 ( the STL segment table length ) of CR13.<br>now type<br>TR I R STD &lt;CR13’s value&gt; 0.7fffffff<br>e.g.<br>TR I R STD 8F32E1FF 0.7fffffff<br>Another very useful variation is<br>TR STORE INTO STD &lt;CR13’s value&gt; <address range><br>for finding out when a particular variable changes.</li>
+</ol>
+<p>An alternative way of finding the STD of a currently running process<br>is to do the following, ( this method is more complex but<br>could be quite convenient if you aren’t updating the kernel much &amp;<br>so your kernel structures will stay constant for a reasonable period of<br>time ).</p>
+<p>grep task /proc/<pid>/status<br>from this you should see something like<br>task: 0f160000 ksp: 0f161de8 pt_regs: 0f161f68<br>This now gives you a pointer to the task structure.<br>Now make CC:=”s390-gcc -g” kernel/sched.s<br>To get the task_struct stabinfo.<br>( task_struct is defined in include/linux/sched.h ).<br>Now we want to look at<br>task-&gt;active_mm-&gt;pgd<br>on my machine the active_mm in the task structure stab is<br>active_mm:(4,12),672,32<br>its offset is 672/8=84=0x54<br>the pgd member in the mm_struct stab is<br>pgd:(4,6)=*(29,5),96,32<br>so its offset is 96/8=12=0xc</p>
+<p>so we’ll<br>hexdump -s 0xf160054 /dev/mem | more<br>i.e. task_struct+active_mm offset<br>to look at the active_mm member<br>f160054 0fee cc60 0019 e334 0000 0000 0000 0011<br>hexdump -s 0x0feecc6c /dev/mem | more<br>i.e. active_mm+pgd offset<br>feecc6c 0f2c 0000 0000 0001 0000 0001 0000 0010<br>we get something like<br>now do<br>TR I R STD &lt;pgd|0x7f&gt; 0.7fffffff<br>i.e. the 0x7f is added because the pgd only<br>gives the page table origin &amp; we need to set the low bits<br>to the maximum possible segment table length.<br>TR I R STD 0f2c007f 0.7fffffff<br>on z/Architecture you’ll probably need to do<br>TR I R STD &lt;pgd|0x7&gt; 0.ffffffffffffffff<br>to set the TableType to 0x1 &amp; the Table length to 3.</p>
+<h2 id="Tracing-Program-Exceptions"><a href="#Tracing-Program-Exceptions" class="headerlink" title="Tracing Program Exceptions"></a>Tracing Program Exceptions</h2><p>If you get a crash which says something like<br>illegal operation or specification exception followed by a register dump<br>You can restart linux &amp; trace these using the tr prog <range or value> trace option.</p>
+<p>The most common ones you will normally be tracing for is<br>1=operation exception<br>2=privileged operation exception<br>4=protection exception<br>5=addressing exception<br>6=specification exception<br>10=segment translation exception<br>11=page translation exception</p>
+<p>The full list of these is on page 22 of the current s/390 Reference Summary.<br>e.g.<br>tr prog 10 will trace segment translation exceptions.<br>tr prog on its own will trace all program interruption codes.</p>
+<h2 id="Trace-Sets"><a href="#Trace-Sets" class="headerlink" title="Trace Sets"></a>Trace Sets</h2><p>On starting VM you are initially in the INITIAL trace set.<br>You can do a Q TR to verify this.<br>If you have a complex tracing situation where you wish to wait for instance<br>till a driver is open before you start tracing IO, but know in your<br>heart that you are going to have to make several runs through the code till you<br>have a clue whats going on. </p>
+<p>What you can do is<br>TR I PSWA <Driver open address><br>hit b to continue till breakpoint<br>reach the breakpoint<br>now do your<br>TR GOTO B<br>TR IO 7c08-7c09 inst int run<br>or whatever the IO channels you wish to trace are &amp; hit b</p>
+<p>To got back to the initial trace set do<br>TR GOTO INITIAL<br>&amp; the TR I PSWA <Driver open address> will be the only active breakpoint again.</p>
+<h2 id="Tracing-linux-syscalls-under-VM"><a href="#Tracing-linux-syscalls-under-VM" class="headerlink" title="Tracing linux syscalls under VM"></a>Tracing linux syscalls under VM</h2><p>Syscalls are implemented on Linux for S390 by the Supervisor call instruction (SVC) there 256<br>possibilities of these as the instruction is made up of a  0xA opcode &amp; the second byte being<br>the syscall number. They are traced using the simple command.<br>TR SVC  <Optional value or range><br>the syscalls are defined in linux/arch/s390/include/asm/unistd.h<br>e.g. to trace all file opens just do<br>TR SVC 5 ( as this is the syscall number of open )</p>
+<h2 id="SMP-Specific-commands"><a href="#SMP-Specific-commands" class="headerlink" title="SMP Specific commands"></a>SMP Specific commands</h2><p>To find out how many cpus you have<br>Q CPUS displays all the CPU’s available to your virtual machine<br>To find the cpu that the current cpu VM debugger commands are being directed at do<br>Q CPU to change the current cpu VM debugger commands are being directed at do<br>CPU <desired cpu no></p>
+<p>On a SMP guest issue a command to all CPUs try prefixing the command with cpu all.<br>To issue a command to a particular cpu try cpu <cpu number> e.g.<br>CPU 01 TR I R 2000.3000<br>If you are running on a guest with several cpus &amp; you have a IO related problem<br>&amp; cannot follow the flow of code but you know it isn’t smp related.<br>from the bash prompt issue<br>shutdown -h now or halt.<br>do a Q CPUS to find out how many cpus you have<br>detach each one of them from cp except cpu 0<br>by issuing a<br>DETACH CPU 01-(number of cpus in configuration)<br>&amp; boot linux again.<br>TR SIGP will trace inter processor signal processor instructions.<br>DEFINE CPU 01-(number in configuration)<br>will get your guests cpus back.</p>
+<h2 id="Help-for-displaying-ascii-textstrings"><a href="#Help-for-displaying-ascii-textstrings" class="headerlink" title="Help for displaying ascii textstrings"></a>Help for displaying ascii textstrings</h2><p>On the very latest VM Nucleus’es VM can now display ascii<br>( thanks Neale for the hint ) by doing<br>D TX<lowaddr>.<len><br>e.g.<br>D TX0.100</p>
+<h1 id="Alternatively"><a href="#Alternatively" class="headerlink" title="Alternatively"></a>Alternatively</h1><p>Under older VM debuggers ( I love EBDIC too ) you can use this little program I wrote which<br>will convert a command line of hex digits to ascii text which can be compiled under linux &amp;<br>you can copy the hex digits from your x3270 terminal to your xterm if you are debugging<br>from a linuxbox.</p>
+<p>This is quite useful when looking at a parameter passed in as a text string<br>under VM ( unless you are good at decoding ASCII in your head ).</p>
+<p>e.g. consider tracing an open syscall<br>TR SVC 5<br>We have stopped at a breakpoint<br>000151B0’ SVC   0A05     -&gt; 0001909A’   CC 0</p>
+<p>D 20.8 to check the SVC old psw in the prefix area &amp; see was it from userspace<br>( for the layout of the prefix area consult P18 of the s/390 390 Reference Summary<br>if you have it available ).<br>V00000020  070C2000 800151B2<br>The problem state bit wasn’t set &amp;  it’s also too early in the boot sequence<br>for it to be a userspace SVC if it was we would have to temporarily switch the<br>psw to user space addressing so we could get at the first parameter of the open in<br>gpr2.<br>Next do a<br>D G2<br>GPR  2 =  00014CB4<br>Now display what gpr2 is pointing to<br>D 00014CB4.20<br>V00014CB4  2F646576 2F636F6E 736F6C65 00001BF5<br>V00014CC4  FC00014C B4001001 E0001000 B8070707<br>Now copy the text till the first 00 hex ( which is the end of the string<br>to an xterm &amp; do hex2ascii on it.<br>hex2ascii 2F646576 2F636F6E 736F6C65 00<br>outputs<br>Decoded Hex:=/ d e v / c o n s o l e 0x00<br>We were opening the console device,</p>
+<p>You can compile the code below yourself for practice :-),<br>/*</p>
+<ul>
+<li>   hex2ascii.c</li>
+<li>   a useful little tool for converting a hexadecimal command line to ascii</li>
+<li></li>
+<li>   Author(s): Denis Joseph Barrow (<a href="mailto:&#100;&#106;&#98;&#97;&#114;&#114;&#111;&#119;&#64;&#100;&#x65;&#46;&#x69;&#x62;&#109;&#46;&#99;&#111;&#109;">&#100;&#106;&#98;&#97;&#114;&#114;&#111;&#119;&#64;&#100;&#x65;&#46;&#x69;&#x62;&#109;&#46;&#99;&#111;&#109;</a>,barrow_dj@yahoo.com)</li>
+<li>   (C) 2000 IBM Deutschland Entwicklung GmbH, IBM Corporation.</li>
+<li>/<br>#include &lt;stdio.h&gt;</li>
+</ul>
+<p>int main(int argc,char *argv[])<br>{<br>  int cnt1,cnt2,len,toggle=0;<br>  int startcnt=1;<br>  unsigned char c,hex;</p>
+<p>  if(argc&gt;1&amp;&amp;(strcmp(argv[1],”-a”)==0))<br>     startcnt=2;<br>  printf(“Decoded Hex:=”);<br>  for(cnt1=startcnt;cnt1&lt;argc;cnt1++)<br>  {<br>    len=strlen(argv[cnt1]);<br>    for(cnt2=0;cnt2&lt;len;cnt2++)<br>    {<br>       c=argv[cnt1][cnt2];<br>       if(c&gt;=’0’&amp;&amp;c&lt;=’9’)<br>      c=c-‘0’;<br>       if(c&gt;=’A’&amp;&amp;c&lt;=’F’)<br>      c=c-‘A’+10;<br>       if(c&gt;=’a’&amp;&amp;c&lt;=’f’)<br>      c=c-‘a’+10;<br>       switch(toggle)<br>       {<br>      case 0:<br>         hex=c&lt;&lt;4;<br>         toggle=1;<br>      break;<br>      case 1:<br>         hex+=c;<br>         if(hex&lt;32||hex&gt;127)<br>         {<br>        if(startcnt==1)<br>           printf(“0x%02X “,(int)hex);<br>        else<br>           printf(“.”);<br>         }<br>         else<br>         {<br>           printf(“%c”,hex);<br>           if(startcnt==1)<br>          printf(“ “);<br>         }<br>         toggle=0;<br>      break;<br>       }<br>    }<br>  }<br>  printf(“\n”);<br>}</p>
+<h2 id="Stack-tracing-under-VM"><a href="#Stack-tracing-under-VM" class="headerlink" title="Stack tracing under VM"></a>Stack tracing under VM</h2><h2 id="A-basic-backtrace"><a href="#A-basic-backtrace" class="headerlink" title="A basic backtrace"></a>A basic backtrace</h2><p>Here are the tricks I use 9 out of 10 times it works pretty well,</p>
+<h2 id="When-your-backchain-reaches-a-dead-end"><a href="#When-your-backchain-reaches-a-dead-end" class="headerlink" title="When your backchain reaches a dead end"></a>When your backchain reaches a dead end</h2><p>This can happen when an exception happens in the kernel &amp; the kernel is entered twice<br>if you reach the NULL pointer at the end of the back chain you should be<br>able to sniff further back if you follow the following tricks.</p>
+<ol>
+<li>A kernel address should be easy to recognise since it is in<br>primary space &amp; the problem state bit isn’t set &amp; also<br>The Hi bit of the address is set.</li>
+<li>Another backchain should also be easy to recognise since it is an<br>address pointing to another address approximately 100 bytes or 0x70 hex<br>behind the current stackpointer.</li>
+</ol>
+<p>Here is some practice.<br>boot the kernel &amp; hit PA1 at some random time<br>d g to display the gprs, this should display something like<br>GPR  0 =  00000001  00156018  0014359C  00000000<br>GPR  4 =  00000001  001B8888  000003E0  00000000<br>GPR  8 =  00100080  00100084  00000000  000FE000<br>GPR 12 =  00010400  8001B2DC  8001B36A  000FFED8<br>Note that GPR14 is a return address but as we are real men we are going to<br>trace the stack.<br>display 0x40 bytes after the stack pointer.</p>
+<p>V000FFED8  000FFF38 8001B838 80014C8E 000FFF38<br>V000FFEE8  00000000 00000000 000003E0 00000000<br>V000FFEF8  00100080 00100084 00000000 000FE000<br>V000FFF08  00010400 8001B2DC 8001B36A 000FFED8</p>
+<p>Ah now look at whats in sp+56 (sp+0x38) this is 8001B36A our saved r14 if<br>you look above at our stackframe &amp; also agrees with GPR14.</p>
+<p>now backchain<br>d 000FFF38.40<br>we now are taking the contents of SP to get our first backchain.</p>
+<p>V000FFF38  000FFFA0 00000000 00014995 00147094<br>V000FFF48  00147090 001470A0 000003E0 00000000<br>V000FFF58  00100080 00100084 00000000 001BF1D0<br>V000FFF68  00010400 800149BA 80014CA6 000FFF38</p>
+<p>This displays a 2nd return address of 80014CA6</p>
+<p>now do d 000FFFA0.40 for our 3rd backchain</p>
+<p>V000FFFA0  04B52002 0001107F 00000000 00000000<br>V000FFFB0  00000000 00000000 FF000000 0001107F<br>V000FFFC0  00000000 00000000 00000000 00000000<br>V000FFFD0  00010400 80010802 8001085A 000FFFA0</p>
+<p>our 3rd return address is 8001085A</p>
+<p>as the 04B52002 looks suspiciously like rubbish it is fair to assume that the kernel entry routines<br>for the sake of optimisation don’t set up a backchain.</p>
+<p>now look at System.map to see if the addresses make any sense.</p>
+<p>grep -i 0001b3 System.map<br>outputs among other things<br>0001b304 T cpu_idle<br>so 8001B36A<br>is cpu_idle+0x66 ( quiet the cpu is asleep, don’t wake it )</p>
+<p>grep -i 00014 System.map<br>produces among other things<br>00014a78 T start_kernel<br>so 0014CA6 is start_kernel+some hex number I can’t add in my head.</p>
+<p>grep -i 00108 System.map<br>this produces<br>00010800 T _stext<br>so   8001085A is _stext+0x5a</p>
+<p>Congrats you’ve done your first backchain.</p>
+<h1 id="s-390-amp-z-Architecture-IO-Overview"><a href="#s-390-amp-z-Architecture-IO-Overview" class="headerlink" title="s/390 &amp; z/Architecture IO Overview"></a>s/390 &amp; z/Architecture IO Overview</h1><p>I am not going to give a course in 390 IO architecture as this would take me quite a<br>while &amp; I’m no expert. Instead I’ll give a 390 IO architecture summary for Dummies if you have<br>the s/390 principles of operation available read this instead. If nothing else you may find a few<br>useful keywords in here &amp; be able to use them on a web search engine like altavista to find<br>more useful information.</p>
+<p>Unlike other bus architectures modern 390 systems do their IO using mostly<br>fibre optics &amp; devices such as tapes &amp; disks can be shared between several mainframes,<br>also S390 can support up to 65536 devices while a high end PC based system might be choking<br>with around 64. Here is some of the common IO terminology</p>
+<p>Subchannel:<br>This is the logical number most IO commands use to talk to an IO device there can be up to<br>0x10000 (65536) of these in a configuration typically there is a few hundred. Under VM<br>for simplicity they are allocated contiguously, however on the native hardware they are not<br>they typically stay consistent between boots provided no new hardware is inserted or removed.<br>Under Linux for 390 we use these as IRQ’s &amp; also when issuing an IO command (CLEAR SUBCHANNEL,<br>HALT SUBCHANNEL,MODIFY SUBCHANNEL,RESUME SUBCHANNEL,START SUBCHANNEL,STORE SUBCHANNEL &amp;<br>TEST SUBCHANNEL ) we use this as the ID of the device we wish to talk to, the most<br>important of these instructions are START SUBCHANNEL ( to start IO ), TEST SUBCHANNEL ( to check<br>whether the IO completed successfully ), &amp; HALT SUBCHANNEL ( to kill IO ), a subchannel<br>can have up to 8 channel paths to a device this offers redundancy if one is not available.</p>
+<p>Device Number:<br>This number remains static &amp; Is closely tied to the hardware, there are 65536 of these<br>also they are made up of a CHPID ( Channel Path ID, the most significant 8 bits )<br>&amp; another lsb 8 bits. These remain static even if more devices are inserted or removed<br>from the hardware, there is a 1 to 1 mapping between Subchannels &amp; Device Numbers provided<br>devices aren’t inserted or removed.</p>
+<p>Channel Control Words:<br>CCWS are linked lists of instructions initially pointed to by an operation request block (ORB),<br>which is initially given to Start Subchannel (SSCH) command along with the subchannel number<br>for the IO subsystem to process while the CPU continues executing normal code.<br>These come in two flavours, Format 0 ( 24 bit for backward )<br>compatibility &amp; Format 1 ( 31 bit ). These are typically used to issue read &amp; write<br>( &amp; many other instructions ) they consist of a length field &amp; an absolute address field.<br>For each IO typically get 1 or 2 interrupts one for channel end ( primary status ) when the<br>channel is idle &amp; the second for device end ( secondary status ) sometimes you get both<br>concurrently, you check how the IO went on by issuing a TEST SUBCHANNEL at each interrupt,<br>from which you receive an Interruption response block (IRB). If you get channel &amp; device end<br>status in the IRB without channel checks etc. your IO probably went okay. If you didn’t you<br>probably need a doctor to examine the IRB &amp; extended status word etc.<br>If an error occurs, more sophisticated control units have a facility known as<br>concurrent sense this means that if an error occurs Extended sense information will<br>be presented in the Extended status word in the IRB if not you have to issue a<br>subsequent SENSE CCW command after the test subchannel. </p>
+<p>TPI( Test pending interrupt) can also be used for polled IO but in multitasking multiprocessor<br>systems it isn’t recommended except for checking special cases ( i.e. non looping checks for<br>pending IO etc. ).</p>
+<p>Store Subchannel &amp; Modify Subchannel can be used to examine &amp; modify operating characteristics<br>of a subchannel ( e.g. channel paths ).</p>
+<p>Other IO related Terms:<br>Sysplex: S390’s Clustering Technology<br>QDIO: S390’s new high speed IO architecture to support devices such as gigabit ethernet,<br>this architecture is also designed to be forward compatible with up &amp; coming 64 bit machines.</p>
+<p>General Concepts </p>
+<p>Input Output Processors (IOP’s) are responsible for communicating between<br>the mainframe CPU’s &amp; the channel &amp; relieve the mainframe CPU’s from the<br>burden of communicating with IO devices directly, this allows the CPU’s to<br>concentrate on data processing. </p>
+<p>IOP’s can use one or more links ( known as channel paths ) to talk to each<br>IO device. It first checks for path availability &amp; chooses an available one,<br>then starts ( &amp; sometimes terminates IO ).<br>There are two types of channel path: ESCON &amp; the Parallel IO interface.</p>
+<p>IO devices are attached to control units, control units provide the<br>logic to interface the channel paths &amp; channel path IO protocols to<br>the IO devices, they can be integrated with the devices or housed separately<br>&amp; often talk to several similar devices ( typical examples would be raid<br>controllers or a control unit which connects to 1000 3270 terminals ).</p>
+<pre><code>+---------------------------------------------------------------+
+| +-----+ +-----+ +-----+ +-----+  +----------+  +----------+   |
+| | CPU | | CPU | | CPU | | CPU |  |  Main    |  | Expanded |   |
+| |     | |     | |     | |     |  |  Memory  |  |  Storage |   |
+| +-----+ +-----+ +-----+ +-----+  +----------+  +----------+   | 
+|---------------------------------------------------------------+
+|   IOP        |      IOP      |       IOP                      |
+|---------------------------------------------------------------
+| C | C | C | C | C | C | C | C | C | C | C | C | C | C | C | C | 
+----------------------------------------------------------------
+     ||                                              ||
+     ||  Bus &amp; Tag Channel Path                      || ESCON
+     ||  ======================                      || Channel
+     ||  ||                  ||                      || Path
++----------+               +----------+         +----------+
+|          |               |          |         |          |
+|    CU    |               |    CU    |         |    CU    |
+|          |               |          |         |          |
++----------+               +----------+         +----------+
+   |      |                     |                |       |
+</code></pre>
+<p>+———-+ +———-+      +———-+   +———-+ +———-+<br>|I/O Device| |I/O Device|      |I/O Device|   |I/O Device| |I/O Device|<br>+———-+ +———-+      +———-+   +———-+ +———-+<br>  CPU = Central Processing Unit<br>  C = Channel<br>  IOP = IP Processor<br>  CU = Control Unit</p>
+<p>The 390 IO systems come in 2 flavours the current 390 machines support both</p>
+<p>The Older 360 &amp; 370 Interface,sometimes called the Parallel I/O interface,<br>sometimes called Bus-and Tag &amp; sometimes Original Equipment Manufacturers<br>Interface (OEMI).</p>
+<p>This byte wide Parallel channel path/bus has parity &amp; data on the “Bus” cable<br>&amp; control lines on the “Tag” cable. These can operate in byte multiplex mode for<br>sharing between several slow devices or burst mode &amp; monopolize the channel for the<br>whole burst. Up to 256 devices can be addressed  on one of these cables. These cables are<br>about one inch in diameter. The maximum unextended length supported by these cables is<br>125 Meters but this can be extended up to 2km with a fibre optic channel extended<br>such as a 3044. The maximum burst speed supported is 4.5 megabytes per second however<br>some really old processors support only transfer rates of 3.0, 2.0 &amp; 1.0 MB/sec.<br>One of these paths can be daisy chained to up to 8 control units.</p>
+<p>ESCON if fibre optic it is also called FICON<br>Was introduced by IBM in 1990. Has 2 fibre optic cables &amp; uses either leds or lasers<br>for communication at a signaling rate of up to 200 megabits/sec. As 10bits are transferred<br>for every 8 bits info this drops to 160 megabits/sec &amp; to 18.6 Megabytes/sec once<br>control info &amp; CRC are added. ESCON only operates in burst mode.</p>
+<p>ESCONs typical max cable length is 3km for the led version &amp; 20km for the laser version<br>known as XDF ( extended distance facility ). This can be further extended by using an<br>ESCON director which triples the above mentioned ranges. Unlike Bus &amp; Tag as ESCON is<br>serial it uses a packet switching architecture the standard Bus &amp; Tag control protocol<br>is however present within the packets. Up to 256 devices can be attached to each control<br>unit that uses one of these interfaces.</p>
+<p>Common 390 Devices include:<br>Network adapters typically OSA2,3172’s,2116’s &amp; OSA-E gigabit ethernet adapters,<br>Consoles 3270 &amp; 3215 ( a teletype emulated under linux for a line mode console ).<br>DASD’s direct access storage devices ( otherwise known as hard disks ).<br>Tape Drives.<br>CTC ( Channel to Channel Adapters ),<br>ESCON or Parallel Cables used as a very high speed serial link<br>between 2 machines. We use 2 cables under linux to do a bi-directional serial link.</p>
+<h1 id="Debugging-IO-on-s-390-amp-z-Architecture-under-VM"><a href="#Debugging-IO-on-s-390-amp-z-Architecture-under-VM" class="headerlink" title="Debugging IO on s/390 &amp; z/Architecture under VM"></a>Debugging IO on s/390 &amp; z/Architecture under VM</h1><p>Now we are ready to go on with IO tracing commands under VM</p>
+<p>A few self explanatory queries:<br>Q OSA<br>Q CTC<br>Q DISK ( This command is CMS specific )<br>Q DASD</p>
+<p>Q OSA on my machine returns<br>OSA  7C08 ON OSA   7C08 SUBCHANNEL = 0000<br>OSA  7C09 ON OSA   7C09 SUBCHANNEL = 0001<br>OSA  7C14 ON OSA   7C14 SUBCHANNEL = 0002<br>OSA  7C15 ON OSA   7C15 SUBCHANNEL = 0003</p>
+<p>If you have a guest with certain privileges you may be able to see devices<br>which don’t belong to you. To avoid this, add the option V.<br>e.g.<br>Q V OSA</p>
+<p>Now using the device numbers returned by this command we will<br>Trace the io starting up on the first device 7c08 &amp; 7c09<br>In our simplest case we can trace the<br>start subchannels<br>like TR SSCH 7C08-7C09<br>or the halt subchannels<br>or TR HSCH 7C08-7C09<br>MSCH’s ,STSCH’s I think you can guess the rest</p>
+<p>Ingo’s favourite trick is tracing all the IO’s &amp; CCWS &amp; spooling them into the reader of another<br>VM guest so he can ftp the logfile back to his own machine.I’ll do a small bit of this &amp; give you<br> a look at the output.</p>
+<ol>
+<li>Spool stdout to VM reader<br>SP PRT TO (another vm guest ) or * for the local vm guest</li>
+<li>Fill the reader with the trace<br>TR IO 7c08-7c09 INST INT CCW PRT RUN</li>
+<li>Start up linux<br>i 00c  </li>
+<li>Finish the trace<br>TR END</li>
+<li>close the reader<br>C PRT</li>
+<li>list reader contents<br>RDRLIST</li>
+<li>copy it to linux4’s minidisk<br>RECEIVE / LOG TXT A1 ( replace</li>
+<li>filel &amp; press F11 to look at it<br>You should see something like:</li>
+</ol>
+<p>00020942’ SSCH  B2334000    0048813C    CC 0    SCH 0000    DEV 7C08<br>          CPA 000FFDF0   PARM 00E2C9C4    KEY 0  FPI C0  LPM 80<br>          CCW    000FFDF0  E4200100 00487FE8   0000  E4240100 ……..<br>          IDAL                                      43D8AFE8<br>          IDAL                                      0FB76000<br>00020B0A’   I/O DEV 7C08 -&gt; 000197BC’   SCH 0000   PARM 00E2C9C4<br>00021628’ TSCH  B2354000 &gt;&gt; 00488164    CC 0    SCH 0000    DEV 7C08<br>          CCWA 000FFDF8   DEV STS 0C  SCH STS 00  CNT 00EC<br>           KEY 0   FPI C0  CC 0   CTLS 4007<br>00022238’ STSCH B2344000 &gt;&gt; 00488108    CC 0    SCH 0000    DEV 7C08</p>
+<p>If you don’t like messing up your readed ( because you possibly booted from it )<br>you can alternatively spool it to another readers guest.</p>
+<h2 id="Other-common-VM-device-related-commands"><a href="#Other-common-VM-device-related-commands" class="headerlink" title="Other common VM device related commands"></a>Other common VM device related commands</h2><p>These commands are listed only because they have<br>been of use to me in the past &amp; may be of use to<br>you too. For more complete info on each of the commands<br>use type HELP <command> from CMS.<br>detaching devices<br>DET <devno range><br>ATT <devno range> <guest><br>attach a device to guest * for your own guest<br>READY <devno> cause VM to issue a fake interrupt.</p>
+<p>The VARY command is normally only available to VM administrators.<br>VARY ON PATH <path> TO <devno range><br>VARY OFF PATH <PATH> FROM <devno range><br>This is used to switch on or off channel paths to devices.</p>
+<p>Q CHPID <channel path ID><br>This displays state of devices using this channel path<br>D SCHIB <subchannel><br>This displays the subchannel information SCHIB block for the device.<br>this I believe is also only available to administrators.<br>DEFINE CTC <devno><br>defines a virtual CTC channel to channel connection<br>2 need to be defined on each guest for the CTC driver to use.<br>COUPLE  devno userid remote devno<br>Joins a local virtual device to a remote virtual device<br>( commonly used for the CTC driver ).</p>
+<p>Building a VM ramdisk under CMS which linux can use<br>def vfb-<blocksize> <subchannel> <number blocks><br>blocksize is commonly 4096 for linux.<br>Formatting it<br>format <subchannel> <driver letter e.g. x> (blksize <blocksize></p>
+<p>Sharing a disk between multiple guests<br>LINK userid devno1 devno2 mode password</p>
+<h1 id="GDB-on-S390"><a href="#GDB-on-S390" class="headerlink" title="GDB on S390"></a>GDB on S390</h1><p>N.B. if compiling for debugging gdb works better without optimisation<br>( see Compiling programs for debugging )</p>
+<h2 id="invocation"><a href="#invocation" class="headerlink" title="invocation"></a>invocation</h2><p>gdb <victim program> <optional corefile></p>
+<h2 id="Online-help"><a href="#Online-help" class="headerlink" title="Online help"></a>Online help</h2><p>help: gives help on commands<br>e.g.<br>help<br>help display<br>Note gdb’s online help is very good use it.</p>
+<h2 id="Assembly"><a href="#Assembly" class="headerlink" title="Assembly"></a>Assembly</h2><p>info registers: displays registers other than floating point.<br>info all-registers: displays floating points as well.<br>disassemble: disassembles<br>e.g.<br>disassemble without parameters will disassemble the current function<br>disassemble $pc $pc+10 </p>
+<h2 id="Viewing-amp-modifying-variables"><a href="#Viewing-amp-modifying-variables" class="headerlink" title="Viewing &amp; modifying variables"></a>Viewing &amp; modifying variables</h2><p>print or p: displays variable or register<br>e.g. p/x $sp will display the stack pointer</p>
+<p>display: prints variable or register each time program stops<br>e.g.<br>display/x $pc will display the program counter<br>display argc</p>
+<p>undisplay : undo’s display’s</p>
+<p>info breakpoints: shows all current breakpoints</p>
+<p>info stack: shows stack back trace ( if this doesn’t work too well, I’ll show you the<br>stacktrace by hand below ).</p>
+<p>info locals: displays local variables.</p>
+<p>info args: display current procedure arguments.</p>
+<p>set args: will set argc &amp; argv each time the victim program is invoked.</p>
+<p>set <variable>=value<br>set argc=100<br>set $pc=0</p>
+<h2 id="Modifying-execution"><a href="#Modifying-execution" class="headerlink" title="Modifying execution"></a>Modifying execution</h2><p>step: steps n lines of sourcecode<br>step steps 1 line.<br>step 100 steps 100 lines of code.</p>
+<p>next: like step except this will not step into subroutines</p>
+<p>stepi: steps a single machine code instruction.<br>e.g. stepi 100</p>
+<p>nexti: steps a single machine code instruction but will not step into subroutines.</p>
+<p>finish: will run until exit of the current routine</p>
+<p>run: (re)starts a program</p>
+<p>cont: continues a program</p>
+<p>quit: exits gdb.</p>
+<h2 id="breakpoints"><a href="#breakpoints" class="headerlink" title="breakpoints"></a>breakpoints</h2><p>break<br>sets a breakpoint<br>e.g.</p>
+<p>break main</p>
+<p>break *$pc</p>
+<p>break *0x400618</p>
+<p>Here’s a really useful one for large programs<br>rbr<br>Set a breakpoint for all functions matching REGEXP<br>e.g.<br>rbr 390<br>will set a breakpoint with all functions with 390 in their name.</p>
+<p>info breakpoints<br>lists all breakpoints</p>
+<p>delete: delete breakpoint by number or delete them all<br>e.g.<br>delete 1 will delete the first breakpoint<br>delete will delete them all</p>
+<p>watch: This will set a watchpoint ( usually hardware assisted ),<br>This will watch a variable till it changes<br>e.g.<br>watch cnt, will watch the variable cnt till it changes.<br>As an aside unfortunately gdb’s, architecture independent watchpoint code<br>is inconsistent &amp; not very good, watchpoints usually work but not always.</p>
+<p>info watchpoints: Display currently active watchpoints</p>
+<p>condition: ( another useful one )<br>Specify breakpoint number N to break only if COND is true.<br>Usage is `condition N COND’, where N is an integer and COND is an<br>expression to be evaluated whenever breakpoint N is reached.</p>
+<h2 id="User-defined-functions-macros"><a href="#User-defined-functions-macros" class="headerlink" title="User defined functions/macros"></a>User defined functions/macros</h2><p>define: ( Note this is very very useful,simple &amp; powerful )<br>usage define <name> <list of commands> end</p>
+<p>examples which you should consider putting into .gdbinit in your home directory<br>define d<br>stepi<br>disassemble $pc $pc+10<br>end</p>
+<p>define e<br>nexti<br>disassemble $pc $pc+10<br>end</p>
+<h2 id="Other-hard-to-classify-stuff"><a href="#Other-hard-to-classify-stuff" class="headerlink" title="Other hard to classify stuff"></a>Other hard to classify stuff</h2><p>signal n:<br>sends the victim program a signal.<br>e.g. signal 3 will send a SIGQUIT.</p>
+<p>info signals:<br>what gdb does when the victim receives certain signals.</p>
+<p>list:<br>e.g.<br>list lists current function source<br>list 1,10 list first 10 lines of current file.<br>list test.c:1,10</p>
+<p>directory:<br>Adds directories to be searched for source if gdb cannot find the source.<br>(note it is a bit sensitive about slashes)<br>e.g. To add the root of the filesystem to the searchpath do<br>directory //</p>
+<p>call <function><br>This calls a function in the victim program, this is pretty powerful<br>e.g.<br>(gdb) call printf(“hello world”)<br>outputs:<br>$1 = 11 </p>
+<p>You might now be thinking that the line above didn’t work, something extra had to be done.<br>(gdb) call fflush(stdout)<br>hello world$2 = 0<br>As an aside the debugger also calls malloc &amp; free under the hood<br>to make space for the “hello world” string.</p>
+<h2 id="hints"><a href="#hints" class="headerlink" title="hints"></a>hints</h2><ol>
+<li><p>command completion works just like bash<br>( if you are a bad typist like me this really helps )<br>e.g. hit br <TAB> &amp; cursor up &amp; down :-).</p>
+</li>
+<li><p>if you have a debugging problem that takes a few steps to recreate<br>put the steps into a file called .gdbinit in your current working directory<br>if you have defined a few extra useful user defined commands put these in<br>your home directory &amp; they will be read each time gdb is launched.</p>
+</li>
+</ol>
+<p>A typical .gdbinit file might be.<br>break main<br>run<br>break runtime_exception<br>cont </p>
+<h2 id="stack-chaining-in-gdb-by-hand"><a href="#stack-chaining-in-gdb-by-hand" class="headerlink" title="stack chaining in gdb by hand"></a>stack chaining in gdb by hand</h2><p>This is done using a the same trick described for VM<br>p/x (*($sp+56))&amp;0x7fffffff get the first backchain.</p>
+<p>For z/Architecture<br>Replace 56 with 112 &amp; ignore the &amp;0x7fffffff<br>in the macros below &amp; do nasty casts to longs like the following<br>as gdb unfortunately deals with printed arguments as ints which<br>messes up everything.<br>i.e. here is a 3rd backchain dereference<br>p/x <em>(long <em>)(**</em>(long **</em>)$sp+112)</p>
+<p>this outputs<br>$5 = 0x528f18<br>on my machine.<br>Now you can use<br>info symbol (<em>($sp+56))&amp;0x7fffffff<br>you might see something like.<br>rl_getc + 36 in section .text  telling you what is located at address 0x528f18<br>Now do.<br>p/x (</em>(<em>$sp+56))&amp;0x7fffffff<br>This outputs<br>$6 = 0x528ed0<br>Now do.<br>info symbol (</em>(<em>$sp+56))&amp;0x7fffffff<br>rl_read_key + 180 in section .text<br>now do<br>p/x (</em>(**$sp+56))&amp;0x7fffffff<br>&amp; so on.</p>
+<h2 id="Disassembling-instructions-without-debug-info"><a href="#Disassembling-instructions-without-debug-info" class="headerlink" title="Disassembling instructions without debug info"></a>Disassembling instructions without debug info</h2><p>gdb typically complains if there is a lack of debugging<br>symbols in the disassemble command with<br>“No function contains specified address.” To get around<br>this do<br>x/<number lines to disassemble>xi <address><br>e.g.<br>x/20xi 0x400730</p>
+<p>Note: Remember gdb has history just like bash you don’t need to retype the<br>whole line just use the up &amp; down arrows.</p>
+<h2 id="For-more-info"><a href="#For-more-info" class="headerlink" title="For more info"></a>For more info</h2><p>From your linuxbox do<br>man gdb or info gdb.</p>
+<h2 id="core-dumps"><a href="#core-dumps" class="headerlink" title="core dumps"></a>core dumps</h2><p>What a core dump ?,<br>A core dump is a file generated by the kernel ( if allowed ) which contains the registers,<br>&amp; all active pages of the program which has crashed.<br>From this file gdb will allow you to look at the registers &amp; stack trace &amp; memory of the<br>program as if it just crashed on your system, it is usually called core &amp; created in the<br>current working directory.<br>This is very useful in that a customer can mail a core dump to a technical support department<br>&amp; the technical support department can reconstruct what happened.<br>Provided they have an identical copy of this program with debugging symbols compiled in &amp;<br>the source base of this build is available.<br>In short it is far more useful than something like a crash log could ever hope to be.</p>
+<p>In theory all that is missing to restart a core dumped program is a kernel patch which<br>will do the following.</p>
+<ol>
+<li>Make a new kernel task structure</li>
+<li>Reload all the dumped pages back into the kernel’s memory management structures.</li>
+<li>Do the required clock fixups</li>
+<li>Get all files &amp; network connections for the process back into an identical state ( really difficult ).</li>
+<li>A few more difficult things I haven’t thought of.</li>
+</ol>
+<p>Why have I never seen one ?.<br>Probably because you haven’t used the command<br>ulimit -c unlimited in bash<br>to allow core dumps, now do<br>ulimit -a<br>to verify that the limit was accepted.</p>
+<p>A sample core dump<br>To create this I’m going to do<br>ulimit -c unlimited<br>gdb<br>to launch gdb (my victim app. ) now be bad &amp; do the following from another<br>telnet/xterm session to the same machine<br>ps -aux | grep gdb<br>kill -SIGSEGV &lt;gdb’s pid&gt;<br>or alternatively use killall -SIGSEGV gdb if you have the killall command.<br>Now look at the core dump.<br>./gdb core<br>Displays the following<br>GNU gdb 4.18<br>Copyright 1998 Free Software Foundation, Inc.<br>GDB is free software, covered by the GNU General Public License, and you are<br>welcome to change it and/or distribute copies of it under certain conditions.<br>Type “show copying” to see the conditions.<br>There is absolutely no warranty for GDB.  Type “show warranty” for details.<br>This GDB was configured as “s390-ibm-linux”…<br>Core was generated by `./gdb’.<br>Program terminated with signal 11, Segmentation fault.<br>Reading symbols from /usr/lib/libncurses.so.4…done.<br>Reading symbols from /lib/libm.so.6…done.<br>Reading symbols from /lib/libc.so.6…done.<br>Reading symbols from /lib/ld-linux.so.2…done.<br>#0  0x40126d1a in read () from /lib/libc.so.6<br>Setting up the environment for debugging gdb.<br>Breakpoint 1 at 0x4dc6f8: file utils.c, line 471.<br>Breakpoint 2 at 0x4d87a4: file top.c, line 2609.<br>(top-gdb) info stack<br>#0  0x40126d1a in read () from /lib/libc.so.6<br>#1  0x528f26 in rl_getc (stream=0x7ffffde8) at input.c:402<br>#2  0x528ed0 in rl_read_key () at input.c:381<br>#3  0x5167e6 in readline_internal_char () at readline.c:454<br>#4  0x5168ee in readline_internal_charloop () at readline.c:507<br>#5  0x51692c in readline_internal () at readline.c:521<br>#6  0x5164fe in readline (prompt=0x7ffff810 “\177ÂÃ¿ÂÃ¸x\177ÂÃ¿ÂÃ·ÂÃ\177ÂÃ¿ÂÃ¸xÂÃ”)<br>    at readline.c:349<br>#7  0x4d7a8a in command_line_input (prompt=0x564420 “(gdb) “, repeat=1,<br>    annotation_suffix=0x4d6b44 “prompt”) at top.c:2091<br>#8  0x4d6cf0 in command_loop () at top.c:1345<br>#9  0x4e25bc in main (argc=1, argv=0x7ffffdf4) at main.c:635</p>
+<h1 id="LDD"><a href="#LDD" class="headerlink" title="LDD"></a>LDD</h1><p>This is a program which lists the shared libraries which a library needs,<br>Note you also get the relocations of the shared library text segments which<br>help when using objdump –source.<br>e.g.<br> ldd ./gdb<br>outputs<br>libncurses.so.4 =&gt; /usr/lib/libncurses.so.4 (0x40018000)<br>libm.so.6 =&gt; /lib/libm.so.6 (0x4005e000)<br>libc.so.6 =&gt; /lib/libc.so.6 (0x40084000)<br>/lib/ld-linux.so.2 =&gt; /lib/ld-linux.so.2 (0x40000000)</p>
+<h1 id="Debugging-shared-libraries"><a href="#Debugging-shared-libraries" class="headerlink" title="Debugging shared libraries"></a>Debugging shared libraries</h1><p>Most programs use shared libraries, however it can be very painful<br>when you single step instruction into a function like printf for the<br>first time &amp; you end up in functions like _dl_runtime_resolve this is<br>the ld.so doing lazy binding, lazy binding is a concept in ELF where<br>shared library functions are not loaded into memory unless they are<br>actually used, great for saving memory but a pain to debug.<br>To get around this either relink the program -static or exit gdb type<br>export LD_BIND_NOW=true this will stop lazy binding &amp; restart the gdb’ing<br>the program in question.</p>
+<h1 id="Debugging-modules"><a href="#Debugging-modules" class="headerlink" title="Debugging modules"></a>Debugging modules</h1><p>As modules are dynamically loaded into the kernel their address can be<br>anywhere to get around this use the -m option with insmod to emit a load<br>map which can be piped into a file if required.</p>
+<h1 id="The-proc-file-system"><a href="#The-proc-file-system" class="headerlink" title="The proc file system"></a>The proc file system</h1><p>What is it ?.<br>It is a filesystem created by the kernel with files which are created on demand<br>by the kernel if read, or can be used to modify kernel parameters,<br>it is a powerful concept.</p>
+<p>e.g.</p>
+<p>cat /proc/sys/net/ipv4/ip_forward<br>On my machine outputs<br>0<br>telling me ip_forwarding is not on to switch it on I can do<br>echo 1 &gt;  /proc/sys/net/ipv4/ip_forward<br>cat it again<br>cat /proc/sys/net/ipv4/ip_forward<br>On my machine now outputs<br>1<br>IP forwarding is on.<br>There is a lot of useful info in here best found by going in &amp; having a look around,<br>so I’ll take you through some entries I consider important.</p>
+<p>All the processes running on the machine have their own entry defined by<br>/proc/<pid><br>So lets have a look at the init process<br>cd /proc/1</p>
+<p>cat cmdline<br>emits<br>init [2]</p>
+<p>cd /proc/1/fd<br>This contains numerical entries of all the open files,<br>some of these you can cat e.g. stdout (2)</p>
+<p>cat /proc/29/maps<br>on my machine emits</p>
+<p>00400000-00478000 r-xp 00000000 5f:00 4103       /bin/bash<br>00478000-0047e000 rw-p 00077000 5f:00 4103       /bin/bash<br>0047e000-00492000 rwxp 00000000 00:00 0<br>40000000-40015000 r-xp 00000000 5f:00 14382      /lib/ld-2.1.2.so<br>40015000-40016000 rw-p 00014000 5f:00 14382      /lib/ld-2.1.2.so<br>40016000-40017000 rwxp 00000000 00:00 0<br>40017000-40018000 rw-p 00000000 00:00 0<br>40018000-4001b000 r-xp 00000000 5f:00 14435      /lib/libtermcap.so.2.0.8<br>4001b000-4001c000 rw-p 00002000 5f:00 14435      /lib/libtermcap.so.2.0.8<br>4001c000-4010d000 r-xp 00000000 5f:00 14387      /lib/libc-2.1.2.so<br>4010d000-40111000 rw-p 000f0000 5f:00 14387      /lib/libc-2.1.2.so<br>40111000-40114000 rw-p 00000000 00:00 0<br>40114000-4011e000 r-xp 00000000 5f:00 14408      /lib/libnss_files-2.1.2.so<br>4011e000-4011f000 rw-p 00009000 5f:00 14408      /lib/libnss_files-2.1.2.so<br>7fffd000-80000000 rwxp ffffe000 00:00 0</p>
+<p>Showing us the shared libraries init uses where they are in memory<br>&amp; memory access permissions for each virtual memory area.</p>
+<p>/proc/1/cwd is a softlink to the current working directory.<br>/proc/1/root is the root of the filesystem for this process. </p>
+<p>/proc/1/mem is the current running processes memory which you<br>can read &amp; write to like a file.<br>strace uses this sometimes as it is a bit faster than the<br>rather inefficient ptrace interface for peeking at DATA.</p>
+<p>cat status </p>
+<p>Name:   init<br>State:  S (sleeping)<br>Pid:    1<br>PPid:   0<br>Uid:    0       0       0       0<br>Gid:    0       0       0       0<br>Groups:<br>VmSize:      408 kB<br>VmLck:         0 kB<br>VmRSS:       208 kB<br>VmData:       24 kB<br>VmStk:         8 kB<br>VmExe:       368 kB<br>VmLib:         0 kB<br>SigPnd: 0000000000000000<br>SigBlk: 0000000000000000<br>SigIgn: 7fffffffd7f0d8fc<br>SigCgt: 00000000280b2603<br>CapInh: 00000000fffffeff<br>CapPrm: 00000000ffffffff<br>CapEff: 00000000fffffeff</p>
+<p>User PSW:    070de000 80414146<br>task: 004b6000 tss: 004b62d8 ksp: 004b7ca8 pt_regs: 004b7f68<br>User GPRS:<br>00000400  00000000  0000000b  7ffffa90<br>00000000  00000000  00000000  0045d9f4<br>0045cafc  7ffffa90  7fffff18  0045cb08<br>00010400  804039e8  80403af8  7ffff8b0<br>User ACRS:<br>00000000  00000000  00000000  00000000<br>00000001  00000000  00000000  00000000<br>00000000  00000000  00000000  00000000<br>00000000  00000000  00000000  00000000<br>Kernel BackChain  CallChain    BackChain  CallChain<br>       004b7ca8   8002bd0c     004b7d18   8002b92c<br>       004b7db8   8005cd50     004b7e38   8005d12a<br>       004b7f08   80019114<br>Showing among other things memory usage &amp; status of some signals &amp;<br>the processes’es registers from the kernel task_structure<br>as well as a backchain which may be useful if a process crashes<br>in the kernel for some unknown reason.</p>
+<h1 id="Some-driver-debugging-techniques"><a href="#Some-driver-debugging-techniques" class="headerlink" title="Some driver debugging techniques"></a>Some driver debugging techniques</h1><h2 id="debug-feature"><a href="#debug-feature" class="headerlink" title="debug feature"></a>debug feature</h2><p>Some of our drivers now support a “debug feature” in<br>/proc/s390dbf see s390dbf.txt in the linux/Documentation directory<br>for more info.<br>e.g.<br>to switch on the lcs “debug feature”<br>echo 5 &gt; /proc/s390dbf/lcs/level<br>&amp; then after the error occurred.<br>cat /proc/s390dbf/lcs/sprintf &gt;/logfile<br>the logfile now contains some information which may help<br>tech support resolve a problem in the field.</p>
+<h2 id="high-level-debugging-network-drivers"><a href="#high-level-debugging-network-drivers" class="headerlink" title="high level debugging network drivers"></a>high level debugging network drivers</h2><p>ifconfig is a quite useful command<br>it gives the current state of network drivers.</p>
+<p>If you suspect your network device driver is dead<br>one way to check is type<br>ifconfig <network device><br>e.g. tr0<br>You should see something like<br>tr0       Link encap:16/4 Mbps Token Ring (New)  HWaddr 00:04:AC:20:8E:48<br>          inet addr:9.164.185.132  Bcast:9.164.191.255  Mask:255.255.224.0<br>          UP BROADCAST RUNNING MULTICAST  MTU:2000  Metric:1<br>          RX packets:246134 errors:0 dropped:0 overruns:0 frame:0<br>          TX packets:5 errors:0 dropped:0 overruns:0 carrier:0<br>          collisions:0 txqueuelen:100</p>
+<p>if the device doesn’t say up<br>try<br>/etc/rc.d/init.d/network start<br>( this starts the network stack &amp; hopefully calls ifconfig tr0 up ).<br>ifconfig looks at the output of /proc/net/dev &amp; presents it in a more presentable form<br>Now ping the device from a machine in the same subnet.<br>if the RX packets count &amp; TX packets counts don’t increment you probably<br>have problems.<br>next<br>cat /proc/net/arp<br>Do you see any hardware addresses in the cache if not you may have problems.<br>Next try<br>ping -c 5 <broadcast_addr> i.e. the Bcast field above in the output of<br>ifconfig. Do you see any replies from machines other than the local machine<br>if not you may have problems. also if the TX packets count in ifconfig<br>hasn’t incremented either you have serious problems in your driver<br>(e.g. the txbusy field of the network device being stuck on )<br>or you may have multiple network devices connected.</p>
+<h2 id="chandev"><a href="#chandev" class="headerlink" title="chandev"></a>chandev</h2><p>There is a new device layer for channel devices, some<br>drivers e.g. lcs are registered with this layer.<br>If the device uses the channel device layer you’ll be<br>able to find what interrupts it uses &amp; the current state<br>of the device.<br>See the manpage chandev.8 &amp;type cat /proc/chandev for more info.</p>
+<h1 id="Starting-points-for-debugging-scripting-languages-etc"><a href="#Starting-points-for-debugging-scripting-languages-etc" class="headerlink" title="Starting points for debugging scripting languages etc."></a>Starting points for debugging scripting languages etc.</h1><p>bash/sh</p>
+<p>bash -x <scriptname><br>e.g. bash -x /usr/bin/bashbug<br>displays the following lines as it executes them.</p>
+<ul>
+<li>MACHINE=i586</li>
+<li>OS=linux-gnu</li>
+<li>CC=gcc</li>
+<li>CFLAGS= -DPROGRAM=’bash’ -DHOSTTYPE=’i586’ -DOSTYPE=’linux-gnu’ -DMACHTYPE=’i586-pc-linux-gnu’ -DSHELL -DHAVE_CONFIG_H   -I. -I. -I./lib -O2 -pipe</li>
+<li>RELEASE=2.01</li>
+<li>PATCHLEVEL=1</li>
+<li>RELSTATUS=release</li>
+<li>MACHTYPE=i586-pc-linux-gnu   </li>
+</ul>
+<p>perl -d <scriptname> runs the perlscript in a fully interactive debugger<br><like gdb>.<br>Type ‘h’ in the debugger for help.</p>
+<p>for debugging java type<br>jdb <filename> another fully interactive gdb style debugger.<br>&amp; type ? in the debugger for help.</p>
+<h1 id="SysRq"><a href="#SysRq" class="headerlink" title="SysRq"></a>SysRq</h1><p>This is now supported by linux for s/390 &amp; z/Architecture.<br>To enable it do compile the kernel with<br>Kernel Hacking -&gt; Magic SysRq Key Enabled<br>echo “1” &gt; /proc/sys/kernel/sysrq<br>also type<br>echo “8” &gt;/proc/sys/kernel/printk<br>To make printk output go to console.<br>On 390 all commands are prefixed with<br>^-<br>e.g.<br>^-t will show tasks.<br>^-? or some unknown command will display help.<br>The sysrq key reading is very picky ( I have to type the keys in an<br> xterm session &amp; paste them  into the x3270 console )<br>&amp; it may be wise to predefine the keys as described in the VM hints above</p>
+<p>This is particularly useful for syncing disks unmounting &amp; rebooting<br>if the machine gets partially hung.</p>
+<p>Read Documentation/sysrq.txt for more info</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References:"></a>References:</h1><p>Enterprise Systems Architecture Reference Summary<br>Enterprise Systems Architecture Principles of Operation<br>Hartmut Penners s390 stack frame sheet.<br>IBM Mainframe Channel Attachment a technology brief from a CISCO webpage<br>Various bits of man &amp; info pages of Linux.<br>Linux &amp; GDB source.<br>Various info &amp; man pages.<br>CMS Help on tracing commands.<br>Linux for s/390 Elf Application Binary Interface<br>Linux for z/Series Elf Application Binary Interface ( Both Highly Recommended )<br>z/Architecture Principles of Operation SA22-7832-00<br>Enterprise Systems Architecture/390 Reference Summary SA22-7209-01 &amp; the<br>Enterprise Systems Architecture/390 Principles of Operation SA22-7201-05</p>
+<h1 id="Special-Thanks"><a href="#Special-Thanks" class="headerlink" title="Special Thanks"></a>Special Thanks</h1><p>Special thanks to Neale Ferguson who maintains a much<br>prettier HTML version of this page at<br><a target="_blank" rel="noopener" href="http://linuxvm.org/penguinvm/">http://linuxvm.org/penguinvm/</a><br>Bob Grainger Stefan Bader &amp; others for reporting bugs</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/" title="Kernel-3.10.0-957.el7_Debugging390" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_Debugging390/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_v4l2-framework/" title="Kernel-3.10.0-957.el7_v4l2-framework"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_memory-barriers/" title="Kernel-3.10.0-957.el7_memory-barriers"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

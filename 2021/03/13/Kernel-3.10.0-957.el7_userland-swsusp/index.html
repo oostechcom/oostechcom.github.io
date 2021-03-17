@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_userland-swsusp | oosTech.com</title>
+  <meta name="description" content="Documentation for userland software suspend interface    (C) 2006 Rafael J. Wysocki &amp;#x72;&amp;#x6a;&amp;#x77;&amp;#x40;&amp;#115;&amp;#105;&amp;#x73;&amp;#x6b;&amp;#x2e;&amp;#x70;&amp;#108; First, the warnings at the beginning of swsusp.tx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_userland-swsusp">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Documentation for userland software suspend interface    (C) 2006 Rafael J. Wysocki &amp;#x72;&amp;#x6a;&amp;#x77;&amp;#x40;&amp;#115;&amp;#105;&amp;#x73;&amp;#x6b;&amp;#x2e;&amp;#x70;&amp;#108; First, the warnings at the beginning of swsusp.tx">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_userland-swsusp" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_userland-swsusp
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Documentation for userland software suspend interface<br>    (C) 2006 Rafael J. Wysocki <a href="mailto:&#x72;&#x6a;&#x77;&#x40;&#115;&#105;&#x73;&#x6b;&#x2e;&#x70;&#108;">&#x72;&#x6a;&#x77;&#x40;&#115;&#105;&#x73;&#x6b;&#x2e;&#x70;&#108;</a></p>
+<p>First, the warnings at the beginning of swsusp.txt still apply.</p>
+<p>Second, you should read the FAQ in swsusp.txt <em>now</em> if you have not<br>done it already.</p>
+<p>Now, to use the userland interface for software suspend you need special<br>utilities that will read/write the system memory snapshot from/to the<br>kernel.  Such utilities are available, for example, from<br><a target="_blank" rel="noopener" href="http://suspend.sourceforge.net/">http://suspend.sourceforge.net</a>.  You may want to have a look at them if you<br>are going to develop your own suspend/resume utilities.</p>
+<p>The interface consists of a character device providing the open(),<br>release(), read(), and write() operations as well as several ioctl()<br>commands defined in include/linux/suspend_ioctls.h .  The major and minor<br>numbers of the device are, respectively, 10 and 231, and they can<br>be read from /sys/class/misc/snapshot/dev.</p>
+<p>The device can be open either for reading or for writing.  If open for<br>reading, it is considered to be in the suspend mode.  Otherwise it is<br>assumed to be in the resume mode.  The device cannot be open for simultaneous<br>reading and writing.  It is also impossible to have the device open more than<br>once at a time.</p>
+<p>Even opening the device has side effects. Data structures are<br>allocated, and PM_HIBERNATION_PREPARE / PM_RESTORE_PREPARE chains are<br>called.</p>
+<p>The ioctl() commands recognized by the device are:</p>
+<p>SNAPSHOT_FREEZE - freeze user space processes (the current process is<br>    not frozen); this is required for SNAPSHOT_CREATE_IMAGE<br>    and SNAPSHOT_ATOMIC_RESTORE to succeed</p>
+<p>SNAPSHOT_UNFREEZE - thaw user space processes frozen by SNAPSHOT_FREEZE</p>
+<p>SNAPSHOT_CREATE_IMAGE - create a snapshot of the system memory; the<br>    last argument of ioctl() should be a pointer to an int variable,<br>    the value of which will indicate whether the call returned after<br>    creating the snapshot (1) or after restoring the system memory state<br>    from it (0) (after resume the system finds itself finishing the<br>    SNAPSHOT_CREATE_IMAGE ioctl() again); after the snapshot<br>    has been created the read() operation can be used to transfer<br>    it out of the kernel</p>
+<p>SNAPSHOT_ATOMIC_RESTORE - restore the system memory state from the<br>    uploaded snapshot image; before calling it you should transfer<br>    the system memory snapshot back to the kernel using the write()<br>    operation; this call will not succeed if the snapshot<br>    image is not available to the kernel</p>
+<p>SNAPSHOT_FREE - free memory allocated for the snapshot image</p>
+<p>SNAPSHOT_PREF_IMAGE_SIZE - set the preferred maximum size of the image<br>    (the kernel will do its best to ensure the image size will not exceed<br>    this number, but if it turns out to be impossible, the kernel will<br>    create the smallest image possible)</p>
+<p>SNAPSHOT_GET_IMAGE_SIZE - return the actual size of the hibernation image</p>
+<p>SNAPSHOT_AVAIL_SWAP_SIZE - return the amount of available swap in bytes (the<br>    last argument should be a pointer to an unsigned int variable that will<br>    contain the result if the call is successful).</p>
+<p>SNAPSHOT_ALLOC_SWAP_PAGE - allocate a swap page from the resume partition<br>    (the last argument should be a pointer to a loff_t variable that<br>    will contain the swap page offset if the call is successful)</p>
+<p>SNAPSHOT_FREE_SWAP_PAGES - free all swap pages allocated by<br>    SNAPSHOT_ALLOC_SWAP_PAGE</p>
+<p>SNAPSHOT_SET_SWAP_AREA - set the resume partition and the offset (in <PAGE_SIZE><br>    units) from the beginning of the partition at which the swap header is<br>    located (the last ioctl() argument should point to a struct<br>    resume_swap_area, as defined in kernel/power/suspend_ioctls.h,<br>    containing the resume device specification and the offset); for swap<br>    partitions the offset is always 0, but it is different from zero for<br>    swap files (see Documentation/power/swsusp-and-swap-files.txt for<br>    details).</p>
+<p>SNAPSHOT_PLATFORM_SUPPORT - enable/disable the hibernation platform support,<br>    depending on the argument value (enable, if the argument is nonzero)</p>
+<p>SNAPSHOT_POWER_OFF - make the kernel transition the system to the hibernation<br>    state (eg. ACPI S4) using the platform (eg. ACPI) driver</p>
+<p>SNAPSHOT_S2RAM - suspend to RAM; using this call causes the kernel to<br>    immediately enter the suspend-to-RAM state, so this call must always<br>    be preceded by the SNAPSHOT_FREEZE call and it is also necessary<br>    to use the SNAPSHOT_UNFREEZE call after the system wakes up.  This call<br>    is needed to implement the suspend-to-both mechanism in which the<br>    suspend image is first created, as though the system had been suspended<br>    to disk, and then the system is suspended to RAM (this makes it possible<br>    to resume the system from RAM if there’s enough battery power or restore<br>    its state on the basis of the saved suspend image otherwise)</p>
+<p>The device’s read() operation can be used to transfer the snapshot image from<br>the kernel.  It has the following limitations:</p>
+<ul>
+<li>you cannot read() more than one virtual memory page at a time</li>
+<li>read()s across page boundaries are impossible (ie. if ypu read() 1/2 of<br>  a page in the previous call, you will only be able to read()<br>  <em>at</em> <em>most</em> 1/2 of the page in the next call)</li>
+</ul>
+<p>The device’s write() operation is used for uploading the system memory snapshot<br>into the kernel.  It has the same limitations as the read() operation.</p>
+<p>The release() operation frees all memory allocated for the snapshot image<br>and all swap pages allocated with SNAPSHOT_ALLOC_SWAP_PAGE (if any).<br>Thus it is not necessary to use either SNAPSHOT_FREE or<br>SNAPSHOT_FREE_SWAP_PAGES before closing the device (in fact it will also<br>unfreeze user space processes frozen by SNAPSHOT_UNFREEZE if they are<br>still frozen when the device is being closed).</p>
+<p>Currently it is assumed that the userland utilities reading/writing the<br>snapshot image from/to the kernel will use a swap partition, called the resume<br>partition, or a swap file as storage space (if a swap file is used, the resume<br>partition is the partition that holds this file).  However, this is not really<br>required, as they can use, for example, a special (blank) suspend partition or<br>a file on a partition that is unmounted before SNAPSHOT_CREATE_IMAGE and<br>mounted afterwards.</p>
+<p>These utilities MUST NOT make any assumptions regarding the ordering of<br>data within the snapshot image.  The contents of the image are entirely owned<br>by the kernel and its structure may be changed in future kernel releases.</p>
+<p>The snapshot image MUST be written to the kernel unaltered (ie. all of the image<br>data, metadata and header MUST be written in <em>exactly</em> the same amount, form<br>and order in which they have been read).  Otherwise, the behavior of the<br>resumed system may be totally unpredictable.</p>
+<p>While executing SNAPSHOT_ATOMIC_RESTORE the kernel checks if the<br>structure of the snapshot image is consistent with the information stored<br>in the image header.  If any inconsistencies are detected,<br>SNAPSHOT_ATOMIC_RESTORE will not succeed.  Still, this is not a fool-proof<br>mechanism and the userland utilities using the interface SHOULD use additional<br>means, such as checksums, to ensure the integrity of the snapshot image.</p>
+<p>The suspending and resuming utilities MUST lock themselves in memory,<br>preferably using mlockall(), before calling SNAPSHOT_FREEZE.</p>
+<p>The suspending utility MUST check the value stored by SNAPSHOT_CREATE_IMAGE<br>in the memory location pointed to by the last argument of ioctl() and proceed<br>in accordance with it:</p>
+<ol>
+<li> If the value is 1 (ie. the system memory snapshot has just been<br> created and the system is ready for saving it):<br> (a)    The suspending utility MUST NOT close the snapshot device<pre><code> _unless_ the whole suspend procedure is to be cancelled, in
+ which case, if the snapshot image has already been saved, the
+ suspending utility SHOULD destroy it, preferably by zapping
+ its header.  If the suspend is not to be cancelled, the
+ system MUST be powered off or rebooted after the snapshot
+ image has been saved.
+</code></pre>
+ (b)    The suspending utility SHOULD NOT attempt to perform any<pre><code> file system operations (including reads) on the file systems
+ that were mounted before SNAPSHOT_CREATE_IMAGE has been
+ called.  However, it MAY mount a file system that was not
+ mounted at that time and perform some operations on it (eg.
+ use it for saving the image).
+</code></pre>
+</li>
+<li>If the value is 0 (ie. the system state has just been restored from<br> the snapshot image), the suspending utility MUST close the snapshot<br> device.  Afterwards it will be treated as a regular userland process,<br> so it need not exit.</li>
+</ol>
+<p>The resuming utility SHOULD NOT attempt to mount any file systems that could<br>be mounted before suspend and SHOULD NOT attempt to perform any operations<br>involving such file systems.</p>
+<p>For details, please refer to the source code.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/" title="Kernel-3.10.0-957.el7_userland-swsusp" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/" title="Kernel-3.10.0-957.el7_userfaultf"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_uvcvideo/" title="Kernel-3.10.0-957.el7_uvcvideo"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

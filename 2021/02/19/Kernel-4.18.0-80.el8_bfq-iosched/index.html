@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_bfq-iosche | oosTech.com</title>
+  <meta name="description" content="BFQ (Budget Fair Queueing)BFQ is a proportional-share I&#x2F;O scheduler, with some extralow-latency capabilities. In addition to cgroups support (blkio or iocontrollers), BFQ’s main features are:  BFQ gua">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_bfq-iosche">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="BFQ (Budget Fair Queueing)BFQ is a proportional-share I&#x2F;O scheduler, with some extralow-latency capabilities. In addition to cgroups support (blkio or iocontrollers), BFQ’s main features are:  BFQ gua">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#BFQ-Budget-Fair-Queueing"><span class="toc-number">1.</span> <span class="toc-text">BFQ (Budget Fair Queueing)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#When-may-BFQ-be-useful"><span class="toc-number">2.</span> <span class="toc-text">When may BFQ be useful?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-Personal-systems"><span class="toc-number">2.1.</span> <span class="toc-text">1-1 Personal systems</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-Server-systems"><span class="toc-number">2.2.</span> <span class="toc-text">1-2 Server systems</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#How-does-BFQ-work"><span class="toc-number">3.</span> <span class="toc-text">How does BFQ work?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#What-are-BFQ%E2%80%99s-tunables-and-how-to-properly-configure-BFQ"><span class="toc-number">4.</span> <span class="toc-text">What are BFQ’s tunables and how to properly configure BFQ?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#per-process-ioprio-and-weight"><span class="toc-number">4.1.</span> <span class="toc-text">per-process ioprio and weight</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#slice-idle"><span class="toc-number">4.2.</span> <span class="toc-text">slice_idle</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#strict-guarantees"><span class="toc-number">4.3.</span> <span class="toc-text">strict_guarantees</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#back-seek-max"><span class="toc-number">4.4.</span> <span class="toc-text">back_seek_max</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#back-seek-penalty"><span class="toc-number">4.5.</span> <span class="toc-text">back_seek_penalty</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fifo-expire-async"><span class="toc-number">4.6.</span> <span class="toc-text">fifo_expire_async</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fifo-expire-sync"><span class="toc-number">4.7.</span> <span class="toc-text">fifo_expire_sync</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#low-latency"><span class="toc-number">4.8.</span> <span class="toc-text">low_latency</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#timeout-sync"><span class="toc-number">4.9.</span> <span class="toc-text">timeout_sync</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#max-budget"><span class="toc-number">4.10.</span> <span class="toc-text">max_budget</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#weights"><span class="toc-number">4.11.</span> <span class="toc-text">weights</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Group-scheduling-with-BFQ"><span class="toc-number">5.</span> <span class="toc-text">Group scheduling with BFQ</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-Service-guarantees-provided"><span class="toc-number">5.1.</span> <span class="toc-text">4-1 Service guarantees provided</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-Interface"><span class="toc-number">5.2.</span> <span class="toc-text">4-2 Interface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Parameters-to-set"><span class="toc-number">5.3.</span> <span class="toc-text">Parameters to set</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_bfq-iosched" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_bfq-iosche
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="BFQ-Budget-Fair-Queueing"><a href="#BFQ-Budget-Fair-Queueing" class="headerlink" title="BFQ (Budget Fair Queueing)"></a>BFQ (Budget Fair Queueing)</h1><p>BFQ is a proportional-share I/O scheduler, with some extra<br>low-latency capabilities. In addition to cgroups support (blkio or io<br>controllers), BFQ’s main features are:</p>
+<ul>
+<li>BFQ guarantees a high system and application responsiveness, and a<br>low latency for time-sensitive applications, such as audio or video<br>players;</li>
+<li>BFQ distributes bandwidth, and not just time, among processes or<br>groups (switching back to time distribution when needed to keep<br>throughput high).</li>
+</ul>
+<p>In its default configuration, BFQ privileges latency over<br>throughput. So, when needed for achieving a lower latency, BFQ builds<br>schedules that may lead to a lower throughput. If your main or only<br>goal, for a given device, is to achieve the maximum-possible<br>throughput at all times, then do switch off all low-latency heuristics<br>for that device, by setting low_latency to 0. See Section 3 for<br>details on how to configure BFQ for the desired tradeoff between<br>latency and throughput, or on how to maximize throughput.</p>
+<p>BFQ has a non-null overhead, which limits the maximum IOPS that a CPU<br>can process for a device scheduled with BFQ. To give an idea of the<br>limits on slow or average CPUs, here are, first, the limits of BFQ for<br>three different CPUs, on, respectively, an average laptop, an old<br>desktop, and a cheap embedded system, in case full hierarchical<br>support is enabled (i.e., CONFIG_BFQ_GROUP_IOSCHED is set), but<br>CONFIG_DEBUG_BLK_CGROUP is not set (Section 4-2):</p>
+<ul>
+<li>Intel i7-4850HQ: 400 KIOPS</li>
+<li>AMD A8-3850: 250 KIOPS</li>
+<li>ARM CortexTM-A53 Octa-core: 80 KIOPS</li>
+</ul>
+<p>If CONFIG_DEBUG_BLK_CGROUP is set (and of course full hierarchical<br>support is enabled), then the sustainable throughput with BFQ<br>decreases, because all blkio.bfq* statistics are created and updated<br>(Section 4-2). For BFQ, this leads to the following maximum<br>sustainable throughputs, on the same systems as above:</p>
+<ul>
+<li>Intel i7-4850HQ: 310 KIOPS</li>
+<li>AMD A8-3850: 200 KIOPS</li>
+<li>ARM CortexTM-A53 Octa-core: 56 KIOPS</li>
+</ul>
+<p>BFQ works for multi-queue devices too.</p>
+<p>The table of contents follow. Impatients can just jump to Section 3.</p>
+<p>CONTENTS</p>
+<ol>
+<li><p>When may BFQ be useful?<br>1-1 Personal systems<br>1-2 Server systems</p>
+</li>
+<li><p>How does BFQ work?</p>
+</li>
+<li><p>What are BFQ’s tunables and how to properly configure BFQ?</p>
+</li>
+<li><p>BFQ group scheduling<br>4-1 Service guarantees provided<br>4-2 Interface</p>
+</li>
+<li><h1 id="When-may-BFQ-be-useful"><a href="#When-may-BFQ-be-useful" class="headerlink" title="When may BFQ be useful?"></a>When may BFQ be useful?</h1></li>
+</ol>
+<p>BFQ provides the following benefits on personal and server systems.</p>
+<h2 id="1-1-Personal-systems"><a href="#1-1-Personal-systems" class="headerlink" title="1-1 Personal systems"></a>1-1 Personal systems</h2><p>Low latency for interactive applications</p>
+<p>Regardless of the actual background workload, BFQ guarantees that, for<br>interactive tasks, the storage device is virtually as responsive as if<br>it was idle. For example, even if one or more of the following<br>background workloads are being executed:</p>
+<ul>
+<li>one or more large files are being read, written or copied,</li>
+<li>a tree of source files is being compiled,</li>
+<li>one or more virtual machines are performing I/O,</li>
+<li>a software update is in progress,</li>
+<li>indexing daemons are scanning filesystems and updating their<br>databases,<br>starting an application or loading a file from within an application<br>takes about the same time as if the storage device was idle. As a<br>comparison, with CFQ, NOOP or DEADLINE, and in the same conditions,<br>applications experience high latencies, or even become unresponsive<br>until the background workload terminates (also on SSDs).</li>
+</ul>
+<p>Low latency for soft real-time applications</p>
+<p>Also soft real-time applications, such as audio and video<br>players/streamers, enjoy a low latency and a low drop rate, regardless<br>of the background I/O workload. As a consequence, these applications<br>do not suffer from almost any glitch due to the background workload.</p>
+<p>Higher speed for code-development tasks</p>
+<p>If some additional workload happens to be executed in parallel, then<br>BFQ executes the I/O-related components of typical code-development<br>tasks (compilation, checkout, merge, …) much more quickly than CFQ,<br>NOOP or DEADLINE.</p>
+<p>High throughput</p>
+<p>On hard disks, BFQ achieves up to 30% higher throughput than CFQ, and<br>up to 150% higher throughput than DEADLINE and NOOP, with all the<br>sequential workloads considered in our tests. With random workloads,<br>and with all the workloads on flash-based devices, BFQ achieves,<br>instead, about the same throughput as the other schedulers.</p>
+<p>Strong fairness, bandwidth and delay guarantees</p>
+<p>BFQ distributes the device throughput, and not just the device time,<br>among I/O-bound applications in proportion their weights, with any<br>workload and regardless of the device parameters. From these bandwidth<br>guarantees, it is possible to compute tight per-I/O-request delay<br>guarantees by a simple formula. If not configured for strict service<br>guarantees, BFQ switches to time-based resource sharing (only) for<br>applications that would otherwise cause a throughput loss.</p>
+<h2 id="1-2-Server-systems"><a href="#1-2-Server-systems" class="headerlink" title="1-2 Server systems"></a>1-2 Server systems</h2><p>Most benefits for server systems follow from the same service<br>properties as above. In particular, regardless of whether additional,<br>possibly heavy workloads are being served, BFQ guarantees:</p>
+<p>. audio and video-streaming with zero or very low jitter and drop<br>  rate;</p>
+<p>. fast retrieval of WEB pages and embedded objects;</p>
+<p>. real-time recording of data in live-dumping applications (e.g.,<br>  packet logging);</p>
+<p>. responsiveness in local and remote access to a server.</p>
+<ol start="2">
+<li><h1 id="How-does-BFQ-work"><a href="#How-does-BFQ-work" class="headerlink" title="How does BFQ work?"></a>How does BFQ work?</h1></li>
+</ol>
+<p>BFQ is a proportional-share I/O scheduler, whose general structure,<br>plus a lot of code, are borrowed from CFQ.</p>
+<ul>
+<li><p>Each process doing I/O on a device is associated with a weight and a<br>(bfq_)queue.</p>
+</li>
+<li><p>BFQ grants exclusive access to the device, for a while, to one queue<br>(process) at a time, and implements this service model by<br>associating every queue with a budget, measured in number of<br>sectors.</p>
+<ul>
+<li><p>After a queue is granted access to the device, the budget of the<br>queue is decremented, on each request dispatch, by the size of the<br>request.</p>
+</li>
+<li><p>The in-service queue is expired, i.e., its service is suspended,<br>only if one of the following events occurs: 1) the queue finishes<br>its budget, 2) the queue empties, 3) a “budget timeout” fires.</p>
+<ul>
+<li><p>The budget timeout prevents processes doing random I/O from<br>holding the device for too long and dramatically reducing<br>throughput.</p>
+</li>
+<li><p>Actually, as in CFQ, a queue associated with a process issuing<br>sync requests may not be expired immediately when it empties. In<br>contrast, BFQ may idle the device for a short time interval,<br>giving the process the chance to go on being served if it issues<br>a new request in time. Device idling typically boosts the<br>throughput on rotational devices and on non-queueing flash-based<br>devices, if processes do synchronous and sequential I/O. In<br>addition, under BFQ, device idling is also instrumental in<br>guaranteeing the desired throughput fraction to processes<br>issuing sync requests (see the description of the slice_idle<br>tunable in this document, or [1, 2], for more details).</p>
+<ul>
+<li>With respect to idling for service guarantees, if several<br>processes are competing for the device at the same time, but<br>all processes and groups have the same weight, then BFQ<br>guarantees the expected throughput distribution without ever<br>idling the device. Throughput is thus as high as possible in<br>this common scenario.</li>
+</ul>
+</li>
+<li><p>On flash-based storage with internal queueing of commands<br>(typically NCQ), device idling happens to be always detrimental<br>for throughput. So, with these devices, BFQ performs idling<br>only when strictly needed for service guarantees, i.e., for<br>guaranteeing low latency or fairness. In these cases, overall<br>throughput may be sub-optimal. No solution currently exists to<br>provide both strong service guarantees and optimal throughput<br>on devices with internal queueing.</p>
+</li>
+</ul>
+</li>
+<li><p>If low-latency mode is enabled (default configuration), BFQ<br>executes some special heuristics to detect interactive and soft<br>real-time applications (e.g., video or audio players/streamers),<br>and to reduce their latency. The most important action taken to<br>achieve this goal is to give to the queues associated with these<br>applications more than their fair share of the device<br>throughput. For brevity, we call just “weight-raising” the whole<br>sets of actions taken by BFQ to privilege these queues. In<br>particular, BFQ provides a milder form of weight-raising for<br>interactive applications, and a stronger form for soft real-time<br>applications.</p>
+</li>
+<li><p>BFQ automatically deactivates idling for queues born in a burst of<br>queue creations. In fact, these queues are usually associated with<br>the processes of applications and services that benefit mostly<br>from a high throughput. Examples are systemd during boot, or git<br>grep.</p>
+</li>
+<li><p>As CFQ, BFQ merges queues performing interleaved I/O, i.e.,<br>performing random I/O that becomes mostly sequential if<br>merged. Differently from CFQ, BFQ achieves this goal with a more<br>reactive mechanism, called Early Queue Merge (EQM). EQM is so<br>responsive in detecting interleaved I/O (cooperating processes),<br>that it enables BFQ to achieve a high throughput, by queue<br>merging, even for queues for which CFQ needs a different<br>mechanism, preemption, to get a high throughput. As such EQM is a<br>unified mechanism to achieve a high throughput with interleaved<br>I/O.</p>
+</li>
+<li><p>Queues are scheduled according to a variant of WF2Q+, named<br>B-WF2Q+, and implemented using an augmented rb-tree to preserve an<br>O(log N) overall complexity.  See [2] for more details. B-WF2Q+ is<br>also ready for hierarchical scheduling, details in Section 4.</p>
+</li>
+<li><p>B-WF2Q+ guarantees a tight deviation with respect to an ideal,<br>perfectly fair, and smooth service. In particular, B-WF2Q+<br>guarantees that each queue receives a fraction of the device<br>throughput proportional to its weight, even if the throughput<br>fluctuates, and regardless of: the device parameters, the current<br>workload and the budgets assigned to the queue.</p>
+</li>
+<li><p>The last, budget-independence, property (although probably<br>counterintuitive in the first place) is definitely beneficial, for<br>the following reasons:</p>
+<ul>
+<li><p>First, with any proportional-share scheduler, the maximum<br>deviation with respect to an ideal service is proportional to<br>the maximum budget (slice) assigned to queues. As a consequence,<br>BFQ can keep this deviation tight not only because of the<br>accurate service of B-WF2Q+, but also because BFQ <em>does not</em><br>need to assign a larger budget to a queue to let the queue<br>receive a higher fraction of the device throughput.</p>
+</li>
+<li><p>Second, BFQ is free to choose, for every process (queue), the<br>budget that best fits the needs of the process, or best<br>leverages the I/O pattern of the process. In particular, BFQ<br>updates queue budgets with a simple feedback-loop algorithm that<br>allows a high throughput to be achieved, while still providing<br>tight latency guarantees to time-sensitive applications. When<br>the in-service queue expires, this algorithm computes the next<br>budget of the queue so as to:</p>
+<ul>
+<li><p>Let large budgets be eventually assigned to the queues<br>associated with I/O-bound applications performing sequential<br>I/O: in fact, the longer these applications are served once<br>got access to the device, the higher the throughput is.</p>
+</li>
+<li><p>Let small budgets be eventually assigned to the queues<br>associated with time-sensitive applications (which typically<br>perform sporadic and short I/O), because, the smaller the<br>budget assigned to a queue waiting for service is, the sooner<br>B-WF2Q+ will serve that queue (Subsec 3.3 in [2]).</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>If several processes are competing for the device at the same time,<br>but all processes and groups have the same weight, then BFQ<br>guarantees the expected throughput distribution without ever idling<br>the device. It uses preemption instead. Throughput is then much<br>higher in this common scenario.</p>
+</li>
+<li><p>ioprio classes are served in strict priority order, i.e.,<br>lower-priority queues are not served as long as there are<br>higher-priority queues.  Among queues in the same class, the<br>bandwidth is distributed in proportion to the weight of each<br>queue. A very thin extra bandwidth is however guaranteed to<br>the Idle class, to prevent it from starving.</p>
+</li>
+</ul>
+<ol start="3">
+<li><h1 id="What-are-BFQ’s-tunables-and-how-to-properly-configure-BFQ"><a href="#What-are-BFQ’s-tunables-and-how-to-properly-configure-BFQ" class="headerlink" title="What are BFQ’s tunables and how to properly configure BFQ?"></a>What are BFQ’s tunables and how to properly configure BFQ?</h1></li>
+</ol>
+<p>Most BFQ tunables affect service guarantees (basically latency and<br>fairness) and throughput. For full details on how to choose the<br>desired tradeoff between service guarantees and throughput, see the<br>parameters slice_idle, strict_guarantees and low_latency. For details<br>on how to maximise throughput, see slice_idle, timeout_sync and<br>max_budget. The other performance-related parameters have been<br>inherited from, and have been preserved mostly for compatibility with<br>CFQ. So far, no performance improvement has been reported after<br>changing the latter parameters in BFQ.</p>
+<p>In particular, the tunables back_seek-max, back_seek_penalty,<br>fifo_expire_async and fifo_expire_sync below are the same as in<br>CFQ. Their description is just copied from that for CFQ. Some<br>considerations in the description of slice_idle are copied from CFQ<br>too.</p>
+<h2 id="per-process-ioprio-and-weight"><a href="#per-process-ioprio-and-weight" class="headerlink" title="per-process ioprio and weight"></a>per-process ioprio and weight</h2><p>Unless the cgroups interface is used (see “4. BFQ group scheduling”),<br>weights can be assigned to processes only indirectly, through I/O<br>priorities, and according to the relation:<br>weight = (IOPRIO_BE_NR - ioprio) * 10.</p>
+<p>Beware that, if low-latency is set, then BFQ automatically raises the<br>weight of the queues associated with interactive and soft real-time<br>applications. Unset this tunable if you need/want to control weights.</p>
+<h2 id="slice-idle"><a href="#slice-idle" class="headerlink" title="slice_idle"></a>slice_idle</h2><p>This parameter specifies how long BFQ should idle for next I/O<br>request, when certain sync BFQ queues become empty. By default<br>slice_idle is a non-zero value. Idling has a double purpose: boosting<br>throughput and making sure that the desired throughput distribution is<br>respected (see the description of how BFQ works, and, if needed, the<br>papers referred there).</p>
+<p>As for throughput, idling can be very helpful on highly seeky media<br>like single spindle SATA/SAS disks where we can cut down on overall<br>number of seeks and see improved throughput.</p>
+<p>Setting slice_idle to 0 will remove all the idling on queues and one<br>should see an overall improved throughput on faster storage devices<br>like multiple SATA/SAS disks in hardware RAID configuration, as well<br>as flash-based storage with internal command queueing (and<br>parallelism).</p>
+<p>So depending on storage and workload, it might be useful to set<br>slice_idle=0.  In general for SATA/SAS disks and software RAID of<br>SATA/SAS disks keeping slice_idle enabled should be useful. For any<br>configurations where there are multiple spindles behind single LUN<br>(Host based hardware RAID controller or for storage arrays), or with<br>flash-based fast storage, setting slice_idle=0 might end up in better<br>throughput and acceptable latencies.</p>
+<p>Idling is however necessary to have service guarantees enforced in<br>case of differentiated weights or differentiated I/O-request lengths.<br>To see why, suppose that a given BFQ queue A must get several I/O<br>requests served for each request served for another queue B. Idling<br>ensures that, if A makes a new I/O request slightly after becoming<br>empty, then no request of B is dispatched in the middle, and thus A<br>does not lose the possibility to get more than one request dispatched<br>before the next request of B is dispatched. Note that idling<br>guarantees the desired differentiated treatment of queues only in<br>terms of I/O-request dispatches. To guarantee that the actual service<br>order then corresponds to the dispatch order, the strict_guarantees<br>tunable must be set too.</p>
+<p>There is an important flipside for idling: apart from the above cases<br>where it is beneficial also for throughput, idling can severely impact<br>throughput. One important case is random workload. Because of this<br>issue, BFQ tends to avoid idling as much as possible, when it is not<br>beneficial also for throughput (as detailed in Section 2). As a<br>consequence of this behavior, and of further issues described for the<br>strict_guarantees tunable, short-term service guarantees may be<br>occasionally violated. And, in some cases, these guarantees may be<br>more important than guaranteeing maximum throughput. For example, in<br>video playing/streaming, a very low drop rate may be more important<br>than maximum throughput. In these cases, consider setting the<br>strict_guarantees parameter.</p>
+<h2 id="strict-guarantees"><a href="#strict-guarantees" class="headerlink" title="strict_guarantees"></a>strict_guarantees</h2><p>If this parameter is set (default: unset), then BFQ</p>
+<ul>
+<li><p>always performs idling when the in-service queue becomes empty;</p>
+</li>
+<li><p>forces the device to serve one I/O request at a time, by dispatching a<br>new request only if there is no outstanding request.</p>
+</li>
+</ul>
+<p>In the presence of differentiated weights or I/O-request sizes, both<br>the above conditions are needed to guarantee that every BFQ queue<br>receives its allotted share of the bandwidth. The first condition is<br>needed for the reasons explained in the description of the slice_idle<br>tunable.  The second condition is needed because all modern storage<br>devices reorder internally-queued requests, which may trivially break<br>the service guarantees enforced by the I/O scheduler.</p>
+<p>Setting strict_guarantees may evidently affect throughput.</p>
+<h2 id="back-seek-max"><a href="#back-seek-max" class="headerlink" title="back_seek_max"></a>back_seek_max</h2><p>This specifies, given in Kbytes, the maximum “distance” for backward seeking.<br>The distance is the amount of space from the current head location to the<br>sectors that are backward in terms of distance.</p>
+<p>This parameter allows the scheduler to anticipate requests in the “backward”<br>direction and consider them as being the “next” if they are within this<br>distance from the current head location.</p>
+<h2 id="back-seek-penalty"><a href="#back-seek-penalty" class="headerlink" title="back_seek_penalty"></a>back_seek_penalty</h2><p>This parameter is used to compute the cost of backward seeking. If the<br>backward distance of request is just 1/back_seek_penalty from a “front”<br>request, then the seeking cost of two requests is considered equivalent.</p>
+<p>So scheduler will not bias toward one or the other request (otherwise scheduler<br>will bias toward front request). Default value of back_seek_penalty is 2.</p>
+<h2 id="fifo-expire-async"><a href="#fifo-expire-async" class="headerlink" title="fifo_expire_async"></a>fifo_expire_async</h2><p>This parameter is used to set the timeout of asynchronous requests. Default<br>value of this is 248ms.</p>
+<h2 id="fifo-expire-sync"><a href="#fifo-expire-sync" class="headerlink" title="fifo_expire_sync"></a>fifo_expire_sync</h2><p>This parameter is used to set the timeout of synchronous requests. Default<br>value of this is 124ms. In case to favor synchronous requests over asynchronous<br>one, this value should be decreased relative to fifo_expire_async.</p>
+<h2 id="low-latency"><a href="#low-latency" class="headerlink" title="low_latency"></a>low_latency</h2><p>This parameter is used to enable/disable BFQ’s low latency mode. By<br>default, low latency mode is enabled. If enabled, interactive and soft<br>real-time applications are privileged and experience a lower latency,<br>as explained in more detail in the description of how BFQ works.</p>
+<p>DISABLE this mode if you need full control on bandwidth<br>distribution. In fact, if it is enabled, then BFQ automatically<br>increases the bandwidth share of privileged applications, as the main<br>means to guarantee a lower latency to them.</p>
+<p>In addition, as already highlighted at the beginning of this document,<br>DISABLE this mode if your only goal is to achieve a high throughput.<br>In fact, privileging the I/O of some application over the rest may<br>entail a lower throughput. To achieve the highest-possible throughput<br>on a non-rotational device, setting slice_idle to 0 may be needed too<br>(at the cost of giving up any strong guarantee on fairness and low<br>latency).</p>
+<h2 id="timeout-sync"><a href="#timeout-sync" class="headerlink" title="timeout_sync"></a>timeout_sync</h2><p>Maximum amount of device time that can be given to a task (queue) once<br>it has been selected for service. On devices with costly seeks,<br>increasing this time usually increases maximum throughput. On the<br>opposite end, increasing this time coarsens the granularity of the<br>short-term bandwidth and latency guarantees, especially if the<br>following parameter is set to zero.</p>
+<h2 id="max-budget"><a href="#max-budget" class="headerlink" title="max_budget"></a>max_budget</h2><p>Maximum amount of service, measured in sectors, that can be provided<br>to a BFQ queue once it is set in service (of course within the limits<br>of the above timeout). According to what said in the description of<br>the algorithm, larger values increase the throughput in proportion to<br>the percentage of sequential I/O requests issued. The price of larger<br>values is that they coarsen the granularity of short-term bandwidth<br>and latency guarantees.</p>
+<p>The default value is 0, which enables auto-tuning: BFQ sets max_budget<br>to the maximum number of sectors that can be served during<br>timeout_sync, according to the estimated peak rate.</p>
+<p>For specific devices, some users have occasionally reported to have<br>reached a higher throughput by setting max_budget explicitly, i.e., by<br>setting max_budget to a higher value than 0. In particular, they have<br>set max_budget to higher values than those to which BFQ would have set<br>it with auto-tuning. An alternative way to achieve this goal is to<br>just increase the value of timeout_sync, leaving max_budget equal to 0.</p>
+<h2 id="weights"><a href="#weights" class="headerlink" title="weights"></a>weights</h2><p>Read-only parameter, used to show the weights of the currently active<br>BFQ queues.</p>
+<ol start="4">
+<li><h1 id="Group-scheduling-with-BFQ"><a href="#Group-scheduling-with-BFQ" class="headerlink" title="Group scheduling with BFQ"></a>Group scheduling with BFQ</h1></li>
+</ol>
+<p>BFQ supports both cgroups-v1 and cgroups-v2 io controllers, namely<br>blkio and io. In particular, BFQ supports weight-based proportional<br>share. To activate cgroups support, set BFQ_GROUP_IOSCHED.</p>
+<h2 id="4-1-Service-guarantees-provided"><a href="#4-1-Service-guarantees-provided" class="headerlink" title="4-1 Service guarantees provided"></a>4-1 Service guarantees provided</h2><p>With BFQ, proportional share means true proportional share of the<br>device bandwidth, according to group weights. For example, a group<br>with weight 200 gets twice the bandwidth, and not just twice the time,<br>of a group with weight 100.</p>
+<p>BFQ supports hierarchies (group trees) of any depth. Bandwidth is<br>distributed among groups and processes in the expected way: for each<br>group, the children of the group share the whole bandwidth of the<br>group in proportion to their weights. In particular, this implies<br>that, for each leaf group, every process of the group receives the<br>same share of the whole group bandwidth, unless the ioprio of the<br>process is modified.</p>
+<p>The resource-sharing guarantee for a group may partially or totally<br>switch from bandwidth to time, if providing bandwidth guarantees to<br>the group lowers the throughput too much. This switch occurs on a<br>per-process basis: if a process of a leaf group causes throughput loss<br>if served in such a way to receive its share of the bandwidth, then<br>BFQ switches back to just time-based proportional share for that<br>process.</p>
+<h2 id="4-2-Interface"><a href="#4-2-Interface" class="headerlink" title="4-2 Interface"></a>4-2 Interface</h2><p>To get proportional sharing of bandwidth with BFQ for a given device,<br>BFQ must of course be the active scheduler for that device.</p>
+<p>Within each group directory, the names of the files associated with<br>BFQ-specific cgroup parameters and stats begin with the “bfq.”<br>prefix. So, with cgroups-v1 or cgroups-v2, the full prefix for<br>BFQ-specific files is “blkio.bfq.” or “io.bfq.” For example, the group<br>parameter to set the weight of a group with BFQ is blkio.bfq.weight<br>or io.bfq.weight.</p>
+<p>As for cgroups-v1 (blkio controller), the exact set of stat files<br>created, and kept up-to-date by bfq, depends on whether<br>CONFIG_DEBUG_BLK_CGROUP is set. If it is set, then bfq creates all<br>the stat files documented in<br>Documentation/cgroup-v1/blkio-controller.txt. If, instead,<br>CONFIG_DEBUG_BLK_CGROUP is not set, then bfq creates only the files<br>blkio.bfq.io_service_bytes<br>blkio.bfq.io_service_bytes_recursive<br>blkio.bfq.io_serviced<br>blkio.bfq.io_serviced_recursive</p>
+<p>The value of CONFIG_DEBUG_BLK_CGROUP greatly influences the maximum<br>throughput sustainable with bfq, because updating the blkio.bfq.*<br>stats is rather costly, especially for some of the stats enabled by<br>CONFIG_DEBUG_BLK_CGROUP.</p>
+<h2 id="Parameters-to-set"><a href="#Parameters-to-set" class="headerlink" title="Parameters to set"></a>Parameters to set</h2><p>For each group, there is only the following parameter to set.</p>
+<p>weight (namely blkio.bfq.weight or io.bfq-weight): the weight of the<br>group inside its parent. Available values: 1..10000 (default 100). The<br>linear mapping between ioprio and weights, described at the beginning<br>of the tunable section, is still valid, but all weights higher than<br>IOPRIO_BE_NR*10 are mapped to ioprio 0.</p>
+<p>Recall that, if low-latency is set, then BFQ automatically raises the<br>weight of the queues associated with interactive and soft real-time<br>applications. Unset this tunable if you need/want to control weights.</p>
+<p>[1] P. Valente, A. Avanzini, “Evolution of the BFQ Storage I/O<br>    Scheduler”, Proceedings of the First Workshop on Mobile System<br>    Technologies (MST-2015), May 2015.<br>    <a target="_blank" rel="noopener" href="http://algogroup.unimore.it/people/paolo/disk_sched/mst-2015.pdf">http://algogroup.unimore.it/people/paolo/disk_sched/mst-2015.pdf</a></p>
+<p>[2] P. Valente and M. Andreolini, “Improving Application<br>    Responsiveness with the BFQ Disk I/O Scheduler”, Proceedings of<br>    the 5th Annual International Systems and Storage Conference<br>    (SYSTOR ‘12), June 2012.<br>    Slightly extended version:<br>    <a target="_blank" rel="noopener" href="http://algogroup.unimore.it/people/paolo/disk_sched/bfq-v1-suite-">http://algogroup.unimore.it/people/paolo/disk_sched/bfq-v1-suite-</a><br>                            results.pdf</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/" title="Kernel-4.18.0-80.el8_bfq-iosche" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_bfq-iosched/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_backend-api/" title="Kernel-4.18.0-80.el8_backend-api"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_booting/" title="Kernel-4.18.0-80.el8_booting"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

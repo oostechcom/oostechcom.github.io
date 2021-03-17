@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_dma-buf-sharing | oosTech.com</title>
+  <meta name="description" content="DMA Buffer Sharing API Guide                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~                          Sumit Semwal             &lt;sumit dot semwal at linaro dot org&gt;              &lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_dma-buf-sharing">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="DMA Buffer Sharing API Guide                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~                          Sumit Semwal             &lt;sumit dot semwal at linaro dot org&gt;              &lt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#dma-buf-operations-for-device-dma-only"><span class="toc-number">1.</span> <span class="toc-text">dma-buf operations for device dma only</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kernel-cpu-access-to-a-dma-buf-buffer-object"><span class="toc-number">2.</span> <span class="toc-text">Kernel cpu access to a dma-buf buffer object</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Direct-Userspace-Access-mmap-Support"><span class="toc-number">3.</span> <span class="toc-text">Direct Userspace Access&#x2F;mmap Support</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Miscellaneous-notes"><span class="toc-number">4.</span> <span class="toc-text">Miscellaneous notes</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_dma-buf-sharing" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_dma-buf-sharing
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>                DMA Buffer Sharing API Guide
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                        Sumit Semwal
+            &lt;sumit dot semwal at linaro dot org&gt;
+             &lt;sumit dot semwal at ti dot com&gt;
+</code></pre>
+<p>This document serves as a guide to device-driver writers on what is the dma-buf<br>buffer sharing API, how to use it for exporting and using shared buffers.</p>
+<p>Any device driver which wishes to be a part of DMA buffer sharing, can do so as<br>either the ‘exporter’ of buffers, or the ‘user’ of buffers.</p>
+<p>Say a driver A wants to use buffers created by driver B, then we call B as the<br>exporter, and A as buffer-user.</p>
+<p>The exporter</p>
+<ul>
+<li>implements and manages operations[1] for the buffer</li>
+<li>allows other users to share the buffer by using dma_buf sharing APIs,</li>
+<li>manages the details of buffer allocation,</li>
+<li>decides about the actual backing storage where this allocation happens,</li>
+<li>takes care of any migration of scatterlist - for all (shared) users of this<br> buffer,</li>
+</ul>
+<p>The buffer-user</p>
+<ul>
+<li>is one of (many) sharing users of the buffer.</li>
+<li>doesn’t need to worry about how the buffer is allocated, or where.</li>
+<li>needs a mechanism to get access to the scatterlist that makes up this buffer<br> in memory, mapped into its own address space, so it can access the same area<br> of memory.</li>
+</ul>
+<h2 id="dma-buf-operations-for-device-dma-only"><a href="#dma-buf-operations-for-device-dma-only" class="headerlink" title="dma-buf operations for device dma only"></a>dma-buf operations for device dma only</h2><p>The dma_buf buffer sharing API usage contains the following steps:</p>
+<ol>
+<li>Exporter announces that it wishes to export a buffer</li>
+<li>Userspace gets the file descriptor associated with the exported buffer, and<br>passes it around to potential buffer-users based on use case</li>
+<li>Each buffer-user ‘connects’ itself to the buffer</li>
+<li>When needed, buffer-user requests access to the buffer from exporter</li>
+<li>When finished with its use, the buffer-user notifies end-of-DMA to exporter</li>
+<li>when buffer-user is done using this buffer completely, it ‘disconnects’<br>itself from the buffer.</li>
+</ol>
+<ol>
+<li><p>Exporter’s announcement of buffer export</p>
+<p>The buffer exporter announces its wish to export a buffer. In this, it<br>connects its own private buffer data, provides implementation for operations<br>that can be performed on the exported dma_buf, and flags for the file<br>associated with this buffer.</p>
+<p>Interface:<br>   struct dma_buf *dma_buf_export_named(void *priv, struct dma_buf_ops *ops,</p>
+<pre><code>              size_t size, int flags,
+              const char *exp_name)
+</code></pre>
+<p>If this succeeds, dma_buf_export allocates a dma_buf structure, and returns a<br>pointer to the same. It also associates an anonymous file with this buffer,<br>so it can be exported. On failure to allocate the dma_buf object, it returns<br>NULL.</p>
+<p>‘exp_name’ is the name of exporter - to facilitate information while<br>debugging.</p>
+<p>Exporting modules which do not wish to provide any specific name may use the<br>helper define ‘dma_buf_export()’, with the same arguments as above, but<br>without the last argument; a <strong>FILE</strong> pre-processor directive will be<br>inserted in place of ‘exp_name’ instead.</p>
+</li>
+<li><p>Userspace gets a handle to pass around to potential buffer-users</p>
+<p>Userspace entity requests for a file-descriptor (fd) which is a handle to the<br>anonymous file associated with the buffer. It can then share the fd with other<br>drivers and/or processes.</p>
+<p>Interface:<br>   int dma_buf_fd(struct dma_buf *dmabuf)</p>
+<p>This API installs an fd for the anonymous file associated with this buffer;<br>returns either ‘fd’, or error.</p>
+</li>
+<li><p>Each buffer-user ‘connects’ itself to the buffer</p>
+<p>Each buffer-user now gets a reference to the buffer, using the fd passed to<br>it.</p>
+<p>Interface:<br>   struct dma_buf *dma_buf_get(int fd)</p>
+<p>This API will return a reference to the dma_buf, and increment refcount for<br>it.</p>
+<p>After this, the buffer-user needs to attach its device with the buffer, which<br>helps the exporter to know of device buffer constraints.</p>
+<p>Interface:<br>   struct dma_buf_attachment *dma_buf_attach(struct dma_buf *dmabuf,</p>
+<pre><code>                                         struct device *dev)
+</code></pre>
+<p>This API returns reference to an attachment structure, which is then used<br>for scatterlist operations. It will optionally call the ‘attach’ dma_buf<br>operation, if provided by the exporter.</p>
+<p>The dma-buf sharing framework does the bookkeeping bits related to managing<br>the list of all attachments to a buffer.</p>
+</li>
+</ol>
+<p>Until this stage, the buffer-exporter has the option to choose not to actually<br>allocate the backing storage for this buffer, but wait for the first buffer-user<br>to request use of buffer for allocation.</p>
+<ol start="4">
+<li><p>When needed, buffer-user requests access to the buffer</p>
+<p>Whenever a buffer-user wants to use the buffer for any DMA, it asks for<br>access to the buffer using dma_buf_map_attachment API. At least one attach to<br>the buffer must have happened before map_dma_buf can be called.</p>
+<p>Interface:<br>   struct sg_table * dma_buf_map_attachment(struct dma_buf_attachment *,</p>
+<pre><code>                                  enum dma_data_direction);
+</code></pre>
+<p>This is a wrapper to dma_buf-&gt;ops-&gt;map_dma_buf operation, which hides the<br>“dma_buf-&gt;ops-&gt;” indirection from the users of this interface.</p>
+<p>In struct dma_buf_ops, map_dma_buf is defined as<br>   struct sg_table * (*map_dma_buf)(struct dma_buf_attachment *,</p>
+<pre><code>                                         enum dma_data_direction);
+</code></pre>
+<p>It is one of the buffer operations that must be implemented by the exporter.<br>It should return the sg_table containing scatterlist for this buffer, mapped<br>into caller’s address space.</p>
+<p>If this is being called for the first time, the exporter can now choose to<br>scan through the list of attachments for this buffer, collate the requirements<br>of the attached devices, and choose an appropriate backing storage for the<br>buffer.</p>
+<p>Based on enum dma_data_direction, it might be possible to have multiple users<br>accessing at the same time (for reading, maybe), or any other kind of sharing<br>that the exporter might wish to make available to buffer-users.</p>
+<p>map_dma_buf() operation can return -EINTR if it is interrupted by a signal.</p>
+</li>
+</ol>
+<ol start="5">
+<li><p>When finished, the buffer-user notifies end-of-DMA to exporter</p>
+<p>Once the DMA for the current buffer-user is over, it signals ‘end-of-DMA’ to<br>the exporter using the dma_buf_unmap_attachment API.</p>
+<p>Interface:<br>   void dma_buf_unmap_attachment(struct dma_buf_attachment *,</p>
+<pre><code>                             struct sg_table *);
+</code></pre>
+<p>This is a wrapper to dma_buf-&gt;ops-&gt;unmap_dma_buf() operation, which hides the<br>“dma_buf-&gt;ops-&gt;” indirection from the users of this interface.</p>
+<p>In struct dma_buf_ops, unmap_dma_buf is defined as<br>   void (*unmap_dma_buf)(struct dma_buf_attachment *, struct sg_table *);</p>
+<p>unmap_dma_buf signifies the end-of-DMA for the attachment provided. Like<br>map_dma_buf, this API also must be implemented by the exporter.</p>
+</li>
+</ol>
+<ol start="6">
+<li><p>when buffer-user is done using this buffer, it ‘disconnects’ itself from the<br>buffer.</p>
+<p>After the buffer-user has no more interest in using this buffer, it should<br>disconnect itself from the buffer:</p>
+<ul>
+<li>it first detaches itself from the buffer.</li>
+</ul>
+<p>Interface:<br>   void dma_buf_detach(struct dma_buf *dmabuf,</p>
+<pre><code>                   struct dma_buf_attachment *dmabuf_attach);
+</code></pre>
+<p>This API removes the attachment from the list in dmabuf, and optionally calls<br>dma_buf-&gt;ops-&gt;detach(), if provided by exporter, for any housekeeping bits.</p>
+<ul>
+<li>Then, the buffer-user returns the buffer reference to exporter.</li>
+</ul>
+<p>Interface:<br>  void dma_buf_put(struct dma_buf *dmabuf);</p>
+<p>This API then reduces the refcount for this buffer.</p>
+<p>If, as a result of this call, the refcount becomes 0, the ‘release’ file<br>operation related to this fd is called. It calls the dmabuf-&gt;ops-&gt;release()<br>operation in turn, and frees the memory allocated for dmabuf when exported.</p>
+</li>
+</ol>
+<p>NOTES:</p>
+<ul>
+<li><p>Importance of attach-detach and {map,unmap}_dma_buf operation pairs<br> The attach-detach calls allow the exporter to figure out backing-storage<br> constraints for the currently-interested devices. This allows preferential<br> allocation, and/or migration of pages across different types of storage<br> available, if possible.</p>
+<p> Bracketing of DMA access with {map,unmap}_dma_buf operations is essential<br> to allow just-in-time backing of storage, and migration mid-way through a<br> use-case.</p>
+</li>
+<li><p>Migration of backing storage if needed<br> If after</p>
+<ul>
+<li><p>at least one map_dma_buf has happened,</p>
+</li>
+<li><p>and the backing storage has been allocated for this buffer,<br>another new buffer-user intends to attach itself to this buffer, it might<br>be allowed, if possible for the exporter.</p>
+<p>In case it is allowed by the exporter:<br>if the new buffer-user has stricter ‘backing-storage constraints’, and the<br>exporter can handle these constraints, the exporter can just stall on the<br>map_dma_buf until all outstanding access is completed (as signalled by<br>unmap_dma_buf).<br>Once all users have finished accessing and have unmapped this buffer, the<br>exporter could potentially move the buffer to the stricter backing-storage,<br>and then allow further {map,unmap}_dma_buf operations from any buffer-user<br>from the migrated backing-storage.</p>
+<p>If the exporter cannot fulfil the backing-storage constraints of the new<br>buffer-user device as requested, dma_buf_attach() would return an error to<br>denote non-compatibility of the new buffer-sharing request with the current<br>buffer.</p>
+<p>If the exporter chooses not to allow an attach() operation once a<br>map_dma_buf() API has been called, it simply returns an error.</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Kernel-cpu-access-to-a-dma-buf-buffer-object"><a href="#Kernel-cpu-access-to-a-dma-buf-buffer-object" class="headerlink" title="Kernel cpu access to a dma-buf buffer object"></a>Kernel cpu access to a dma-buf buffer object</h2><p>The motivation to allow cpu access from the kernel to a dma-buf object from the<br>importers side are:</p>
+<ul>
+<li>fallback operations, e.g. if the devices is connected to a usb bus and the<br>kernel needs to shuffle the data around first before sending it away.</li>
+<li>full transparency for existing users on the importer side, i.e. userspace<br>should not notice the difference between a normal object from that subsystem<br>and an imported one backed by a dma-buf. This is really important for drm<br>opengl drivers that expect to still use all the existing upload/download<br>paths.</li>
+</ul>
+<p>Access to a dma_buf from the kernel context involves three steps:</p>
+<ol>
+<li><p>Prepare access, which invalidate any necessary caches and make the object<br>available for cpu access.</p>
+</li>
+<li><p>Access the object page-by-page with the dma_buf map apis</p>
+</li>
+<li><p>Finish access, which will flush any necessary cpu caches and free reserved<br>resources.</p>
+</li>
+<li><p>Prepare access</p>
+<p>Before an importer can access a dma_buf object with the cpu from the kernel<br>context, it needs to notify the exporter of the access that is about to<br>happen.</p>
+<p>Interface:<br>   int dma_buf_begin_cpu_access(struct dma_buf *dmabuf,</p>
+<pre><code>            size_t start, size_t len,
+            enum dma_data_direction direction)
+</code></pre>
+<p>This allows the exporter to ensure that the memory is actually available for<br>cpu access - the exporter might need to allocate or swap-in and pin the<br>backing storage. The exporter also needs to ensure that cpu access is<br>coherent for the given range and access direction. The range and access<br>direction can be used by the exporter to optimize the cache flushing, i.e.<br>access outside of the range or with a different direction (read instead of<br>write) might return stale or even bogus data (e.g. when the exporter needs to<br>copy the data to temporary storage).</p>
+<p>This step might fail, e.g. in oom conditions.</p>
+</li>
+<li><p>Accessing the buffer</p>
+<p>To support dma_buf objects residing in highmem cpu access is page-based using<br>an api similar to kmap. Accessing a dma_buf is done in aligned chunks of<br>PAGE_SIZE size. Before accessing a chunk it needs to be mapped, which returns<br>a pointer in kernel virtual address space. Afterwards the chunk needs to be<br>unmapped again. There is no limit on how often a given chunk can be mapped<br>and unmapped, i.e. the importer does not need to call begin_cpu_access again<br>before mapping the same chunk again.</p>
+<p>Interfaces:<br>   void *dma_buf_kmap(struct dma_buf *, unsigned long);<br>   void dma_buf_kunmap(struct dma_buf *, unsigned long, void *);</p>
+<p>There are also atomic variants of these interfaces. Like for kmap they<br>facilitate non-blocking fast-paths. Neither the importer nor the exporter (in<br>the callback) is allowed to block when using these.</p>
+<p>Interfaces:<br>   void *dma_buf_kmap_atomic(struct dma_buf *, unsigned long);<br>   void dma_buf_kunmap_atomic(struct dma_buf *, unsigned long, void *);</p>
+<p>For importers all the restrictions of using kmap apply, like the limited<br>supply of kmap_atomic slots. Hence an importer shall only hold onto at most 2<br>atomic dma_buf kmaps at the same time (in any given process context).</p>
+<p>dma_buf kmap calls outside of the range specified in begin_cpu_access are<br>undefined. If the range is not PAGE_SIZE aligned, kmap needs to succeed on<br>the partial chunks at the beginning and end but may return stale or bogus<br>data outside of the range (in these partial chunks).</p>
+<p>Note that these calls need to always succeed. The exporter needs to complete<br>any preparations that might fail in begin_cpu_access.</p>
+<p>For some cases the overhead of kmap can be too high, a vmap interface<br>is introduced. This interface should be used very carefully, as vmalloc<br>space is a limited resources on many architectures.</p>
+<p>Interfaces:<br>   void *dma_buf_vmap(struct dma_buf *dmabuf)<br>   void dma_buf_vunmap(struct dma_buf *dmabuf, void *vaddr)</p>
+<p>The vmap call can fail if there is no vmap support in the exporter, or if it<br>runs out of vmalloc space. Fallback to kmap should be implemented. Note that<br>the dma-buf layer keeps a reference count for all vmap access and calls down<br>into the exporter’s vmap function only when no vmapping exists, and only<br>unmaps it once. Protection against concurrent vmap/vunmap calls is provided<br>by taking the dma_buf-&gt;lock mutex.</p>
+</li>
+<li><p>Finish access</p>
+<p>When the importer is done accessing the range specified in begin_cpu_access,<br>it needs to announce this to the exporter (to facilitate cache flushing and<br>unpinning of any pinned resources). The result of of any dma_buf kmap calls<br>after end_cpu_access is undefined.</p>
+<p>Interface:<br>   void dma_buf_end_cpu_access(struct dma_buf *dma_buf,</p>
+<pre><code>           size_t start, size_t len,
+           enum dma_data_direction dir);
+</code></pre>
+</li>
+</ol>
+<h2 id="Direct-Userspace-Access-mmap-Support"><a href="#Direct-Userspace-Access-mmap-Support" class="headerlink" title="Direct Userspace Access/mmap Support"></a>Direct Userspace Access/mmap Support</h2><p>Being able to mmap an export dma-buf buffer object has 2 main use-cases:</p>
+<ul>
+<li>CPU fallback processing in a pipeline and</li>
+<li>supporting existing mmap interfaces in importers.</li>
+</ul>
+<ol>
+<li><p>CPU fallback processing in a pipeline</p>
+<p>In many processing pipelines it is sometimes required that the cpu can access<br>the data in a dma-buf (e.g. for thumbnail creation, snapshots, …). To avoid<br>the need to handle this specially in userspace frameworks for buffer sharing<br>it’s ideal if the dma_buf fd itself can be used to access the backing storage<br>from userspace using mmap.</p>
+<p>Furthermore Android’s ION framework already supports this (and is otherwise<br>rather similar to dma-buf from a userspace consumer side with using fds as<br>handles, too). So it’s beneficial to support this in a similar fashion on<br>dma-buf to have a good transition path for existing Android userspace.</p>
+<p>No special interfaces, userspace simply calls mmap on the dma-buf fd.</p>
+</li>
+<li><p>Supporting existing mmap interfaces in exporters</p>
+<p>Similar to the motivation for kernel cpu access it is again important that<br>the userspace code of a given importing subsystem can use the same interfaces<br>with a imported dma-buf buffer object as with a native buffer object. This is<br>especially important for drm where the userspace part of contemporary OpenGL,<br>X, and other drivers is huge, and reworking them to use a different way to<br>mmap a buffer rather invasive.</p>
+<p>The assumption in the current dma-buf interfaces is that redirecting the<br>initial mmap is all that’s needed. A survey of some of the existing<br>subsystems shows that no driver seems to do any nefarious thing like syncing<br>up with outstanding asynchronous processing on the device or allocating<br>special resources at fault time. So hopefully this is good enough, since<br>adding interfaces to intercept pagefaults and allow pte shootdowns would<br>increase the complexity quite a bit.</p>
+<p>Interface:<br>   int dma_buf_mmap(struct dma_buf *, struct vm_area_struct *,</p>
+<pre><code>        unsigned long);
+</code></pre>
+<p>If the importing subsystem simply provides a special-purpose mmap call to set<br>up a mapping in userspace, calling do_mmap with dma_buf-&gt;file will equally<br>achieve that for a dma-buf object.</p>
+</li>
+<li><p>Implementation notes for exporters</p>
+<p>Because dma-buf buffers have invariant size over their lifetime, the dma-buf<br>core checks whether a vma is too large and rejects such mappings. The<br>exporter hence does not need to duplicate this check.</p>
+<p>Because existing importing subsystems might presume coherent mappings for<br>userspace, the exporter needs to set up a coherent mapping. If that’s not<br>possible, it needs to fake coherency by manually shooting down ptes when<br>leaving the cpu domain and flushing caches at fault time. Note that all the<br>dma_buf files share the same anon inode, hence the exporter needs to replace<br>the dma_buf file stored in vma-&gt;vm_file with it’s own if pte shootdown is<br>required. This is because the kernel uses the underlying inode’s address_space<br>for vma tracking (and hence pte tracking at shootdown time with<br>unmap_mapping_range).</p>
+<p>If the above shootdown dance turns out to be too expensive in certain<br>scenarios, we can extend dma-buf with a more explicit cache tracking scheme<br>for userspace mappings. But the current assumption is that using mmap is<br>always a slower path, so some inefficiencies should be acceptable.</p>
+<p>Exporters that shoot down mappings (for any reasons) shall not do any<br>synchronization at fault time with outstanding device operations.<br>Synchronization is an orthogonal issue to sharing the backing storage of a<br>buffer and hence should not be handled by dma-buf itself. This is explicitly<br>mentioned here because many people seem to want something like this, but if<br>different exporters handle this differently, buffer sharing can fail in<br>interesting ways depending upong the exporter (if userspace starts depending<br>upon this implicit synchronization).</p>
+</li>
+</ol>
+<h2 id="Miscellaneous-notes"><a href="#Miscellaneous-notes" class="headerlink" title="Miscellaneous notes"></a>Miscellaneous notes</h2><ul>
+<li><p>Any exporters or users of the dma-buf buffer sharing framework must have<br>a ‘select DMA_SHARED_BUFFER’ in their respective Kconfigs.</p>
+</li>
+<li><p>In order to avoid fd leaks on exec, the FD_CLOEXEC flag must be set<br>on the file descriptor.  This is not just a resource leak, but a<br>potential security hole.  It could give the newly exec’d application<br>access to buffers, via the leaked fd, to which it should otherwise<br>not be permitted access.</p>
+<p>The problem with doing this via a separate fcntl() call, versus doing it<br>atomically when the fd is created, is that this is inherently racy in a<br>multi-threaded app[3].  The issue is made worse when it is library code<br>opening/creating the file descriptor, as the application may not even be<br>aware of the fd’s.</p>
+<p>To avoid this problem, userspace must have a way to request O_CLOEXEC<br>flag be set when the dma-buf fd is created.  So any API provided by<br>the exporting driver to create a dmabuf fd must provide a way to let<br>userspace control setting of O_CLOEXEC flag passed in to dma_buf_fd().</p>
+</li>
+<li><p>If an exporter needs to manually flush caches and hence needs to fake<br>coherency for mmap support, it needs to be able to zap all the ptes pointing<br>at the backing storage. Now linux mm needs a struct address_space associated<br>with the struct file stored in vma-&gt;vm_file to do that with the function<br>unmap_mapping_range. But the dma_buf framework only backs every dma_buf fd<br>with the anon_file struct file, i.e. all dma_bufs share the same file.</p>
+<p>Hence exporters need to setup their own file (and address_space) association<br>by setting vma-&gt;vm_file and adjusting vma-&gt;vm_pgoff in the dma_buf mmap<br>callback. In the specific case of a gem driver the exporter could use the<br>shmem file already provided by gem (and set vm_pgoff = 0). Exporters can then<br>zap ptes by unmapping the corresponding range of the struct address_space<br>associated with their own file.</p>
+</li>
+</ul>
+<p>References:<br>[1] struct dma_buf_ops in include/linux/dma-buf.h<br>[2] All interfaces mentioned above defined in include/linux/dma-buf.h<br>[3] <a target="_blank" rel="noopener" href="https://lwn.net/Articles/236486/">https://lwn.net/Articles/236486/</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/" title="Kernel-3.10.0-957.el7_dma-buf-sharing" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dma-buf-sharing/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_dm-raid/" title="Kernel-3.10.0-957.el7_dm-rai"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_draft-ietf-cipso-ipsecurity-01/" title="Kernel-3.10.0-957.el7_draft-ietf-cipso-ipsecurity-01"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

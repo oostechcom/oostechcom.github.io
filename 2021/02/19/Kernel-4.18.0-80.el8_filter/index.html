@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_filter | oosTech.com</title>
+  <meta name="description" content="Linux Socket Filtering aka Berkeley Packet Filter (BPF)IntroductionLinux Socket Filtering (LSF) is derived from the Berkeley Packet Filter.Though there are some distinct differences between the BSD an">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_filter">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_filter/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Linux Socket Filtering aka Berkeley Packet Filter (BPF)IntroductionLinux Socket Filtering (LSF) is derived from the Berkeley Packet Filter.Though there are some distinct differences between the BSD an">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_filter/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-Socket-Filtering-aka-Berkeley-Packet-Filter-BPF"><span class="toc-number">1.</span> <span class="toc-text">Linux Socket Filtering aka Berkeley Packet Filter (BPF)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Structure"><span class="toc-number">1.2.</span> <span class="toc-text">Structure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example"><span class="toc-number">1.3.</span> <span class="toc-text">Example</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BPF-engine-and-instruction-set"><span class="toc-number">1.4.</span> <span class="toc-text">BPF engine and instruction set</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#get-a-random-uint32-number"><span class="toc-number">2.</span> <span class="toc-text">get a random uint32 number</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#bpf-dbg"><span class="toc-number">3.</span> <span class="toc-text">.&#x2F;bpf_dbg</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JIT-compiler"><span class="toc-number">3.1.</span> <span class="toc-text">JIT compiler</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#bpf-jit-disasm"><span class="toc-number">4.</span> <span class="toc-text">.&#x2F;bpf_jit_disasm</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#bpf-jit-disasm-o"><span class="toc-number">5.</span> <span class="toc-text">.&#x2F;bpf_jit_disasm -o</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BPF-kernel-internals"><span class="toc-number">5.1.</span> <span class="toc-text">BPF kernel internals</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eBPF-opcode-encoding"><span class="toc-number">5.2.</span> <span class="toc-text">eBPF opcode encoding</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eBPF-verifier"><span class="toc-number">5.3.</span> <span class="toc-text">eBPF verifier</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Register-value-tracking"><span class="toc-number">5.4.</span> <span class="toc-text">Register value tracking</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Direct-packet-access"><span class="toc-number">5.5.</span> <span class="toc-text">Direct packet access</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eBPF-maps"><span class="toc-number">5.6.</span> <span class="toc-text">eBPF maps</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pruning"><span class="toc-number">5.7.</span> <span class="toc-text">Pruning</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Understanding-eBPF-verifier-messages"><span class="toc-number">5.8.</span> <span class="toc-text">Understanding eBPF verifier messages</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Testing"><span class="toc-number">5.9.</span> <span class="toc-text">Testing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Misc"><span class="toc-number">5.10.</span> <span class="toc-text">Misc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Written-by"><span class="toc-number">5.11.</span> <span class="toc-text">Written by</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_filter" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_filter
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_filter/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_filter/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_filter/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Linux-Socket-Filtering-aka-Berkeley-Packet-Filter-BPF"><a href="#Linux-Socket-Filtering-aka-Berkeley-Packet-Filter-BPF" class="headerlink" title="Linux Socket Filtering aka Berkeley Packet Filter (BPF)"></a>Linux Socket Filtering aka Berkeley Packet Filter (BPF)</h1><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Linux Socket Filtering (LSF) is derived from the Berkeley Packet Filter.<br>Though there are some distinct differences between the BSD and Linux<br>Kernel filtering, but when we speak of BPF or LSF in Linux context, we<br>mean the very same mechanism of filtering in the Linux kernel.</p>
+<p>BPF allows a user-space program to attach a filter onto any socket and<br>allow or disallow certain types of data to come through the socket. LSF<br>follows exactly the same filter code structure as BSD’s BPF, so referring<br>to the BSD bpf.4 manpage is very helpful in creating filters.</p>
+<p>On Linux, BPF is much simpler than on BSD. One does not have to worry<br>about devices or anything like that. You simply create your filter code,<br>send it to the kernel via the SO_ATTACH_FILTER option and if your filter<br>code passes the kernel check on it, you then immediately begin filtering<br>data on that socket.</p>
+<p>You can also detach filters from your socket via the SO_DETACH_FILTER<br>option. This will probably not be used much since when you close a socket<br>that has a filter on it the filter is automagically removed. The other<br>less common case may be adding a different filter on the same socket where<br>you had another filter that is still running: the kernel takes care of<br>removing the old one and placing your new one in its place, assuming your<br>filter has passed the checks, otherwise if it fails the old filter will<br>remain on that socket.</p>
+<p>SO_LOCK_FILTER option allows to lock the filter attached to a socket. Once<br>set, a filter cannot be removed or changed. This allows one process to<br>setup a socket, attach a filter, lock it then drop privileges and be<br>assured that the filter will be kept until the socket is closed.</p>
+<p>The biggest user of this construct might be libpcap. Issuing a high-level<br>filter command like <code>tcpdump -i em1 port 22</code> passes through the libpcap<br>internal compiler that generates a structure that can eventually be loaded<br>via SO_ATTACH_FILTER to the kernel. <code>tcpdump -i em1 port 22 -ddd</code><br>displays what is being placed into this structure.</p>
+<p>Although we were only speaking about sockets here, BPF in Linux is used<br>in many more places. There’s xt_bpf for netfilter, cls_bpf in the kernel<br>qdisc layer, SECCOMP-BPF (SECure COMPuting [1]), and lots of other places<br>such as team driver, PTP code, etc where BPF is being used.</p>
+<p> [1] Documentation/userspace-api/seccomp_filter.rst</p>
+<p>Original BPF paper:</p>
+<p>Steven McCanne and Van Jacobson. 1993. The BSD packet filter: a new<br>architecture for user-level packet capture. In Proceedings of the<br>USENIX Winter 1993 Conference Proceedings on USENIX Winter 1993<br>Conference Proceedings (USENIX’93). USENIX Association, Berkeley,<br>CA, USA, 2-2. [<a target="_blank" rel="noopener" href="http://www.tcpdump.org/papers/bpf-usenix93.pdf]">http://www.tcpdump.org/papers/bpf-usenix93.pdf]</a></p>
+<h2 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h2><p>User space applications include &lt;linux/filter.h&gt; which contains the<br>following relevant structures:</p>
+<p>struct sock_filter {    /* Filter block <em>/<br>    __u16    code;   /</em> Actual filter code <em>/<br>    __u8    jt;    /</em> Jump true <em>/<br>    __u8    jf;    /</em> Jump false <em>/<br>    __u32    k;      /</em> Generic multiuse field */<br>};</p>
+<p>Such a structure is assembled as an array of 4-tuples, that contains<br>a code, jt, jf and k value. jt and jf are jump offsets and k a generic<br>value to be used for a provided code.</p>
+<p>struct sock_fprog {            /* Required for SO_ATTACH_FILTER. <em>/<br>    unsigned short           len;    /</em> Number of filter blocks */<br>    struct sock_filter __user *filter;<br>};</p>
+<p>For socket filtering, a pointer to this structure (as shown in<br>follow-up example) is being passed to the kernel through setsockopt(2).</p>
+<h2 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h2><p>#include &lt;sys/socket.h&gt;<br>#include &lt;sys/types.h&gt;<br>#include &lt;arpa/inet.h&gt;<br>#include &lt;linux/if_ether.h&gt;<br>/* … */</p>
+<p>/* From the example above: tcpdump -i em1 port 22 -dd */<br>struct sock_filter code[] = {<br>    { 0x28,  0,  0, 0x0000000c },<br>    { 0x15,  0,  8, 0x000086dd },<br>    { 0x30,  0,  0, 0x00000014 },<br>    { 0x15,  2,  0, 0x00000084 },<br>    { 0x15,  1,  0, 0x00000006 },<br>    { 0x15,  0, 17, 0x00000011 },<br>    { 0x28,  0,  0, 0x00000036 },<br>    { 0x15, 14,  0, 0x00000016 },<br>    { 0x28,  0,  0, 0x00000038 },<br>    { 0x15, 12, 13, 0x00000016 },<br>    { 0x15,  0, 12, 0x00000800 },<br>    { 0x30,  0,  0, 0x00000017 },<br>    { 0x15,  2,  0, 0x00000084 },<br>    { 0x15,  1,  0, 0x00000006 },<br>    { 0x15,  0,  8, 0x00000011 },<br>    { 0x28,  0,  0, 0x00000014 },<br>    { 0x45,  6,  0, 0x00001fff },<br>    { 0xb1,  0,  0, 0x0000000e },<br>    { 0x48,  0,  0, 0x0000000e },<br>    { 0x15,  2,  0, 0x00000016 },<br>    { 0x48,  0,  0, 0x00000010 },<br>    { 0x15,  0,  1, 0x00000016 },<br>    { 0x06,  0,  0, 0x0000ffff },<br>    { 0x06,  0,  0, 0x00000000 },<br>};</p>
+<p>struct sock_fprog bpf = {<br>    .len = ARRAY_SIZE(code),<br>    .filter = code,<br>};</p>
+<p>sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));<br>if (sock &lt; 0)<br>    /* … bail out … */</p>
+<p>ret = setsockopt(sock, SOL_SOCKET, SO_ATTACH_FILTER, &amp;bpf, sizeof(bpf));<br>if (ret &lt; 0)<br>    /* … bail out … */</p>
+<p>/* … */<br>close(sock);</p>
+<p>The above example code attaches a socket filter for a PF_PACKET socket<br>in order to let all IPv4/IPv6 packets with port 22 pass. The rest will<br>be dropped for this socket.</p>
+<p>The setsockopt(2) call to SO_DETACH_FILTER doesn’t need any arguments<br>and SO_LOCK_FILTER for preventing the filter to be detached, takes an<br>integer value with 0 or 1.</p>
+<p>Note that socket filters are not restricted to PF_PACKET sockets only,<br>but can also be used on other socket families.</p>
+<p>Summary of system calls:</p>
+<ul>
+<li>setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_FILTER, &amp;val, sizeof(val));</li>
+<li>setsockopt(sockfd, SOL_SOCKET, SO_DETACH_FILTER, &amp;val, sizeof(val));</li>
+<li>setsockopt(sockfd, SOL_SOCKET, SO_LOCK_FILTER,   &amp;val, sizeof(val));</li>
+</ul>
+<p>Normally, most use cases for socket filtering on packet sockets will be<br>covered by libpcap in high-level syntax, so as an application developer<br>you should stick to that. libpcap wraps its own layer around all that.</p>
+<p>Unless i) using/linking to libpcap is not an option, ii) the required BPF<br>filters use Linux extensions that are not supported by libpcap’s compiler,<br>iii) a filter might be more complex and not cleanly implementable with<br>libpcap’s compiler, or iv) particular filter codes should be optimized<br>differently than libpcap’s internal compiler does; then in such cases<br>writing such a filter “by hand” can be of an alternative. For example,<br>xt_bpf and cls_bpf users might have requirements that could result in<br>more complex filter code, or one that cannot be expressed with libpcap<br>(e.g. different return codes for various code paths). Moreover, BPF JIT<br>implementors may wish to manually write test cases and thus need low-level<br>access to BPF code as well.</p>
+<h2 id="BPF-engine-and-instruction-set"><a href="#BPF-engine-and-instruction-set" class="headerlink" title="BPF engine and instruction set"></a>BPF engine and instruction set</h2><p>Under tools/bpf/ there’s a small helper tool called bpf_asm which can<br>be used to write low-level filters for example scenarios mentioned in the<br>previous section. Asm-like syntax mentioned here has been implemented in<br>bpf_asm and will be used for further explanations (instead of dealing with<br>less readable opcodes directly, principles are the same). The syntax is<br>closely modelled after Steven McCanne’s and Van Jacobson’s BPF paper.</p>
+<p>The BPF architecture consists of the following basic elements:</p>
+<p>  Element          Description</p>
+<p>  A                32 bit wide accumulator<br>  X                32 bit wide X register<br>  M[]              16 x 32 bit wide misc registers aka “scratch memory<br>                   store”, addressable from 0 to 15</p>
+<p>A program, that is translated by bpf_asm into “opcodes” is an array that<br>consists of the following elements (as already mentioned):</p>
+<p>  op:16, jt:8, jf:8, k:32</p>
+<p>The element op is a 16 bit wide opcode that has a particular instruction<br>encoded. jt and jf are two 8 bit wide jump targets, one for condition<br>“jump if true”, the other one “jump if false”. Eventually, element k<br>contains a miscellaneous argument that can be interpreted in different<br>ways depending on the given instruction in op.</p>
+<p>The instruction set consists of load, store, branch, alu, miscellaneous<br>and return instructions that are also represented in bpf_asm syntax. This<br>table lists all bpf_asm instructions available resp. what their underlying<br>opcodes as defined in linux/filter.h stand for:</p>
+<p>  Instruction      Addressing mode      Description</p>
+<p>  ld               1, 2, 3, 4, 10       Load word into A<br>  ldi              4                    Load word into A<br>  ldh              1, 2                 Load half-word into A<br>  ldb              1, 2                 Load byte into A<br>  ldx              3, 4, 5, 10          Load word into X<br>  ldxi             4                    Load word into X<br>  ldxb             5                    Load byte into X</p>
+<p>  st               3                    Store A into M[]<br>  stx              3                    Store X into M[]</p>
+<p>  jmp              6                    Jump to label<br>  ja               6                    Jump to label<br>  jeq              7, 8                 Jump on A == k<br>  jneq             8                    Jump on A != k<br>  jne              8                    Jump on A != k<br>  jlt              8                    Jump on A &lt;  k<br>  jle              8                    Jump on A &lt;= k<br>  jgt              7, 8                 Jump on A &gt;  k<br>  jge              7, 8                 Jump on A &gt;= k<br>  jset             7, 8                 Jump on A &amp;  k</p>
+<p>  add              0, 4                 A + <x><br>  sub              0, 4                 A - <x><br>  mul              0, 4                 A * <x><br>  div              0, 4                 A / <x><br>  mod              0, 4                 A % <x><br>  neg                                   !A<br>  and              0, 4                 A &amp; <x><br>  or               0, 4                 A | <x><br>  xor              0, 4                 A ^ <x><br>  lsh              0, 4                 A &lt;&lt; <x><br>  rsh              0, 4                 A &gt;&gt; <x></p>
+<p>  tax                                   Copy A into X<br>  txa                                   Copy X into A</p>
+<p>  ret              4, 9                 Return</p>
+<p>The next table shows addressing formats from the 2nd column:</p>
+<p>  Addressing mode  Syntax               Description</p>
+<p>   0               x/%x                 Register X<br>   1               [k]                  BHW at byte offset k in the packet<br>   2               [x + k]              BHW at the offset X + k in the packet<br>   3               M[k]                 Word at offset k in M[]<br>   4               #k                   Literal value stored in k<br>   5               4*([k]&amp;0xf)          Lower nibble * 4 at byte offset k in the packet<br>   6               L                    Jump label L<br>   7               #k,Lt,Lf             Jump to Lt if true, otherwise jump to Lf<br>   8               #k,Lt                Jump to Lt if predicate is true<br>   9               a/%a                 Accumulator A<br>  10               extension            BPF extension</p>
+<p>The Linux kernel also has a couple of BPF extensions that are used along<br>with the class of load instructions by “overloading” the k argument with<br>a negative offset + a particular extension offset. The result of such BPF<br>extensions are loaded into A.</p>
+<p>Possible BPF extensions are shown in the following table:</p>
+<p>  Extension                             Description</p>
+<p>  len                                   skb-&gt;len<br>  proto                                 skb-&gt;protocol<br>  type                                  skb-&gt;pkt_type<br>  poff                                  Payload start offset<br>  ifidx                                 skb-&gt;dev-&gt;ifindex<br>  nla                                   Netlink attribute of type X with offset A<br>  nlan                                  Nested Netlink attribute of type X with offset A<br>  mark                                  skb-&gt;mark<br>  queue                                 skb-&gt;queue_mapping<br>  hatype                                skb-&gt;dev-&gt;type<br>  rxhash                                skb-&gt;hash<br>  cpu                                   raw_smp_processor_id()<br>  vlan_tci                              skb_vlan_tag_get(skb)<br>  vlan_avail                            skb_vlan_tag_present(skb)<br>  vlan_tpid                             skb-&gt;vlan_proto<br>  rand                                  prandom_u32()</p>
+<p>These extensions can also be prefixed with ‘#’.<br>Examples for low-level BPF:</p>
+<p>** ARP packets:</p>
+<p>  ldh [12]<br>  jne #0x806, drop<br>  ret #-1<br>  drop: ret #0</p>
+<p>** IPv4 TCP packets:</p>
+<p>  ldh [12]<br>  jne #0x800, drop<br>  ldb [23]<br>  jneq #6, drop<br>  ret #-1<br>  drop: ret #0</p>
+<p>** (Accelerated) VLAN w/ id 10:</p>
+<p>  ld vlan_tci<br>  jneq #10, drop<br>  ret #-1<br>  drop: ret #0</p>
+<p>** icmp random packet sampling, 1 in 4<br>  ldh [12]<br>  jne #0x800, drop<br>  ldb [23]<br>  jneq #1, drop</p>
+<h1 id="get-a-random-uint32-number"><a href="#get-a-random-uint32-number" class="headerlink" title="get a random uint32 number"></a>get a random uint32 number</h1><p>  ld rand<br>  mod #4<br>  jneq #1, drop<br>  ret #-1<br>  drop: ret #0</p>
+<p>** SECCOMP filter example:</p>
+<p>  ld [4]                  /* offsetof(struct seccomp_data, arch) <em>/<br>  jne #0xc000003e, bad    /</em> AUDIT_ARCH_X86_64 <em>/<br>  ld [0]                  /</em> offsetof(struct seccomp_data, nr) <em>/<br>  jeq #15, good           /</em> __NR_rt_sigreturn <em>/<br>  jeq #231, good          /</em> __NR_exit_group <em>/<br>  jeq #60, good           /</em> __NR_exit <em>/<br>  jeq #0, good            /</em> __NR_read <em>/<br>  jeq #1, good            /</em> __NR_write <em>/<br>  jeq #5, good            /</em> __NR_fstat <em>/<br>  jeq #9, good            /</em> __NR_mmap <em>/<br>  jeq #14, good           /</em> __NR_rt_sigprocmask <em>/<br>  jeq #13, good           /</em> __NR_rt_sigaction <em>/<br>  jeq #35, good           /</em> __NR_nanosleep <em>/<br>  bad: ret #0             /</em> SECCOMP_RET_KILL_THREAD <em>/<br>  good: ret #0x7fff0000   /</em> SECCOMP_RET_ALLOW */</p>
+<p>The above example code can be placed into a file (here called “foo”), and<br>then be passed to the bpf_asm tool for generating opcodes, output that xt_bpf<br>and cls_bpf understands and can directly be loaded with. Example with above<br>ARP code:</p>
+<p>$ ./bpf_asm foo<br>4,40 0 0 12,21 0 1 2054,6 0 0 4294967295,6 0 0 0,</p>
+<p>In copy and paste C-like output:</p>
+<p>$ ./bpf_asm -c foo<br>{ 0x28,  0,  0, 0x0000000c },<br>{ 0x15,  0,  1, 0x00000806 },<br>{ 0x06,  0,  0, 0xffffffff },<br>{ 0x06,  0,  0, 0000000000 },</p>
+<p>In particular, as usage with xt_bpf or cls_bpf can result in more complex BPF<br>filters that might not be obvious at first, it’s good to test filters before<br>attaching to a live system. For that purpose, there’s a small tool called<br>bpf_dbg under tools/bpf/ in the kernel source directory. This debugger allows<br>for testing BPF filters against given pcap files, single stepping through the<br>BPF code on the pcap’s packets and to do BPF machine register dumps.</p>
+<p>Starting bpf_dbg is trivial and just requires issuing:</p>
+<h1 id="bpf-dbg"><a href="#bpf-dbg" class="headerlink" title="./bpf_dbg"></a>./bpf_dbg</h1><p>In case input and output do not equal stdin/stdout, bpf_dbg takes an<br>alternative stdin source as a first argument, and an alternative stdout<br>sink as a second one, e.g. <code>./bpf_dbg test_in.txt test_out.txt</code>.</p>
+<p>Other than that, a particular libreadline configuration can be set via<br>file “<del>/.bpf_dbg_init” and the command history is stored in the file<br>“</del>/.bpf_dbg_history”.</p>
+<p>Interaction in bpf_dbg happens through a shell that also has auto-completion<br>support (follow-up example commands starting with ‘&gt;’ denote bpf_dbg shell).<br>The usual workflow would be to …</p>
+<blockquote>
+<p>load bpf 6,40 0 0 12,21 0 3 2048,48 0 0 23,21 0 1 1,6 0 0 65535,6 0 0 0<br>  Loads a BPF filter from standard output of bpf_asm, or transformed via<br>  e.g. <code>tcpdump -iem1 -ddd port 22 | tr &#39;\n&#39; &#39;,&#39;</code>. Note that for JIT<br>  debugging (next section), this command creates a temporary socket and<br>  loads the BPF code into the kernel. Thus, this will also be useful for<br>  JIT developers.</p>
+</blockquote>
+<blockquote>
+<p>load pcap foo.pcap<br>  Loads standard tcpdump pcap file.</p>
+</blockquote>
+<blockquote>
+<p>run [<n>]<br>bpf passes:1 fails:9<br>  Runs through all packets from a pcap to account how many passes and fails<br>  the filter will generate. A limit of packets to traverse can be given.</p>
+</blockquote>
+<blockquote>
+<p>disassemble<br>l0:    ldh [12]<br>l1:    jeq #0x800, l2, l5<br>l2:    ldb [23]<br>l3:    jeq #0x1, l4, l5<br>l4:    ret #0xffff<br>l5:    ret #0<br>  Prints out BPF code disassembly.</p>
+</blockquote>
+<blockquote>
+<p>dump<br>/* { op, jt, jf, k }, */<br>{ 0x28,  0,  0, 0x0000000c },<br>{ 0x15,  0,  3, 0x00000800 },<br>{ 0x30,  0,  0, 0x00000017 },<br>{ 0x15,  0,  1, 0x00000001 },<br>{ 0x06,  0,  0, 0x0000ffff },<br>{ 0x06,  0,  0, 0000000000 },<br>  Prints out C-style BPF code dump.</p>
+</blockquote>
+<blockquote>
+<p>breakpoint 0<br>breakpoint at: l0:    ldh [12]<br>breakpoint 1<br>breakpoint at: l1:    jeq #0x800, l2, l5<br>  …<br>  Sets breakpoints at particular BPF instructions. Issuing a <code>run</code> command<br>  will walk through the pcap file continuing from the current packet and<br>  break when a breakpoint is being hit (another <code>run</code> will continue from<br>  the currently active breakpoint executing next instructions):</p>
+</blockquote>
+<blockquote>
+<p>run<br>  – register dump –<br>  pc:       [0]                       &lt;– program counter<br>  code:     [40] jt[0] jf[0] k[12]    &lt;– plain BPF code of current instruction<br>  curr:     l0:    ldh [12]              &lt;– disassembly of current instruction<br>  A:        [00000000][0]             &lt;– content of A (hex, decimal)<br>  X:        [00000000][0]             &lt;– content of X (hex, decimal)<br>  M[0,15]:  [00000000][0]             &lt;– folded content of M (hex, decimal)<br>  – packet dump –                   &lt;– Current packet from pcap (hex)<br>  len: 42<br>    0: 00 19 cb 55 55 a4 00 14 a4 43 78 69 08 06 00 01<br>   16: 08 00 06 04 00 01 00 14 a4 43 78 69 0a 3b 01 26<br>   32: 00 00 00 00 00 00 0a 3b 01 01<br>  (breakpoint)</p>
+</blockquote>
+<blockquote>
+<p>breakpoint<br>breakpoints: 0 1<br>  Prints currently set breakpoints.</p>
+</blockquote>
+<blockquote>
+<p>step [-<n>, +<n>]<br>  Performs single stepping through the BPF program from the current pc<br>  offset. Thus, on each step invocation, above register dump is issued.<br>  This can go forwards and backwards in time, a plain <code>step</code> will break<br>  on the next BPF instruction, thus +1. (No <code>run</code> needs to be issued here.)</p>
+</blockquote>
+<blockquote>
+<p>select <n><br>  Selects a given packet from the pcap file to continue from. Thus, on<br>  the next <code>run</code> or <code>step</code>, the BPF program is being evaluated against<br>  the user pre-selected packet. Numbering starts just as in Wireshark<br>  with index 1.</p>
+</blockquote>
+<blockquote>
+<p>quit<br>#<br>  Exits bpf_dbg.</p>
+</blockquote>
+<h2 id="JIT-compiler"><a href="#JIT-compiler" class="headerlink" title="JIT compiler"></a>JIT compiler</h2><p>The Linux kernel has a built-in BPF JIT compiler for x86_64, SPARC, PowerPC,<br>ARM, ARM64, MIPS and s390 and can be enabled through CONFIG_BPF_JIT. The JIT<br>compiler is transparently invoked for each attached filter from user space<br>or for internal kernel users if it has been previously enabled by root:</p>
+<p>  echo 1 &gt; /proc/sys/net/core/bpf_jit_enable</p>
+<p>For JIT developers, doing audits etc, each compile run can output the generated<br>opcode image into the kernel log via:</p>
+<p>  echo 2 &gt; /proc/sys/net/core/bpf_jit_enable</p>
+<p>Example output from dmesg:</p>
+<p>[ 3389.935842] flen=6 proglen=70 pass=3 image=ffffffffa0069c8f<br>[ 3389.935847] JIT code: 00000000: 55 48 89 e5 48 83 ec 60 48 89 5d f8 44 8b 4f 68<br>[ 3389.935849] JIT code: 00000010: 44 2b 4f 6c 4c 8b 87 d8 00 00 00 be 0c 00 00 00<br>[ 3389.935850] JIT code: 00000020: e8 1d 94 ff e0 3d 00 08 00 00 75 16 be 17 00 00<br>[ 3389.935851] JIT code: 00000030: 00 e8 28 94 ff e0 83 f8 01 75 07 b8 ff ff 00 00<br>[ 3389.935852] JIT code: 00000040: eb 02 31 c0 c9 c3</p>
+<p>When CONFIG_BPF_JIT_ALWAYS_ON is enabled, bpf_jit_enable is permanently set to 1 and<br>setting any other value than that will return in failure. This is even the case for<br>setting bpf_jit_enable to 2, since dumping the final JIT image into the kernel log<br>is discouraged and introspection through bpftool (under tools/bpf/bpftool/) is the<br>generally recommended approach instead.</p>
+<p>In the kernel source tree under tools/bpf/, there’s bpf_jit_disasm for<br>generating disassembly out of the kernel log’s hexdump:</p>
+<h1 id="bpf-jit-disasm"><a href="#bpf-jit-disasm" class="headerlink" title="./bpf_jit_disasm"></a>./bpf_jit_disasm</h1><p>70 bytes emitted from JIT compiler (pass:3, flen:6)<br>ffffffffa0069c8f + <x>:<br>   0:    push   %rbp<br>   1:    mov    %rsp,%rbp<br>   4:    sub    $0x60,%rsp<br>   8:    mov    %rbx,-0x8(%rbp)<br>   c:    mov    0x68(%rdi),%r9d<br>  10:    sub    0x6c(%rdi),%r9d<br>  14:    mov    0xd8(%rdi),%r8<br>  1b:    mov    $0xc,%esi<br>  20:    callq  0xffffffffe0ff9442<br>  25:    cmp    $0x800,%eax<br>  2a:    jne    0x0000000000000042<br>  2c:    mov    $0x17,%esi<br>  31:    callq  0xffffffffe0ff945e<br>  36:    cmp    $0x1,%eax<br>  39:    jne    0x0000000000000042<br>  3b:    mov    $0xffff,%eax<br>  40:    jmp    0x0000000000000044<br>  42:    xor    %eax,%eax<br>  44:    leaveq<br>  45:    retq</p>
+<p>Issuing option <code>-o</code> will “annotate” opcodes to resulting assembler<br>instructions, which can be very useful for JIT developers:</p>
+<h1 id="bpf-jit-disasm-o"><a href="#bpf-jit-disasm-o" class="headerlink" title="./bpf_jit_disasm -o"></a>./bpf_jit_disasm -o</h1><p>70 bytes emitted from JIT compiler (pass:3, flen:6)<br>ffffffffa0069c8f + <x>:<br>   0:    push   %rbp<br>    55<br>   1:    mov    %rsp,%rbp<br>    48 89 e5<br>   4:    sub    $0x60,%rsp<br>    48 83 ec 60<br>   8:    mov    %rbx,-0x8(%rbp)<br>    48 89 5d f8<br>   c:    mov    0x68(%rdi),%r9d<br>    44 8b 4f 68<br>  10:    sub    0x6c(%rdi),%r9d<br>    44 2b 4f 6c<br>  14:    mov    0xd8(%rdi),%r8<br>    4c 8b 87 d8 00 00 00<br>  1b:    mov    $0xc,%esi<br>    be 0c 00 00 00<br>  20:    callq  0xffffffffe0ff9442<br>    e8 1d 94 ff e0<br>  25:    cmp    $0x800,%eax<br>    3d 00 08 00 00<br>  2a:    jne    0x0000000000000042<br>    75 16<br>  2c:    mov    $0x17,%esi<br>    be 17 00 00 00<br>  31:    callq  0xffffffffe0ff945e<br>    e8 28 94 ff e0<br>  36:    cmp    $0x1,%eax<br>    83 f8 01<br>  39:    jne    0x0000000000000042<br>    75 07<br>  3b:    mov    $0xffff,%eax<br>    b8 ff ff 00 00<br>  40:    jmp    0x0000000000000044<br>    eb 02<br>  42:    xor    %eax,%eax<br>    31 c0<br>  44:    leaveq<br>    c9<br>  45:    retq<br>    c3</p>
+<p>For BPF JIT developers, bpf_jit_disasm, bpf_asm and bpf_dbg provides a useful<br>toolchain for developing and testing the kernel’s JIT compiler.</p>
+<h2 id="BPF-kernel-internals"><a href="#BPF-kernel-internals" class="headerlink" title="BPF kernel internals"></a>BPF kernel internals</h2><p>Internally, for the kernel interpreter, a different instruction set<br>format with similar underlying principles from BPF described in previous<br>paragraphs is being used. However, the instruction set format is modelled<br>closer to the underlying architecture to mimic native instruction sets, so<br>that a better performance can be achieved (more details later). This new<br>ISA is called ‘eBPF’ or ‘internal BPF’ interchangeably. (Note: eBPF which<br>originates from [e]xtended BPF is not the same as BPF extensions! While<br>eBPF is an ISA, BPF extensions date back to classic BPF’s ‘overloading’<br>of BPF_LD | BPF_{B,H,W} | BPF_ABS instruction.)</p>
+<p>It is designed to be JITed with one to one mapping, which can also open up<br>the possibility for GCC/LLVM compilers to generate optimized eBPF code through<br>an eBPF backend that performs almost as fast as natively compiled code.</p>
+<p>The new instruction set was originally designed with the possible goal in<br>mind to write programs in “restricted C” and compile into eBPF with a optional<br>GCC/LLVM backend, so that it can just-in-time map to modern 64-bit CPUs with<br>minimal performance overhead over two steps, that is, C -&gt; eBPF -&gt; native code.</p>
+<p>Currently, the new format is being used for running user BPF programs, which<br>includes seccomp BPF, classic socket filters, cls_bpf traffic classifier,<br>team driver’s classifier for its load-balancing mode, netfilter’s xt_bpf<br>extension, PTP dissector/classifier, and much more. They are all internally<br>converted by the kernel into the new instruction set representation and run<br>in the eBPF interpreter. For in-kernel handlers, this all works transparently<br>by using bpf_prog_create() for setting up the filter, resp.<br>bpf_prog_destroy() for destroying it. The macro<br>BPF_PROG_RUN(filter, ctx) transparently invokes eBPF interpreter or JITed<br>code to run the filter. ‘filter’ is a pointer to struct bpf_prog that we<br>got from bpf_prog_create(), and ‘ctx’ the given context (e.g.<br>skb pointer). All constraints and restrictions from bpf_check_classic() apply<br>before a conversion to the new layout is being done behind the scenes!</p>
+<p>Currently, the classic BPF format is being used for JITing on most 32-bit<br>architectures, whereas x86-64, aarch64, s390x, powerpc64, sparc64, arm32 perform<br>JIT compilation from eBPF instruction set.</p>
+<p>Some core changes of the new internal format:</p>
+<ul>
+<li><p>Number of registers increase from 2 to 10:</p>
+<p>The old format had two registers A and X, and a hidden frame pointer. The<br>new layout extends this to be 10 internal registers and a read-only frame<br>pointer. Since 64-bit CPUs are passing arguments to functions via registers<br>the number of args from eBPF program to in-kernel function is restricted<br>to 5 and one register is used to accept return value from an in-kernel<br>function. Natively, x86_64 passes first 6 arguments in registers, aarch64/<br>sparcv9/mips64 have 7 - 8 registers for arguments; x86_64 has 6 callee saved<br>registers, and aarch64/sparcv9/mips64 have 11 or more callee saved registers.</p>
+<p>Therefore, eBPF calling convention is defined as:</p>
+<ul>
+<li>R0    - return value from in-kernel function, and exit value for eBPF program</li>
+<li>R1 - R5    - arguments from eBPF program to in-kernel function</li>
+<li>R6 - R9    - callee saved registers that in-kernel function will preserve</li>
+<li>R10    - read-only frame pointer to access stack</li>
+</ul>
+<p>Thus, all eBPF registers map one to one to HW registers on x86_64, aarch64,<br>etc, and eBPF calling convention maps directly to ABIs used by the kernel on<br>64-bit architectures.</p>
+<p>On 32-bit architectures JIT may map programs that use only 32-bit arithmetic<br>and may let more complex programs to be interpreted.</p>
+<p>R0 - R5 are scratch registers and eBPF program needs spill/fill them if<br>necessary across calls. Note that there is only one eBPF program (== one<br>eBPF main routine) and it cannot call other eBPF functions, it can only<br>call predefined in-kernel functions, though.</p>
+</li>
+<li><p>Register width increases from 32-bit to 64-bit:</p>
+<p>Still, the semantics of the original 32-bit ALU operations are preserved<br>via 32-bit subregisters. All eBPF registers are 64-bit with 32-bit lower<br>subregisters that zero-extend into 64-bit if they are being written to.<br>That behavior maps directly to x86_64 and arm64 subregister definition, but<br>makes other JITs more difficult.</p>
+<p>32-bit architectures run 64-bit internal BPF programs via interpreter.<br>Their JITs may convert BPF programs that only use 32-bit subregisters into<br>native instruction set and let the rest being interpreted.</p>
+<p>Operation is 64-bit, because on 64-bit architectures, pointers are also<br>64-bit wide, and we want to pass 64-bit values in/out of kernel functions,<br>so 32-bit eBPF registers would otherwise require to define register-pair<br>ABI, thus, there won’t be able to use a direct eBPF register to HW register<br>mapping and JIT would need to do combine/split/move operations for every<br>register in and out of the function, which is complex, bug prone and slow.<br>Another reason is the use of atomic 64-bit counters.</p>
+</li>
+<li><p>Conditional jt/jf targets replaced with jt/fall-through:</p>
+<p>While the original design has constructs such as “if (cond) jump_true;<br>else jump_false;”, they are being replaced into alternative constructs like<br>“if (cond) jump_true; /* else fall-through */“.</p>
+</li>
+<li><p>Introduces bpf_call insn and register passing convention for zero overhead<br>calls from/to other kernel functions:</p>
+<p>Before an in-kernel function call, the internal BPF program needs to<br>place function arguments into R1 to R5 registers to satisfy calling<br>convention, then the interpreter will take them from registers and pass<br>to in-kernel function. If R1 - R5 registers are mapped to CPU registers<br>that are used for argument passing on given architecture, the JIT compiler<br>doesn’t need to emit extra moves. Function arguments will be in the correct<br>registers and BPF_CALL instruction will be JITed as single ‘call’ HW<br>instruction. This calling convention was picked to cover common call<br>situations without performance penalty.</p>
+<p>After an in-kernel function call, R1 - R5 are reset to unreadable and R0 has<br>a return value of the function. Since R6 - R9 are callee saved, their state<br>is preserved across the call.</p>
+<p>For example, consider three C functions:</p>
+<p>u64 f1() { return (*_f2)(1); }<br>u64 f2(u64 a) { return f3(a + 1, a); }<br>u64 f3(u64 a, u64 b) { return a - b; }</p>
+<p>GCC can compile f1, f3 into x86_64:</p>
+<p>f1:<br>  movl $1, %edi<br>  movq _f2(%rip), %rax<br>  jmp  *%rax<br>f3:<br>  movq %rdi, %rax<br>  subq %rsi, %rax<br>  ret</p>
+<p>Function f2 in eBPF may look like:</p>
+<p>f2:<br>  bpf_mov R2, R1<br>  bpf_add R1, 1<br>  bpf_call f3<br>  bpf_exit</p>
+<p>If f2 is JITed and the pointer stored to ‘_f2’. The calls f1 -&gt; f2 -&gt; f3 and<br>returns will be seamless. Without JIT, __bpf_prog_run() interpreter needs to<br>be used to call into f2.</p>
+<p>For practical reasons all eBPF programs have only one argument ‘ctx’ which is<br>already placed into R1 (e.g. on __bpf_prog_run() startup) and the programs<br>can call kernel functions with up to 5 arguments. Calls with 6 or more arguments<br>are currently not supported, but these restrictions can be lifted if necessary<br>in the future.</p>
+<p>On 64-bit architectures all register map to HW registers one to one. For<br>example, x86_64 JIT compiler can map them as …</p>
+<p>  R0 - rax<br>  R1 - rdi<br>  R2 - rsi<br>  R3 - rdx<br>  R4 - rcx<br>  R5 - r8<br>  R6 - rbx<br>  R7 - r13<br>  R8 - r14<br>  R9 - r15<br>  R10 - rbp</p>
+<p>… since x86_64 ABI mandates rdi, rsi, rdx, rcx, r8, r9 for argument passing<br>and rbx, r12 - r15 are callee saved.</p>
+<p>Then the following internal BPF pseudo-program:</p>
+<p>  bpf_mov R6, R1 /* save ctx <em>/<br>  bpf_mov R2, 2<br>  bpf_mov R3, 3<br>  bpf_mov R4, 4<br>  bpf_mov R5, 5<br>  bpf_call foo<br>  bpf_mov R7, R0 /</em> save foo() return value <em>/<br>  bpf_mov R1, R6 /</em> restore ctx for next call */<br>  bpf_mov R2, 6<br>  bpf_mov R3, 7<br>  bpf_mov R4, 8<br>  bpf_mov R5, 9<br>  bpf_call bar<br>  bpf_add R0, R7<br>  bpf_exit</p>
+<p>After JIT to x86_64 may look like:</p>
+<p>  push %rbp<br>  mov %rsp,%rbp<br>  sub $0x228,%rsp<br>  mov %rbx,-0x228(%rbp)<br>  mov %r13,-0x220(%rbp)<br>  mov %rdi,%rbx<br>  mov $0x2,%esi<br>  mov $0x3,%edx<br>  mov $0x4,%ecx<br>  mov $0x5,%r8d<br>  callq foo<br>  mov %rax,%r13<br>  mov %rbx,%rdi<br>  mov $0x2,%esi<br>  mov $0x3,%edx<br>  mov $0x4,%ecx<br>  mov $0x5,%r8d<br>  callq bar<br>  add %r13,%rax<br>  mov -0x228(%rbp),%rbx<br>  mov -0x220(%rbp),%r13<br>  leaveq<br>  retq</p>
+<p>Which is in this example equivalent in C to:</p>
+<p>  u64 bpf_filter(u64 ctx)<br>  {</p>
+<pre><code>  return foo(ctx, 2, 3, 4, 5) + bar(ctx, 6, 7, 8, 9);
+</code></pre>
+<p>  }</p>
+<p>In-kernel functions foo() and bar() with prototype: u64 (*)(u64 arg1, u64<br>arg2, u64 arg3, u64 arg4, u64 arg5); will receive arguments in proper<br>registers and place their return value into ‘%rax’ which is R0 in eBPF.<br>Prologue and epilogue are emitted by JIT and are implicit in the<br>interpreter. R0-R5 are scratch registers, so eBPF program needs to preserve<br>them across the calls as defined by calling convention.</p>
+<p>For example the following program is invalid:</p>
+<p>  bpf_mov R1, 1<br>  bpf_call foo<br>  bpf_mov R0, R1<br>  bpf_exit</p>
+<p>After the call the registers R1-R5 contain junk values and cannot be read.<br>An in-kernel eBPF verifier is used to validate internal BPF programs.</p>
+</li>
+</ul>
+<p>Also in the new design, eBPF is limited to 4096 insns, which means that any<br>program will terminate quickly and will only call a fixed number of kernel<br>functions. Original BPF and the new format are two operand instructions,<br>which helps to do one-to-one mapping between eBPF insn and x86 insn during JIT.</p>
+<p>The input context pointer for invoking the interpreter function is generic,<br>its content is defined by a specific use case. For seccomp register R1 points<br>to seccomp_data, for converted BPF filters R1 points to a skb.</p>
+<p>A program, that is translated internally consists of the following elements:</p>
+<p>  op:16, jt:8, jf:8, k:32    ==&gt;    op:8, dst_reg:4, src_reg:4, off:16, imm:32</p>
+<p>So far 87 internal BPF instructions were implemented. 8-bit ‘op’ opcode field<br>has room for new instructions. Some of them may use 16/24/32 byte encoding. New<br>instructions must be multiple of 8 bytes to preserve backward compatibility.</p>
+<p>Internal BPF is a general purpose RISC instruction set. Not every register and<br>every instruction are used during translation from original BPF to new format.<br>For example, socket filters are not using ‘exclusive add’ instruction, but<br>tracing filters may do to maintain counters of events, for example. Register R9<br>is not used by socket filters either, but more complex filters may be running<br>out of registers and would have to resort to spill/fill to stack.</p>
+<p>Internal BPF can used as generic assembler for last step performance<br>optimizations, socket filters and seccomp are using it as assembler. Tracing<br>filters may use it as assembler to generate code from kernel. In kernel usage<br>may not be bounded by security considerations, since generated internal BPF code<br>may be optimizing internal code path and not being exposed to the user space.<br>Safety of internal BPF can come from a verifier (TBD). In such use cases as<br>described, it may be used as safe instruction set.</p>
+<p>Just like the original BPF, the new format runs within a controlled environment,<br>is deterministic and the kernel can easily prove that. The safety of the program<br>can be determined in two steps: first step does depth-first-search to disallow<br>loops and other CFG validation; second step starts from the first insn and<br>descends all possible paths. It simulates execution of every insn and observes<br>the state change of registers and stack.</p>
+<h2 id="eBPF-opcode-encoding"><a href="#eBPF-opcode-encoding" class="headerlink" title="eBPF opcode encoding"></a>eBPF opcode encoding</h2><p>eBPF is reusing most of the opcode encoding from classic to simplify conversion<br>of classic BPF to eBPF. For arithmetic and jump instructions the 8-bit ‘code’<br>field is divided into three parts:</p>
+<p>  +—————-+——–+——————–+<br>  |   4 bits       |  1 bit |   3 bits           |<br>  | operation code | source | instruction class  |<br>  +—————-+——–+——————–+<br>  (MSB)                                      (LSB)</p>
+<p>Three LSB bits store instruction class which is one of:</p>
+<p>  Classic BPF classes:    eBPF classes:</p>
+<p>  BPF_LD    0x00          BPF_LD    0x00<br>  BPF_LDX   0x01          BPF_LDX   0x01<br>  BPF_ST    0x02          BPF_ST    0x02<br>  BPF_STX   0x03          BPF_STX   0x03<br>  BPF_ALU   0x04          BPF_ALU   0x04<br>  BPF_JMP   0x05          BPF_JMP   0x05<br>  BPF_RET   0x06          [ class 6 unused, for future if needed ]<br>  BPF_MISC  0x07          BPF_ALU64 0x07</p>
+<p>When BPF_CLASS(code) == BPF_ALU or BPF_JMP, 4th bit encodes source operand …</p>
+<p>  BPF_K     0x00<br>  BPF_X     0x08</p>
+<ul>
+<li><p>in classic BPF, this means:</p>
+<p>BPF_SRC(code) == BPF_X - use register X as source operand<br>BPF_SRC(code) == BPF_K - use 32-bit immediate as source operand</p>
+</li>
+<li><p>in eBPF, this means:</p>
+<p>BPF_SRC(code) == BPF_X - use ‘src_reg’ register as source operand<br>BPF_SRC(code) == BPF_K - use 32-bit immediate as source operand</p>
+</li>
+</ul>
+<p>… and four MSB bits store operation code.</p>
+<p>If BPF_CLASS(code) == BPF_ALU or BPF_ALU64 [ in eBPF ], BPF_OP(code) is one of:</p>
+<p>  BPF_ADD   0x00<br>  BPF_SUB   0x10<br>  BPF_MUL   0x20<br>  BPF_DIV   0x30<br>  BPF_OR    0x40<br>  BPF_AND   0x50<br>  BPF_LSH   0x60<br>  BPF_RSH   0x70<br>  BPF_NEG   0x80<br>  BPF_MOD   0x90<br>  BPF_XOR   0xa0<br>  BPF_MOV   0xb0  /* eBPF only: mov reg to reg <em>/<br>  BPF_ARSH  0xc0  /</em> eBPF only: sign extending shift right <em>/<br>  BPF_END   0xd0  /</em> eBPF only: endianness conversion */</p>
+<p>If BPF_CLASS(code) == BPF_JMP, BPF_OP(code) is one of:</p>
+<p>  BPF_JA    0x00<br>  BPF_JEQ   0x10<br>  BPF_JGT   0x20<br>  BPF_JGE   0x30<br>  BPF_JSET  0x40<br>  BPF_JNE   0x50  /* eBPF only: jump != <em>/<br>  BPF_JSGT  0x60  /</em> eBPF only: signed ‘&gt;’ <em>/<br>  BPF_JSGE  0x70  /</em> eBPF only: signed ‘&gt;=’ <em>/<br>  BPF_CALL  0x80  /</em> eBPF only: function call <em>/<br>  BPF_EXIT  0x90  /</em> eBPF only: function return <em>/<br>  BPF_JLT   0xa0  /</em> eBPF only: unsigned ‘&lt;’ <em>/<br>  BPF_JLE   0xb0  /</em> eBPF only: unsigned ‘&lt;=’ <em>/<br>  BPF_JSLT  0xc0  /</em> eBPF only: signed ‘&lt;’ <em>/<br>  BPF_JSLE  0xd0  /</em> eBPF only: signed ‘&lt;=’ */</p>
+<p>So BPF_ADD | BPF_X | BPF_ALU means 32-bit addition in both classic BPF<br>and eBPF. There are only two registers in classic BPF, so it means A += X.<br>In eBPF it means dst_reg = (u32) dst_reg + (u32) src_reg; similarly,<br>BPF_XOR | BPF_K | BPF_ALU means A ^= imm32 in classic BPF and analogous<br>src_reg = (u32) src_reg ^ (u32) imm32 in eBPF.</p>
+<p>Classic BPF is using BPF_MISC class to represent A = X and X = A moves.<br>eBPF is using BPF_MOV | BPF_X | BPF_ALU code instead. Since there are no<br>BPF_MISC operations in eBPF, the class 7 is used as BPF_ALU64 to mean<br>exactly the same operations as BPF_ALU, but with 64-bit wide operands<br>instead. So BPF_ADD | BPF_X | BPF_ALU64 means 64-bit addition, i.e.:<br>dst_reg = dst_reg + src_reg</p>
+<p>Classic BPF wastes the whole BPF_RET class to represent a single ‘ret’<br>operation. Classic BPF_RET | BPF_K means copy imm32 into return register<br>and perform function exit. eBPF is modeled to match CPU, so BPF_JMP | BPF_EXIT<br>in eBPF means function exit only. The eBPF program needs to store return<br>value into register R0 before doing a BPF_EXIT. Class 6 in eBPF is currently<br>unused and reserved for future use.</p>
+<p>For load and store instructions the 8-bit ‘code’ field is divided as:</p>
+<p>  +——–+——–+——————-+<br>  | 3 bits | 2 bits |   3 bits          |<br>  |  mode  |  size  | instruction class |<br>  +——–+——–+——————-+<br>  (MSB)                             (LSB)</p>
+<p>Size modifier is one of …</p>
+<p>  BPF_W   0x00    /* word <em>/<br>  BPF_H   0x08    /</em> half word <em>/<br>  BPF_B   0x10    /</em> byte <em>/<br>  BPF_DW  0x18    /</em> eBPF only, double word */</p>
+<p>… which encodes size of load/store operation:</p>
+<p> B  - 1 byte<br> H  - 2 byte<br> W  - 4 byte<br> DW - 8 byte (eBPF only)</p>
+<p>Mode modifier is one of:</p>
+<p>  BPF_IMM  0x00  /* used for 32-bit mov in classic BPF and 64-bit in eBPF <em>/<br>  BPF_ABS  0x20<br>  BPF_IND  0x40<br>  BPF_MEM  0x60<br>  BPF_LEN  0x80  /</em> classic BPF only, reserved in eBPF <em>/<br>  BPF_MSH  0xa0  /</em> classic BPF only, reserved in eBPF <em>/<br>  BPF_XADD 0xc0  /</em> eBPF only, exclusive add */</p>
+<p>eBPF has two non-generic instructions: (BPF_ABS | <size> | BPF_LD) and<br>(BPF_IND | <size> | BPF_LD) which are used to access packet data.</p>
+<p>They had to be carried over from classic to have strong performance of<br>socket filters running in eBPF interpreter. These instructions can only<br>be used when interpreter context is a pointer to ‘struct sk_buff’ and<br>have seven implicit operands. Register R6 is an implicit input that must<br>contain pointer to sk_buff. Register R0 is an implicit output which contains<br>the data fetched from the packet. Registers R1-R5 are scratch registers<br>and must not be used to store the data across BPF_ABS | BPF_LD or<br>BPF_IND | BPF_LD instructions.</p>
+<p>These instructions have implicit program exit condition as well. When<br>eBPF program is trying to access the data beyond the packet boundary,<br>the interpreter will abort the execution of the program. JIT compilers<br>therefore must preserve this property. src_reg and imm32 fields are<br>explicit inputs to these instructions.</p>
+<p>For example:</p>
+<p>  BPF_IND | BPF_W | BPF_LD means:</p>
+<pre><code>R0 = ntohl(*(u32 *) (((struct sk_buff *) R6)-&gt;data + src_reg + imm32))
+and R1 - R5 were scratched.
+</code></pre>
+<p>Unlike classic BPF instruction set, eBPF has generic load/store operations:</p>
+<p>BPF_MEM | <size> | BPF_STX:  *(size *) (dst_reg + off) = src_reg<br>BPF_MEM | <size> | BPF_ST:   *(size *) (dst_reg + off) = imm32<br>BPF_MEM | <size> | BPF_LDX:  dst_reg = *(size *) (src_reg + off)<br>BPF_XADD | BPF_W  | BPF_STX: lock xadd *(u32 *)(dst_reg + off16) += src_reg<br>BPF_XADD | BPF_DW | BPF_STX: lock xadd *(u64 *)(dst_reg + off16) += src_reg</p>
+<p>Where size is one of: BPF_B or BPF_H or BPF_W or BPF_DW. Note that 1 and<br>2 byte atomic increments are not supported.</p>
+<p>eBPF has one 16-byte instruction: BPF_LD | BPF_DW | BPF_IMM which consists<br>of two consecutive ‘struct bpf_insn’ 8-byte blocks and interpreted as single<br>instruction that loads 64-bit immediate value into a dst_reg.<br>Classic BPF has similar instruction: BPF_LD | BPF_W | BPF_IMM which loads<br>32-bit immediate value into a register.</p>
+<h2 id="eBPF-verifier"><a href="#eBPF-verifier" class="headerlink" title="eBPF verifier"></a>eBPF verifier</h2><p>The safety of the eBPF program is determined in two steps.</p>
+<p>First step does DAG check to disallow loops and other CFG validation.<br>In particular it will detect programs that have unreachable instructions.<br>(though classic BPF checker allows them)</p>
+<p>Second step starts from the first insn and descends all possible paths.<br>It simulates execution of every insn and observes the state change of<br>registers and stack.</p>
+<p>At the start of the program the register R1 contains a pointer to context<br>and has type PTR_TO_CTX.<br>If verifier sees an insn that does R2=R1, then R2 has now type<br>PTR_TO_CTX as well and can be used on the right hand side of expression.<br>If R1=PTR_TO_CTX and insn is R2=R1+R1, then R2=SCALAR_VALUE,<br>since addition of two valid pointers makes invalid pointer.<br>(In ‘secure’ mode verifier will reject any type of pointer arithmetic to make<br>sure that kernel addresses don’t leak to unprivileged users)</p>
+<p>If register was never written to, it’s not readable:<br>  bpf_mov R0 = R2<br>  bpf_exit<br>will be rejected, since R2 is unreadable at the start of the program.</p>
+<p>After kernel function call, R1-R5 are reset to unreadable and<br>R0 has a return type of the function.</p>
+<p>Since R6-R9 are callee saved, their state is preserved across the call.<br>  bpf_mov R6 = 1<br>  bpf_call foo<br>  bpf_mov R0 = R6<br>  bpf_exit<br>is a correct program. If there was R1 instead of R6, it would have<br>been rejected.</p>
+<p>load/store instructions are allowed only with registers of valid types, which<br>are PTR_TO_CTX, PTR_TO_MAP, PTR_TO_STACK. They are bounds and alignment checked.<br>For example:<br> bpf_mov R1 = 1<br> bpf_mov R2 = 2<br> bpf_xadd *(u32 *)(R1 + 3) += R2<br> bpf_exit<br>will be rejected, since R1 doesn’t have a valid pointer type at the time of<br>execution of instruction bpf_xadd.</p>
+<p>At the start R1 type is PTR_TO_CTX (a pointer to generic ‘struct bpf_context’)<br>A callback is used to customize verifier to restrict eBPF program access to only<br>certain fields within ctx structure with specified size and alignment.</p>
+<p>For example, the following insn:<br>  bpf_ld R0 = *(u32 *)(R6 + 8)<br>intends to load a word from address R6 + 8 and store it into R0<br>If R6=PTR_TO_CTX, via is_valid_access() callback the verifier will know<br>that offset 8 of size 4 bytes can be accessed for reading, otherwise<br>the verifier will reject the program.<br>If R6=PTR_TO_STACK, then access should be aligned and be within<br>stack bounds, which are [-MAX_BPF_STACK, 0). In this example offset is 8,<br>so it will fail verification, since it’s out of bounds.</p>
+<p>The verifier will allow eBPF program to read data from stack only after<br>it wrote into it.<br>Classic BPF verifier does similar check with M[0-15] memory slots.<br>For example:<br>  bpf_ld R0 = *(u32 *)(R10 - 4)<br>  bpf_exit<br>is invalid program.<br>Though R10 is correct read-only register and has type PTR_TO_STACK<br>and R10 - 4 is within stack bounds, there were no stores into that location.</p>
+<p>Pointer register spill/fill is tracked as well, since four (R6-R9)<br>callee saved registers may not be enough for some programs.</p>
+<p>Allowed function calls are customized with bpf_verifier_ops-&gt;get_func_proto()<br>The eBPF verifier will check that registers match argument constraints.<br>After the call register R0 will be set to return type of the function.</p>
+<p>Function calls is a main mechanism to extend functionality of eBPF programs.<br>Socket filters may let programs to call one set of functions, whereas tracing<br>filters may allow completely different set.</p>
+<p>If a function made accessible to eBPF program, it needs to be thought through<br>from safety point of view. The verifier will guarantee that the function is<br>called with valid arguments.</p>
+<p>seccomp vs socket filters have different security restrictions for classic BPF.<br>Seccomp solves this by two stage verifier: classic BPF verifier is followed<br>by seccomp verifier. In case of eBPF one configurable verifier is shared for<br>all use cases.</p>
+<p>See details of eBPF verifier in kernel/bpf/verifier.c</p>
+<h2 id="Register-value-tracking"><a href="#Register-value-tracking" class="headerlink" title="Register value tracking"></a>Register value tracking</h2><p>In order to determine the safety of an eBPF program, the verifier must track<br>the range of possible values in each register and also in each stack slot.<br>This is done with ‘struct bpf_reg_state’, defined in include/linux/<br>bpf_verifier.h, which unifies tracking of scalar and pointer values.  Each<br>register state has a type, which is either NOT_INIT (the register has not been<br>written to), SCALAR_VALUE (some value which is not usable as a pointer), or a<br>pointer type.  The types of pointers describe their base, as follows:<br>    PTR_TO_CTX          Pointer to bpf_context.<br>    CONST_PTR_TO_MAP    Pointer to struct bpf_map.  “Const” because arithmetic<br>                        on these pointers is forbidden.<br>    PTR_TO_MAP_VALUE    Pointer to the value stored in a map element.<br>    PTR_TO_MAP_VALUE_OR_NULL<br>                        Either a pointer to a map value, or NULL; map accesses<br>                        (see section ‘eBPF maps’, below) return this type,<br>                        which becomes a PTR_TO_MAP_VALUE when checked != NULL.<br>                        Arithmetic on these pointers is forbidden.<br>    PTR_TO_STACK        Frame pointer.<br>    PTR_TO_PACKET       skb-&gt;data.<br>    PTR_TO_PACKET_END   skb-&gt;data + headlen; arithmetic forbidden.<br>However, a pointer may be offset from this base (as a result of pointer<br>arithmetic), and this is tracked in two parts: the ‘fixed offset’ and ‘variable<br>offset’.  The former is used when an exactly-known value (e.g. an immediate<br>operand) is added to a pointer, while the latter is used for values which are<br>not exactly known.  The variable offset is also used in SCALAR_VALUEs, to track<br>the range of possible values in the register.<br>The verifier’s knowledge about the variable offset consists of:</p>
+<ul>
+<li>minimum and maximum values as unsigned</li>
+<li>minimum and maximum values as signed</li>
+<li>knowledge of the values of individual bits, in the form of a ‘tnum’: a u64<br>‘mask’ and a u64 ‘value’.  1s in the mask represent bits whose value is unknown;<br>1s in the value represent bits known to be 1.  Bits known to be 0 have 0 in both<br>mask and value; no bit should ever be 1 in both.  For example, if a byte is read<br>into a register from memory, the register’s top 56 bits are known zero, while<br>the low 8 are unknown - which is represented as the tnum (0x0; 0xff).  If we<br>then OR this with 0x40, we get (0x40; 0xbf), then if we add 1 we get (0x0;<br>0x1ff), because of potential carries.</li>
+</ul>
+<p>Besides arithmetic, the register state can also be updated by conditional<br>branches.  For instance, if a SCALAR_VALUE is compared &gt; 8, in the ‘true’ branch<br>it will have a umin_value (unsigned minimum value) of 9, whereas in the ‘false’<br>branch it will have a umax_value of 8.  A signed compare (with BPF_JSGT or<br>BPF_JSGE) would instead update the signed minimum/maximum values.  Information<br>from the signed and unsigned bounds can be combined; for instance if a value is<br>first tested &lt; 8 and then tested s&gt; 4, the verifier will conclude that the value<br>is also &gt; 4 and s&lt; 8, since the bounds prevent crossing the sign boundary.</p>
+<p>PTR_TO_PACKETs with a variable offset part have an ‘id’, which is common to all<br>pointers sharing that same variable offset.  This is important for packet range<br>checks: after adding a variable to a packet pointer register A, if you then copy<br>it to another register B and then add a constant 4 to A, both registers will<br>share the same ‘id’ but the A will have a fixed offset of +4.  Then if A is<br>bounds-checked and found to be less than a PTR_TO_PACKET_END, the register B is<br>now known to have a safe range of at least 4 bytes.  See ‘Direct packet access’,<br>below, for more on PTR_TO_PACKET ranges.</p>
+<p>The ‘id’ field is also used on PTR_TO_MAP_VALUE_OR_NULL, common to all copies of<br>the pointer returned from a map lookup.  This means that when one copy is<br>checked and found to be non-NULL, all copies can become PTR_TO_MAP_VALUEs.<br>As well as range-checking, the tracked information is also used for enforcing<br>alignment of pointer accesses.  For instance, on most systems the packet pointer<br>is 2 bytes after a 4-byte alignment.  If a program adds 14 bytes to that to jump<br>over the Ethernet header, then reads IHL and addes (IHL * 4), the resulting<br>pointer will have a variable offset known to be 4n+2 for some n, so adding the 2<br>bytes (NET_IP_ALIGN) gives a 4-byte alignment and so word-sized accesses through<br>that pointer are safe.</p>
+<h2 id="Direct-packet-access"><a href="#Direct-packet-access" class="headerlink" title="Direct packet access"></a>Direct packet access</h2><p>In cls_bpf and act_bpf programs the verifier allows direct access to the packet<br>data via skb-&gt;data and skb-&gt;data_end pointers.<br>Ex:<br>1:  r4 = *(u32 <em>)(r1 +80)  /</em> load skb-&gt;data_end <em>/<br>2:  r3 = *(u32 *)(r1 +76)  /</em> load skb-&gt;data <em>/<br>3:  r5 = r3<br>4:  r5 += 14<br>5:  if r5 &gt; r4 goto pc+16<br>R1=ctx R3=pkt(id=0,off=0,r=14) R4=pkt_end R5=pkt(id=0,off=14,r=14) R10=fp<br>6:  r0 = *(u16 *)(r3 +12) /</em> access 12 and 13 bytes of the packet */</p>
+<p>this 2byte load from the packet is safe to do, since the program author<br>did check ‘if (skb-&gt;data + 14 &gt; skb-&gt;data_end) goto err’ at insn #5 which<br>means that in the fall-through case the register R3 (which points to skb-&gt;data)<br>has at least 14 directly accessible bytes. The verifier marks it<br>as R3=pkt(id=0,off=0,r=14).<br>id=0 means that no additional variables were added to the register.<br>off=0 means that no additional constants were added.<br>r=14 is the range of safe access which means that bytes [R3, R3 + 14) are ok.<br>Note that R5 is marked as R5=pkt(id=0,off=14,r=14). It also points<br>to the packet data, but constant 14 was added to the register, so<br>it now points to ‘skb-&gt;data + 14’ and accessible range is [R5, R5 + 14 - 14)<br>which is zero bytes.</p>
+<p>More complex packet access may look like:<br> R0=inv1 R1=ctx R3=pkt(id=0,off=0,r=14) R4=pkt_end R5=pkt(id=0,off=14,r=14) R10=fp<br> 6:  r0 = <em>(u8 <em>)(r3 +7) /</em> load 7th byte from the packet */<br> 7:  r4 = *(u8 *)(r3 +12)<br> 8:  r4 *= 14<br> 9:  r3 = *(u32 *)(r1 +76) /</em> load skb-&gt;data <em>/<br>10:  r3 += r4<br>11:  r2 = r1<br>12:  r2 &lt;&lt;= 48<br>13:  r2 &gt;&gt;= 48<br>14:  r3 += r2<br>15:  r2 = r3<br>16:  r2 += 8<br>17:  r1 = *(u32 *)(r1 +80) /</em> load skb-&gt;data_end */<br>18:  if r2 &gt; r1 goto pc+2<br> R0=inv(id=0,umax_value=255,var_off=(0x0; 0xff)) R1=pkt_end R2=pkt(id=2,off=8,r=8) R3=pkt(id=2,off=0,r=8) R4=inv(id=0,umax_value=3570,var_off=(0x0; 0xfffe)) R5=pkt(id=0,off=14,r=14) R10=fp<br>19:  r1 = *(u8 *)(r3 +4)<br>The state of the register R3 is R3=pkt(id=2,off=0,r=8)<br>id=2 means that two ‘r3 += rX’ instructions were seen, so r3 points to some<br>offset within a packet and since the program author did<br>‘if (r3 + 8 &gt; r1) goto err’ at insn #18, the safe range is [R3, R3 + 8).<br>The verifier only allows ‘add’/‘sub’ operations on packet registers. Any other<br>operation will set the register state to ‘SCALAR_VALUE’ and it won’t be<br>available for direct packet access.<br>Operation ‘r3 += rX’ may overflow and become less than original skb-&gt;data,<br>therefore the verifier has to prevent that.  So when it sees ‘r3 += rX’<br>instruction and rX is more than 16-bit value, any subsequent bounds-check of r3<br>against skb-&gt;data_end will not give us ‘range’ information, so attempts to read<br>through the pointer will give “invalid access to packet” error.<br>Ex. after insn ‘r4 = *(u8 *)(r3 +12)’ (insn #7 above) the state of r4 is<br>R4=inv(id=0,umax_value=255,var_off=(0x0; 0xff)) which means that upper 56 bits<br>of the register are guaranteed to be zero, and nothing is known about the lower<br>8 bits. After insn ‘r4 *= 14’ the state becomes<br>R4=inv(id=0,umax_value=3570,var_off=(0x0; 0xfffe)), since multiplying an 8-bit<br>value by constant 14 will keep upper 52 bits as zero, also the least significant<br>bit will be zero as 14 is even.  Similarly ‘r2 &gt;&gt;= 48’ will make<br>R2=inv(id=0,umax_value=65535,var_off=(0x0; 0xffff)), since the shift is not sign<br>extending.  This logic is implemented in adjust_reg_min_max_vals() function,<br>which calls adjust_ptr_min_max_vals() for adding pointer to scalar (or vice<br>versa) and adjust_scalar_min_max_vals() for operations on two scalars.</p>
+<p>The end result is that bpf program author can access packet directly<br>using normal C code as:<br>  void *data = (void *)(long)skb-&gt;data;<br>  void *data_end = (void *)(long)skb-&gt;data_end;<br>  struct eth_hdr *eth = data;<br>  struct iphdr *iph = data + sizeof(*eth);<br>  struct udphdr *udp = data + sizeof(*eth) + sizeof(*iph);</p>
+<p>  if (data + sizeof(*eth) + sizeof(*iph) + sizeof(*udp) &gt; data_end)<br>          return 0;<br>  if (eth-&gt;h_proto != htons(ETH_P_IP))<br>          return 0;<br>  if (iph-&gt;protocol != IPPROTO_UDP || iph-&gt;ihl != 5)<br>          return 0;<br>  if (udp-&gt;dest == 53 || udp-&gt;source == 9)<br>          …;<br>which makes such programs easier to write comparing to LD_ABS insn<br>and significantly faster.</p>
+<h2 id="eBPF-maps"><a href="#eBPF-maps" class="headerlink" title="eBPF maps"></a>eBPF maps</h2><p>‘maps’ is a generic storage of different types for sharing data between kernel<br>and userspace.</p>
+<p>The maps are accessed from user space via BPF syscall, which has commands:</p>
+<ul>
+<li><p>create a map with given type and attributes<br>map_fd = bpf(BPF_MAP_CREATE, union bpf_attr *attr, u32 size)<br>using attr-&gt;map_type, attr-&gt;key_size, attr-&gt;value_size, attr-&gt;max_entries<br>returns process-local file descriptor or negative error</p>
+</li>
+<li><p>lookup key in a given map<br>err = bpf(BPF_MAP_LOOKUP_ELEM, union bpf_attr *attr, u32 size)<br>using attr-&gt;map_fd, attr-&gt;key, attr-&gt;value<br>returns zero and stores found elem into value or negative error</p>
+</li>
+<li><p>create or update key/value pair in a given map<br>err = bpf(BPF_MAP_UPDATE_ELEM, union bpf_attr *attr, u32 size)<br>using attr-&gt;map_fd, attr-&gt;key, attr-&gt;value<br>returns zero or negative error</p>
+</li>
+<li><p>find and delete element by key in a given map<br>err = bpf(BPF_MAP_DELETE_ELEM, union bpf_attr *attr, u32 size)<br>using attr-&gt;map_fd, attr-&gt;key</p>
+</li>
+<li><p>to delete map: close(fd)<br>Exiting process will delete maps automatically</p>
+</li>
+</ul>
+<p>userspace programs use this syscall to create/access maps that eBPF programs<br>are concurrently updating.</p>
+<p>maps can have different types: hash, array, bloom filter, radix-tree, etc.</p>
+<p>The map is defined by:<br>  . type<br>  . max number of elements<br>  . key size in bytes<br>  . value size in bytes</p>
+<h2 id="Pruning"><a href="#Pruning" class="headerlink" title="Pruning"></a>Pruning</h2><p>The verifier does not actually walk all possible paths through the program.  For<br>each new branch to analyse, the verifier looks at all the states it’s previously<br>been in when at this instruction.  If any of them contain the current state as a<br>subset, the branch is ‘pruned’ - that is, the fact that the previous state was<br>accepted implies the current state would be as well.  For instance, if in the<br>previous state, r1 held a packet-pointer, and in the current state, r1 holds a<br>packet-pointer with a range as long or longer and at least as strict an<br>alignment, then r1 is safe.  Similarly, if r2 was NOT_INIT before then it can’t<br>have been used by any path from that point, so any value in r2 (including<br>another NOT_INIT) is safe.  The implementation is in the function regsafe().<br>Pruning considers not only the registers but also the stack (and any spilled<br>registers it may hold).  They must all be safe for the branch to be pruned.<br>This is implemented in states_equal().</p>
+<h2 id="Understanding-eBPF-verifier-messages"><a href="#Understanding-eBPF-verifier-messages" class="headerlink" title="Understanding eBPF verifier messages"></a>Understanding eBPF verifier messages</h2><p>The following are few examples of invalid eBPF programs and verifier error<br>messages as seen in the log:</p>
+<p>Program with unreachable instructions:<br>static struct bpf_insn prog[] = {<br>  BPF_EXIT_INSN(),<br>  BPF_EXIT_INSN(),<br>};<br>Error:<br>  unreachable insn 1</p>
+<p>Program that reads uninitialized register:<br>  BPF_MOV64_REG(BPF_REG_0, BPF_REG_2),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (bf) r0 = r2<br>  R2 !read_ok</p>
+<p>Program that doesn’t initialize R0 before exiting:<br>  BPF_MOV64_REG(BPF_REG_2, BPF_REG_1),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (bf) r2 = r1<br>  1: (95) exit<br>  R0 !read_ok</p>
+<p>Program that accesses stack out of bounds:<br>  BPF_ST_MEM(BPF_DW, BPF_REG_10, 8, 0),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (7a) *(u64 *)(r10 +8) = 0<br>  invalid stack off=8 size=8</p>
+<p>Program that doesn’t initialize stack before passing its address into function:<br>  BPF_MOV64_REG(BPF_REG_2, BPF_REG_10),<br>  BPF_ALU64_IMM(BPF_ADD, BPF_REG_2, -8),<br>  BPF_LD_MAP_FD(BPF_REG_1, 0),<br>  BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_map_lookup_elem),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (bf) r2 = r10<br>  1: (07) r2 += -8<br>  2: (b7) r1 = 0x0<br>  3: (85) call 1<br>  invalid indirect read from stack off -8+0 size 8</p>
+<p>Program that uses invalid map_fd=0 while calling to map_lookup_elem() function:<br>  BPF_ST_MEM(BPF_DW, BPF_REG_10, -8, 0),<br>  BPF_MOV64_REG(BPF_REG_2, BPF_REG_10),<br>  BPF_ALU64_IMM(BPF_ADD, BPF_REG_2, -8),<br>  BPF_LD_MAP_FD(BPF_REG_1, 0),<br>  BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_map_lookup_elem),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (7a) *(u64 *)(r10 -8) = 0<br>  1: (bf) r2 = r10<br>  2: (07) r2 += -8<br>  3: (b7) r1 = 0x0<br>  4: (85) call 1<br>  fd 0 is not pointing to valid bpf_map</p>
+<p>Program that doesn’t check return value of map_lookup_elem() before accessing<br>map element:<br>  BPF_ST_MEM(BPF_DW, BPF_REG_10, -8, 0),<br>  BPF_MOV64_REG(BPF_REG_2, BPF_REG_10),<br>  BPF_ALU64_IMM(BPF_ADD, BPF_REG_2, -8),<br>  BPF_LD_MAP_FD(BPF_REG_1, 0),<br>  BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_map_lookup_elem),<br>  BPF_ST_MEM(BPF_DW, BPF_REG_0, 0, 0),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (7a) *(u64 *)(r10 -8) = 0<br>  1: (bf) r2 = r10<br>  2: (07) r2 += -8<br>  3: (b7) r1 = 0x0<br>  4: (85) call 1<br>  5: (7a) *(u64 *)(r0 +0) = 0<br>  R0 invalid mem access ‘map_value_or_null’</p>
+<p>Program that correctly checks map_lookup_elem() returned value for NULL, but<br>accesses the memory with incorrect alignment:<br>  BPF_ST_MEM(BPF_DW, BPF_REG_10, -8, 0),<br>  BPF_MOV64_REG(BPF_REG_2, BPF_REG_10),<br>  BPF_ALU64_IMM(BPF_ADD, BPF_REG_2, -8),<br>  BPF_LD_MAP_FD(BPF_REG_1, 0),<br>  BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_map_lookup_elem),<br>  BPF_JMP_IMM(BPF_JEQ, BPF_REG_0, 0, 1),<br>  BPF_ST_MEM(BPF_DW, BPF_REG_0, 4, 0),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (7a) *(u64 *)(r10 -8) = 0<br>  1: (bf) r2 = r10<br>  2: (07) r2 += -8<br>  3: (b7) r1 = 1<br>  4: (85) call 1<br>  5: (15) if r0 == 0x0 goto pc+1<br>   R0=map_ptr R10=fp<br>  6: (7a) *(u64 *)(r0 +4) = 0<br>  misaligned access off 4 size 8</p>
+<p>Program that correctly checks map_lookup_elem() returned value for NULL and<br>accesses memory with correct alignment in one side of ‘if’ branch, but fails<br>to do so in the other side of ‘if’ branch:<br>  BPF_ST_MEM(BPF_DW, BPF_REG_10, -8, 0),<br>  BPF_MOV64_REG(BPF_REG_2, BPF_REG_10),<br>  BPF_ALU64_IMM(BPF_ADD, BPF_REG_2, -8),<br>  BPF_LD_MAP_FD(BPF_REG_1, 0),<br>  BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_map_lookup_elem),<br>  BPF_JMP_IMM(BPF_JEQ, BPF_REG_0, 0, 2),<br>  BPF_ST_MEM(BPF_DW, BPF_REG_0, 0, 0),<br>  BPF_EXIT_INSN(),<br>  BPF_ST_MEM(BPF_DW, BPF_REG_0, 0, 1),<br>  BPF_EXIT_INSN(),<br>Error:<br>  0: (7a) *(u64 *)(r10 -8) = 0<br>  1: (bf) r2 = r10<br>  2: (07) r2 += -8<br>  3: (b7) r1 = 1<br>  4: (85) call 1<br>  5: (15) if r0 == 0x0 goto pc+2<br>   R0=map_ptr R10=fp<br>  6: (7a) *(u64 *)(r0 +0) = 0<br>  7: (95) exit</p>
+<p>  from 5 to 8: R0=imm0 R10=fp<br>  8: (7a) *(u64 *)(r0 +0) = 1<br>  R0 invalid mem access ‘imm’</p>
+<h2 id="Testing"><a href="#Testing" class="headerlink" title="Testing"></a>Testing</h2><p>Next to the BPF toolchain, the kernel also ships a test module that contains<br>various test cases for classic and internal BPF that can be executed against<br>the BPF interpreter and JIT compiler. It can be found in lib/test_bpf.c and<br>enabled via Kconfig:</p>
+<p>  CONFIG_TEST_BPF=m</p>
+<p>After the module has been built and installed, the test suite can be executed<br>via insmod or modprobe against ‘test_bpf’ module. Results of the test cases<br>including timings in nsec can be found in the kernel log (dmesg).</p>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><p>Also trinity, the Linux syscall fuzzer, has built-in support for BPF and<br>SECCOMP-BPF kernel fuzzing.</p>
+<h2 id="Written-by"><a href="#Written-by" class="headerlink" title="Written by"></a>Written by</h2><p>The document was written in the hope that it is found useful and in order<br>to give potential BPF hackers or security auditors a better overview of<br>the underlying architecture.</p>
+<p>Jay Schulist <a href="mailto:&#106;&#115;&#99;&#x68;&#x6c;&#x73;&#116;&#x40;&#115;&#97;&#109;&#98;&#97;&#46;&#x6f;&#114;&#103;">&#106;&#115;&#99;&#x68;&#x6c;&#x73;&#116;&#x40;&#115;&#97;&#109;&#98;&#97;&#46;&#x6f;&#114;&#103;</a><br>Daniel Borkmann <a href="mailto:&#x64;&#x61;&#110;&#105;&#x65;&#x6c;&#x40;&#105;&#111;&#x67;&#x65;&#97;&#114;&#98;&#111;&#x78;&#x2e;&#110;&#101;&#x74;">&#x64;&#x61;&#110;&#105;&#x65;&#x6c;&#x40;&#105;&#111;&#x67;&#x65;&#97;&#114;&#98;&#111;&#x78;&#x2e;&#110;&#101;&#x74;</a><br>Alexei Starovoitov <a href="mailto:&#x61;&#115;&#x74;&#64;&#x6b;&#x65;&#114;&#x6e;&#x65;&#x6c;&#46;&#111;&#114;&#103;">&#x61;&#115;&#x74;&#64;&#x6b;&#x65;&#114;&#x6e;&#x65;&#x6c;&#46;&#111;&#114;&#103;</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_filter/" title="Kernel-4.18.0-80.el8_filter" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_filter/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_coda/" title="Kernel-4.18.0-80.el8_coda"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_gpio/" title="Kernel-4.18.0-80.el8_gpio"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

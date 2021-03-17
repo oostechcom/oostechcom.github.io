@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_path-lookup | oosTech.com</title>
+  <meta name="description" content="Path walking and name lookup lockingPath resolution is the finding a dentry corresponding to a path name string, byperforming a path walk. Typically, for every open(), stat() etc., the path namewill b">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_path-lookup">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Path walking and name lookup lockingPath resolution is the finding a dentry corresponding to a path name string, byperforming a path walk. Typically, for every open(), stat() etc., the path namewill b">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Path-walking-and-name-lookup-locking"><span class="toc-number">1.</span> <span class="toc-text">Path walking and name lookup locking</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Path-walking-overview"><span class="toc-number">2.</span> <span class="toc-text">Path walking overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Safe-store-free-look-up-of-dcache-hash-table"><span class="toc-number">3.</span> <span class="toc-text">Safe store-free look-up of dcache hash table</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Dcache-name-lookup"><span class="toc-number">3.1.</span> <span class="toc-text">Dcache name lookup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Renames"><span class="toc-number">3.2.</span> <span class="toc-text">Renames</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Seqcount-based-lookups"><span class="toc-number">3.3.</span> <span class="toc-text">Seqcount based lookups</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RCU-walk-path-walking-design"><span class="toc-number">4.</span> <span class="toc-text">RCU-walk path walking design</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Interesting-statistics"><span class="toc-number">5.</span> <span class="toc-text">Interesting statistics</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Papers-and-other-documentation-on-dcache-locking"><span class="toc-number">6.</span> <span class="toc-text">Papers and other documentation on dcache locking</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_path-lookup" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_path-lookup
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Path-walking-and-name-lookup-locking"><a href="#Path-walking-and-name-lookup-locking" class="headerlink" title="Path walking and name lookup locking"></a>Path walking and name lookup locking</h1><p>Path resolution is the finding a dentry corresponding to a path name string, by<br>performing a path walk. Typically, for every open(), stat() etc., the path name<br>will be resolved. Paths are resolved by walking the namespace tree, starting<br>with the first component of the pathname (eg. root or cwd) with a known dentry,<br>then finding the child of that dentry, which is named the next component in the<br>path string. Then repeating the lookup from the child dentry and finding its<br>child with the next element, and so on.</p>
+<p>Since it is a frequent operation for workloads like multiuser environments and<br>web servers, it is important to optimize this code.</p>
+<p>Path walking synchronisation history:<br>Prior to 2.5.10, dcache_lock was acquired in d_lookup (dcache hash lookup) and<br>thus in every component during path look-up. Since 2.5.10 onwards, fast-walk<br>algorithm changed this by holding the dcache_lock at the beginning and walking<br>as many cached path component dentries as possible. This significantly<br>decreases the number of acquisition of dcache_lock. However it also increases<br>the lock hold time significantly and affects performance in large SMP machines.<br>Since 2.5.62 kernel, dcache has been using a new locking model that uses RCU to<br>make dcache look-up lock-free.</p>
+<p>All the above algorithms required taking a lock and reference count on the<br>dentry that was looked up, so that may be used as the basis for walking the<br>next path element. This is inefficient and unscalable. It is inefficient<br>because of the locks and atomic operations required for every dentry element<br>slows things down. It is not scalable because many parallel applications that<br>are path-walk intensive tend to do path lookups starting from a common dentry<br>(usually, the root “/“ or current working directory). So contention on these<br>common path elements causes lock and cacheline queueing.</p>
+<p>Since 2.6.38, RCU is used to make a significant part of the entire path walk<br>(including dcache look-up) completely “store-free” (so, no locks, atomics, or<br>even stores into cachelines of common dentries). This is known as “rcu-walk”<br>path walking.</p>
+<h1 id="Path-walking-overview"><a href="#Path-walking-overview" class="headerlink" title="Path walking overview"></a>Path walking overview</h1><p>A name string specifies a start (root directory, cwd, fd-relative) and a<br>sequence of elements (directory entry names), which together refer to a path in<br>the namespace. A path is represented as a (dentry, vfsmount) tuple. The name<br>elements are sub-strings, separated by ‘/‘.</p>
+<p>Name lookups will want to find a particular path that a name string refers to<br>(usually the final element, or parent of final element). This is done by taking<br>the path given by the name’s starting point (which we know in advance – eg.<br>current-&gt;fs-&gt;cwd or current-&gt;fs-&gt;root) as the first parent of the lookup. Then<br>iteratively for each subsequent name element, look up the child of the current<br>parent with the given name and if it is not the desired entry, make it the<br>parent for the next lookup.</p>
+<p>A parent, of course, must be a directory, and we must have appropriate<br>permissions on the parent inode to be able to walk into it.</p>
+<p>Turning the child into a parent for the next lookup requires more checks and<br>procedures. Symlinks essentially substitute the symlink name for the target<br>name in the name string, and require some recursive path walking.  Mount points<br>must be followed into (thus changing the vfsmount that subsequent path elements<br>refer to), switching from the mount point path to the root of the particular<br>mounted vfsmount. These behaviours are variously modified depending on the<br>exact path walking flags.</p>
+<p>Path walking then must, broadly, do several particular things:</p>
+<ul>
+<li>find the start point of the walk;</li>
+<li>perform permissions and validity checks on inodes;</li>
+<li>perform dcache hash name lookups on (parent, name element) tuples;</li>
+<li>traverse mount points;</li>
+<li>traverse symlinks;</li>
+<li>lookup and create missing parts of the path on demand.</li>
+</ul>
+<h1 id="Safe-store-free-look-up-of-dcache-hash-table"><a href="#Safe-store-free-look-up-of-dcache-hash-table" class="headerlink" title="Safe store-free look-up of dcache hash table"></a>Safe store-free look-up of dcache hash table</h1><h2 id="Dcache-name-lookup"><a href="#Dcache-name-lookup" class="headerlink" title="Dcache name lookup"></a>Dcache name lookup</h2><p>In order to lookup a dcache (parent, name) tuple, we take a hash on the tuple<br>and use that to select a bucket in the dcache-hash table. The list of entries<br>in that bucket is then walked, and we do a full comparison of each entry<br>against our (parent, name) tuple.</p>
+<p>The hash lists are RCU protected, so list walking is not serialised with<br>concurrent updates (insertion, deletion from the hash). This is a standard RCU<br>list application with the exception of renames, which will be covered below.</p>
+<p>Parent and name members of a dentry, as well as its membership in the dcache<br>hash, and its inode are protected by the per-dentry d_lock spinlock. A<br>reference is taken on the dentry (while the fields are verified under d_lock),<br>and this stabilises its d_inode pointer and actual inode. This gives a stable<br>point to perform the next step of our path walk against.</p>
+<p>These members are also protected by d_seq seqlock, although this offers<br>read-only protection and no durability of results, so care must be taken when<br>using d_seq for synchronisation (see seqcount based lookups, below).</p>
+<h2 id="Renames"><a href="#Renames" class="headerlink" title="Renames"></a>Renames</h2><p>Back to the rename case. In usual RCU protected lists, the only operations that<br>will happen to an object is insertion, and then eventually removal from the<br>list. The object will not be reused until an RCU grace period is complete.<br>This ensures the RCU list traversal primitives can run over the object without<br>problems (see RCU documentation for how this works).</p>
+<p>However when a dentry is renamed, its hash value can change, requiring it to be<br>moved to a new hash list. Allocating and inserting a new alias would be<br>expensive and also problematic for directory dentries. Latency would be far to<br>high to wait for a grace period after removing the dentry and before inserting<br>it in the new hash bucket. So what is done is to insert the dentry into the<br>new list immediately.</p>
+<p>However, when the dentry’s list pointers are updated to point to objects in the<br>new list before waiting for a grace period, this can result in a concurrent RCU<br>lookup of the old list veering off into the new (incorrect) list and missing<br>the remaining dentries on the list.</p>
+<p>There is no fundamental problem with walking down the wrong list, because the<br>dentry comparisons will never match. However it is fatal to miss a matching<br>dentry. So a seqlock is used to detect when a rename has occurred, and so the<br>lookup can be retried.</p>
+<pre><code>     1      2      3
+    +---+  +---+  +---+
+</code></pre>
+<p>hlist–&gt;| N-+-&gt;| N-+-&gt;| N-+-&gt;<br>head &lt;–+-P |&lt;-+-P |&lt;-+-P |<br>        +—+  +—+  +—+</p>
+<p>Rename of dentry 2 may require it deleted from the above list, and inserted<br>into a new list. Deleting 2 gives the following list.</p>
+<pre><code>     1             3
+    +---+         +---+     (don&#39;t worry, the longer pointers do not
+</code></pre>
+<p>hlist–&gt;| N-+——–&gt;| N-+-&gt;    impose a measurable performance overhead<br>head &lt;–+-P |&lt;——–+-P |      on modern CPUs)<br>        +—+         +—+<br>          ^      2      ^<br>          |    +—+    |<br>          |    | N-+—-+<br>          +—-+-P |<br>               +—+</p>
+<p>This is a standard RCU-list deletion, which leaves the deleted object’s<br>pointers intact, so a concurrent list walker that is currently looking at<br>object 2 will correctly continue to object 3 when it is time to traverse the<br>next object.</p>
+<p>However, when inserting object 2 onto a new list, we end up with this:</p>
+<pre><code>     1             3
+    +---+         +---+
+</code></pre>
+<p>hlist–&gt;| N-+——–&gt;| N-+-&gt;<br>head &lt;–+-P |&lt;——–+-P |<br>        +—+         +—+<br>                 2<br>               +—+<br>               | N-+—-&gt;<br>          &lt;—-+-P |<br>               +—+</p>
+<p>Because we didn’t wait for a grace period, there may be a concurrent lookup<br>still at 2. Now when it follows 2’s ‘next’ pointer, it will walk off into<br>another list without ever having checked object 3.</p>
+<p>A related, but distinctly different, issue is that of rename atomicity versus<br>lookup operations. If a file is renamed from ‘A’ to ‘B’, a lookup must only<br>find either ‘A’ or ‘B’. So if a lookup of ‘A’ returns NULL, a subsequent lookup<br>of ‘B’ must succeed (note the reverse is not true).</p>
+<p>Between deleting the dentry from the old hash list, and inserting it on the new<br>hash list, a lookup may find neither ‘A’ nor ‘B’ matching the dentry. The same<br>rename seqlock is also used to cover this race in much the same way, by<br>retrying a negative lookup result if a rename was in progress.</p>
+<h2 id="Seqcount-based-lookups"><a href="#Seqcount-based-lookups" class="headerlink" title="Seqcount based lookups"></a>Seqcount based lookups</h2><p>In refcount based dcache lookups, d_lock is used to serialise access to<br>the dentry, stabilising it while comparing its name and parent and then<br>taking a reference count (the reference count then gives a stable place to<br>start the next part of the path walk from).</p>
+<p>As explained above, we would like to do path walking without taking locks or<br>reference counts on intermediate dentries along the path. To do this, a per<br>dentry seqlock (d_seq) is used to take a “coherent snapshot” of what the dentry<br>looks like (its name, parent, and inode). That snapshot is then used to start<br>the next part of the path walk. When loading the coherent snapshot under d_seq,<br>care must be taken to load the members up-front, and use those pointers rather<br>than reloading from the dentry later on (otherwise we’d have interesting things<br>like d_inode going NULL underneath us, if the name was unlinked).</p>
+<p>Also important is to avoid performing any destructive operations (pretty much:<br>no non-atomic stores to shared data), and to recheck the seqcount when we are<br>“done” with the operation. Retry or abort if the seqcount does not match.<br>Avoiding destructive or changing operations means we can easily unwind from<br>failure.</p>
+<p>What this means is that a caller, provided they are holding RCU lock to<br>protect the dentry object from disappearing, can perform a seqcount based<br>lookup which does not increment the refcount on the dentry or write to<br>it in any way. This returned dentry can be used for subsequent operations,<br>provided that d_seq is rechecked after that operation is complete.</p>
+<p>Inodes are also rcu freed, so the seqcount lookup dentry’s inode may also be<br>queried for permissions.</p>
+<p>With this two parts of the puzzle, we can do path lookups without taking<br>locks or refcounts on dentry elements.</p>
+<h1 id="RCU-walk-path-walking-design"><a href="#RCU-walk-path-walking-design" class="headerlink" title="RCU-walk path walking design"></a>RCU-walk path walking design</h1><p>Path walking code now has two distinct modes, ref-walk and rcu-walk. ref-walk<br>is the traditional[*] way of performing dcache lookups using d_lock to<br>serialise concurrent modifications to the dentry and take a reference count on<br>it. ref-walk is simple and obvious, and may sleep, take locks, etc while path<br>walking is operating on each dentry. rcu-walk uses seqcount based dentry<br>lookups, and can perform lookup of intermediate elements without any stores to<br>shared data in the dentry or inode. rcu-walk can not be applied to all cases,<br>eg. if the filesystem must sleep or perform non trivial operations, rcu-walk<br>must be switched to ref-walk mode.</p>
+<p>[*] RCU is still used for the dentry hash lookup in ref-walk, but not the full<br>    path walk.</p>
+<p>Where ref-walk uses a stable, refcounted ``parent’’ to walk the remaining<br>path string, rcu-walk uses a d_seq protected snapshot. When looking up a<br>child of this parent snapshot, we open d_seq critical section on the child<br>before closing d_seq critical section on the parent. This gives an interlocking<br>ladder of snapshots to walk down.</p>
+<pre><code> proc 101
+  /----------------\
+ / comm:    &quot;vi&quot;    \
+/  fs.root: dentry0  \
+\  fs.cwd:  dentry2  /
+ \                  /
+  \----------------/
+</code></pre>
+<p>So when vi wants to open(“/home/npiggin/test.c”, O_RDWR), then it will<br>start from current-&gt;fs-&gt;root, which is a pinned dentry. Alternatively,<br>“./test.c” would start from cwd; both names refer to the same path in<br>the context of proc101.</p>
+<pre><code> dentry 0
++---------------------+   rcu-walk begins here, we note d_seq, check the
+| name:    &quot;/&quot;        |   inode&#39;s permission, and then look up the next
+| inode:   10         |   path element which is &quot;home&quot;...
+| children:&quot;home&quot;, ...|
++---------------------+
+          |
+ dentry 1 V
++---------------------+   ... which brings us here. We find dentry1 via
+| name:    &quot;home&quot;     |   hash lookup, then note d_seq and compare name
+| inode:   678        |   string and parent pointer. When we have a match,
+| children:&quot;npiggin&quot;  |   we now recheck the d_seq of dentry0. Then we
++---------------------+   check inode and look up the next element.
+          |
+ dentry2  V
++---------------------+   Note: if dentry0 is now modified, lookup is
+| name:    &quot;npiggin&quot;  |   not necessarily invalid, so we need only keep a
+| inode:   543        |   parent for d_seq verification, and grandparents
+| children:&quot;a.c&quot;, ... |   can be forgotten.
++---------------------+
+          |
+ dentry3  V
++---------------------+   At this point we have our destination dentry.
+| name:    &quot;a.c&quot;      |   We now take its d_lock, verify d_seq of this
+| inode:   14221      |   dentry. If that checks out, we can increment
+| children:NULL       |   its refcount because we&#39;re holding d_lock.
++---------------------+
+</code></pre>
+<p>Taking a refcount on a dentry from rcu-walk mode, by taking its d_lock,<br>re-checking its d_seq, and then incrementing its refcount is called<br>“dropping rcu” or dropping from rcu-walk into ref-walk mode.</p>
+<p>It is, in some sense, a bit of a house of cards. If the seqcount check of the<br>parent snapshot fails, the house comes down, because we had closed the d_seq<br>section on the grandparent, so we have nothing left to stand on. In that case,<br>the path walk must be fully restarted (which we do in ref-walk mode, to avoid<br>live locks). It is costly to have a full restart, but fortunately they are<br>quite rare.</p>
+<p>When we reach a point where sleeping is required, or a filesystem callout<br>requires ref-walk, then instead of restarting the walk, we attempt to drop rcu<br>at the last known good dentry we have. Avoiding a full restart in ref-walk in<br>these cases is fundamental for performance and scalability because blocking<br>operations such as creates and unlinks are not uncommon.</p>
+<p>The detailed design for rcu-walk is like this:</p>
+<ul>
+<li>LOOKUP_RCU is set in nd-&gt;flags, which distinguishes rcu-walk from ref-walk.</li>
+<li>Take the RCU lock for the entire path walk, starting with the acquiring<br>of the starting path (eg. root/cwd/fd-path). So now dentry refcounts are<br>not required for dentry persistence.</li>
+<li>synchronize_rcu is called when unregistering a filesystem, so we can<br>access d_ops and i_ops during rcu-walk.</li>
+<li>Similarly take the vfsmount lock for the entire path walk. So now mnt<br>refcounts are not required for persistence. Also we are free to perform mount<br>lookups, and to assume dentry mount points and mount roots are stable up and<br>down the path.</li>
+<li>Have a per-dentry seqlock to protect the dentry name, parent, and inode,<br>so we can load this tuple atomically, and also check whether any of its<br>members have changed.</li>
+<li>Dentry lookups (based on parent, candidate string tuple) recheck the parent<br>sequence after the child is found in case anything changed in the parent<br>during the path walk.</li>
+<li>inode is also RCU protected so we can load d_inode and use the inode for<br>limited things.</li>
+<li>i_mode, i_uid, i_gid can be tested for exec permissions during path walk.</li>
+<li>i_op can be loaded.</li>
+<li>When the destination dentry is reached, drop rcu there (ie. take d_lock,<br>verify d_seq, increment refcount).</li>
+<li>If seqlock verification fails anywhere along the path, do a full restart<br>of the path lookup in ref-walk mode. -ECHILD tends to be used (for want of<br>a better errno) to signal an rcu-walk failure.</li>
+</ul>
+<p>The cases where rcu-walk cannot continue are:</p>
+<ul>
+<li>NULL dentry (ie. any uncached path element)</li>
+<li>Following links</li>
+</ul>
+<p>It may be possible eventually to make following links rcu-walk aware.</p>
+<p>Uncached path elements will always require dropping to ref-walk mode, at the<br>very least because i_mutex needs to be grabbed, and objects allocated.</p>
+<p>Final note:<br>“store-free” path walking is not strictly store free. We take vfsmount lock<br>and refcounts (both of which can be made per-cpu), and we also store to the<br>stack (which is essentially CPU-local), and we also have to take locks and<br>refcount on final dentry.</p>
+<p>The point is that shared data, where practically possible, is not locked<br>or stored into. The result is massive improvements in performance and<br>scalability of path resolution.</p>
+<h1 id="Interesting-statistics"><a href="#Interesting-statistics" class="headerlink" title="Interesting statistics"></a>Interesting statistics</h1><p>The following table gives rcu lookup statistics for a few simple workloads<br>(2s12c24t Westmere, debian non-graphical system). Ungraceful are attempts to<br>drop rcu that fail due to d_seq failure and requiring the entire path lookup<br>again. Other cases are successful rcu-drops that are required before the final<br>element, nodentry for missing dentry, revalidate for filesystem revalidate<br>routine requiring rcu drop, permission for permission check requiring drop,<br>and link for symlink traversal requiring drop.</p>
+<pre><code> rcu-lookups     restart  nodentry          link  revalidate  permission
+</code></pre>
+<p>bootup     47121           0      4624          1010       10283        7852<br>dbench  25386793           0   6778659(26.7%)     55         549        1156<br>kbuild   2696672          10     64442(2.3%)  108764(4.0%)     1        1590<br>git diff   39605           0        28             2           0         106<br>vfstest 24185492        4945    708725(2.9%) 1076136(4.4%)     0        2651</p>
+<p>What this shows is that failed rcu-walk lookups, ie. ones that are restarted<br>entirely with ref-walk, are quite rare. Even the “vfstest” case which<br>specifically has concurrent renames/mkdir/rmdir/ creat/unlink/etc to exercise<br>such races is not showing a huge amount of restarts.</p>
+<p>Dropping from rcu-walk to ref-walk mean that we have encountered a dentry where<br>the reference count needs to be taken for some reason. This is either because<br>we have reached the target of the path walk, or because we have encountered a<br>condition that can’t be resolved in rcu-walk mode.  Ideally, we drop rcu-walk<br>only when we have reached the target dentry, so the other statistics show where<br>this does not happen.</p>
+<p>Note that a graceful drop from rcu-walk mode due to something such as the<br>dentry not existing (which can be common) is not necessarily a failure of<br>rcu-walk scheme, because some elements of the path may have been walked in<br>rcu-walk mode. The further we get from common path elements (such as cwd or<br>root), the less contended the dentry is likely to be. The closer we are to<br>common path elements, the more likely they will exist in dentry cache.</p>
+<h1 id="Papers-and-other-documentation-on-dcache-locking"><a href="#Papers-and-other-documentation-on-dcache-locking" class="headerlink" title="Papers and other documentation on dcache locking"></a>Papers and other documentation on dcache locking</h1><ol>
+<li><p>Scaling dcache with RCU (<a target="_blank" rel="noopener" href="http://linuxjournal.com/article.php?sid=7124">http://linuxjournal.com/article.php?sid=7124</a>).</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://lse.sourceforge.net/locking/dcache/dcache.html">http://lse.sourceforge.net/locking/dcache/dcache.html</a></p>
+</li>
+<li><p>path-lookup.md in this directory.</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/" title="Kernel-4.18.0-80.el8_path-lookup" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_path-lookup/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_paride/" title="Kernel-4.18.0-80.el8_paride"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_pci-error-recovery/" title="Kernel-4.18.0-80.el8_pci-error-recovery"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

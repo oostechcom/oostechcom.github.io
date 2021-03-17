@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_DMA-API-HOWTO | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Dynamic DMA mapping Guide&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Author: David S. Miller &amp;#x64;&amp;#x61;&amp;#118;&amp;#101;&amp;#109;&amp;#x40;&amp;#114;&amp;#x65;&amp;#100;&amp;#x68;&amp;#x61;&amp;#x74;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;:Aut">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_DMA-API-HOWTO">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Dynamic DMA mapping Guide&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; :Author: David S. Miller &amp;#x64;&amp;#x61;&amp;#118;&amp;#101;&amp;#109;&amp;#x40;&amp;#114;&amp;#x65;&amp;#100;&amp;#x68;&amp;#x61;&amp;#x74;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;:Aut">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CPU-and-DMA-addresses"><span class="toc-number">1.</span> <span class="toc-text">CPU and DMA addresses</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#What-memory-is-DMA%E2%80%99able"><span class="toc-number">2.</span> <span class="toc-text">What memory is DMA’able?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-addressing-limitations"><span class="toc-number">3.</span> <span class="toc-text">DMA addressing limitations</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Types-of-DMA-mappings"><span class="toc-number">4.</span> <span class="toc-text">Types of DMA mappings</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Using-Consistent-DMA-mappings"><span class="toc-number">5.</span> <span class="toc-text">Using Consistent DMA mappings</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-Direction"><span class="toc-number">6.</span> <span class="toc-text">DMA Direction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Using-Streaming-DMA-mappings"><span class="toc-number">7.</span> <span class="toc-text">Using Streaming DMA mappings</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Handling-Errors"><span class="toc-number">8.</span> <span class="toc-text">Handling Errors</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Optimizing-Unmap-State-Space-Consumption"><span class="toc-number">9.</span> <span class="toc-text">Optimizing Unmap State Space Consumption</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Platform-Issues"><span class="toc-number">10.</span> <span class="toc-text">Platform Issues</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Closing"><span class="toc-number">11.</span> <span class="toc-text">Closing</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_DMA-API-HOWTO" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_DMA-API-HOWTO
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>=========================<br>Dynamic DMA mapping Guide<br>=========================</p>
+<p>:Author: David S. Miller <a href="mailto:&#x64;&#x61;&#118;&#101;&#109;&#x40;&#114;&#x65;&#100;&#x68;&#x61;&#x74;&#46;&#x63;&#111;&#x6d;">&#x64;&#x61;&#118;&#101;&#109;&#x40;&#114;&#x65;&#100;&#x68;&#x61;&#x74;&#46;&#x63;&#111;&#x6d;</a><br>:Author: Richard Henderson <a href="mailto:&#114;&#x74;&#104;&#x40;&#99;&#x79;&#x67;&#x6e;&#117;&#x73;&#x2e;&#99;&#x6f;&#x6d;">&#114;&#x74;&#104;&#x40;&#99;&#x79;&#x67;&#x6e;&#117;&#x73;&#x2e;&#99;&#x6f;&#x6d;</a><br>:Author: Jakub Jelinek <a href="mailto:&#x6a;&#x61;&#x6b;&#x75;&#98;&#64;&#114;&#x65;&#x64;&#104;&#97;&#116;&#x2e;&#99;&#x6f;&#x6d;">&#x6a;&#x61;&#x6b;&#x75;&#98;&#64;&#114;&#x65;&#x64;&#104;&#97;&#116;&#x2e;&#99;&#x6f;&#x6d;</a></p>
+<p>This is a guide to device driver writers on how to use the DMA API<br>with example pseudo-code.  For a concise description of the API, see<br>DMA-API.txt.</p>
+<h1 id="CPU-and-DMA-addresses"><a href="#CPU-and-DMA-addresses" class="headerlink" title="CPU and DMA addresses"></a>CPU and DMA addresses</h1><p>There are several kinds of addresses involved in the DMA API, and it’s<br>important to understand the differences.</p>
+<p>The kernel normally uses virtual addresses.  Any address returned by<br>kmalloc(), vmalloc(), and similar interfaces is a virtual address and can<br>be stored in a <code>void *</code>.</p>
+<p>The virtual memory system (TLB, page tables, etc.) translates virtual<br>addresses to CPU physical addresses, which are stored as “phys_addr_t” or<br>“resource_size_t”.  The kernel manages device resources like registers as<br>physical addresses.  These are the addresses in /proc/iomem.  The physical<br>address is not directly useful to a driver; it must use ioremap() to map<br>the space and produce a virtual address.</p>
+<p>I/O devices use a third kind of address: a “bus address”.  If a device has<br>registers at an MMIO address, or if it performs DMA to read or write system<br>memory, the addresses used by the device are bus addresses.  In some<br>systems, bus addresses are identical to CPU physical addresses, but in<br>general they are not.  IOMMUs and host bridges can produce arbitrary<br>mappings between physical and bus addresses.</p>
+<p>From a device’s point of view, DMA uses the bus address space, but it may<br>be restricted to a subset of that space.  For example, even if a system<br>supports 64-bit addresses for main memory and PCI BARs, it may use an IOMMU<br>so devices only need to use 32-bit DMA addresses.</p>
+<p>Here’s a picture and some examples::</p>
+<pre><code>           CPU                  CPU                  Bus
+         Virtual              Physical             Address
+         Address              Address               Space
+          Space                Space
+
+        +-------+             +------+             +------+
+        |       |             |MMIO  |   Offset    |      |
+        |       |  Virtual    |Space |   applied   |      |
+      C +-------+ --------&gt; B +------+ ----------&gt; +------+ A
+        |       |  mapping    |      |   by host   |      |
+</code></pre>
+<p>  +—–+   |       |             |      |   bridge    |      |   +——–+<br>  |     |   |       |             +——+             |      |   |        |<br>  | CPU |   |       |             | RAM  |             |      |   | Device |<br>  |     |   |       |             |      |             |      |   |        |<br>  +—–+   +——-+             +——+             +——+   +——–+<br>            |       |  Virtual    |Buffer|   Mapping   |      |<br>          X +——-+ ——–&gt; Y +——+ &lt;———- +——+ Z<br>            |       |  mapping    | RAM  |   by IOMMU<br>            |       |             |      |<br>            |       |             |      |<br>            +——-+             +——+</p>
+<p>During the enumeration process, the kernel learns about I/O devices and<br>their MMIO space and the host bridges that connect them to the system.  For<br>example, if a PCI device has a BAR, the kernel reads the bus address (A)<br>from the BAR and converts it to a CPU physical address (B).  The address B<br>is stored in a struct resource and usually exposed via /proc/iomem.  When a<br>driver claims a device, it typically uses ioremap() to map physical address<br>B at a virtual address (C).  It can then use, e.g., ioread32(C), to access<br>the device registers at bus address A.</p>
+<p>If the device supports DMA, the driver sets up a buffer using kmalloc() or<br>a similar interface, which returns a virtual address (X).  The virtual<br>memory system maps X to a physical address (Y) in system RAM.  The driver<br>can use virtual address X to access the buffer, but the device itself<br>cannot because DMA doesn’t go through the CPU virtual memory system.</p>
+<p>In some simple systems, the device can do DMA directly to physical address<br>Y.  But in many others, there is IOMMU hardware that translates DMA<br>addresses to physical addresses, e.g., it translates Z to Y.  This is part<br>of the reason for the DMA API: the driver can give a virtual address X to<br>an interface like dma_map_single(), which sets up any required IOMMU<br>mapping and returns the DMA address Z.  The driver then tells the device to<br>do DMA to Z, and the IOMMU maps it to the buffer at address Y in system<br>RAM.</p>
+<p>So that Linux can use the dynamic DMA mapping, it needs some help from the<br>drivers, namely it has to take into account that DMA addresses should be<br>mapped only for the time they are actually used and unmapped after the DMA<br>transfer.</p>
+<p>The following API will work of course even on platforms where no such<br>hardware exists.</p>
+<p>Note that the DMA API works with any bus independent of the underlying<br>microprocessor architecture. You should use the DMA API rather than the<br>bus-specific DMA API, i.e., use the dma_map_*() interfaces rather than the<br>pci_map_*() interfaces.</p>
+<p>First of all, you should make sure::</p>
+<pre><code>#include &lt;linux/dma-mapping.h&gt;
+</code></pre>
+<p>is in your driver, which provides the definition of dma_addr_t.  This type<br>can hold any valid DMA address for the platform and should be used<br>everywhere you hold a DMA address returned from the DMA mapping functions.</p>
+<h1 id="What-memory-is-DMA’able"><a href="#What-memory-is-DMA’able" class="headerlink" title="What memory is DMA’able?"></a>What memory is DMA’able?</h1><p>The first piece of information you must know is what kernel memory can<br>be used with the DMA mapping facilities.  There has been an unwritten<br>set of rules regarding this, and this text is an attempt to finally<br>write them down.</p>
+<p>If you acquired your memory via the page allocator<br>(i.e. __get_free_page*()) or the generic memory allocators<br>(i.e. kmalloc() or kmem_cache_alloc()) then you may DMA to/from<br>that memory using the addresses returned from those routines.</p>
+<p>This means specifically that you may <em>not</em> use the memory/addresses<br>returned from vmalloc() for DMA.  It is possible to DMA to the<br><em>underlying</em> memory mapped into a vmalloc() area, but this requires<br>walking page tables to get the physical addresses, and then<br>translating each of those pages back to a kernel address using<br>something like __va().  [ EDIT: Update this when we integrate<br>Gerd Knorr’s generic code which does this. ]</p>
+<p>This rule also means that you may use neither kernel image addresses<br>(items in data/text/bss segments), nor module image addresses, nor<br>stack addresses for DMA.  These could all be mapped somewhere entirely<br>different than the rest of physical memory.  Even if those classes of<br>memory could physically work with DMA, you’d need to ensure the I/O<br>buffers were cacheline-aligned.  Without that, you’d see cacheline<br>sharing problems (data corruption) on CPUs with DMA-incoherent caches.<br>(The CPU could write to one word, DMA would write to a different one<br>in the same cache line, and one of them could be overwritten.)</p>
+<p>Also, this means that you cannot take the return of a kmap()<br>call and DMA to/from that.  This is similar to vmalloc().</p>
+<p>What about block I/O and networking buffers?  The block I/O and<br>networking subsystems make sure that the buffers they use are valid<br>for you to DMA from/to.</p>
+<h1 id="DMA-addressing-limitations"><a href="#DMA-addressing-limitations" class="headerlink" title="DMA addressing limitations"></a>DMA addressing limitations</h1><p>Does your device have any DMA addressing limitations?  For example, is<br>your device only capable of driving the low order 24-bits of address?<br>If so, you need to inform the kernel of this fact.</p>
+<p>By default, the kernel assumes that your device can address the full<br>32-bits.  For a 64-bit capable device, this needs to be increased.<br>And for a device with limitations, as discussed in the previous<br>paragraph, it needs to be decreased.</p>
+<p>Special note about PCI: PCI-X specification requires PCI-X devices to<br>support 64-bit addressing (DAC) for all transactions.  And at least<br>one platform (SGI SN2) requires 64-bit consistent allocations to<br>operate correctly when the IO bus is in PCI-X mode.</p>
+<p>For correct operation, you must interrogate the kernel in your device<br>probe routine to see if the DMA controller on the machine can properly<br>support the DMA addressing limitation your device has.  It is good<br>style to do this even if your device holds the default setting,<br>because this shows that you did think about these issues wrt. your<br>device.</p>
+<p>The query is performed via a call to dma_set_mask_and_coherent()::</p>
+<pre><code>int dma_set_mask_and_coherent(struct device *dev, u64 mask);
+</code></pre>
+<p>which will query the mask for both streaming and coherent APIs together.<br>If you have some special requirements, then the following two separate<br>queries can be used instead:</p>
+<pre><code>The query for streaming mappings is performed via a call to
+dma_set_mask()::
+
+    int dma_set_mask(struct device *dev, u64 mask);
+
+The query for consistent allocations is performed via a call
+to dma_set_coherent_mask()::
+
+    int dma_set_coherent_mask(struct device *dev, u64 mask);
+</code></pre>
+<p>Here, dev is a pointer to the device struct of your device, and mask<br>is a bit mask describing which bits of an address your device<br>supports.  It returns zero if your card can perform DMA properly on<br>the machine given the address mask you provided.  In general, the<br>device struct of your device is embedded in the bus-specific device<br>struct of your device.  For example, &amp;pdev-&gt;dev is a pointer to the<br>device struct of a PCI device (pdev is a pointer to the PCI device<br>struct of your device).</p>
+<p>If it returns non-zero, your device cannot perform DMA properly on<br>this platform, and attempting to do so will result in undefined<br>behavior.  You must either use a different mask, or not use DMA.</p>
+<p>This means that in the failure case, you have three options:</p>
+<ol>
+<li>Use another DMA mask, if possible (see below).</li>
+<li>Use some non-DMA mode for data transfer, if possible.</li>
+<li>Ignore this device and do not initialize it.</li>
+</ol>
+<p>It is recommended that your driver print a kernel KERN_WARNING message<br>when you end up performing either #2 or #3.  In this manner, if a user<br>of your driver reports that performance is bad or that the device is not<br>even detected, you can ask them for the kernel messages to find out<br>exactly why.</p>
+<p>The standard 32-bit addressing device would do something like this::</p>
+<pre><code>if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32))) &#123;
+    dev_warn(dev, &quot;mydev: No suitable DMA available\n&quot;);
+    goto ignore_this_device;
+&#125;
+</code></pre>
+<p>Another common scenario is a 64-bit capable device.  The approach here<br>is to try for 64-bit addressing, but back down to a 32-bit mask that<br>should not fail.  The kernel may fail the 64-bit mask not because the<br>platform is not capable of 64-bit addressing.  Rather, it may fail in<br>this case simply because 32-bit addressing is done more efficiently<br>than 64-bit addressing.  For example, Sparc64 PCI SAC addressing is<br>more efficient than DAC addressing.</p>
+<p>Here is how you would handle a 64-bit capable device which can drive<br>all 64-bits when accessing streaming DMA::</p>
+<pre><code>int using_dac;
+
+if (!dma_set_mask(dev, DMA_BIT_MASK(64))) &#123;
+    using_dac = 1;
+&#125; else if (!dma_set_mask(dev, DMA_BIT_MASK(32))) &#123;
+    using_dac = 0;
+&#125; else &#123;
+    dev_warn(dev, &quot;mydev: No suitable DMA available\n&quot;);
+    goto ignore_this_device;
+&#125;
+</code></pre>
+<p>If a card is capable of using 64-bit consistent allocations as well,<br>the case would look like this::</p>
+<pre><code>int using_dac, consistent_using_dac;
+
+if (!dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) &#123;
+    using_dac = 1;
+    consistent_using_dac = 1;
+&#125; else if (!dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32))) &#123;
+    using_dac = 0;
+    consistent_using_dac = 0;
+&#125; else &#123;
+    dev_warn(dev, &quot;mydev: No suitable DMA available\n&quot;);
+    goto ignore_this_device;
+&#125;
+</code></pre>
+<p>The coherent mask will always be able to set the same or a smaller mask as<br>the streaming mask. However for the rare case that a device driver only<br>uses consistent allocations, one would have to check the return value from<br>dma_set_coherent_mask().</p>
+<p>Finally, if your device can only drive the low 24-bits of<br>address you might do something like::</p>
+<pre><code>if (dma_set_mask(dev, DMA_BIT_MASK(24))) &#123;
+    dev_warn(dev, &quot;mydev: 24-bit DMA addressing not available\n&quot;);
+    goto ignore_this_device;
+&#125;
+</code></pre>
+<p>When dma_set_mask() or dma_set_mask_and_coherent() is successful, and<br>returns zero, the kernel saves away this mask you have provided.  The<br>kernel will use this information later when you make DMA mappings.</p>
+<p>There is a case which we are aware of at this time, which is worth<br>mentioning in this documentation.  If your device supports multiple<br>functions (for example a sound card provides playback and record<br>functions) and the various different functions have <em>different</em><br>DMA addressing limitations, you may wish to probe each mask and<br>only provide the functionality which the machine can handle.  It<br>is important that the last call to dma_set_mask() be for the<br>most specific mask.</p>
+<p>Here is pseudo-code showing how this might be done::</p>
+<pre><code>#define PLAYBACK_ADDRESS_BITS    DMA_BIT_MASK(32)
+#define RECORD_ADDRESS_BITS    DMA_BIT_MASK(24)
+
+struct my_sound_card *card;
+struct device *dev;
+
+...
+if (!dma_set_mask(dev, PLAYBACK_ADDRESS_BITS)) &#123;
+    card-&gt;playback_enabled = 1;
+&#125; else &#123;
+    card-&gt;playback_enabled = 0;
+    dev_warn(dev, &quot;%s: Playback disabled due to DMA limitations\n&quot;,
+           card-&gt;name);
+&#125;
+if (!dma_set_mask(dev, RECORD_ADDRESS_BITS)) &#123;
+    card-&gt;record_enabled = 1;
+&#125; else &#123;
+    card-&gt;record_enabled = 0;
+    dev_warn(dev, &quot;%s: Record disabled due to DMA limitations\n&quot;,
+           card-&gt;name);
+&#125;
+</code></pre>
+<p>A sound card was used as an example here because this genre of PCI<br>devices seems to be littered with ISA chips given a PCI front end,<br>and thus retaining the 16MB DMA addressing limitations of ISA.</p>
+<h1 id="Types-of-DMA-mappings"><a href="#Types-of-DMA-mappings" class="headerlink" title="Types of DMA mappings"></a>Types of DMA mappings</h1><p>There are two types of DMA mappings:</p>
+<ul>
+<li><p>Consistent DMA mappings which are usually mapped at driver<br>initialization, unmapped at the end and for which the hardware should<br>guarantee that the device and the CPU can access the data<br>in parallel and will see updates made by each other without any<br>explicit software flushing.</p>
+<p>Think of “consistent” as “synchronous” or “coherent”.</p>
+<p>The current default is to return consistent memory in the low 32<br>bits of the DMA space.  However, for future compatibility you should<br>set the consistent mask even if this default is fine for your<br>driver.</p>
+<p>Good examples of what to use consistent mappings for are:</p>
+<ul>
+<li>Network card DMA ring descriptors.</li>
+<li>SCSI adapter mailbox command data structures.</li>
+<li>Device firmware microcode executed out of<br>main memory.</li>
+</ul>
+<p>The invariant these examples all require is that any CPU store<br>to memory is immediately visible to the device, and vice<br>versa.  Consistent mappings guarantee this.</p>
+<p>.. important::</p>
+<pre><code>   Consistent DMA memory does not preclude the usage of
+   proper memory barriers.  The CPU may reorder stores to
+   consistent memory just as it may normal memory.  Example:
+   if it is important for the device to see the first word
+   of a descriptor updated before the second, you must do
+   something like::
+
+  desc-&gt;word0 = address;
+  wmb();
+  desc-&gt;word1 = DESC_VALID;
+
+       in order to get correct behavior on all platforms.
+
+   Also, on some platforms your driver may need to flush CPU write
+   buffers in much the same way as it needs to flush write buffers
+   found in PCI bridges (such as by reading a register&#39;s value
+   after writing it).
+</code></pre>
+</li>
+<li><p>Streaming DMA mappings which are usually mapped for one DMA<br>transfer, unmapped right after it (unless you use dma_sync_* below)<br>and for which hardware can optimize for sequential accesses.</p>
+<p>Think of “streaming” as “asynchronous” or “outside the coherency<br>domain”.</p>
+<p>Good examples of what to use streaming mappings for are:</p>
+<ul>
+<li>Networking buffers transmitted/received by a device.</li>
+<li>Filesystem buffers written/read by a SCSI device.</li>
+</ul>
+<p>The interfaces for using this type of mapping were designed in<br>such a way that an implementation can make whatever performance<br>optimizations the hardware allows.  To this end, when using<br>such mappings you must be explicit about what you want to happen.</p>
+</li>
+</ul>
+<p>Neither type of DMA mapping has alignment restrictions that come from<br>the underlying bus, although some devices may have such restrictions.<br>Also, systems with caches that aren’t DMA-coherent will work better<br>when the underlying buffers don’t share cache lines with other data.</p>
+<h1 id="Using-Consistent-DMA-mappings"><a href="#Using-Consistent-DMA-mappings" class="headerlink" title="Using Consistent DMA mappings"></a>Using Consistent DMA mappings</h1><p>To allocate and map large (PAGE_SIZE or so) consistent DMA regions,<br>you should do::</p>
+<pre><code>dma_addr_t dma_handle;
+
+cpu_addr = dma_alloc_coherent(dev, size, &amp;dma_handle, gfp);
+</code></pre>
+<p>where device is a <code>struct device *</code>. This may be called in interrupt<br>context with the GFP_ATOMIC flag.</p>
+<p>Size is the length of the region you want to allocate, in bytes.</p>
+<p>This routine will allocate RAM for that region, so it acts similarly to<br>__get_free_pages() (but takes size instead of a page order).  If your<br>driver needs regions sized smaller than a page, you may prefer using<br>the dma_pool interface, described below.</p>
+<p>The consistent DMA mapping interfaces, for non-NULL dev, will by<br>default return a DMA address which is 32-bit addressable.  Even if the<br>device indicates (via DMA mask) that it may address the upper 32-bits,<br>consistent allocation will only return &gt; 32-bit addresses for DMA if<br>the consistent DMA mask has been explicitly changed via<br>dma_set_coherent_mask().  This is true of the dma_pool interface as<br>well.</p>
+<p>dma_alloc_coherent() returns two values: the virtual address which you<br>can use to access it from the CPU and dma_handle which you pass to the<br>card.</p>
+<p>The CPU virtual address and the DMA address are both<br>guaranteed to be aligned to the smallest PAGE_SIZE order which<br>is greater than or equal to the requested size.  This invariant<br>exists (for example) to guarantee that if you allocate a chunk<br>which is smaller than or equal to 64 kilobytes, the extent of the<br>buffer you receive will not cross a 64K boundary.</p>
+<p>To unmap and free such a DMA region, you call::</p>
+<pre><code>dma_free_coherent(dev, size, cpu_addr, dma_handle);
+</code></pre>
+<p>where dev, size are the same as in the above call and cpu_addr and<br>dma_handle are the values dma_alloc_coherent() returned to you.<br>This function may not be called in interrupt context.</p>
+<p>If your driver needs lots of smaller memory regions, you can write<br>custom code to subdivide pages returned by dma_alloc_coherent(),<br>or you can use the dma_pool API to do that.  A dma_pool is like<br>a kmem_cache, but it uses dma_alloc_coherent(), not __get_free_pages().<br>Also, it understands common hardware constraints for alignment,<br>like queue heads needing to be aligned on N byte boundaries.</p>
+<p>Create a dma_pool like this::</p>
+<pre><code>struct dma_pool *pool;
+
+pool = dma_pool_create(name, dev, size, align, boundary);
+</code></pre>
+<p>The “name” is for diagnostics (like a kmem_cache name); dev and size<br>are as above.  The device’s hardware alignment requirement for this<br>type of data is “align” (which is expressed in bytes, and must be a<br>power of two).  If your device has no boundary crossing restrictions,<br>pass 0 for boundary; passing 4096 says memory allocated from this pool<br>must not cross 4KByte boundaries (but at that time it may be better to<br>use dma_alloc_coherent() directly instead).</p>
+<p>Allocate memory from a DMA pool like this::</p>
+<pre><code>cpu_addr = dma_pool_alloc(pool, flags, &amp;dma_handle);
+</code></pre>
+<p>flags are GFP_KERNEL if blocking is permitted (not in_interrupt nor<br>holding SMP locks), GFP_ATOMIC otherwise.  Like dma_alloc_coherent(),<br>this returns two values, cpu_addr and dma_handle.</p>
+<p>Free memory that was allocated from a dma_pool like this::</p>
+<pre><code>dma_pool_free(pool, cpu_addr, dma_handle);
+</code></pre>
+<p>where pool is what you passed to dma_pool_alloc(), and cpu_addr and<br>dma_handle are the values dma_pool_alloc() returned. This function<br>may be called in interrupt context.</p>
+<p>Destroy a dma_pool by calling::</p>
+<pre><code>dma_pool_destroy(pool);
+</code></pre>
+<p>Make sure you’ve called dma_pool_free() for all memory allocated<br>from a pool before you destroy the pool. This function may not<br>be called in interrupt context.</p>
+<h1 id="DMA-Direction"><a href="#DMA-Direction" class="headerlink" title="DMA Direction"></a>DMA Direction</h1><p>The interfaces described in subsequent portions of this document<br>take a DMA direction argument, which is an integer and takes on<br>one of the following values::</p>
+<p> DMA_BIDIRECTIONAL<br> DMA_TO_DEVICE<br> DMA_FROM_DEVICE<br> DMA_NONE</p>
+<p>You should provide the exact DMA direction if you know it.</p>
+<p>DMA_TO_DEVICE means “from main memory to the device”<br>DMA_FROM_DEVICE means “from the device to main memory”<br>It is the direction in which the data moves during the DMA<br>transfer.</p>
+<p>You are <em>strongly</em> encouraged to specify this as precisely<br>as you possibly can.</p>
+<p>If you absolutely cannot know the direction of the DMA transfer,<br>specify DMA_BIDIRECTIONAL.  It means that the DMA can go in<br>either direction.  The platform guarantees that you may legally<br>specify this, and that it will work, but this may be at the<br>cost of performance for example.</p>
+<p>The value DMA_NONE is to be used for debugging.  One can<br>hold this in a data structure before you come to know the<br>precise direction, and this will help catch cases where your<br>direction tracking logic has failed to set things up properly.</p>
+<p>Another advantage of specifying this value precisely (outside of<br>potential platform-specific optimizations of such) is for debugging.<br>Some platforms actually have a write permission boolean which DMA<br>mappings can be marked with, much like page protections in the user<br>program address space.  Such platforms can and do report errors in the<br>kernel logs when the DMA controller hardware detects violation of the<br>permission setting.</p>
+<p>Only streaming mappings specify a direction, consistent mappings<br>implicitly have a direction attribute setting of<br>DMA_BIDIRECTIONAL.</p>
+<p>The SCSI subsystem tells you the direction to use in the<br>‘sc_data_direction’ member of the SCSI command your driver is<br>working on.</p>
+<p>For Networking drivers, it’s a rather simple affair.  For transmit<br>packets, map/unmap them with the DMA_TO_DEVICE direction<br>specifier.  For receive packets, just the opposite, map/unmap them<br>with the DMA_FROM_DEVICE direction specifier.</p>
+<h1 id="Using-Streaming-DMA-mappings"><a href="#Using-Streaming-DMA-mappings" class="headerlink" title="Using Streaming DMA mappings"></a>Using Streaming DMA mappings</h1><p>The streaming DMA mapping routines can be called from interrupt<br>context.  There are two versions of each map/unmap, one which will<br>map/unmap a single memory region, and one which will map/unmap a<br>scatterlist.</p>
+<p>To map a single region, you do::</p>
+<pre><code>struct device *dev = &amp;my_dev-&gt;dev;
+dma_addr_t dma_handle;
+void *addr = buffer-&gt;ptr;
+size_t size = buffer-&gt;len;
+
+dma_handle = dma_map_single(dev, addr, size, direction);
+if (dma_mapping_error(dev, dma_handle)) &#123;
+    /*
+     * reduce current DMA mapping usage,
+     * delay and try again later or
+     * reset driver.
+     */
+    goto map_error_handling;
+&#125;
+</code></pre>
+<p>and to unmap it::</p>
+<pre><code>dma_unmap_single(dev, dma_handle, size, direction);
+</code></pre>
+<p>You should call dma_mapping_error() as dma_map_single() could fail and return<br>error.  Doing so will ensure that the mapping code will work correctly on all<br>DMA implementations without any dependency on the specifics of the underlying<br>implementation. Using the returned address without checking for errors could<br>result in failures ranging from panics to silent data corruption.  The same<br>applies to dma_map_page() as well.</p>
+<p>You should call dma_unmap_single() when the DMA activity is finished, e.g.,<br>from the interrupt which told you that the DMA transfer is done.</p>
+<p>Using CPU pointers like this for single mappings has a disadvantage:<br>you cannot reference HIGHMEM memory in this way.  Thus, there is a<br>map/unmap interface pair akin to dma_{map,unmap}_single().  These<br>interfaces deal with page/offset pairs instead of CPU pointers.<br>Specifically::</p>
+<pre><code>struct device *dev = &amp;my_dev-&gt;dev;
+dma_addr_t dma_handle;
+struct page *page = buffer-&gt;page;
+unsigned long offset = buffer-&gt;offset;
+size_t size = buffer-&gt;len;
+
+dma_handle = dma_map_page(dev, page, offset, size, direction);
+if (dma_mapping_error(dev, dma_handle)) &#123;
+    /*
+     * reduce current DMA mapping usage,
+     * delay and try again later or
+     * reset driver.
+     */
+    goto map_error_handling;
+&#125;
+
+...
+
+dma_unmap_page(dev, dma_handle, size, direction);
+</code></pre>
+<p>Here, “offset” means byte offset within the given page.</p>
+<p>You should call dma_mapping_error() as dma_map_page() could fail and return<br>error as outlined under the dma_map_single() discussion.</p>
+<p>You should call dma_unmap_page() when the DMA activity is finished, e.g.,<br>from the interrupt which told you that the DMA transfer is done.</p>
+<p>With scatterlists, you map a region gathered from several regions by::</p>
+<pre><code>int i, count = dma_map_sg(dev, sglist, nents, direction);
+struct scatterlist *sg;
+
+for_each_sg(sglist, sg, count, i) &#123;
+    hw_address[i] = sg_dma_address(sg);
+    hw_len[i] = sg_dma_len(sg);
+&#125;
+</code></pre>
+<p>where nents is the number of entries in the sglist.</p>
+<p>The implementation is free to merge several consecutive sglist entries<br>into one (e.g. if DMA mapping is done with PAGE_SIZE granularity, any<br>consecutive sglist entries can be merged into one provided the first one<br>ends and the second one starts on a page boundary - in fact this is a huge<br>advantage for cards which either cannot do scatter-gather or have very<br>limited number of scatter-gather entries) and returns the actual number<br>of sg entries it mapped them to. On failure 0 is returned.</p>
+<p>Then you should loop count times (note: this can be less than nents times)<br>and use sg_dma_address() and sg_dma_len() macros where you previously<br>accessed sg-&gt;address and sg-&gt;length as shown above.</p>
+<p>To unmap a scatterlist, just call::</p>
+<pre><code>dma_unmap_sg(dev, sglist, nents, direction);
+</code></pre>
+<p>Again, make sure DMA activity has already finished.</p>
+<p>.. note::</p>
+<pre><code>The &#39;nents&#39; argument to the dma_unmap_sg call must be
+the _same_ one you passed into the dma_map_sg call,
+it should _NOT_ be the &#39;count&#39; value _returned_ from the
+dma_map_sg call.
+</code></pre>
+<p>Every dma_map_{single,sg}() call should have its dma_unmap_{single,sg}()<br>counterpart, because the DMA address space is a shared resource and<br>you could render the machine unusable by consuming all DMA addresses.</p>
+<p>If you need to use the same streaming DMA region multiple times and touch<br>the data in between the DMA transfers, the buffer needs to be synced<br>properly in order for the CPU and device to see the most up-to-date and<br>correct copy of the DMA buffer.</p>
+<p>So, firstly, just map it with dma_map_{single,sg}(), and after each DMA<br>transfer call either::</p>
+<pre><code>dma_sync_single_for_cpu(dev, dma_handle, size, direction);
+</code></pre>
+<p>or::</p>
+<pre><code>dma_sync_sg_for_cpu(dev, sglist, nents, direction);
+</code></pre>
+<p>as appropriate.</p>
+<p>Then, if you wish to let the device get at the DMA area again,<br>finish accessing the data with the CPU, and then before actually<br>giving the buffer to the hardware call either::</p>
+<pre><code>dma_sync_single_for_device(dev, dma_handle, size, direction);
+</code></pre>
+<p>or::</p>
+<pre><code>dma_sync_sg_for_device(dev, sglist, nents, direction);
+</code></pre>
+<p>as appropriate.</p>
+<p>.. note::</p>
+<pre><code>      The &#39;nents&#39; argument to dma_sync_sg_for_cpu() and
+      dma_sync_sg_for_device() must be the same passed to
+      dma_map_sg(). It is _NOT_ the count returned by
+      dma_map_sg().
+</code></pre>
+<p>After the last DMA transfer call one of the DMA unmap routines<br>dma_unmap_{single,sg}(). If you don’t touch the data from the first<br>dma_map_*() call till dma_unmap_*(), then you don’t have to call the<br>dma_sync_*() routines at all.</p>
+<p>Here is pseudo code which shows a situation in which you would need<br>to use the dma_sync_*() interfaces::</p>
+<pre><code>my_card_setup_receive_buffer(struct my_card *cp, char *buffer, int len)
+&#123;
+    dma_addr_t mapping;
+
+    mapping = dma_map_single(cp-&gt;dev, buffer, len, DMA_FROM_DEVICE);
+    if (dma_mapping_error(cp-&gt;dev, mapping)) &#123;
+        /*
+         * reduce current DMA mapping usage,
+         * delay and try again later or
+         * reset driver.
+         */
+        goto map_error_handling;
+    &#125;
+
+    cp-&gt;rx_buf = buffer;
+    cp-&gt;rx_len = len;
+    cp-&gt;rx_dma = mapping;
+
+    give_rx_buf_to_card(cp);
+&#125;
+
+...
+
+my_card_interrupt_handler(int irq, void *devid, struct pt_regs *regs)
+&#123;
+    struct my_card *cp = devid;
+
+    ...
+    if (read_card_status(cp) == RX_BUF_TRANSFERRED) &#123;
+        struct my_card_header *hp;
+
+        /* Examine the header to see if we wish
+         * to accept the data.  But synchronize
+         * the DMA transfer with the CPU first
+         * so that we see updated contents.
+         */
+        dma_sync_single_for_cpu(&amp;cp-&gt;dev, cp-&gt;rx_dma,
+                    cp-&gt;rx_len,
+                    DMA_FROM_DEVICE);
+
+        /* Now it is safe to examine the buffer. */
+        hp = (struct my_card_header *) cp-&gt;rx_buf;
+        if (header_is_ok(hp)) &#123;
+            dma_unmap_single(&amp;cp-&gt;dev, cp-&gt;rx_dma, cp-&gt;rx_len,
+                     DMA_FROM_DEVICE);
+            pass_to_upper_layers(cp-&gt;rx_buf);
+            make_and_setup_new_rx_buf(cp);
+        &#125; else &#123;
+            /* CPU should not write to
+             * DMA_FROM_DEVICE-mapped area,
+             * so dma_sync_single_for_device() is
+             * not needed here. It would be required
+             * for DMA_BIDIRECTIONAL mapping if
+             * the memory was modified.
+             */
+            give_rx_buf_to_card(cp);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>Drivers converted fully to this interface should not use virt_to_bus() any<br>longer, nor should they use bus_to_virt(). Some drivers have to be changed a<br>little bit, because there is no longer an equivalent to bus_to_virt() in the<br>dynamic DMA mapping scheme - you have to always store the DMA addresses<br>returned by the dma_alloc_coherent(), dma_pool_alloc(), and dma_map_single()<br>calls (dma_map_sg() stores them in the scatterlist itself if the platform<br>supports dynamic DMA mapping in hardware) in your driver structures and/or<br>in the card registers.</p>
+<p>All drivers should be using these interfaces with no exceptions.  It<br>is planned to completely remove virt_to_bus() and bus_to_virt() as<br>they are entirely deprecated.  Some ports already do not provide these<br>as it is impossible to correctly support them.</p>
+<h1 id="Handling-Errors"><a href="#Handling-Errors" class="headerlink" title="Handling Errors"></a>Handling Errors</h1><p>DMA address space is limited on some architectures and an allocation<br>failure can be determined by:</p>
+<ul>
+<li><p>checking if dma_alloc_coherent() returns NULL or dma_map_sg returns 0</p>
+</li>
+<li><p>checking the dma_addr_t returned from dma_map_single() and dma_map_page()<br>by using dma_mapping_error()::</p>
+<p>  dma_addr_t dma_handle;</p>
+<p>  dma_handle = dma_map_single(dev, addr, size, direction);<br>  if (dma_mapping_error(dev, dma_handle)) {</p>
+<pre><code>  /*
+   * reduce current DMA mapping usage,
+   * delay and try again later or
+   * reset driver.
+   */
+  goto map_error_handling;
+</code></pre>
+<p>  }</p>
+</li>
+<li><p>unmap pages that are already mapped, when mapping error occurs in the middle<br>of a multiple page mapping attempt. These example are applicable to<br>dma_map_page() as well.</p>
+</li>
+</ul>
+<p>Example 1::</p>
+<pre><code>dma_addr_t dma_handle1;
+dma_addr_t dma_handle2;
+
+dma_handle1 = dma_map_single(dev, addr, size, direction);
+if (dma_mapping_error(dev, dma_handle1)) &#123;
+    /*
+     * reduce current DMA mapping usage,
+     * delay and try again later or
+     * reset driver.
+     */
+    goto map_error_handling1;
+&#125;
+dma_handle2 = dma_map_single(dev, addr, size, direction);
+if (dma_mapping_error(dev, dma_handle2)) &#123;
+    /*
+     * reduce current DMA mapping usage,
+     * delay and try again later or
+     * reset driver.
+     */
+    goto map_error_handling2;
+&#125;
+
+...
+
+map_error_handling2:
+    dma_unmap_single(dma_handle1);
+map_error_handling1:
+</code></pre>
+<p>Example 2::</p>
+<pre><code>/*
+ * if buffers are allocated in a loop, unmap all mapped buffers when
+ * mapping error is detected in the middle
+ */
+
+dma_addr_t dma_addr;
+dma_addr_t array[DMA_BUFFERS];
+int save_index = 0;
+
+for (i = 0; i &lt; DMA_BUFFERS; i++) &#123;
+
+    ...
+
+    dma_addr = dma_map_single(dev, addr, size, direction);
+    if (dma_mapping_error(dev, dma_addr)) &#123;
+        /*
+         * reduce current DMA mapping usage,
+         * delay and try again later or
+         * reset driver.
+         */
+        goto map_error_handling;
+    &#125;
+    array[i].dma_addr = dma_addr;
+    save_index++;
+&#125;
+
+...
+
+map_error_handling:
+
+for (i = 0; i &lt; save_index; i++) &#123;
+
+    ...
+
+    dma_unmap_single(array[i].dma_addr);
+&#125;
+</code></pre>
+<p>Networking drivers must call dev_kfree_skb() to free the socket buffer<br>and return NETDEV_TX_OK if the DMA mapping fails on the transmit hook<br>(ndo_start_xmit). This means that the socket buffer is just dropped in<br>the failure case.</p>
+<p>SCSI drivers must return SCSI_MLQUEUE_HOST_BUSY if the DMA mapping<br>fails in the queuecommand hook. This means that the SCSI subsystem<br>passes the command to the driver again later.</p>
+<h1 id="Optimizing-Unmap-State-Space-Consumption"><a href="#Optimizing-Unmap-State-Space-Consumption" class="headerlink" title="Optimizing Unmap State Space Consumption"></a>Optimizing Unmap State Space Consumption</h1><p>On many platforms, dma_unmap_{single,page}() is simply a nop.<br>Therefore, keeping track of the mapping address and length is a waste<br>of space.  Instead of filling your drivers up with ifdefs and the like<br>to “work around” this (which would defeat the whole purpose of a<br>portable API) the following facilities are provided.</p>
+<p>Actually, instead of describing the macros one by one, we’ll<br>transform some example code.</p>
+<ol>
+<li><p>Use DEFINE_DMA_UNMAP_{ADDR,LEN} in state saving structures.<br>Example, before::</p>
+<p> struct ring_state {</p>
+<pre><code> struct sk_buff *skb;
+ dma_addr_t mapping;
+ __u32 len;
+</code></pre>
+<p> };</p>
+<p>after::</p>
+<p> struct ring_state {</p>
+<pre><code> struct sk_buff *skb;
+ DEFINE_DMA_UNMAP_ADDR(mapping);
+ DEFINE_DMA_UNMAP_LEN(len);
+</code></pre>
+<p> };</p>
+</li>
+<li><p>Use dma_unmap_{addr,len}_set() to set these values.<br>Example, before::</p>
+<p> ringp-&gt;mapping = FOO;<br> ringp-&gt;len = BAR;</p>
+<p>after::</p>
+<p> dma_unmap_addr_set(ringp, mapping, FOO);<br> dma_unmap_len_set(ringp, len, BAR);</p>
+</li>
+<li><p>Use dma_unmap_{addr,len}() to access these values.<br>Example, before::</p>
+<p> dma_unmap_single(dev, ringp-&gt;mapping, ringp-&gt;len,</p>
+<pre><code>      DMA_FROM_DEVICE);
+</code></pre>
+<p>after::</p>
+<p> dma_unmap_single(dev,</p>
+<pre><code>      dma_unmap_addr(ringp, mapping),
+      dma_unmap_len(ringp, len),
+      DMA_FROM_DEVICE);
+</code></pre>
+</li>
+</ol>
+<p>It really should be self-explanatory.  We treat the ADDR and LEN<br>separately, because it is possible for an implementation to only<br>need the address in order to perform the unmap operation.</p>
+<h1 id="Platform-Issues"><a href="#Platform-Issues" class="headerlink" title="Platform Issues"></a>Platform Issues</h1><p>If you are just writing drivers for Linux and do not maintain<br>an architecture port for the kernel, you can safely skip down<br>to “Closing”.</p>
+<ol>
+<li><p>Struct scatterlist requirements.</p>
+<p>You need to enable CONFIG_NEED_SG_DMA_LENGTH if the architecture<br>supports IOMMUs (including software IOMMU).</p>
+</li>
+<li><p>ARCH_DMA_MINALIGN</p>
+<p>Architectures must ensure that kmalloc’ed buffer is<br>DMA-safe. Drivers and subsystems depend on it. If an architecture<br>isn’t fully DMA-coherent (i.e. hardware doesn’t ensure that data in<br>the CPU cache is identical to data in main memory),<br>ARCH_DMA_MINALIGN must be set so that the memory allocator<br>makes sure that kmalloc’ed buffer doesn’t share a cache line with<br>the others. See arch/arm/include/asm/cache.h as an example.</p>
+<p>Note that ARCH_DMA_MINALIGN is about DMA memory alignment<br>constraints. You don’t need to worry about the architecture data<br>alignment constraints (e.g. the alignment constraints about 64-bit<br>objects).</p>
+</li>
+</ol>
+<h1 id="Closing"><a href="#Closing" class="headerlink" title="Closing"></a>Closing</h1><p>This document, and the API itself, would not be in its current<br>form without the feedback and suggestions from numerous individuals.<br>We would like to specifically mention, in no particular order, the<br>following people::</p>
+<pre><code>Russell King &lt;rmk@arm.linux.org.uk&gt;
+Leo Dagum &lt;dagum@barrel.engr.sgi.com&gt;
+Ralf Baechle &lt;ralf@oss.sgi.com&gt;
+Grant Grundler &lt;grundler@cup.hp.com&gt;
+Jay Estabrook &lt;Jay.Estabrook@compaq.com&gt;
+Thomas Sailer &lt;sailer@ife.ee.ethz.ch&gt;
+Andrea Arcangeli &lt;andrea@suse.de&gt;
+Jens Axboe &lt;jens.axboe@oracle.com&gt;
+David Mosberger-Tang &lt;davidm@hpl.hp.com&gt;
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/" title="Kernel-4.18.0-80.el8_DMA-API-HOWTO" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_DMA-API-HOWTO/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_akebono/" title="Kernel-4.18.0-80.el8_akebono"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_boot/" title="Kernel-4.18.0-80.el8_boot"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

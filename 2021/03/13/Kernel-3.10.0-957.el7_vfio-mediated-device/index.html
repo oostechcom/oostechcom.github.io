@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_vfio-mediated-device | oosTech.com</title>
+  <meta name="description" content="&#x2F;*  VFIO Mediated devices  Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved. Author: Neo Jia &lt;cjia@nvidia.com&gt;           Kirti Wankhede &lt;kwankhede@nvidia.com&gt;    This program is">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_vfio-mediated-device">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x2F;*  VFIO Mediated devices  Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved. Author: Neo Jia &lt;cjia@nvidia.com&gt;           Kirti Wankhede &lt;kwankhede@nvidia.com&gt;    This program is">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Virtual-Function-I-O-VFIO-Mediated-devices-1"><span class="toc-number">1.</span> <span class="toc-text">Virtual Function I&#x2F;O (VFIO) Mediated devices[1]</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Registration-Interfaces"><span class="toc-number">2.</span> <span class="toc-text">Registration Interfaces</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Registration-Interface-for-a-Mediated-Bus-Driver"><span class="toc-number">2.1.</span> <span class="toc-text">Registration Interface for a Mediated Bus Driver</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Physical-Device-Driver-Interface"><span class="toc-number">2.2.</span> <span class="toc-text">Physical Device Driver Interface</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Mediated-Device-Management-Interface-Through-sysfs"><span class="toc-number">3.</span> <span class="toc-text">Mediated Device Management Interface Through sysfs</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Links-in-the-mdev-bus-Class-Directory"><span class="toc-number">3.1.</span> <span class="toc-text">Links in the mdev_bus Class Directory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Directories-and-files-under-the-sysfs-for-Each-Physical-Device"><span class="toc-number">3.2.</span> <span class="toc-text">Directories and files under the sysfs for Each Physical Device</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Directories-and-Files-Under-the-sysfs-for-Each-mdev-Device"><span class="toc-number">3.3.</span> <span class="toc-text">Directories and Files Under the sysfs for Each mdev Device</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mediated-device-Hot-plug"><span class="toc-number">3.4.</span> <span class="toc-text">Mediated device Hot plug:</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Translation-APIs-for-Mediated-Devices"><span class="toc-number">4.</span> <span class="toc-text">Translation APIs for Mediated Devices</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Using-the-Sample-Code"><span class="toc-number">5.</span> <span class="toc-text">Using the Sample Code</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#tree-sys-devices-virtual-mtty-mtty"><span class="toc-number">6.</span> <span class="toc-text">tree &#x2F;sys&#x2F;devices&#x2F;virtual&#x2F;mtty&#x2F;mtty&#x2F;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-%E2%80%9C83b8f4f2-509f-382f-3c1e-e6bfe0fa1001%E2%80%9D-gt"><span class="toc-number">7.</span> <span class="toc-text">echo “83b8f4f2-509f-382f-3c1e-e6bfe0fa1001” &gt;    \</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#lspci-s-00-05-0-xxvv"><span class="toc-number">8.</span> <span class="toc-text">lspci -s 00:05.0 -xxvv</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#setserial-g-dev-ttyS"><span class="toc-number">9.</span> <span class="toc-text">setserial -g &#x2F;dev&#x2F;ttyS*</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#echo-1-gt-sys-bus-mdev-devices-83b8f4f2-509f-382f-3c1e-e6bfe0fa1001-remove"><span class="toc-number">10.</span> <span class="toc-text">echo 1 &gt; &#x2F;sys&#x2F;bus&#x2F;mdev&#x2F;devices&#x2F;83b8f4f2-509f-382f-3c1e-e6bfe0fa1001&#x2F;remove</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">11.</span> <span class="toc-text">References</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_vfio-mediated-device" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_vfio-mediated-device
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>/*</p>
+<ul>
+<li>VFIO Mediated devices</li>
+<li></li>
+<li>Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.</li>
+<li><pre><code>Author: Neo Jia &lt;cjia@nvidia.com&gt;
+</code></pre>
+</li>
+<li><pre><code>        Kirti Wankhede &lt;kwankhede@nvidia.com&gt;
+</code></pre>
+</li>
+<li></li>
+<li>This program is free software; you can redistribute it and/or modify</li>
+<li>it under the terms of the GNU General Public License version 2 as</li>
+<li>published by the Free Software Foundation.</li>
+<li>/</li>
+</ul>
+<h1 id="Virtual-Function-I-O-VFIO-Mediated-devices-1"><a href="#Virtual-Function-I-O-VFIO-Mediated-devices-1" class="headerlink" title="Virtual Function I/O (VFIO) Mediated devices[1]"></a>Virtual Function I/O (VFIO) Mediated devices[1]</h1><p>The number of use cases for virtualizing DMA devices that do not have built-in<br>SR_IOV capability is increasing. Previously, to virtualize such devices,<br>developers had to create their own management interfaces and APIs, and then<br>integrate them with user space software. To simplify integration with user space<br>software, we have identified common requirements and a unified management<br>interface for such devices.</p>
+<p>The VFIO driver framework provides unified APIs for direct device access. It is<br>an IOMMU/device-agnostic framework for exposing direct device access to user<br>space in a secure, IOMMU-protected environment. This framework is used for<br>multiple devices, such as GPUs, network adapters, and compute accelerators. With<br>direct device access, virtual machines or user space applications have direct<br>access to the physical device. This framework is reused for mediated devices.</p>
+<p>The mediated core driver provides a common interface for mediated device<br>management that can be used by drivers of different devices. This module<br>provides a generic interface to perform these operations:</p>
+<ul>
+<li>Create and destroy a mediated device</li>
+<li>Add a mediated device to and remove it from a mediated bus driver</li>
+<li>Add a mediated device to and remove it from an IOMMU group</li>
+</ul>
+<p>The mediated core driver also provides an interface to register a bus driver.<br>For example, the mediated VFIO mdev driver is designed for mediated devices and<br>supports VFIO APIs. The mediated bus driver adds a mediated device to and<br>removes it from a VFIO group.</p>
+<p>The following high-level block diagram shows the main components and interfaces<br>in the VFIO mediated driver framework. The diagram shows NVIDIA, Intel, and IBM<br>devices as examples, as these devices are the first devices to use this module.</p>
+<pre><code> +---------------+
+ |               |
+ | +-----------+ |  mdev_register_driver() +--------------+
+ | |           | +&lt;------------------------+              |
+ | |  mdev     | |                         |              |
+ | |  bus      | +------------------------&gt;+ vfio_mdev.ko |&lt;-&gt; VFIO user
+ | |  driver   | |     probe()/remove()    |              |    APIs
+ | |           | |                         +--------------+
+ | +-----------+ |
+ |               |
+ |  MDEV CORE    |
+ |   MODULE      |
+ |   mdev.ko     |
+ | +-----------+ |  mdev_register_device() +--------------+
+ | |           | +&lt;------------------------+              |
+ | |           | |                         |  nvidia.ko   |&lt;-&gt; physical
+ | |           | +------------------------&gt;+              |    device
+ | |           | |        callbacks        +--------------+
+ | | Physical  | |
+ | |  device   | |  mdev_register_device() +--------------+
+ | | interface | |&lt;------------------------+              |
+ | |           | |                         |  i915.ko     |&lt;-&gt; physical
+ | |           | +------------------------&gt;+              |    device
+ | |           | |        callbacks        +--------------+
+ | |           | |
+ | |           | |  mdev_register_device() +--------------+
+ | |           | +&lt;------------------------+              |
+ | |           | |                         | ccw_device.ko|&lt;-&gt; physical
+ | |           | +------------------------&gt;+              |    device
+ | |           | |        callbacks        +--------------+
+ | +-----------+ |
+ +---------------+
+</code></pre>
+<h1 id="Registration-Interfaces"><a href="#Registration-Interfaces" class="headerlink" title="Registration Interfaces"></a>Registration Interfaces</h1><p>The mediated core driver provides the following types of registration<br>interfaces:</p>
+<ul>
+<li>Registration interface for a mediated bus driver</li>
+<li>Physical device driver interface</li>
+</ul>
+<h2 id="Registration-Interface-for-a-Mediated-Bus-Driver"><a href="#Registration-Interface-for-a-Mediated-Bus-Driver" class="headerlink" title="Registration Interface for a Mediated Bus Driver"></a>Registration Interface for a Mediated Bus Driver</h2><p>The registration interface for a mediated bus driver provides the following<br>structure to represent a mediated device’s driver:</p>
+<pre><code> /*
+  * struct mdev_driver [2] - Mediated device&#39;s driver
+  * @name: driver name
+  * @probe: called when new device created
+  * @remove: called when device removed
+  * @driver: device driver structure
+  */
+ struct mdev_driver &#123;
+     const char *name;
+     int  (*probe)  (struct device *dev);
+     void (*remove) (struct device *dev);
+     struct device_driver    driver;
+ &#125;;
+</code></pre>
+<p>A mediated bus driver for mdev should use this structure in the function calls<br>to register and unregister itself with the core driver:</p>
+<ul>
+<li><p>Register:</p>
+<p>extern int  mdev_register_driver(struct mdev_driver *drv,</p>
+<pre><code>             struct module *owner);
+</code></pre>
+</li>
+<li><p>Unregister:</p>
+<p>extern void mdev_unregister_driver(struct mdev_driver *drv);</p>
+</li>
+</ul>
+<p>The mediated bus driver is responsible for adding mediated devices to the VFIO<br>group when devices are bound to the driver and removing mediated devices from<br>the VFIO when devices are unbound from the driver.</p>
+<h2 id="Physical-Device-Driver-Interface"><a href="#Physical-Device-Driver-Interface" class="headerlink" title="Physical Device Driver Interface"></a>Physical Device Driver Interface</h2><p>The physical device driver interface provides the mdev_parent_ops[3] structure<br>to define the APIs to manage work in the mediated core driver that is related<br>to the physical device.</p>
+<p>The structures in the mdev_parent_ops structure are as follows:</p>
+<ul>
+<li>dev_attr_groups: attributes of the parent device</li>
+<li>mdev_attr_groups: attributes of the mediated device</li>
+<li>supported_config: attributes to define supported configurations</li>
+</ul>
+<p>The functions in the mdev_parent_ops structure are as follows:</p>
+<ul>
+<li>create: allocate basic resources in a driver for a mediated device</li>
+<li>remove: free resources in a driver when a mediated device is destroyed</li>
+</ul>
+<p>(Note that mdev-core provides no implicit serialization of create/remove<br>callbacks per mdev parent device, per mdev type, or any other categorization.<br>Vendor drivers are expected to be fully asynchronous in this respect or<br>provide their own internal resource protection.)</p>
+<p>The callbacks in the mdev_parent_ops structure are as follows:</p>
+<ul>
+<li>open: open callback of mediated device</li>
+<li>close: close callback of mediated device</li>
+<li>ioctl: ioctl callback of mediated device</li>
+<li>read : read emulation callback</li>
+<li>write: write emulation callback</li>
+<li>mmap: mmap emulation callback</li>
+</ul>
+<p>A driver should use the mdev_parent_ops structure in the function call to<br>register itself with the mdev core driver:</p>
+<p>extern int  mdev_register_device(struct device *dev,<br>                 const struct mdev_parent_ops *ops);</p>
+<p>However, the mdev_parent_ops structure is not required in the function call<br>that a driver should use to unregister itself with the mdev core driver:</p>
+<p>extern void mdev_unregister_device(struct device *dev);</p>
+<h1 id="Mediated-Device-Management-Interface-Through-sysfs"><a href="#Mediated-Device-Management-Interface-Through-sysfs" class="headerlink" title="Mediated Device Management Interface Through sysfs"></a>Mediated Device Management Interface Through sysfs</h1><p>The management interface through sysfs enables user space software, such as<br>libvirt, to query and configure mediated devices in a hardware-agnostic fashion.<br>This management interface provides flexibility to the underlying physical<br>device’s driver to support features such as:</p>
+<ul>
+<li>Mediated device hot plug</li>
+<li>Multiple mediated devices in a single virtual machine</li>
+<li>Multiple mediated devices from different physical devices</li>
+</ul>
+<h2 id="Links-in-the-mdev-bus-Class-Directory"><a href="#Links-in-the-mdev-bus-Class-Directory" class="headerlink" title="Links in the mdev_bus Class Directory"></a>Links in the mdev_bus Class Directory</h2><p>The /sys/class/mdev_bus/ directory contains links to devices that are registered<br>with the mdev core driver.</p>
+<h2 id="Directories-and-files-under-the-sysfs-for-Each-Physical-Device"><a href="#Directories-and-files-under-the-sysfs-for-Each-Physical-Device" class="headerlink" title="Directories and files under the sysfs for Each Physical Device"></a>Directories and files under the sysfs for Each Physical Device</h2><p>|- [parent physical device]<br>|— Vendor-specific-attributes [optional]<br>|— [mdev_supported_types]<br>|     |— [<type-id>]<br>|     |   |— create<br>|     |   |— name<br>|     |   |— available_instances<br>|     |   |— device_api<br>|     |   |— description<br>|     |   |— [devices]<br>|     |— [<type-id>]<br>|     |   |— create<br>|     |   |— name<br>|     |   |— available_instances<br>|     |   |— device_api<br>|     |   |— description<br>|     |   |— [devices]<br>|     |— [<type-id>]<br>|          |— create<br>|          |— name<br>|          |— available_instances<br>|          |— device_api<br>|          |— description<br>|          |— [devices]</p>
+<ul>
+<li><p>[mdev_supported_types]</p>
+<p>The list of currently supported mediated device types and their details.</p>
+<p>[<type-id>], device_api, and available_instances are mandatory attributes<br>that should be provided by vendor driver.</p>
+</li>
+<li><p>[<type-id>]</p>
+<p>The [<type-id>] name is created by adding the the device driver string as a<br>prefix to the string provided by the vendor driver. This format of this name<br>is as follows:</p>
+<p>  sprintf(buf, “%s-%s”, dev_driver_string(parent-&gt;dev), group-&gt;name);</p>
+<p>(or using mdev_parent_dev(mdev) to arrive at the parent device outside<br> of the core mdev code)</p>
+</li>
+<li><p>device_api</p>
+<p>This attribute should show which device API is being created, for example,<br>“vfio-pci” for a PCI device.</p>
+</li>
+<li><p>available_instances</p>
+<p>This attribute should show the number of devices of type <type-id> that can be<br>created.</p>
+</li>
+<li><p>[device]</p>
+<p>This directory contains links to the devices of type <type-id> that have been<br>created.</p>
+</li>
+<li><p>name</p>
+<p>This attribute should show human readable name. This is optional attribute.</p>
+</li>
+<li><p>description</p>
+<p>This attribute should show brief features/description of the type. This is<br>optional attribute.</p>
+</li>
+</ul>
+<h2 id="Directories-and-Files-Under-the-sysfs-for-Each-mdev-Device"><a href="#Directories-and-Files-Under-the-sysfs-for-Each-mdev-Device" class="headerlink" title="Directories and Files Under the sysfs for Each mdev Device"></a>Directories and Files Under the sysfs for Each mdev Device</h2><p>|- [parent phy device]<br>|— [$MDEV_UUID]<br>         |— remove<br>         |— mdev_type {link to its type}<br>         |— vendor-specific-attributes [optional]</p>
+<ul>
+<li>remove (write only)<br>Writing ‘1’ to the ‘remove’ file destroys the mdev device. The vendor driver can<br>fail the remove() callback if that device is active and the vendor driver<br>doesn’t support hot unplug.</li>
+</ul>
+<p>Example:<br>    # echo 1 &gt; /sys/bus/mdev/devices/$mdev_UUID/remove</p>
+<h2 id="Mediated-device-Hot-plug"><a href="#Mediated-device-Hot-plug" class="headerlink" title="Mediated device Hot plug:"></a>Mediated device Hot plug:</h2><p>Mediated devices can be created and assigned at runtime. The procedure to hot<br>plug a mediated device is the same as the procedure to hot plug a PCI device.</p>
+<h1 id="Translation-APIs-for-Mediated-Devices"><a href="#Translation-APIs-for-Mediated-Devices" class="headerlink" title="Translation APIs for Mediated Devices"></a>Translation APIs for Mediated Devices</h1><p>The following APIs are provided for translating user pfn to host pfn in a VFIO<br>driver:</p>
+<p>extern int vfio_pin_pages(struct device *dev, unsigned long *user_pfn,<br>              int npage, int prot, unsigned long *phys_pfn);</p>
+<p>extern int vfio_unpin_pages(struct device *dev, unsigned long *user_pfn,<br>                int npage);</p>
+<p>These functions call back into the back-end IOMMU module by using the pin_pages<br>and unpin_pages callbacks of the struct vfio_iommu_driver_ops[4]. Currently<br>these callbacks are supported in the TYPE1 IOMMU module. To enable them for<br>other IOMMU backend modules, such as PPC64 sPAPR module, they need to provide<br>these two callback functions.</p>
+<h1 id="Using-the-Sample-Code"><a href="#Using-the-Sample-Code" class="headerlink" title="Using the Sample Code"></a>Using the Sample Code</h1><p>mtty.c in samples/vfio-mdev/ directory is a sample driver program to<br>demonstrate how to use the mediated device framework.</p>
+<p>The sample driver creates an mdev device that simulates a serial port over a PCI<br>card.</p>
+<ol>
+<li><p>Build and load the mtty.ko module.</p>
+<p>This step creates a dummy device, /sys/devices/virtual/mtty/mtty/</p>
+<p>Files in this device directory in sysfs are similar to the following:</p>
+<h1 id="tree-sys-devices-virtual-mtty-mtty"><a href="#tree-sys-devices-virtual-mtty-mtty" class="headerlink" title="tree /sys/devices/virtual/mtty/mtty/"></a>tree /sys/devices/virtual/mtty/mtty/</h1><p>   /sys/devices/virtual/mtty/mtty/<br>   |– mdev_supported_types<br>   |   |– mtty-1<br>   |   |   |– available_instances<br>   |   |   |– create<br>   |   |   |– device_api<br>   |   |   |– devices<br>   |   |   <code>-- name    |   </code>– mtty-2<br>   |       |– available_instances<br>   |       |– create<br>   |       |– device_api<br>   |       |– devices<br>   |       <code>-- name    |-- mtty_dev    |   </code>– sample_mtty_dev<br>   |– power<br>   |   |– autosuspend_delay_ms<br>   |   |– control<br>   |   |– runtime_active_time<br>   |   |– runtime_status<br>   |   <code>-- runtime_suspended_time    |-- subsystem -&gt; ../../../../class/mtty    </code>– uevent</p>
+</li>
+<li><p>Create a mediated device by using the dummy device that you created in the<br>previous step.</p>
+<h1 id="echo-“83b8f4f2-509f-382f-3c1e-e6bfe0fa1001”-gt"><a href="#echo-“83b8f4f2-509f-382f-3c1e-e6bfe0fa1001”-gt" class="headerlink" title="echo “83b8f4f2-509f-382f-3c1e-e6bfe0fa1001” &gt;    \"></a>echo “83b8f4f2-509f-382f-3c1e-e6bfe0fa1001” &gt;    \</h1><pre><code> /sys/devices/virtual/mtty/mtty/mdev_supported_types/mtty-2/create
+</code></pre>
+</li>
+<li><p>Add parameters to qemu-kvm.</p>
+<p>-device vfio-pci,<br> sysfsdev=/sys/bus/mdev/devices/83b8f4f2-509f-382f-3c1e-e6bfe0fa1001</p>
+</li>
+<li><p>Boot the VM.</p>
+<p>In the Linux guest VM, with no hardware on the host, the device appears<br>as  follows:</p>
+<h1 id="lspci-s-00-05-0-xxvv"><a href="#lspci-s-00-05-0-xxvv" class="headerlink" title="lspci -s 00:05.0 -xxvv"></a>lspci -s 00:05.0 -xxvv</h1><p>00:05.0 Serial controller: Device 4348:3253 (rev 10) (prog-if 02 [16550])</p>
+<pre><code>    Subsystem: Device 4348:3253
+    Physical Slot: 5
+    Control: I/O+ Mem- BusMaster- SpecCycle- MemWINV- VGASnoop- ParErr-
+</code></pre>
+<p>Stepping- SERR- FastB2B- DisINTx-</p>
+<pre><code>    Status: Cap- 66MHz- UDF- FastB2B- ParErr- DEVSEL=medium &gt;TAbort-
+</code></pre>
+<p>&lt;TAbort- <MAbort- >SERR- &lt;PERR- INTx-</p>
+<pre><code>    Interrupt: pin A routed to IRQ 10
+    Region 0: I/O ports at c150 [size=8]
+    Region 1: I/O ports at c158 [size=8]
+    Kernel driver in use: serial
+</code></pre>
+<p>00: 48 43 53 32 01 00 00 02 10 02 00 07 00 00 00 00<br>10: 51 c1 00 00 59 c1 00 00 00 00 00 00 00 00 00 00<br>20: 00 00 00 00 00 00 00 00 00 00 00 00 48 43 53 32<br>30: 00 00 00 00 00 00 00 00 00 00 00 00 0a 01 00 00</p>
+<p>In the Linux guest VM, dmesg output for the device is as follows:</p>
+<p>serial 0000:00:05.0: PCI INT A -&gt; Link[LNKA] -&gt; GSI 10 (level, high) -&gt; IRQ<br>10<br>0000:00:05.0: ttyS1 at I/O 0xc150 (irq = 10) is a 16550A<br>0000:00:05.0: ttyS2 at I/O 0xc158 (irq = 10) is a 16550A</p>
+</li>
+</ol>
+<ol start="5">
+<li><p>In the Linux guest VM, check the serial ports.</p>
+<h1 id="setserial-g-dev-ttyS"><a href="#setserial-g-dev-ttyS" class="headerlink" title="setserial -g /dev/ttyS*"></a>setserial -g /dev/ttyS*</h1><p>/dev/ttyS0, UART: 16550A, Port: 0x03f8, IRQ: 4<br>/dev/ttyS1, UART: 16550A, Port: 0xc150, IRQ: 10<br>/dev/ttyS2, UART: 16550A, Port: 0xc158, IRQ: 10</p>
+</li>
+<li><p>Using a minicom or any terminal enulation program, open port /dev/ttyS1 or<br>/dev/ttyS2 with hardware flow control disabled.</p>
+</li>
+<li><p>Type data on the minicom terminal or send data to the terminal emulation<br>program and read the data.</p>
+<p>Data is loop backed from hosts mtty driver.</p>
+</li>
+<li><p>Destroy the mediated device that you created.</p>
+<h1 id="echo-1-gt-sys-bus-mdev-devices-83b8f4f2-509f-382f-3c1e-e6bfe0fa1001-remove"><a href="#echo-1-gt-sys-bus-mdev-devices-83b8f4f2-509f-382f-3c1e-e6bfe0fa1001-remove" class="headerlink" title="echo 1 &gt; /sys/bus/mdev/devices/83b8f4f2-509f-382f-3c1e-e6bfe0fa1001/remove"></a>echo 1 &gt; /sys/bus/mdev/devices/83b8f4f2-509f-382f-3c1e-e6bfe0fa1001/remove</h1></li>
+</ol>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p>[1] See Documentation/vfio.txt for more information on VFIO.<br>[2] struct mdev_driver in include/linux/mdev.h<br>[3] struct mdev_parent_ops in include/linux/mdev.h<br>[4] struct vfio_iommu_driver_ops in include/linux/vfio.h</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/" title="Kernel-3.10.0-957.el7_vfio-mediated-device" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_vfio-mediated-device/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_vfat/" title="Kernel-3.10.0-957.el7_vfat"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_vfio/" title="Kernel-3.10.0-957.el7_vfio"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

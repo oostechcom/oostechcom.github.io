@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_rcubarrier | oosTech.com</title>
+  <meta name="description" content="RCU and Unloadable Modules [Originally published in LWN Jan. 14, 2007: http:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;217484&#x2F;] RCU (read-copy update) is a synchronization mechanism that can be thoughtof as a replacement for">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_rcubarrier">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="RCU and Unloadable Modules [Originally published in LWN Jan. 14, 2007: http:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;217484&#x2F;] RCU (read-copy update) is a synchronization mechanism that can be thoughtof as a replacement for">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_rcubarrier" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_rcubarrier
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>RCU and Unloadable Modules</p>
+<p>[Originally published in LWN Jan. 14, 2007: <a target="_blank" rel="noopener" href="http://lwn.net/Articles/217484/]">http://lwn.net/Articles/217484/]</a></p>
+<p>RCU (read-copy update) is a synchronization mechanism that can be thought<br>of as a replacement for read-writer locking (among other things), but with<br>very low-overhead readers that are immune to deadlock, priority inversion,<br>and unbounded latency. RCU read-side critical sections are delimited<br>by rcu_read_lock() and rcu_read_unlock(), which, in non-CONFIG_PREEMPT<br>kernels, generate no code whatsoever.</p>
+<p>This means that RCU writers are unaware of the presence of concurrent<br>readers, so that RCU updates to shared data must be undertaken quite<br>carefully, leaving an old version of the data structure in place until all<br>pre-existing readers have finished. These old versions are needed because<br>such readers might hold a reference to them. RCU updates can therefore be<br>rather expensive, and RCU is thus best suited for read-mostly situations.</p>
+<p>How can an RCU writer possibly determine when all readers are finished,<br>given that readers might well leave absolutely no trace of their<br>presence? There is a synchronize_rcu() primitive that blocks until all<br>pre-existing readers have completed. An updater wishing to delete an<br>element p from a linked list might do the following, while holding an<br>appropriate lock, of course:</p>
+<pre><code>list_del_rcu(p);
+synchronize_rcu();
+kfree(p);
+</code></pre>
+<p>But the above code cannot be used in IRQ context – the call_rcu()<br>primitive must be used instead. This primitive takes a pointer to an<br>rcu_head struct placed within the RCU-protected data structure and<br>another pointer to a function that may be invoked later to free that<br>structure. Code to delete an element p from the linked list from IRQ<br>context might then be as follows:</p>
+<pre><code>list_del_rcu(p);
+call_rcu(&amp;p-&gt;rcu, p_callback);
+</code></pre>
+<p>Since call_rcu() never blocks, this code can safely be used from within<br>IRQ context. The function p_callback() might be defined as follows:</p>
+<pre><code>static void p_callback(struct rcu_head *rp)
+&#123;
+    struct pstruct *p = container_of(rp, struct pstruct, rcu);
+
+    kfree(p);
+&#125;
+</code></pre>
+<p>Unloading Modules That Use call_rcu()</p>
+<p>But what if p_callback is defined in an unloadable module?</p>
+<p>If we unload the module while some RCU callbacks are pending,<br>the CPUs executing these callbacks are going to be severely<br>disappointed when they are later invoked, as fancifully depicted at<br><a target="_blank" rel="noopener" href="http://lwn.net/images/ns/kernel/rcu-drop.jpg">http://lwn.net/images/ns/kernel/rcu-drop.jpg</a>.</p>
+<p>We could try placing a synchronize_rcu() in the module-exit code path,<br>but this is not sufficient. Although synchronize_rcu() does wait for a<br>grace period to elapse, it does not wait for the callbacks to complete.</p>
+<p>One might be tempted to try several back-to-back synchronize_rcu()<br>calls, but this is still not guaranteed to work. If there is a very<br>heavy RCU-callback load, then some of the callbacks might be deferred<br>in order to allow other processing to proceed. Such deferral is required<br>in realtime kernels in order to avoid excessive scheduling latencies.</p>
+<p>rcu_barrier()</p>
+<p>We instead need the rcu_barrier() primitive. This primitive is similar<br>to synchronize_rcu(), but instead of waiting solely for a grace<br>period to elapse, it also waits for all outstanding RCU callbacks to<br>complete. Pseudo-code using rcu_barrier() is as follows:</p>
+<ol>
+<li>Prevent any new RCU callbacks from being posted.</li>
+<li>Execute rcu_barrier().</li>
+<li>Allow the module to be unloaded.</li>
+</ol>
+<p>There are also rcu_barrier_bh(), rcu_barrier_sched(), and srcu_barrier()<br>functions for the other flavors of RCU, and you of course must match<br>the flavor of rcu_barrier() with that of call_rcu().  If your module<br>uses multiple flavors of call_rcu(), then it must also use multiple<br>flavors of rcu_barrier() when unloading that module.  For example, if<br>it uses call_rcu_bh(), call_srcu() on srcu_struct_1, and call_srcu() on<br>srcu_struct_2(), then the following three lines of code will be required<br>when unloading:</p>
+<p> 1 rcu_barrier_bh();<br> 2 srcu_barrier(&amp;srcu_struct_1);<br> 3 srcu_barrier(&amp;srcu_struct_2);</p>
+<p>The rcutorture module makes use of rcu_barrier() in its exit function<br>as follows:</p>
+<p> 1 static void<br> 2 rcu_torture_cleanup(void)<br> 3 {<br> 4   int i;<br> 5<br> 6   fullstop = 1;<br> 7   if (shuffler_task != NULL) {<br> 8     VERBOSE_PRINTK_STRING(“Stopping rcu_torture_shuffle task”);<br> 9     kthread_stop(shuffler_task);<br>10   }<br>11   shuffler_task = NULL;<br>12<br>13   if (writer_task != NULL) {<br>14     VERBOSE_PRINTK_STRING(“Stopping rcu_torture_writer task”);<br>15     kthread_stop(writer_task);<br>16   }<br>17   writer_task = NULL;<br>18<br>19   if (reader_tasks != NULL) {<br>20     for (i = 0; i &lt; nrealreaders; i++) {<br>21       if (reader_tasks[i] != NULL) {<br>22         VERBOSE_PRINTK_STRING(<br>23           “Stopping rcu_torture_reader task”);<br>24         kthread_stop(reader_tasks[i]);<br>25       }<br>26       reader_tasks[i] = NULL;<br>27     }<br>28     kfree(reader_tasks);<br>29     reader_tasks = NULL;<br>30   }<br>31   rcu_torture_current = NULL;<br>32<br>33   if (fakewriter_tasks != NULL) {<br>34     for (i = 0; i &lt; nfakewriters; i++) {<br>35       if (fakewriter_tasks[i] != NULL) {<br>36         VERBOSE_PRINTK_STRING(<br>37           “Stopping rcu_torture_fakewriter task”);<br>38         kthread_stop(fakewriter_tasks[i]);<br>39       }<br>40       fakewriter_tasks[i] = NULL;<br>41     }<br>42     kfree(fakewriter_tasks);<br>43     fakewriter_tasks = NULL;<br>44   }<br>45<br>46   if (stats_task != NULL) {<br>47     VERBOSE_PRINTK_STRING(“Stopping rcu_torture_stats task”);<br>48     kthread_stop(stats_task);<br>49   }<br>50   stats_task = NULL;<br>51<br>52   /* Wait for all RCU callbacks to fire. */<br>53   rcu_barrier();<br>54<br>55   rcu_torture_stats_print(); /* -After- the stats thread is stopped! */<br>56<br>57   if (cur_ops-&gt;cleanup != NULL)<br>58     cur_ops-&gt;cleanup();<br>59   if (atomic_read(&amp;n_rcu_torture_error))<br>60     rcu_torture_print_module_parms(“End of test: FAILURE”);<br>61   else<br>62     rcu_torture_print_module_parms(“End of test: SUCCESS”);<br>63 }</p>
+<p>Line 6 sets a global variable that prevents any RCU callbacks from<br>re-posting themselves. This will not be necessary in most cases, since<br>RCU callbacks rarely include calls to call_rcu(). However, the rcutorture<br>module is an exception to this rule, and therefore needs to set this<br>global variable.</p>
+<p>Lines 7-50 stop all the kernel tasks associated with the rcutorture<br>module. Therefore, once execution reaches line 53, no more rcutorture<br>RCU callbacks will be posted. The rcu_barrier() call on line 53 waits<br>for any pre-existing callbacks to complete.</p>
+<p>Then lines 55-62 print status and do operation-specific cleanup, and<br>then return, permitting the module-unload operation to be completed.</p>
+<p>Quick Quiz #1: Is there any other situation where rcu_barrier() might<br>    be required?</p>
+<p>Your module might have additional complications. For example, if your<br>module invokes call_rcu() from timers, you will need to first cancel all<br>the timers, and only then invoke rcu_barrier() to wait for any remaining<br>RCU callbacks to complete.</p>
+<p>Of course, if you module uses call_rcu_bh(), you will need to invoke<br>rcu_barrier_bh() before unloading.  Similarly, if your module uses<br>call_rcu_sched(), you will need to invoke rcu_barrier_sched() before<br>unloading.  If your module uses call_rcu(), call_rcu_bh(), -and-<br>call_rcu_sched(), then you will need to invoke each of rcu_barrier(),<br>rcu_barrier_bh(), and rcu_barrier_sched().</p>
+<p>Implementing rcu_barrier()</p>
+<p>Dipankar Sarma’s implementation of rcu_barrier() makes use of the fact<br>that RCU callbacks are never reordered once queued on one of the per-CPU<br>queues. His implementation queues an RCU callback on each of the per-CPU<br>callback queues, and then waits until they have all started executing, at<br>which point, all earlier RCU callbacks are guaranteed to have completed.</p>
+<p>The original code for rcu_barrier() was as follows:</p>
+<p> 1 void rcu_barrier(void)<br> 2 {<br> 3   BUG_ON(in_interrupt());<br> 4   /* Take cpucontrol mutex to protect against CPU hotplug */<br> 5   mutex_lock(&amp;rcu_barrier_mutex);<br> 6   init_completion(&amp;rcu_barrier_completion);<br> 7   atomic_set(&amp;rcu_barrier_cpu_count, 0);<br> 8   on_each_cpu(rcu_barrier_func, NULL, 0, 1);<br> 9   wait_for_completion(&amp;rcu_barrier_completion);<br>10   mutex_unlock(&amp;rcu_barrier_mutex);<br>11 }</p>
+<p>Line 3 verifies that the caller is in process context, and lines 5 and 10<br>use rcu_barrier_mutex to ensure that only one rcu_barrier() is using the<br>global completion and counters at a time, which are initialized on lines<br>6 and 7. Line 8 causes each CPU to invoke rcu_barrier_func(), which is<br>shown below. Note that the final “1” in on_each_cpu()’s argument list<br>ensures that all the calls to rcu_barrier_func() will have completed<br>before on_each_cpu() returns. Line 9 then waits for the completion.</p>
+<p>This code was rewritten in 2008 to support rcu_barrier_bh() and<br>rcu_barrier_sched() in addition to the original rcu_barrier().</p>
+<p>The rcu_barrier_func() runs on each CPU, where it invokes call_rcu()<br>to post an RCU callback, as follows:</p>
+<p> 1 static void rcu_barrier_func(void *notused)<br> 2 {<br> 3 int cpu = smp_processor_id();<br> 4 struct rcu_data *rdp = &amp;per_cpu(rcu_data, cpu);<br> 5 struct rcu_head *head;<br> 6<br> 7 head = &amp;rdp-&gt;barrier;<br> 8 atomic_inc(&amp;rcu_barrier_cpu_count);<br> 9 call_rcu(head, rcu_barrier_callback);<br>10 }</p>
+<p>Lines 3 and 4 locate RCU’s internal per-CPU rcu_data structure,<br>which contains the struct rcu_head that needed for the later call to<br>call_rcu(). Line 7 picks up a pointer to this struct rcu_head, and line<br>8 increments a global counter. This counter will later be decremented<br>by the callback. Line 9 then registers the rcu_barrier_callback() on<br>the current CPU’s queue.</p>
+<p>The rcu_barrier_callback() function simply atomically decrements the<br>rcu_barrier_cpu_count variable and finalizes the completion when it<br>reaches zero, as follows:</p>
+<p> 1 static void rcu_barrier_callback(struct rcu_head *notused)<br> 2 {<br> 3 if (atomic_dec_and_test(&amp;rcu_barrier_cpu_count))<br> 4 complete(&amp;rcu_barrier_completion);<br> 5 }</p>
+<p>Quick Quiz #2: What happens if CPU 0’s rcu_barrier_func() executes<br>    immediately (thus incrementing rcu_barrier_cpu_count to the<br>    value one), but the other CPU’s rcu_barrier_func() invocations<br>    are delayed for a full grace period? Couldn’t this result in<br>    rcu_barrier() returning prematurely?</p>
+<p>rcu_barrier() Summary</p>
+<p>The rcu_barrier() primitive has seen relatively little use, since most<br>code using RCU is in the core kernel rather than in modules. However, if<br>you are using RCU from an unloadable module, you need to use rcu_barrier()<br>so that your module may be safely unloaded.</p>
+<p>Answers to Quick Quizzes</p>
+<p>Quick Quiz #1: Is there any other situation where rcu_barrier() might<br>    be required?</p>
+<p>Answer: Interestingly enough, rcu_barrier() was not originally<br>    implemented for module unloading. Nikita Danilov was using<br>    RCU in a filesystem, which resulted in a similar situation at<br>    filesystem-unmount time. Dipankar Sarma coded up rcu_barrier()<br>    in response, so that Nikita could invoke it during the<br>    filesystem-unmount process.</p>
+<pre><code>Much later, yours truly hit the RCU module-unload problem when
+implementing rcutorture, and found that rcu_barrier() solves
+this problem as well.
+</code></pre>
+<p>Quick Quiz #2: What happens if CPU 0’s rcu_barrier_func() executes<br>    immediately (thus incrementing rcu_barrier_cpu_count to the<br>    value one), but the other CPU’s rcu_barrier_func() invocations<br>    are delayed for a full grace period? Couldn’t this result in<br>    rcu_barrier() returning prematurely?</p>
+<p>Answer: This cannot happen. The reason is that on_each_cpu() has its last<br>    argument, the wait flag, set to “1”. This flag is passed through<br>    to smp_call_function() and further to smp_call_function_on_cpu(),<br>    causing this latter to spin until the cross-CPU invocation of<br>    rcu_barrier_func() has completed. This by itself would prevent<br>    a grace period from completing on non-CONFIG_PREEMPT kernels,<br>    since each CPU must undergo a context switch (or other quiescent<br>    state) before the grace period can complete. However, this is<br>    of no use in CONFIG_PREEMPT kernels.</p>
+<pre><code>Therefore, on_each_cpu() disables preemption across its call
+to smp_call_function() and also across the local call to
+rcu_barrier_func(). This prevents the local CPU from context
+switching, again preventing grace periods from completing. This
+means that all CPUs have executed rcu_barrier_func() before
+the first rcu_barrier_callback() can possibly execute, in turn
+preventing rcu_barrier_cpu_count from prematurely reaching zero.
+
+Currently, -rt implementations of RCU keep but a single global
+queue for RCU callbacks, and thus do not suffer from this
+problem. However, when the -rt RCU eventually does have per-CPU
+callback queues, things will have to change. One simple change
+is to add an rcu_read_lock() before line 8 of rcu_barrier()
+and an rcu_read_unlock() after line 8 of this same function. If
+you can think of a better change, please let me know!
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/" title="Kernel-3.10.0-957.el7_rcubarrier" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_rcubarrier/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_rcu/" title="Kernel-3.10.0-957.el7_rcu"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_rcuref/" title="Kernel-3.10.0-957.el7_rcuref"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

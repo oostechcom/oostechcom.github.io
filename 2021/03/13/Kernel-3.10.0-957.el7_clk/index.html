@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_clk | oosTech.com</title>
+  <meta name="description" content="The Common Clk Framework     Mike Turquette &lt;mturquette@ti.com&gt;  This document endeavours to explain the common clk framework details,and how to port a platform over to this framework.  It i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_clk">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_clk/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="The Common Clk Framework     Mike Turquette &lt;mturquette@ti.com&gt;  This document endeavours to explain the common clk framework details,and how to port a platform over to this framework.  It i">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_clk/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_clk" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_clk
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_clk/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_clk/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_clk/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>    The Common Clk Framework
+    Mike Turquette &lt;mturquette@ti.com&gt;
+</code></pre>
+<p>This document endeavours to explain the common clk framework details,<br>and how to port a platform over to this framework.  It is not yet a<br>detailed explanation of the clock api in include/linux/clk.h, but<br>perhaps someday it will include that information.</p>
+<pre><code>Part 1 - introduction and interface split
+</code></pre>
+<p>The common clk framework is an interface to control the clock nodes<br>available on various devices today.  This may come in the form of clock<br>gating, rate adjustment, muxing or other operations.  This framework is<br>enabled with the CONFIG_COMMON_CLK option.</p>
+<p>The interface itself is divided into two halves, each shielded from the<br>details of its counterpart.  First is the common definition of struct<br>clk which unifies the framework-level accounting and infrastructure that<br>has traditionally been duplicated across a variety of platforms.  Second<br>is a common implementation of the clk.h api, defined in<br>drivers/clk/clk.c.  Finally there is struct clk_ops, whose operations<br>are invoked by the clk api implementation.</p>
+<p>The second half of the interface is comprised of the hardware-specific<br>callbacks registered with struct clk_ops and the corresponding<br>hardware-specific structures needed to model a particular clock.  For<br>the remainder of this document any reference to a callback in struct<br>clk_ops, such as .enable or .set_rate, implies the hardware-specific<br>implementation of that code.  Likewise, references to struct clk_foo<br>serve as a convenient shorthand for the implementation of the<br>hardware-specific bits for the hypothetical “foo” hardware.</p>
+<p>Tying the two halves of this interface together is struct clk_hw, which<br>is defined in struct clk_foo and pointed to within struct clk.  This<br>allows easy for navigation between the two discrete halves of the common<br>clock interface.</p>
+<pre><code>Part 2 - common data structures and api
+</code></pre>
+<p>Below is the common struct clk definition from<br>include/linux/clk-private.h, modified for brevity:</p>
+<pre><code>struct clk &#123;
+    const char        *name;
+    const struct clk_ops    *ops;
+    struct clk_hw        *hw;
+    char            **parent_names;
+    struct clk        **parents;
+    struct clk        *parent;
+    struct hlist_head    children;
+    struct hlist_node    child_node;
+    ...
+&#125;;
+</code></pre>
+<p>The members above make up the core of the clk tree topology.  The clk<br>api itself defines several driver-facing functions which operate on<br>struct clk.  That api is documented in include/linux/clk.h.</p>
+<p>Platforms and devices utilizing the common struct clk use the struct<br>clk_ops pointer in struct clk to perform the hardware-specific parts of<br>the operations defined in clk.h:</p>
+<pre><code>struct clk_ops &#123;
+    int        (*prepare)(struct clk_hw *hw);
+    void        (*unprepare)(struct clk_hw *hw);
+    int        (*enable)(struct clk_hw *hw);
+    void        (*disable)(struct clk_hw *hw);
+    int        (*is_enabled)(struct clk_hw *hw);
+    unsigned long    (*recalc_rate)(struct clk_hw *hw,
+                    unsigned long parent_rate);
+    long        (*round_rate)(struct clk_hw *hw, unsigned long,
+                    unsigned long *);
+    int        (*set_parent)(struct clk_hw *hw, u8 index);
+    u8        (*get_parent)(struct clk_hw *hw);
+    int        (*set_rate)(struct clk_hw *hw, unsigned long);
+    void        (*init)(struct clk_hw *hw);
+&#125;;
+
+Part 3 - hardware clk implementations
+</code></pre>
+<p>The strength of the common struct clk comes from its .ops and .hw pointers<br>which abstract the details of struct clk from the hardware-specific bits, and<br>vice versa.  To illustrate consider the simple gateable clk implementation in<br>drivers/clk/clk-gate.c:</p>
+<p>struct clk_gate {<br>    struct clk_hw    hw;<br>    void __iomem    *reg;<br>    u8              bit_idx;<br>    …<br>};</p>
+<p>struct clk_gate contains struct clk_hw hw as well as hardware-specific<br>knowledge about which register and bit controls this clk’s gating.<br>Nothing about clock topology or accounting, such as enable_count or<br>notifier_count, is needed here.  That is all handled by the common<br>framework code and struct clk.</p>
+<p>Let’s walk through enabling this clk from driver code:</p>
+<pre><code>struct clk *clk;
+clk = clk_get(NULL, &quot;my_gateable_clk&quot;);
+
+clk_prepare(clk);
+clk_enable(clk);
+</code></pre>
+<p>The call graph for clk_enable is very simple:</p>
+<p>clk_enable(clk);<br>    clk-&gt;ops-&gt;enable(clk-&gt;hw);<br>    [resolves to…]<br>        clk_gate_enable(hw);<br>        [resolves struct clk gate with to_clk_gate(hw)]<br>            clk_gate_set_bit(gate);</p>
+<p>And the definition of clk_gate_set_bit:</p>
+<p>static void clk_gate_set_bit(struct clk_gate *gate)<br>{<br>    u32 reg;</p>
+<pre><code>reg = __raw_readl(gate-&gt;reg);
+reg |= BIT(gate-&gt;bit_idx);
+writel(reg, gate-&gt;reg);
+</code></pre>
+<p>}</p>
+<p>Note that to_clk_gate is defined as:</p>
+<p>#define to_clk_gate(_hw) container_of(_hw, struct clk_gate, clk)</p>
+<p>This pattern of abstraction is used for every clock hardware<br>representation.</p>
+<pre><code>Part 4 - supporting your own clk hardware
+</code></pre>
+<p>When implementing support for a new type of clock it only necessary to<br>include the following header:</p>
+<p>#include &lt;linux/clk-provider.h&gt;</p>
+<p>include/linux/clk.h is included within that header and clk-private.h<br>must never be included from the code which implements the operations for<br>a clock.  More on that below in Part 5.</p>
+<p>To construct a clk hardware structure for your platform you must define<br>the following:</p>
+<p>struct clk_foo {<br>    struct clk_hw hw;<br>    … hardware specific data goes here …<br>};</p>
+<p>To take advantage of your data you’ll need to support valid operations<br>for your clk:</p>
+<p>struct clk_ops clk_foo_ops {<br>    .enable        = &clk_foo_enable;<br>    .disable    = &clk_foo_disable;<br>};</p>
+<p>Implement the above functions using container_of:</p>
+<p>#define to_clk_foo(_hw) container_of(_hw, struct clk_foo, hw)</p>
+<p>int clk_foo_enable(struct clk_hw *hw)<br>{<br>    struct clk_foo *foo;</p>
+<pre><code>foo = to_clk_foo(hw);
+
+... perform magic on foo ...
+
+return 0;
+</code></pre>
+<p>};</p>
+<p>Below is a matrix detailing which clk_ops are mandatory based upon the<br>hardware capabilities of that clock.  A cell marked as “y” means<br>mandatory, a cell marked as “n” implies that either including that<br>callback is invalid or otherwise unnecessary.  Empty cells are either<br>optional or must be evaluated on a case-by-case basis.</p>
+<pre><code>                       clock hardware characteristics
+     -----------------------------------------------------------
+         | gate | change rate | single parent | multiplexer | root |
+         |------|-------------|---------------|-------------|------|
+</code></pre>
+<p>.prepare     |      |             |               |             |      |<br>.unprepare   |      |             |               |             |      |<br>             |      |             |               |             |      |<br>.enable      | y    |             |               |             |      |<br>.disable     | y    |             |               |             |      |<br>.is_enabled  | y    |             |               |             |      |<br>             |      |             |               |             |      |<br>.recalc_rate |      | y           |               |             |      |<br>.round_rate  |      | y           |               |             |      |<br>.set_rate    |      | y           |               |             |      |<br>             |      |             |               |             |      |<br>.set_parent  |      |             | n             | y           | n    |<br>.get_parent  |      |             | n             | y           | n    |<br>             |      |             |               |             |      |<br>.init        |      |             |               |             |      |<br>         ———————————————————–</p>
+<p>Finally, register your clock at run-time with a hardware-specific<br>registration function.  This function simply populates struct clk_foo’s<br>data and then passes the common struct clk parameters to the framework<br>with a call to:</p>
+<p>clk_register(…)</p>
+<p>See the basic clock types in drivers/clk/clk-*.c for examples.</p>
+<pre><code>Part 5 - static initialization of clock data
+</code></pre>
+<p>For platforms with many clocks (often numbering into the hundreds) it<br>may be desirable to statically initialize some clock data.  This<br>presents a problem since the definition of struct clk should be hidden<br>from everyone except for the clock core in drivers/clk/clk.c.</p>
+<p>To get around this problem struct clk’s definition is exposed in<br>include/linux/clk-private.h along with some macros for more easily<br>initializing instances of the basic clock types.  These clocks must<br>still be initialized with the common clock framework via a call to<br>__clk_init.</p>
+<p>clk-private.h must NEVER be included by code which implements struct<br>clk_ops callbacks, nor must it be included by any logic which pokes<br>around inside of struct clk at run-time.  To do so is a layering<br>violation.</p>
+<p>To better enforce this policy, always follow this simple rule: any<br>statically initialized clock data MUST be defined in a separate file<br>from the logic that implements its ops.  Basically separate the logic<br>from the data and all is well.</p>
+<pre><code>Part 6 - Disabling clock gating of unused clocks
+</code></pre>
+<p>Sometimes during development it can be useful to be able to bypass the<br>default disabling of unused clocks. For example, if drivers aren’t enabling<br>clocks properly but rely on them being on from the bootloader, bypassing<br>the disabling means that the driver will remain functional while the issues<br>are sorted out.</p>
+<p>To bypass this disabling, include “clk_ignore_unused” in the bootargs to the<br>kernel.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_clk/" title="Kernel-3.10.0-957.el7_clk" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_clk/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_cleancache/" title="Kernel-3.10.0-957.el7_cleancache"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_clock-bindings/" title="Kernel-3.10.0-957.el7_clock-bindings"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

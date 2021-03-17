@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_userfaultf | oosTech.com</title>
+  <meta name="description" content="&#x3D; Userfaultfd &#x3D; &#x3D;&#x3D; Objective &#x3D;&#x3D; Userfaults allow the implementation of on-demand paging from userlandand more generally they allow userland to take control of variousmemory page faults, something othe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_userfaultf">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D; Userfaultfd &#x3D; &#x3D;&#x3D; Objective &#x3D;&#x3D; Userfaults allow the implementation of on-demand paging from userlandand more generally they allow userland to take control of variousmemory page faults, something othe">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_userfaultfd" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_userfaultf
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>= Userfaultfd =</p>
+<p>== Objective ==</p>
+<p>Userfaults allow the implementation of on-demand paging from userland<br>and more generally they allow userland to take control of various<br>memory page faults, something otherwise only the kernel code could do.</p>
+<p>For example userfaults allows a proper and more optimal implementation<br>of the PROT_NONE+SIGSEGV trick.</p>
+<p>== Design ==</p>
+<p>Userfaults are delivered and resolved through the userfaultfd syscall.</p>
+<p>The userfaultfd (aside from registering and unregistering virtual<br>memory ranges) provides two primary functionalities:</p>
+<ol>
+<li><p>read/POLLIN protocol to notify a userland thread of the faults<br>happening</p>
+</li>
+<li><p>various UFFDIO_* ioctls that can manage the virtual memory regions<br>registered in the userfaultfd that allows userland to efficiently<br>resolve the userfaults it receives via 1) or to manage the virtual<br>memory in the background</p>
+</li>
+</ol>
+<p>The real advantage of userfaults if compared to regular virtual memory<br>management of mremap/mprotect is that the userfaults in all their<br>operations never involve heavyweight structures like vmas (in fact the<br>userfaultfd runtime load never takes the mmap_sem for writing).</p>
+<p>Vmas are not suitable for page- (or hugepage) granular fault tracking<br>when dealing with virtual address spaces that could span<br>Terabytes. Too many vmas would be needed for that.</p>
+<p>The userfaultfd once opened by invoking the syscall, can also be<br>passed using unix domain sockets to a manager process, so the same<br>manager process could handle the userfaults of a multitude of<br>different processes without them being aware about what is going on<br>(well of course unless they later try to use the userfaultfd<br>themselves on the same region the manager is already tracking, which<br>is a corner case that would currently return -EBUSY).</p>
+<p>== API ==</p>
+<p>When first opened the userfaultfd must be enabled invoking the<br>UFFDIO_API ioctl specifying a uffdio_api.api value set to UFFD_API (or<br>a later API version) which will specify the read/POLLIN protocol<br>userland intends to speak on the UFFD and the uffdio_api.features<br>userland requires. The UFFDIO_API ioctl if successful (i.e. if the<br>requested uffdio_api.api is spoken also by the running kernel and the<br>requested features are going to be enabled) will return into<br>uffdio_api.features and uffdio_api.ioctls two 64bit bitmasks of<br>respectively all the available features of the read(2) protocol and<br>the generic ioctl available.</p>
+<p>The uffdio_api.features bitmask returned by the UFFDIO_API ioctl<br>defines what memory types are supported by the userfaultfd and what<br>events, except page fault notifications, may be generated.</p>
+<p>If the kernel supports registering userfaultfd ranges on hugetlbfs<br>virtual memory areas, UFFD_FEATURE_MISSING_HUGETLBFS will be set in<br>uffdio_api.features. Similarly, UFFD_FEATURE_MISSING_SHMEM will be<br>set if the kernel supports registering userfaultfd ranges on shared<br>memory (covering all shmem APIs, i.e. tmpfs, IPCSHM, /dev/zero<br>MAP_SHARED, memfd_create, etc).</p>
+<p>The userland application that wants to use userfaultfd with hugetlbfs<br>or shared memory need to set the corresponding flag in<br>uffdio_api.features to enable those features.</p>
+<p>If the userland desires to receive notifications for events other than<br>page faults, it has to verify that uffdio_api.features has appropriate<br>UFFD_FEATURE_EVENT_* bits set. These events are described in more<br>detail below in “Non-cooperative userfaultfd” section.</p>
+<p>Once the userfaultfd has been enabled the UFFDIO_REGISTER ioctl should<br>be invoked (if present in the returned uffdio_api.ioctls bitmask) to<br>register a memory range in the userfaultfd by setting the<br>uffdio_register structure accordingly. The uffdio_register.mode<br>bitmask will specify to the kernel which kind of faults to track for<br>the range (UFFDIO_REGISTER_MODE_MISSING would track missing<br>pages). The UFFDIO_REGISTER ioctl will return the<br>uffdio_register.ioctls bitmask of ioctls that are suitable to resolve<br>userfaults on the range registered. Not all ioctls will necessarily be<br>supported for all memory types depending on the underlying virtual<br>memory backend (anonymous memory vs tmpfs vs real filebacked<br>mappings).</p>
+<p>Userland can use the uffdio_register.ioctls to manage the virtual<br>address space in the background (to add or potentially also remove<br>memory from the userfaultfd registered range). This means a userfault<br>could be triggering just before userland maps in the background the<br>user-faulted page.</p>
+<p>The primary ioctl to resolve userfaults is UFFDIO_COPY. That<br>atomically copies a page into the userfault registered range and wakes<br>up the blocked userfaults (unless uffdio_copy.mode &amp;<br>UFFDIO_COPY_MODE_DONTWAKE is set). Other ioctl works similarly to<br>UFFDIO_COPY. They’re atomic as in guaranteeing that nothing can see an<br>half copied page since it’ll keep userfaulting until the copy has<br>finished.</p>
+<p>== QEMU/KVM ==</p>
+<p>QEMU/KVM is using the userfaultfd syscall to implement postcopy live<br>migration. Postcopy live migration is one form of memory<br>externalization consisting of a virtual machine running with part or<br>all of its memory residing on a different node in the cloud. The<br>userfaultfd abstraction is generic enough that not a single line of<br>KVM kernel code had to be modified in order to add postcopy live<br>migration to QEMU.</p>
+<p>Guest async page faults, FOLL_NOWAIT and all other GUP features work<br>just fine in combination with userfaults. Userfaults trigger async<br>page faults in the guest scheduler so those guest processes that<br>aren’t waiting for userfaults (i.e. network bound) can keep running in<br>the guest vcpus.</p>
+<p>It is generally beneficial to run one pass of precopy live migration<br>just before starting postcopy live migration, in order to avoid<br>generating userfaults for readonly guest regions.</p>
+<p>The implementation of postcopy live migration currently uses one<br>single bidirectional socket but in the future two different sockets<br>will be used (to reduce the latency of the userfaults to the minimum<br>possible without having to decrease /proc/sys/net/ipv4/tcp_wmem).</p>
+<p>The QEMU in the source node writes all pages that it knows are missing<br>in the destination node, into the socket, and the migration thread of<br>the QEMU running in the destination node runs UFFDIO_COPY|ZEROPAGE<br>ioctls on the userfaultfd in order to map the received pages into the<br>guest (UFFDIO_ZEROCOPY is used if the source page was a zero page).</p>
+<p>A different postcopy thread in the destination node listens with<br>poll() to the userfaultfd in parallel. When a POLLIN event is<br>generated after a userfault triggers, the postcopy thread read() from<br>the userfaultfd and receives the fault address (or -EAGAIN in case the<br>userfault was already resolved and waken by a UFFDIO_COPY|ZEROPAGE run<br>by the parallel QEMU migration thread).</p>
+<p>After the QEMU postcopy thread (running in the destination node) gets<br>the userfault address it writes the information about the missing page<br>into the socket. The QEMU source node receives the information and<br>roughly “seeks” to that page address and continues sending all<br>remaining missing pages from that new page offset. Soon after that<br>(just the time to flush the tcp_wmem queue through the network) the<br>migration thread in the QEMU running in the destination node will<br>receive the page that triggered the userfault and it’ll map it as<br>usual with the UFFDIO_COPY|ZEROPAGE (without actually knowing if it<br>was spontaneously sent by the source or if it was an urgent page<br>requested through a userfault).</p>
+<p>By the time the userfaults start, the QEMU in the destination node<br>doesn’t need to keep any per-page state bitmap relative to the live<br>migration around and a single per-page bitmap has to be maintained in<br>the QEMU running in the source node to know which pages are still<br>missing in the destination node. The bitmap in the source node is<br>checked to find which missing pages to send in round robin and we seek<br>over it when receiving incoming userfaults. After sending each page of<br>course the bitmap is updated accordingly. It’s also useful to avoid<br>sending the same page twice (in case the userfault is read by the<br>postcopy thread just before UFFDIO_COPY|ZEROPAGE runs in the migration<br>thread).</p>
+<p>== Non-cooperative userfaultfd ==</p>
+<p>When the userfaultfd is monitored by an external manager, the manager<br>must be able to track changes in the process virtual memory<br>layout. Userfaultfd can notify the manager about such changes using<br>the same read(2) protocol as for the page fault notifications. The<br>manager has to explicitly enable these events by setting appropriate<br>bits in uffdio_api.features passed to UFFDIO_API ioctl:</p>
+<p>UFFD_FEATURE_EVENT_FORK - enable userfaultfd hooks for fork(). When<br>this feature is enabled, the userfaultfd context of the parent process<br>is duplicated into the newly created process. The manager receives<br>UFFD_EVENT_FORK with file descriptor of the new userfaultfd context in<br>the uffd_msg.fork.</p>
+<p>UFFD_FEATURE_EVENT_REMAP - enable notifications about mremap()<br>calls. When the non-cooperative process moves a virtual memory area to<br>a different location, the manager will receive UFFD_EVENT_REMAP. The<br>uffd_msg.remap will contain the old and new addresses of the area and<br>its original length.</p>
+<p>UFFD_FEATURE_EVENT_REMOVE - enable notifications about<br>madvise(MADV_REMOVE) and madvise(MADV_DONTNEED) calls. The event<br>UFFD_EVENT_REMOVE will be generated upon these calls to madvise. The<br>uffd_msg.remove will contain start and end addresses of the removed<br>area.</p>
+<p>UFFD_FEATURE_EVENT_UNMAP - enable notifications about memory<br>unmapping. The manager will get UFFD_EVENT_UNMAP with uffd_msg.remove<br>containing start and end addresses of the unmapped area.</p>
+<p>Although the UFFD_FEATURE_EVENT_REMOVE and UFFD_FEATURE_EVENT_UNMAP<br>are pretty similar, they quite differ in the action expected from the<br>userfaultfd manager. In the former case, the virtual memory is<br>removed, but the area is not, the area remains monitored by the<br>userfaultfd, and if a page fault occurs in that area it will be<br>delivered to the manager. The proper resolution for such page fault is<br>to zeromap the faulting address. However, in the latter case, when an<br>area is unmapped, either explicitly (with munmap() system call), or<br>implicitly (e.g. during mremap()), the area is removed and in turn the<br>userfaultfd context for such area disappears too and the manager will<br>not get further userland page faults from the removed area. Still, the<br>notification is required in order to prevent manager from using<br>UFFDIO_COPY on the unmapped area.</p>
+<p>Unlike userland page faults which have to be synchronous and require<br>explicit or implicit wakeup, all the events are delivered<br>asynchronously and the non-cooperative process resumes execution as<br>soon as manager executes read(). The userfaultfd manager should<br>carefully synchronize calls to UFFDIO_COPY with the events<br>processing. To aid the synchronization, the UFFDIO_COPY ioctl will<br>return -ENOSPC when the monitored process exits at the time of<br>UFFDIO_COPY, and -ENOENT, when the non-cooperative process has changed<br>its virtual memory layout simultaneously with outstanding UFFDIO_COPY<br>operation.</p>
+<p>The current asynchronous model of the event delivery is optimal for<br>single threaded non-cooperative userfaultfd manager implementations. A<br>synchronous event delivery model can be added later as a new<br>userfaultfd feature to facilitate multithreading enhancements of the<br>non cooperative manager, for example to allow UFFDIO_COPY ioctls to<br>run in parallel to the event reception. Single threaded<br>implementations should continue to use the current async event<br>delivery model instead.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/" title="Kernel-3.10.0-957.el7_userfaultf" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_userfaultfd/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_user_verbs/" title="Kernel-3.10.0-957.el7_user_verbs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_userland-swsusp/" title="Kernel-3.10.0-957.el7_userland-swsusp"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

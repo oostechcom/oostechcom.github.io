@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_porting | oosTech.com</title>
+  <meta name="description" content="Porting Drivers to the New Driver Model Patrick Mochel 7 January 2003 Overview Please refer to Documentation&#x2F;driver-model&#x2F;*.txt for definitions ofvarious driver types and concepts.  Most of the work o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_porting">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_porting/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Porting Drivers to the New Driver Model Patrick Mochel 7 January 2003 Overview Please refer to Documentation&#x2F;driver-model&#x2F;*.txt for definitions ofvarious driver types and concepts.  Most of the work o">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_porting/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#tree-d-sys-bus-pci"><span class="toc-number">1.</span> <span class="toc-text">tree -d &#x2F;sys&#x2F;bus&#x2F;pci&#x2F;</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_porting" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_porting
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_porting/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_porting/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_porting/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Porting Drivers to the New Driver Model</p>
+<p>Patrick Mochel</p>
+<p>7 January 2003</p>
+<p>Overview</p>
+<p>Please refer to Documentation/driver-model/*.txt for definitions of<br>various driver types and concepts. </p>
+<p>Most of the work of porting devices drivers to the new model happens<br>at the bus driver layer. This was intentional, to minimize the<br>negative effect on kernel drivers, and to allow a gradual transition<br>of bus drivers.</p>
+<p>In a nutshell, the driver model consists of a set of objects that can<br>be embedded in larger, bus-specific objects. Fields in these generic<br>objects can replace fields in the bus-specific objects. </p>
+<p>The generic objects must be registered with the driver model core. By<br>doing so, they will exported via the sysfs filesystem. sysfs can be<br>mounted by doing </p>
+<pre><code># mount -t sysfs sysfs /sys
+</code></pre>
+<p>The Process</p>
+<p>Step 0: Read include/linux/device.h for object and function definitions. </p>
+<p>Step 1: Registering the bus driver. </p>
+<ul>
+<li>Define a struct bus_type for the bus driver.</li>
+</ul>
+<p>struct bus_type pci_bus_type = {<br>        .name           = “pci”,<br>};</p>
+<ul>
+<li>Register the bus type.<br>This should be done in the initialization function for the bus type,<br>which is usually the module_init(), or equivalent, function. </li>
+</ul>
+<p>static int __init pci_driver_init(void)<br>{<br>        return bus_register(&amp;pci_bus_type);<br>}</p>
+<p>subsys_initcall(pci_driver_init);</p>
+<p>  The bus type may be unregistered (if the bus driver may be compiled<br>  as a module) by doing:</p>
+<pre><code> bus_unregister(&amp;pci_bus_type);
+</code></pre>
+<ul>
+<li><p>Export the bus type for others to use. </p>
+<p>Other code may wish to reference the bus type, so declare it in a<br>shared header file and export the symbol.</p>
+</li>
+</ul>
+<p>From include/linux/pci.h:</p>
+<p>extern struct bus_type pci_bus_type;</p>
+<p>From file the above code appears in:</p>
+<p>EXPORT_SYMBOL(pci_bus_type);</p>
+<ul>
+<li>This will cause the bus to show up in /sys/bus/pci/ with two<br>subdirectories: ‘devices’ and ‘drivers’.</li>
+</ul>
+<h1 id="tree-d-sys-bus-pci"><a href="#tree-d-sys-bus-pci" class="headerlink" title="tree -d /sys/bus/pci/"></a>tree -d /sys/bus/pci/</h1><p>/sys/bus/pci/<br>|– devices<br>`– drivers</p>
+<p>Step 2: Registering Devices. </p>
+<p>struct device represents a single device. It mainly contains metadata<br>describing the relationship the device has to other entities. </p>
+<ul>
+<li>Embed a struct device in the bus-specific device type. </li>
+</ul>
+<p>struct pci_dev {<br>       …<br>       struct  device  dev;            /* Generic device interface */<br>       …<br>};</p>
+<p>  It is recommended that the generic device not be the first item in<br>  the struct to discourage programmers from doing mindless casts<br>  between the object types. Instead macros, or inline functions,<br>  should be created to convert from the generic object type.</p>
+<p>#define to_pci_dev(n) container_of(n, struct pci_dev, dev)</p>
+<p>or </p>
+<p>static inline struct pci_dev * to_pci_dev(struct kobject * kobj)<br>{<br>    return container_of(n, struct pci_dev, dev);<br>}</p>
+<p>  This allows the compiler to verify type-safety of the operations<br>  that are performed (which is Good).</p>
+<ul>
+<li><p>Initialize the device on registration.</p>
+<p>When devices are discovered or registered with the bus type, the<br>bus driver should initialize the generic device. The most important<br>things to initialize are the bus_id, parent, and bus fields.</p>
+<p>The bus_id is an ASCII string that contains the device’s address on<br>the bus. The format of this string is bus-specific. This is<br>necessary for representing devices in sysfs. </p>
+<p>parent is the physical parent of the device. It is important that<br>the bus driver sets this field correctly. </p>
+<p>The driver model maintains an ordered list of devices that it uses<br>for power management. This list must be in order to guarantee that<br>devices are shutdown before their physical parents, and vice versa.<br>The order of this list is determined by the parent of registered<br>devices.</p>
+<p>Also, the location of the device’s sysfs directory depends on a<br>device’s parent. sysfs exports a directory structure that mirrors<br>the device hierarchy. Accurately setting the parent guarantees that<br>sysfs will accurately represent the hierarchy.</p>
+<p>The device’s bus field is a pointer to the bus type the device<br>belongs to. This should be set to the bus_type that was declared<br>and initialized before. </p>
+<p>Optionally, the bus driver may set the device’s name and release<br>fields.</p>
+<p>The name field is an ASCII string describing the device, like</p>
+<p>   “ATI Technologies Inc Radeon QD”</p>
+<p>The release field is a callback that the driver model core calls<br>when the device has been removed, and all references to it have<br>been released. More on this in a moment.</p>
+</li>
+</ul>
+<ul>
+<li><p>Register the device. </p>
+<p>Once the generic device has been initialized, it can be registered<br>with the driver model core by doing:</p>
+<pre><code> device_register(&amp;dev-&gt;dev);
+</code></pre>
+<p>It can later be unregistered by doing: </p>
+<pre><code> device_unregister(&amp;dev-&gt;dev);
+</code></pre>
+<p>This should happen on buses that support hotpluggable devices.<br>If a bus driver unregisters a device, it should not immediately free<br>it. It should instead wait for the driver model core to call the<br>device’s release method, then free the bus-specific object.<br>(There may be other code that is currently referencing the device<br>structure, and it would be rude to free the device while that is<br>happening).</p>
+</li>
+</ul>
+<p>  When the device is registered, a directory in sysfs is created.<br>  The PCI tree in sysfs looks like: </p>
+<p>/sys/devices/pci0/<br>|– 00:00.0<br>|– 00:01.0<br>|   <code>-- 01:00.0 |-- 00:02.0 |   </code>– 02:1f.0<br>|       <code>-- 03:00.0 |-- 00:1e.0 |   </code>– 04:04.0<br>|– 00:1f.0<br>|– 00:1f.1<br>|   |– ide0<br>|   |   |– 0.0<br>|   |   <code>-- 0.1 |   </code>– ide1<br>|       <code>-- 1.0 |-- 00:1f.2 |-- 00:1f.3 </code>– 00:1f.5</p>
+<p>  Also, symlinks are created in the bus’s ‘devices’ directory<br>  that point to the device’s directory in the physical hierarchy. </p>
+<p>/sys/bus/pci/devices/<br>|– 00:00.0 -&gt; ../../../devices/pci0/00:00.0<br>|– 00:01.0 -&gt; ../../../devices/pci0/00:01.0<br>|– 00:02.0 -&gt; ../../../devices/pci0/00:02.0<br>|– 00:1e.0 -&gt; ../../../devices/pci0/00:1e.0<br>|– 00:1f.0 -&gt; ../../../devices/pci0/00:1f.0<br>|– 00:1f.1 -&gt; ../../../devices/pci0/00:1f.1<br>|– 00:1f.2 -&gt; ../../../devices/pci0/00:1f.2<br>|– 00:1f.3 -&gt; ../../../devices/pci0/00:1f.3<br>|– 00:1f.5 -&gt; ../../../devices/pci0/00:1f.5<br>|– 01:00.0 -&gt; ../../../devices/pci0/00:01.0/01:00.0<br>|– 02:1f.0 -&gt; ../../../devices/pci0/00:02.0/02:1f.0<br>|– 03:00.0 -&gt; ../../../devices/pci0/00:02.0/02:1f.0/03:00.0<br>`– 04:04.0 -&gt; ../../../devices/pci0/00:1e.0/04:04.0</p>
+<p>Step 3: Registering Drivers.</p>
+<p>struct device_driver is a simple driver structure that contains a set<br>of operations that the driver model core may call. </p>
+<ul>
+<li><p>Embed a struct device_driver in the bus-specific driver. </p>
+<p>Just like with devices, do something like:</p>
+</li>
+</ul>
+<p>struct pci_driver {<br>       …<br>       struct device_driver    driver;<br>};</p>
+<ul>
+<li><p>Initialize the generic driver structure. </p>
+<p>When the driver registers with the bus (e.g. doing pci_register_driver()),<br>initialize the necessary fields of the driver: the name and bus<br>fields. </p>
+</li>
+</ul>
+<ul>
+<li><p>Register the driver.</p>
+<p>After the generic driver has been initialized, call</p>
+<p>  driver_register(&amp;drv-&gt;driver);</p>
+<p>to register the driver with the core.</p>
+<p>When the driver is unregistered from the bus, unregister it from the<br>core by doing:</p>
+<pre><code>  driver_unregister(&amp;drv-&gt;driver);
+</code></pre>
+<p>Note that this will block until all references to the driver have<br>gone away. Normally, there will not be any.</p>
+</li>
+</ul>
+<ul>
+<li><p>Sysfs representation.</p>
+<p>Drivers are exported via sysfs in their bus’s ‘driver’s directory.<br>For example:</p>
+</li>
+</ul>
+<p>/sys/bus/pci/drivers/<br>|– 3c59x<br>|– Ensoniq AudioPCI<br>|– agpgart-amdk7<br>|– e100<br>`– serial</p>
+<p>Step 4: Define Generic Methods for Drivers.</p>
+<p>struct device_driver defines a set of operations that the driver model<br>core calls. Most of these operations are probably similar to<br>operations the bus already defines for drivers, but taking different<br>parameters. </p>
+<p>It would be difficult and tedious to force every driver on a bus to<br>simultaneously convert their drivers to generic format. Instead, the<br>bus driver should define single instances of the generic methods that<br>forward call to the bus-specific drivers. For instance: </p>
+<p>static int pci_device_remove(struct device * dev)<br>{<br>        struct pci_dev * pci_dev = to_pci_dev(dev);<br>        struct pci_driver * drv = pci_dev-&gt;driver;</p>
+<pre><code>    if (drv) &#123;
+            if (drv-&gt;remove)
+                    drv-&gt;remove(pci_dev);
+            pci_dev-&gt;driver = NULL;
+    &#125;
+    return 0;
+</code></pre>
+<p>}</p>
+<p>The generic driver should be initialized with these methods before it<br>is registered. </p>
+<pre><code>    /* initialize common driver fields */
+    drv-&gt;driver.name = drv-&gt;name;
+    drv-&gt;driver.bus = &amp;pci_bus_type;
+    drv-&gt;driver.probe = pci_device_probe;
+    drv-&gt;driver.resume = pci_device_resume;
+    drv-&gt;driver.suspend = pci_device_suspend;
+    drv-&gt;driver.remove = pci_device_remove;
+
+    /* register with core */
+    driver_register(&amp;drv-&gt;driver);
+</code></pre>
+<p>Ideally, the bus should only initialize the fields if they are not<br>already set. This allows the drivers to implement their own generic<br>methods. </p>
+<p>Step 5: Support generic driver binding. </p>
+<p>The model assumes that a device or driver can be dynamically<br>registered with the bus at any time. When registration happens,<br>devices must be bound to a driver, or drivers must be bound to all<br>devices that it supports. </p>
+<p>A driver typically contains a list of device IDs that it supports. The<br>bus driver compares these IDs to the IDs of devices registered with it.<br>The format of the device IDs, and the semantics for comparing them are<br>bus-specific, so the generic model does attempt to generalize them. </p>
+<p>Instead, a bus may supply a method in struct bus_type that does the<br>comparison: </p>
+<p>  int (*match)(struct device * dev, struct device_driver * drv);</p>
+<p>match should return ‘1’ if the driver supports the device, and ‘0’<br>otherwise. </p>
+<p>When a device is registered, the bus’s list of drivers is iterated<br>over. bus-&gt;match() is called for each one until a match is found. </p>
+<p>When a driver is registered, the bus’s list of devices is iterated<br>over. bus-&gt;match() is called for each device that is not already<br>claimed by a driver. </p>
+<p>When a device is successfully bound to a driver, device-&gt;driver is<br>set, the device is added to a per-driver list of devices, and a<br>symlink is created in the driver’s sysfs directory that points to the<br>device’s physical directory:</p>
+<p>/sys/bus/pci/drivers/<br>|– 3c59x<br>|   <code>-- 00:0b.0 -&gt; ../../../../devices/pci0/00:0b.0 |-- Ensoniq AudioPCI |-- agpgart-amdk7 |   </code>– 00:00.0 -&gt; ../../../../devices/pci0/00:00.0<br>|– e100<br>|   <code>-- 00:0c.0 -&gt; ../../../../devices/pci0/00:0c.0 </code>– serial</p>
+<p>This driver binding should replace the existing driver binding<br>mechanism the bus currently uses. </p>
+<p>Step 6: Supply a hotplug callback.</p>
+<p>Whenever a device is registered with the driver model core, the<br>userspace program /sbin/hotplug is called to notify userspace.<br>Users can define actions to perform when a device is inserted or<br>removed. </p>
+<p>The driver model core passes several arguments to userspace via<br>environment variables, including</p>
+<ul>
+<li>ACTION: set to ‘add’ or ‘remove’</li>
+<li>DEVPATH: set to the device’s physical path in sysfs. </li>
+</ul>
+<p>A bus driver may also supply additional parameters for userspace to<br>consume. To do this, a bus must implement the ‘hotplug’ method in<br>struct bus_type:</p>
+<pre><code> int (*hotplug) (struct device *dev, char **envp, 
+                 int num_envp, char *buffer, int buffer_size);
+</code></pre>
+<p>This is called immediately before /sbin/hotplug is executed. </p>
+<p>Step 7: Cleaning up the bus driver.</p>
+<p>The generic bus, device, and driver structures provide several fields<br>that can replace those defined privately to the bus driver. </p>
+<ul>
+<li>Device list.</li>
+</ul>
+<p>struct bus_type contains a list of all devices registered with the bus<br>type. This includes all devices on all instances of that bus type.<br>An internal list that the bus uses may be removed, in favor of using<br>this one.</p>
+<p>The core provides an iterator to access these devices. </p>
+<p>int bus_for_each_dev(struct bus_type * bus, struct device * start,<br>                     void * data, int (*fn)(struct device *, void *));</p>
+<ul>
+<li>Driver list.</li>
+</ul>
+<p>struct bus_type also contains a list of all drivers registered with<br>it. An internal list of drivers that the bus driver maintains may<br>be removed in favor of using the generic one. </p>
+<p>The drivers may be iterated over, like devices: </p>
+<p>int bus_for_each_drv(struct bus_type * bus, struct device_driver * start,<br>                     void * data, int (*fn)(struct device_driver *, void *));</p>
+<p>Please see drivers/base/bus.c for more information.</p>
+<ul>
+<li>rwsem </li>
+</ul>
+<p>struct bus_type contains an rwsem that protects all core accesses to<br>the device and driver lists. This can be used by the bus driver<br>internally, and should be used when accessing the device or driver<br>lists the bus maintains. </p>
+<ul>
+<li>Device and driver fields. </li>
+</ul>
+<p>Some of the fields in struct device and struct device_driver duplicate<br>fields in the bus-specific representations of these objects. Feel free<br>to remove the bus-specific ones and favor the generic ones. Note<br>though, that this will likely mean fixing up all the drivers that<br>reference the bus-specific fields (though those should all be 1-line<br>changes).</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_porting/" title="Kernel-3.10.0-957.el7_porting" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_porting/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_pops_clicks/" title="Kernel-3.10.0-957.el7_pops_clicks"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_power_domain/" title="Kernel-3.10.0-957.el7_power_domain"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

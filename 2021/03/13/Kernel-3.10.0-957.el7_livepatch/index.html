@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_livepatch | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Livepatch&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; This document outlines basic information about kernel livepatching. Table of Contents:  Motivation Kprobes, Ftrace, Livepatching Consistency model Livepatch module4.1. New">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_livepatch">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_livepatch/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Livepatch&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; This document outlines basic information about kernel livepatching. Table of Contents:  Motivation Kprobes, Ftrace, Livepatching Consistency model Livepatch module4.1. New">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_livepatch/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Motivation"><span class="toc-number">1.</span> <span class="toc-text">Motivation</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kprobes-Ftrace-Livepatching"><span class="toc-number">2.</span> <span class="toc-text">Kprobes, Ftrace, Livepatching</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Consistency-model"><span class="toc-number">3.</span> <span class="toc-text">Consistency model</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-Adding-consistency-model-support-to-new-architectures"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 Adding consistency model support to new architectures</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Livepatch-module"><span class="toc-number">4.</span> <span class="toc-text">Livepatch module</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-New-functions"><span class="toc-number">4.1.</span> <span class="toc-text">4.1. New functions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-Metadata"><span class="toc-number">4.2.</span> <span class="toc-text">4.2. Metadata</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-Livepatch-module-handling"><span class="toc-number">4.3.</span> <span class="toc-text">4.3. Livepatch module handling</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Livepatch-life-cycle"><span class="toc-number">5.</span> <span class="toc-text">Livepatch life-cycle</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-Registration"><span class="toc-number">5.1.</span> <span class="toc-text">5.1. Registration</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-Enabling"><span class="toc-number">5.2.</span> <span class="toc-text">5.2. Enabling</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-Disabling"><span class="toc-number">5.3.</span> <span class="toc-text">5.3. Disabling</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-Unregistration"><span class="toc-number">5.4.</span> <span class="toc-text">5.4. Unregistration</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Sysfs"><span class="toc-number">6.</span> <span class="toc-text">Sysfs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Limitations"><span class="toc-number">7.</span> <span class="toc-text">Limitations</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_livepatch" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_livepatch
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_livepatch/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_livepatch/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_livepatch/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>=========<br>Livepatch<br>=========</p>
+<p>This document outlines basic information about kernel livepatching.</p>
+<p>Table of Contents:</p>
+<ol>
+<li>Motivation</li>
+<li>Kprobes, Ftrace, Livepatching</li>
+<li>Consistency model</li>
+<li>Livepatch module<br>4.1. New functions<br>4.2. Metadata<br>4.3. Livepatch module handling</li>
+<li>Livepatch life-cycle<br>5.1. Registration<br>5.2. Enabling<br>5.3. Disabling<br>5.4. Unregistration</li>
+<li>Sysfs</li>
+<li>Limitations</li>
+</ol>
+<ol>
+<li><h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1></li>
+</ol>
+<p>There are many situations where users are reluctant to reboot a system. It may<br>be because their system is performing complex scientific computations or under<br>heavy load during peak usage. In addition to keeping systems up and running,<br>users want to also have a stable and secure system. Livepatching gives users<br>both by allowing for function calls to be redirected; thus, fixing critical<br>functions without a system reboot.</p>
+<ol start="2">
+<li><h1 id="Kprobes-Ftrace-Livepatching"><a href="#Kprobes-Ftrace-Livepatching" class="headerlink" title="Kprobes, Ftrace, Livepatching"></a>Kprobes, Ftrace, Livepatching</h1></li>
+</ol>
+<p>There are multiple mechanisms in the Linux kernel that are directly related<br>to redirection of code execution; namely: kernel probes, function tracing,<br>and livepatching:</p>
+<ul>
+<li><p>The kernel probes are the most generic. The code can be redirected by<br>putting a breakpoint instruction instead of any instruction.</p>
+</li>
+<li><p>The function tracer calls the code from a predefined location that is<br>close to the function entry point. This location is generated by the<br>compiler using the ‘-pg’ gcc option.</p>
+</li>
+<li><p>Livepatching typically needs to redirect the code at the very beginning<br>of the function entry before the function parameters or the stack<br>are in any way modified.</p>
+</li>
+</ul>
+<p>All three approaches need to modify the existing code at runtime. Therefore<br>they need to be aware of each other and not step over each other’s toes.<br>Most of these problems are solved by using the dynamic ftrace framework as<br>a base. A Kprobe is registered as a ftrace handler when the function entry<br>is probed, see CONFIG_KPROBES_ON_FTRACE. Also an alternative function from<br>a live patch is called with the help of a custom ftrace handler. But there are<br>some limitations, see below.</p>
+<ol start="3">
+<li><h1 id="Consistency-model"><a href="#Consistency-model" class="headerlink" title="Consistency model"></a>Consistency model</h1></li>
+</ol>
+<p>Functions are there for a reason. They take some input parameters, get or<br>release locks, read, process, and even write some data in a defined way,<br>have return values. In other words, each function has a defined semantic.</p>
+<p>Many fixes do not change the semantic of the modified functions. For<br>example, they add a NULL pointer or a boundary check, fix a race by adding<br>a missing memory barrier, or add some locking around a critical section.<br>Most of these changes are self contained and the function presents itself<br>the same way to the rest of the system. In this case, the functions might<br>be updated independently one by one.</p>
+<p>But there are more complex fixes. For example, a patch might change<br>ordering of locking in multiple functions at the same time. Or a patch<br>might exchange meaning of some temporary structures and update<br>all the relevant functions. In this case, the affected unit<br>(thread, whole kernel) need to start using all new versions of<br>the functions at the same time. Also the switch must happen only<br>when it is safe to do so, e.g. when the affected locks are released<br>or no data are stored in the modified structures at the moment.</p>
+<p>The theory about how to apply functions a safe way is rather complex.<br>The aim is to define a so-called consistency model. It attempts to define<br>conditions when the new implementation could be used so that the system<br>stays consistent.</p>
+<p>Livepatch has a consistency model which is a hybrid of kGraft and<br>kpatch:  it uses kGraft’s per-task consistency and syscall barrier<br>switching combined with kpatch’s stack trace switching.  There are also<br>a number of fallback options which make it quite flexible.</p>
+<p>Patches are applied on a per-task basis, when the task is deemed safe to<br>switch over.  When a patch is enabled, livepatch enters into a<br>transition state where tasks are converging to the patched state.<br>Usually this transition state can complete in a few seconds.  The same<br>sequence occurs when a patch is disabled, except the tasks converge from<br>the patched state to the unpatched state.</p>
+<p>An interrupt handler inherits the patched state of the task it<br>interrupts.  The same is true for forked tasks: the child inherits the<br>patched state of the parent.</p>
+<p>Livepatch uses several complementary approaches to determine when it’s<br>safe to patch tasks:</p>
+<ol>
+<li><p>The first and most effective approach is stack checking of sleeping<br>tasks.  If no affected functions are on the stack of a given task,<br>the task is patched.  In most cases this will patch most or all of<br>the tasks on the first try.  Otherwise it’ll keep trying<br>periodically.  This option is only available if the architecture has<br>reliable stacks (HAVE_RELIABLE_STACKTRACE).</p>
+</li>
+<li><p>The second approach, if needed, is kernel exit switching.  A<br>task is switched when it returns to user space from a system call, a<br>user space IRQ, or a signal.  It’s useful in the following cases:</p>
+<p>a) Patching I/O-bound user tasks which are sleeping on an affected<br>   function.  In this case you have to send SIGSTOP and SIGCONT to<br>   force it to exit the kernel and be patched.<br>b) Patching CPU-bound user tasks.  If the task is highly CPU-bound<br>   then it will get patched the next time it gets interrupted by an<br>   IRQ.</p>
+</li>
+<li><p>For idle “swapper” tasks, since they don’t ever exit the kernel, they<br>instead have a klp_update_patch_state() call in the idle loop which<br>allows them to be patched before the CPU enters the idle state.</p>
+<p>(Note there’s not yet such an approach for kthreads.)</p>
+</li>
+</ol>
+<p>Architectures which don’t have HAVE_RELIABLE_STACKTRACE solely rely on<br>the second approach. It’s highly likely that some tasks may still be<br>running with an old version of the function, until that function<br>returns. In this case you would have to signal the tasks. This<br>especially applies to kthreads. They may not be woken up and would need<br>to be forced. See below for more information.</p>
+<p>Unless we can come up with another way to patch kthreads, architectures<br>without HAVE_RELIABLE_STACKTRACE are not considered fully supported by<br>the kernel livepatching.</p>
+<p>The /sys/kernel/livepatch/<patch>/transition file shows whether a patch<br>is in transition.  Only a single patch (the topmost patch on the stack)<br>can be in transition at a given time.  A patch can remain in transition<br>indefinitely, if any of the tasks are stuck in the initial patch state.</p>
+<p>A transition can be reversed and effectively canceled by writing the<br>opposite value to the /sys/kernel/livepatch/<patch>/enabled file while<br>the transition is in progress.  Then all the tasks will attempt to<br>converge back to the original patch state.</p>
+<p>There’s also a /proc/<pid>/patch_state file which can be used to<br>determine which tasks are blocking completion of a patching operation.<br>If a patch is in transition, this file shows 0 to indicate the task is<br>unpatched and 1 to indicate it’s patched.  Otherwise, if no patch is in<br>transition, it shows -1.  Any tasks which are blocking the transition<br>can be signaled with SIGSTOP and SIGCONT to force them to change their<br>patched state. This may be harmful to the system though.<br>/sys/kernel/livepatch/<patch>/signal attribute provides a better alternative.<br>Writing 1 to the attribute sends a fake signal to all remaining blocking<br>tasks. No proper signal is actually delivered (there is no data in signal<br>pending structures). Tasks are interrupted or woken up, and forced to change<br>their patched state.</p>
+<p>Administrator can also affect a transition through<br>/sys/kernel/livepatch/<patch>/force attribute. Writing 1 there clears<br>TIF_PATCH_PENDING flag of all tasks and thus forces the tasks to the patched<br>state. Important note! The force attribute is intended for cases when the<br>transition gets stuck for a long time because of a blocking task. Administrator<br>is expected to collect all necessary data (namely stack traces of such blocking<br>tasks) and request a clearance from a patch distributor to force the transition.<br>Unauthorized usage may cause harm to the system. It depends on the nature of the<br>patch, which functions are (un)patched, and which functions the blocking tasks<br>are sleeping in (/proc/<pid>/stack may help here). Removal (rmmod) of patch<br>modules is permanently disabled when the force feature is used. It cannot be<br>guaranteed there is no task sleeping in such module. It implies unbounded<br>reference count if a patch module is disabled and enabled in a loop.</p>
+<p>Moreover, the usage of force may also affect future applications of live<br>patches and cause even more harm to the system. Administrator should first<br>consider to simply cancel a transition (see above). If force is used, reboot<br>should be planned and no more live patches applied.</p>
+<h2 id="3-1-Adding-consistency-model-support-to-new-architectures"><a href="#3-1-Adding-consistency-model-support-to-new-architectures" class="headerlink" title="3.1 Adding consistency model support to new architectures"></a>3.1 Adding consistency model support to new architectures</h2><p>For adding consistency model support to new architectures, there are a<br>few options:</p>
+<ol>
+<li><p>Add CONFIG_HAVE_RELIABLE_STACKTRACE.  This means porting objtool, and<br>for non-DWARF unwinders, also making sure there’s a way for the stack<br>tracing code to detect interrupts on the stack.</p>
+</li>
+<li><p>Alternatively, ensure that every kthread has a call to<br>klp_update_patch_state() in a safe location.  Kthreads are typically<br>in an infinite loop which does some action repeatedly.  The safe<br>location to switch the kthread’s patch state would be at a designated<br>point in the loop where there are no locks taken and all data<br>structures are in a well-defined state.</p>
+<p>The location is clear when using workqueues or the kthread worker<br>API.  These kthreads process independent actions in a generic loop.</p>
+<p>It’s much more complicated with kthreads which have a custom loop.<br>There the safe location must be carefully selected on a case-by-case<br>basis.</p>
+<p>In that case, arches without HAVE_RELIABLE_STACKTRACE would still be<br>able to use the non-stack-checking parts of the consistency model:</p>
+<p>a) patching user tasks when they cross the kernel/user space<br>   boundary; and</p>
+<p>b) patching kthreads and idle tasks at their designated patch points.</p>
+<p>This option isn’t as good as option 1 because it requires signaling<br>user tasks and waking kthreads to patch them.  But it could still be<br>a good backup option for those architectures which don’t have<br>reliable stack traces yet.</p>
+</li>
+</ol>
+<ol start="4">
+<li><h1 id="Livepatch-module"><a href="#Livepatch-module" class="headerlink" title="Livepatch module"></a>Livepatch module</h1></li>
+</ol>
+<p>Livepatches are distributed using kernel modules, see<br>samples/livepatch/livepatch-sample.c.</p>
+<p>The module includes a new implementation of functions that we want<br>to replace. In addition, it defines some structures describing the<br>relation between the original and the new implementation. Then there<br>is code that makes the kernel start using the new code when the livepatch<br>module is loaded. Also there is code that cleans up before the<br>livepatch module is removed. All this is explained in more details in<br>the next sections.</p>
+<h2 id="4-1-New-functions"><a href="#4-1-New-functions" class="headerlink" title="4.1. New functions"></a>4.1. New functions</h2><p>New versions of functions are typically just copied from the original<br>sources. A good practice is to add a prefix to the names so that they<br>can be distinguished from the original ones, e.g. in a backtrace. Also<br>they can be declared as static because they are not called directly<br>and do not need the global visibility.</p>
+<p>The patch contains only functions that are really modified. But they<br>might want to access functions or data from the original source file<br>that may only be locally accessible. This can be solved by a special<br>relocation section in the generated livepatch module, see<br>Documentation/livepatch/module-elf-format.txt for more details.</p>
+<h2 id="4-2-Metadata"><a href="#4-2-Metadata" class="headerlink" title="4.2. Metadata"></a>4.2. Metadata</h2><p>The patch is described by several structures that split the information<br>into three levels:</p>
+<ul>
+<li><p>struct klp_func is defined for each patched function. It describes<br>the relation between the original and the new implementation of a<br>particular function.</p>
+<p>The structure includes the name, as a string, of the original function.<br>The function address is found via kallsyms at runtime.</p>
+<p>Then it includes the address of the new function. It is defined<br>directly by assigning the function pointer. Note that the new<br>function is typically defined in the same source file.</p>
+<p>As an optional parameter, the symbol position in the kallsyms database can<br>be used to disambiguate functions of the same name. This is not the<br>absolute position in the database, but rather the order it has been found<br>only for a particular object ( vmlinux or a kernel module ). Note that<br>kallsyms allows for searching symbols according to the object name.</p>
+</li>
+<li><p>struct klp_object defines an array of patched functions (struct<br>klp_func) in the same object. Where the object is either vmlinux<br>(NULL) or a module name.</p>
+<p>The structure helps to group and handle functions for each object<br>together. Note that patched modules might be loaded later than<br>the patch itself and the relevant functions might be patched<br>only when they are available.</p>
+</li>
+</ul>
+<ul>
+<li><p>struct klp_patch defines an array of patched objects (struct<br>klp_object).</p>
+<p>This structure handles all patched functions consistently and eventually,<br>synchronously. The whole patch is applied only when all patched<br>symbols are found. The only exception are symbols from objects<br>(kernel modules) that have not been loaded yet.</p>
+<p>For more details on how the patch is applied on a per-task basis,<br>see the “Consistency model” section.</p>
+</li>
+</ul>
+<h2 id="4-3-Livepatch-module-handling"><a href="#4-3-Livepatch-module-handling" class="headerlink" title="4.3. Livepatch module handling"></a>4.3. Livepatch module handling</h2><p>The usual behavior is that the new functions will get used when<br>the livepatch module is loaded. For this, the module init() function<br>has to register the patch (struct klp_patch) and enable it. See the<br>section “Livepatch life-cycle” below for more details about these<br>two operations.</p>
+<p>Module removal is only safe when there are no users of the underlying<br>functions. This is the reason why the force feature permanently disables<br>the removal. The forced tasks entered the functions but we cannot say<br>that they returned back.  Therefore it cannot be decided when the<br>livepatch module can be safely removed. When the system is successfully<br>transitioned to a new patch state (patched/unpatched) without being<br>forced it is guaranteed that no task sleeps or runs in the old code.</p>
+<ol start="5">
+<li><h1 id="Livepatch-life-cycle"><a href="#Livepatch-life-cycle" class="headerlink" title="Livepatch life-cycle"></a>Livepatch life-cycle</h1></li>
+</ol>
+<p>Livepatching defines four basic operations that define the life cycle of each<br>live patch: registration, enabling, disabling and unregistration.  There are<br>several reasons why it is done this way.</p>
+<p>First, the patch is applied only when all patched symbols for already<br>loaded objects are found. The error handling is much easier if this<br>check is done before particular functions get redirected.</p>
+<p>Second, it might take some time until the entire system is migrated with<br>the hybrid consistency model being used. The patch revert might block<br>the livepatch module removal for too long. Therefore it is useful to<br>revert the patch using a separate operation that might be called<br>explicitly. But it does not make sense to remove all information until<br>the livepatch module is really removed.</p>
+<h2 id="5-1-Registration"><a href="#5-1-Registration" class="headerlink" title="5.1. Registration"></a>5.1. Registration</h2><p>Each patch first has to be registered using klp_register_patch(). This makes<br>the patch known to the livepatch framework. Also it does some preliminary<br>computing and checks.</p>
+<p>In particular, the patch is added into the list of known patches. The<br>addresses of the patched functions are found according to their names.<br>The special relocations, mentioned in the section “New functions”, are<br>applied. The relevant entries are created under<br>/sys/kernel/livepatch/<name>. The patch is rejected when any operation<br>fails.</p>
+<h2 id="5-2-Enabling"><a href="#5-2-Enabling" class="headerlink" title="5.2. Enabling"></a>5.2. Enabling</h2><p>Registered patches might be enabled either by calling klp_enable_patch() or<br>by writing ‘1’ to /sys/kernel/livepatch/<name>/enabled. The system will<br>start using the new implementation of the patched functions at this stage.</p>
+<p>When a patch is enabled, livepatch enters into a transition state where<br>tasks are converging to the patched state.  This is indicated by a value<br>of ‘1’ in /sys/kernel/livepatch/<name>/transition.  Once all tasks have<br>been patched, the ‘transition’ value changes to ‘0’.  For more<br>information about this process, see the “Consistency model” section.</p>
+<p>If an original function is patched for the first time, a function<br>specific struct klp_ops is created and an universal ftrace handler is<br>registered.</p>
+<p>Functions might be patched multiple times. The ftrace handler is registered<br>only once for the given function. Further patches just add an entry to the<br>list (see field <code>func_stack</code>) of the struct klp_ops. The last added<br>entry is chosen by the ftrace handler and becomes the active function<br>replacement.</p>
+<p>Note that the patches might be enabled in a different order than they were<br>registered.</p>
+<h2 id="5-3-Disabling"><a href="#5-3-Disabling" class="headerlink" title="5.3. Disabling"></a>5.3. Disabling</h2><p>Enabled patches might get disabled either by calling klp_disable_patch() or<br>by writing ‘0’ to /sys/kernel/livepatch/<name>/enabled. At this stage<br>either the code from the previously enabled patch or even the original<br>code gets used.</p>
+<p>When a patch is disabled, livepatch enters into a transition state where<br>tasks are converging to the unpatched state.  This is indicated by a<br>value of ‘1’ in /sys/kernel/livepatch/<name>/transition.  Once all tasks<br>have been unpatched, the ‘transition’ value changes to ‘0’.  For more<br>information about this process, see the “Consistency model” section.</p>
+<p>Here all the functions (struct klp_func) associated with the to-be-disabled<br>patch are removed from the corresponding struct klp_ops. The ftrace handler<br>is unregistered and the struct klp_ops is freed when the func_stack list<br>becomes empty.</p>
+<p>Patches must be disabled in exactly the reverse order in which they were<br>enabled. It makes the problem and the implementation much easier.</p>
+<h2 id="5-4-Unregistration"><a href="#5-4-Unregistration" class="headerlink" title="5.4. Unregistration"></a>5.4. Unregistration</h2><p>Disabled patches might be unregistered by calling klp_unregister_patch().<br>This can be done only when the patch is disabled and the code is no longer<br>used. It must be called before the livepatch module gets unloaded.</p>
+<p>At this stage, all the relevant sys-fs entries are removed and the patch<br>is removed from the list of known patches.</p>
+<ol start="6">
+<li><h1 id="Sysfs"><a href="#Sysfs" class="headerlink" title="Sysfs"></a>Sysfs</h1></li>
+</ol>
+<p>Information about the registered patches can be found under<br>/sys/kernel/livepatch. The patches could be enabled and disabled<br>by writing there.</p>
+<p>/sys/kernel/livepatch/<patch>/signal and /sys/kernel/livepatch/<patch>/force<br>attributes allow administrator to affect a patching operation.</p>
+<p>See Documentation/ABI/testing/sysfs-kernel-livepatch for more details.</p>
+<ol start="7">
+<li><h1 id="Limitations"><a href="#Limitations" class="headerlink" title="Limitations"></a>Limitations</h1></li>
+</ol>
+<p>The current Livepatch implementation has several limitations:</p>
+<ul>
+<li><p>The patch must not change the semantic of the patched functions.</p>
+<p>The current implementation guarantees only that either the old<br>or the new function is called. The functions are patched one<br>by one. It means that the patch must <em>not</em> change the semantic<br>of the function.</p>
+</li>
+</ul>
+<ul>
+<li><p>Data structures can not be patched.</p>
+<p>There is no support to version data structures or anyhow migrate<br>one structure into another. Also the simple consistency model does<br>not allow to switch more functions atomically.</p>
+<p>Once there is more complex consistency mode, it will be possible to<br>use some workarounds. For example, it will be possible to use a hole<br>for a new member because the data structure is aligned. Or it will<br>be possible to use an existing member for something else.</p>
+<p>There are no plans to add more generic support for modified structures<br>at the moment.</p>
+</li>
+</ul>
+<ul>
+<li><p>Only functions that can be traced could be patched.</p>
+<p>Livepatch is based on the dynamic ftrace. In particular, functions<br>implementing ftrace or the livepatch ftrace handler could not be<br>patched. Otherwise, the code would end up in an infinite loop. A<br>potential mistake is prevented by marking the problematic functions<br>by “notrace”.</p>
+</li>
+</ul>
+<ul>
+<li><p>Livepatch works reliably only when the dynamic ftrace is located at<br>the very beginning of the function.</p>
+<p>The function need to be redirected before the stack or the function<br>parameters are modified in any way. For example, livepatch requires<br>using -fentry gcc compiler option on x86_64.</p>
+<p>One exception is the PPC port. It uses relative addressing and TOC.<br>Each function has to handle TOC and save LR before it could call<br>the ftrace handler. This operation has to be reverted on return.<br>Fortunately, the generic ftrace code has the same problem and all<br>this is is handled on the ftrace level.</p>
+</li>
+</ul>
+<ul>
+<li><p>Kretprobes using the ftrace framework conflict with the patched<br>functions.</p>
+<p>Both kretprobes and livepatches use a ftrace handler that modifies<br>the return address. The first user wins. Either the probe or the patch<br>is rejected when the handler is already in use by the other.</p>
+</li>
+</ul>
+<ul>
+<li><p>Kprobes in the original function are ignored when the code is<br>redirected to the new implementation.</p>
+<p>There is a work in progress to add warnings about this situation.</p>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_livepatch/" title="Kernel-3.10.0-957.el7_livepatch" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_livepatch/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_laptop-mode/" title="Kernel-3.10.0-957.el7_laptop-mode"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_marvell,kirkwood-pinctrl/" title="Kernel-3.10.0-957.el7_marvell,kirkwood-pinctrl"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

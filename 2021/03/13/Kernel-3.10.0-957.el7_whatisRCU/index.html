@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_whatisRCU | oosTech.com</title>
+  <meta name="description" content="Please note that the “What is RCU?” LWN series is an excellent placeto start learning about RCU:     What is RCU, Fundamentally?  http:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;262464&#x2F;    What is RCU? Part 2: Usage   http:&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_whatisRCU">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Please note that the “What is RCU?” LWN series is an excellent placeto start learning about RCU:     What is RCU, Fundamentally?  http:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;262464&#x2F;    What is RCU? Part 2: Usage   http:&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_whatisRCU" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_whatisRCU
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Please note that the “What is RCU?” LWN series is an excellent place<br>to start learning about RCU:</p>
+<ol>
+<li>   What is RCU, Fundamentally?  <a target="_blank" rel="noopener" href="http://lwn.net/Articles/262464/">http://lwn.net/Articles/262464/</a></li>
+<li>   What is RCU? Part 2: Usage   <a target="_blank" rel="noopener" href="http://lwn.net/Articles/263130/">http://lwn.net/Articles/263130/</a></li>
+<li>   RCU part 3: the RCU API      <a target="_blank" rel="noopener" href="http://lwn.net/Articles/264090/">http://lwn.net/Articles/264090/</a></li>
+<li>   The RCU API, 2010 Edition    <a target="_blank" rel="noopener" href="http://lwn.net/Articles/418853/">http://lwn.net/Articles/418853/</a></li>
+</ol>
+<p>What is RCU?</p>
+<p>RCU is a synchronization mechanism that was added to the Linux kernel<br>during the 2.5 development effort that is optimized for read-mostly<br>situations.  Although RCU is actually quite simple once you understand it,<br>getting there can sometimes be a challenge.  Part of the problem is that<br>most of the past descriptions of RCU have been written with the mistaken<br>assumption that there is “one true way” to describe RCU.  Instead,<br>the experience has been that different people must take different paths<br>to arrive at an understanding of RCU.  This document provides several<br>different paths, as follows:</p>
+<ol>
+<li>   RCU OVERVIEW</li>
+<li>   WHAT IS RCU’S CORE API?</li>
+<li>   WHAT ARE SOME EXAMPLE USES OF CORE RCU API?</li>
+<li>   WHAT IF MY UPDATING THREAD CANNOT BLOCK?</li>
+<li>   WHAT ARE SOME SIMPLE IMPLEMENTATIONS OF RCU?</li>
+<li>   ANALOGY WITH READER-WRITER LOCKING</li>
+<li>   FULL LIST OF RCU APIs</li>
+<li>   ANSWERS TO QUICK QUIZZES</li>
+</ol>
+<p>People who prefer starting with a conceptual overview should focus on<br>Section 1, though most readers will profit by reading this section at<br>some point.  People who prefer to start with an API that they can then<br>experiment with should focus on Section 2.  People who prefer to start<br>with example uses should focus on Sections 3 and 4.  People who need to<br>understand the RCU implementation should focus on Section 5, then dive<br>into the kernel source code.  People who reason best by analogy should<br>focus on Section 6.  Section 7 serves as an index to the docbook API<br>documentation, and Section 8 is the traditional answer key.</p>
+<p>So, start with the section that makes the most sense to you and your<br>preferred method of learning.  If you need to know everything about<br>everything, feel free to read the whole thing – but if you are really<br>that type of person, you have perused the source code and will therefore<br>never need this document anyway.  ;-)</p>
+<ol>
+<li> RCU OVERVIEW</li>
+</ol>
+<p>The basic idea behind RCU is to split updates into “removal” and<br>“reclamation” phases.  The removal phase removes references to data items<br>within a data structure (possibly by replacing them with references to<br>new versions of these data items), and can run concurrently with readers.<br>The reason that it is safe to run the removal phase concurrently with<br>readers is the semantics of modern CPUs guarantee that readers will see<br>either the old or the new version of the data structure rather than a<br>partially updated reference.  The reclamation phase does the work of reclaiming<br>(e.g., freeing) the data items removed from the data structure during the<br>removal phase.  Because reclaiming data items can disrupt any readers<br>concurrently referencing those data items, the reclamation phase must<br>not start until readers no longer hold references to those data items.</p>
+<p>Splitting the update into removal and reclamation phases permits the<br>updater to perform the removal phase immediately, and to defer the<br>reclamation phase until all readers active during the removal phase have<br>completed, either by blocking until they finish or by registering a<br>callback that is invoked after they finish.  Only readers that are active<br>during the removal phase need be considered, because any reader starting<br>after the removal phase will be unable to gain a reference to the removed<br>data items, and therefore cannot be disrupted by the reclamation phase.</p>
+<p>So the typical RCU update sequence goes something like the following:</p>
+<p>a.    Remove pointers to a data structure, so that subsequent<br>    readers cannot gain a reference to it.</p>
+<p>b.    Wait for all previous readers to complete their RCU read-side<br>    critical sections.</p>
+<p>c.    At this point, there cannot be any readers who hold references<br>    to the data structure, so it now may safely be reclaimed<br>    (e.g., kfree()d).</p>
+<p>Step (b) above is the key idea underlying RCU’s deferred destruction.<br>The ability to wait until all readers are done allows RCU readers to<br>use much lighter-weight synchronization, in some cases, absolutely no<br>synchronization at all.  In contrast, in more conventional lock-based<br>schemes, readers must use heavy-weight synchronization in order to<br>prevent an updater from deleting the data structure out from under them.<br>This is because lock-based updaters typically update data items in place,<br>and must therefore exclude readers.  In contrast, RCU-based updaters<br>typically take advantage of the fact that writes to single aligned<br>pointers are atomic on modern CPUs, allowing atomic insertion, removal,<br>and replacement of data items in a linked structure without disrupting<br>readers.  Concurrent RCU readers can then continue accessing the old<br>versions, and can dispense with the atomic operations, memory barriers,<br>and communications cache misses that are so expensive on present-day<br>SMP computer systems, even in absence of lock contention.</p>
+<p>In the three-step procedure shown above, the updater is performing both<br>the removal and the reclamation step, but it is often helpful for an<br>entirely different thread to do the reclamation, as is in fact the case<br>in the Linux kernel’s directory-entry cache (dcache).  Even if the same<br>thread performs both the update step (step (a) above) and the reclamation<br>step (step (c) above), it is often helpful to think of them separately.<br>For example, RCU readers and updaters need not communicate at all,<br>but RCU provides implicit low-overhead communication between readers<br>and reclaimers, namely, in step (b) above.</p>
+<p>So how the heck can a reclaimer tell when a reader is done, given<br>that readers are not doing any sort of synchronization operations???<br>Read on to learn about how RCU’s API makes this easy.</p>
+<ol start="2">
+<li> WHAT IS RCU’S CORE API?</li>
+</ol>
+<p>The core RCU API is quite small:</p>
+<p>a.    rcu_read_lock()<br>b.    rcu_read_unlock()<br>c.    synchronize_rcu() / call_rcu()<br>d.    rcu_assign_pointer()<br>e.    rcu_dereference()</p>
+<p>There are many other members of the RCU API, but the rest can be<br>expressed in terms of these five, though most implementations instead<br>express synchronize_rcu() in terms of the call_rcu() callback API.</p>
+<p>The five core RCU APIs are described below, the other 18 will be enumerated<br>later.  See the kernel docbook documentation for more info, or look directly<br>at the function header comments.</p>
+<p>rcu_read_lock()</p>
+<pre><code>void rcu_read_lock(void);
+
+Used by a reader to inform the reclaimer that the reader is
+entering an RCU read-side critical section.  It is illegal
+to block while in an RCU read-side critical section, though
+kernels built with CONFIG_TREE_PREEMPT_RCU can preempt RCU
+read-side critical sections.  Any RCU-protected data structure
+accessed during an RCU read-side critical section is guaranteed to
+remain unreclaimed for the full duration of that critical section.
+Reference counts may be used in conjunction with RCU to maintain
+longer-term references to data structures.
+</code></pre>
+<p>rcu_read_unlock()</p>
+<pre><code>void rcu_read_unlock(void);
+
+Used by a reader to inform the reclaimer that the reader is
+exiting an RCU read-side critical section.  Note that RCU
+read-side critical sections may be nested and/or overlapping.
+</code></pre>
+<p>synchronize_rcu()</p>
+<pre><code>void synchronize_rcu(void);
+
+Marks the end of updater code and the beginning of reclaimer
+code.  It does this by blocking until all pre-existing RCU
+read-side critical sections on all CPUs have completed.
+Note that synchronize_rcu() will -not- necessarily wait for
+any subsequent RCU read-side critical sections to complete.
+For example, consider the following sequence of events:
+
+         CPU 0                  CPU 1                 CPU 2
+     ----------------- ------------------------- ---------------
+ 1.  rcu_read_lock()
+ 2.                    enters synchronize_rcu()
+ 3.                                               rcu_read_lock()
+ 4.  rcu_read_unlock()
+ 5.                     exits synchronize_rcu()
+ 6.                                              rcu_read_unlock()
+
+To reiterate, synchronize_rcu() waits only for ongoing RCU
+read-side critical sections to complete, not necessarily for
+any that begin after synchronize_rcu() is invoked.
+
+Of course, synchronize_rcu() does not necessarily return
+-immediately- after the last pre-existing RCU read-side critical
+section completes.  For one thing, there might well be scheduling
+delays.  For another thing, many RCU implementations process
+requests in batches in order to improve efficiencies, which can
+further delay synchronize_rcu().
+
+Since synchronize_rcu() is the API that must figure out when
+readers are done, its implementation is key to RCU.  For RCU
+to be useful in all but the most read-intensive situations,
+synchronize_rcu()&#39;s overhead must also be quite small.
+
+The call_rcu() API is a callback form of synchronize_rcu(),
+and is described in more detail in a later section.  Instead of
+blocking, it registers a function and argument which are invoked
+after all ongoing RCU read-side critical sections have completed.
+This callback variant is particularly useful in situations where
+it is illegal to block or where update-side performance is
+critically important.
+
+However, the call_rcu() API should not be used lightly, as use
+of the synchronize_rcu() API generally results in simpler code.
+In addition, the synchronize_rcu() API has the nice property
+of automatically limiting update rate should grace periods
+be delayed.  This property results in system resilience in face
+of denial-of-service attacks.  Code using call_rcu() should limit
+update rate in order to gain this same sort of resilience.  See
+checklist.txt for some approaches to limiting the update rate.
+</code></pre>
+<p>rcu_assign_pointer()</p>
+<pre><code>typeof(p) rcu_assign_pointer(p, typeof(p) v);
+
+Yes, rcu_assign_pointer() -is- implemented as a macro, though it
+would be cool to be able to declare a function in this manner.
+(Compiler experts will no doubt disagree.)
+
+The updater uses this function to assign a new value to an
+RCU-protected pointer, in order to safely communicate the change
+in value from the updater to the reader.  This function returns
+the new value, and also executes any memory-barrier instructions
+required for a given CPU architecture.
+
+Perhaps just as important, it serves to document (1) which
+pointers are protected by RCU and (2) the point at which a
+given structure becomes accessible to other CPUs.  That said,
+rcu_assign_pointer() is most frequently used indirectly, via
+the _rcu list-manipulation primitives such as list_add_rcu().
+</code></pre>
+<p>rcu_dereference()</p>
+<pre><code>typeof(p) rcu_dereference(p);
+
+Like rcu_assign_pointer(), rcu_dereference() must be implemented
+as a macro.
+
+The reader uses rcu_dereference() to fetch an RCU-protected
+pointer, which returns a value that may then be safely
+dereferenced.  Note that rcu_deference() does not actually
+dereference the pointer, instead, it protects the pointer for
+later dereferencing.  It also executes any needed memory-barrier
+instructions for a given CPU architecture.  Currently, only Alpha
+needs memory barriers within rcu_dereference() -- on other CPUs,
+it compiles to nothing, not even a compiler directive.
+
+Common coding practice uses rcu_dereference() to copy an
+RCU-protected pointer to a local variable, then dereferences
+this local variable, for example as follows:
+
+    p = rcu_dereference(head.next);
+    return p-&gt;data;
+
+However, in this case, one could just as easily combine these
+into one statement:
+
+    return rcu_dereference(head.next)-&gt;data;
+
+If you are going to be fetching multiple fields from the
+RCU-protected structure, using the local variable is of
+course preferred.  Repeated rcu_dereference() calls look
+ugly and incur unnecessary overhead on Alpha CPUs.
+
+Note that the value returned by rcu_dereference() is valid
+only within the enclosing RCU read-side critical section.
+For example, the following is -not- legal:
+
+    rcu_read_lock();
+    p = rcu_dereference(head.next);
+    rcu_read_unlock();
+    x = p-&gt;address;    /* BUG!!! */
+    rcu_read_lock();
+    y = p-&gt;data;    /* BUG!!! */
+    rcu_read_unlock();
+
+Holding a reference from one RCU read-side critical section
+to another is just as illegal as holding a reference from
+one lock-based critical section to another!  Similarly,
+using a reference outside of the critical section in which
+it was acquired is just as illegal as doing so with normal
+locking.
+
+As with rcu_assign_pointer(), an important function of
+rcu_dereference() is to document which pointers are protected by
+RCU, in particular, flagging a pointer that is subject to changing
+at any time, including immediately after the rcu_dereference().
+And, again like rcu_assign_pointer(), rcu_dereference() is
+typically used indirectly, via the _rcu list-manipulation
+primitives, such as list_for_each_entry_rcu().
+</code></pre>
+<p>The following diagram shows how each API communicates among the<br>reader, updater, and reclaimer.</p>
+<pre><code>    rcu_assign_pointer()
+                    +--------+
+    +----------------------&gt;| reader |---------+
+    |                       +--------+         |
+    |                           |              |
+    |                           |              | Protect:
+    |                           |              | rcu_read_lock()
+    |                           |              | rcu_read_unlock()
+    |        rcu_dereference()  |              |
+   +---------+                      |              |
+   | updater |&lt;---------------------+              |
+   +---------+                                     V
+    |                                    +-----------+
+    +-----------------------------------&gt;| reclaimer |
+                             +-----------+
+      Defer:
+      synchronize_rcu() &amp; call_rcu()
+</code></pre>
+<p>The RCU infrastructure observes the time sequence of rcu_read_lock(),<br>rcu_read_unlock(), synchronize_rcu(), and call_rcu() invocations in<br>order to determine when (1) synchronize_rcu() invocations may return<br>to their callers and (2) call_rcu() callbacks may be invoked.  Efficient<br>implementations of the RCU infrastructure make heavy use of batching in<br>order to amortize their overhead over many uses of the corresponding APIs.</p>
+<p>There are no fewer than three RCU mechanisms in the Linux kernel; the<br>diagram above shows the first one, which is by far the most commonly used.<br>The rcu_dereference() and rcu_assign_pointer() primitives are used for<br>all three mechanisms, but different defer and protect primitives are<br>used as follows:</p>
+<pre><code>Defer            Protect
+</code></pre>
+<p>a.    synchronize_rcu()    rcu_read_lock() / rcu_read_unlock()<br>    call_rcu()        rcu_dereference()</p>
+<p>b.    call_rcu_bh()        rcu_read_lock_bh() / rcu_read_unlock_bh()<br>                rcu_dereference_bh()</p>
+<p>c.    synchronize_sched()    rcu_read_lock_sched() / rcu_read_unlock_sched()<br>                preempt_disable() / preempt_enable()<br>                local_irq_save() / local_irq_restore()<br>                hardirq enter / hardirq exit<br>                NMI enter / NMI exit<br>                rcu_dereference_sched()</p>
+<p>These three mechanisms are used as follows:</p>
+<p>a.    RCU applied to normal data structures.</p>
+<p>b.    RCU applied to networking data structures that may be subjected<br>    to remote denial-of-service attacks.</p>
+<p>c.    RCU applied to scheduler and interrupt/NMI-handler tasks.</p>
+<p>Again, most uses will be of (a).  The (b) and (c) cases are important<br>for specialized uses, but are relatively uncommon.</p>
+<ol start="3">
+<li> WHAT ARE SOME EXAMPLE USES OF CORE RCU API?</li>
+</ol>
+<p>This section shows a simple use of the core RCU API to protect a<br>global pointer to a dynamically allocated structure.  More-typical<br>uses of RCU may be found in listRCU.txt, arrayRCU.txt, and NMI-RCU.txt.</p>
+<pre><code>struct foo &#123;
+    int a;
+    char b;
+    long c;
+&#125;;
+DEFINE_SPINLOCK(foo_mutex);
+
+struct foo *gbl_foo;
+
+/*
+ * Create a new struct foo that is the same as the one currently
+ * pointed to by gbl_foo, except that field &quot;a&quot; is replaced
+ * with &quot;new_a&quot;.  Points gbl_foo to the new structure, and
+ * frees up the old structure after a grace period.
+ *
+ * Uses rcu_assign_pointer() to ensure that concurrent readers
+ * see the initialized version of the new structure.
+ *
+ * Uses synchronize_rcu() to ensure that any readers that might
+ * have references to the old structure complete before freeing
+ * the old structure.
+ */
+void foo_update_a(int new_a)
+&#123;
+    struct foo *new_fp;
+    struct foo *old_fp;
+
+    new_fp = kmalloc(sizeof(*new_fp), GFP_KERNEL);
+    spin_lock(&amp;foo_mutex);
+    old_fp = gbl_foo;
+    *new_fp = *old_fp;
+    new_fp-&gt;a = new_a;
+    rcu_assign_pointer(gbl_foo, new_fp);
+    spin_unlock(&amp;foo_mutex);
+    synchronize_rcu();
+    kfree(old_fp);
+&#125;
+
+/*
+ * Return the value of field &quot;a&quot; of the current gbl_foo
+ * structure.  Use rcu_read_lock() and rcu_read_unlock()
+ * to ensure that the structure does not get deleted out
+ * from under us, and use rcu_dereference() to ensure that
+ * we see the initialized version of the structure (important
+ * for DEC Alpha and for people reading the code).
+ */
+int foo_get_a(void)
+&#123;
+    int retval;
+
+    rcu_read_lock();
+    retval = rcu_dereference(gbl_foo)-&gt;a;
+    rcu_read_unlock();
+    return retval;
+&#125;
+</code></pre>
+<p>So, to sum up:</p>
+<p>o    Use rcu_read_lock() and rcu_read_unlock() to guard RCU<br>    read-side critical sections.</p>
+<p>o    Within an RCU read-side critical section, use rcu_dereference()<br>    to dereference RCU-protected pointers.</p>
+<p>o    Use some solid scheme (such as locks or semaphores) to<br>    keep concurrent updates from interfering with each other.</p>
+<p>o    Use rcu_assign_pointer() to update an RCU-protected pointer.<br>    This primitive protects concurrent readers from the updater,<br>    -not- concurrent updates from each other!  You therefore still<br>    need to use locking (or something similar) to keep concurrent<br>    rcu_assign_pointer() primitives from interfering with each other.</p>
+<p>o    Use synchronize_rcu() -after- removing a data element from an<br>    RCU-protected data structure, but -before- reclaiming/freeing<br>    the data element, in order to wait for the completion of all<br>    RCU read-side critical sections that might be referencing that<br>    data item.</p>
+<p>See checklist.txt for additional rules to follow when using RCU.<br>And again, more-typical uses of RCU may be found in listRCU.txt,<br>arrayRCU.txt, and NMI-RCU.txt.</p>
+<ol start="4">
+<li> WHAT IF MY UPDATING THREAD CANNOT BLOCK?</li>
+</ol>
+<p>In the example above, foo_update_a() blocks until a grace period elapses.<br>This is quite simple, but in some cases one cannot afford to wait so<br>long – there might be other high-priority work to be done.</p>
+<p>In such cases, one uses call_rcu() rather than synchronize_rcu().<br>The call_rcu() API is as follows:</p>
+<pre><code>void call_rcu(struct rcu_head * head,
+          void (*func)(struct rcu_head *head));
+</code></pre>
+<p>This function invokes func(head) after a grace period has elapsed.<br>This invocation might happen from either softirq or process context,<br>so the function is not permitted to block.  The foo struct needs to<br>have an rcu_head structure added, perhaps as follows:</p>
+<pre><code>struct foo &#123;
+    int a;
+    char b;
+    long c;
+    struct rcu_head rcu;
+&#125;;
+</code></pre>
+<p>The foo_update_a() function might then be written as follows:</p>
+<pre><code>/*
+ * Create a new struct foo that is the same as the one currently
+ * pointed to by gbl_foo, except that field &quot;a&quot; is replaced
+ * with &quot;new_a&quot;.  Points gbl_foo to the new structure, and
+ * frees up the old structure after a grace period.
+ *
+ * Uses rcu_assign_pointer() to ensure that concurrent readers
+ * see the initialized version of the new structure.
+ *
+ * Uses call_rcu() to ensure that any readers that might have
+ * references to the old structure complete before freeing the
+ * old structure.
+ */
+void foo_update_a(int new_a)
+&#123;
+    struct foo *new_fp;
+    struct foo *old_fp;
+
+    new_fp = kmalloc(sizeof(*new_fp), GFP_KERNEL);
+    spin_lock(&amp;foo_mutex);
+    old_fp = gbl_foo;
+    *new_fp = *old_fp;
+    new_fp-&gt;a = new_a;
+    rcu_assign_pointer(gbl_foo, new_fp);
+    spin_unlock(&amp;foo_mutex);
+    call_rcu(&amp;old_fp-&gt;rcu, foo_reclaim);
+&#125;
+</code></pre>
+<p>The foo_reclaim() function might appear as follows:</p>
+<pre><code>void foo_reclaim(struct rcu_head *rp)
+&#123;
+    struct foo *fp = container_of(rp, struct foo, rcu);
+
+    foo_cleanup(fp-&gt;a);
+
+    kfree(fp);
+&#125;
+</code></pre>
+<p>The container_of() primitive is a macro that, given a pointer into a<br>struct, the type of the struct, and the pointed-to field within the<br>struct, returns a pointer to the beginning of the struct.</p>
+<p>The use of call_rcu() permits the caller of foo_update_a() to<br>immediately regain control, without needing to worry further about the<br>old version of the newly updated element.  It also clearly shows the<br>RCU distinction between updater, namely foo_update_a(), and reclaimer,<br>namely foo_reclaim().</p>
+<p>The summary of advice is the same as for the previous section, except<br>that we are now using call_rcu() rather than synchronize_rcu():</p>
+<p>o    Use call_rcu() -after- removing a data element from an<br>    RCU-protected data structure in order to register a callback<br>    function that will be invoked after the completion of all RCU<br>    read-side critical sections that might be referencing that<br>    data item.</p>
+<p>If the callback for call_rcu() is not doing anything more than calling<br>kfree() on the structure, you can use kfree_rcu() instead of call_rcu()<br>to avoid having to write your own callback:</p>
+<pre><code>kfree_rcu(old_fp, rcu);
+</code></pre>
+<p>Again, see checklist.txt for additional rules governing the use of RCU.</p>
+<ol start="5">
+<li> WHAT ARE SOME SIMPLE IMPLEMENTATIONS OF RCU?</li>
+</ol>
+<p>One of the nice things about RCU is that it has extremely simple “toy”<br>implementations that are a good first step towards understanding the<br>production-quality implementations in the Linux kernel.  This section<br>presents two such “toy” implementations of RCU, one that is implemented<br>in terms of familiar locking primitives, and another that more closely<br>resembles “classic” RCU.  Both are way too simple for real-world use,<br>lacking both functionality and performance.  However, they are useful<br>in getting a feel for how RCU works.  See kernel/rcupdate.c for a<br>production-quality implementation, and see:</p>
+<pre><code>http://www.rdrop.com/users/paulmck/RCU
+</code></pre>
+<p>for papers describing the Linux kernel RCU implementation.  The OLS’01<br>and OLS’02 papers are a good introduction, and the dissertation provides<br>more details on the current implementation as of early 2004.</p>
+<p>5A.  “TOY” IMPLEMENTATION #1: LOCKING</p>
+<p>This section presents a “toy” RCU implementation that is based on<br>familiar locking primitives.  Its overhead makes it a non-starter for<br>real-life use, as does its lack of scalability.  It is also unsuitable<br>for realtime use, since it allows scheduling latency to “bleed” from<br>one read-side critical section to another.</p>
+<p>However, it is probably the easiest implementation to relate to, so is<br>a good starting point.</p>
+<p>It is extremely simple:</p>
+<pre><code>static DEFINE_RWLOCK(rcu_gp_mutex);
+
+void rcu_read_lock(void)
+&#123;
+    read_lock(&amp;rcu_gp_mutex);
+&#125;
+
+void rcu_read_unlock(void)
+&#123;
+    read_unlock(&amp;rcu_gp_mutex);
+&#125;
+
+void synchronize_rcu(void)
+&#123;
+    write_lock(&amp;rcu_gp_mutex);
+    write_unlock(&amp;rcu_gp_mutex);
+&#125;
+</code></pre>
+<p>[You can ignore rcu_assign_pointer() and rcu_dereference() without<br>missing much.  But here they are anyway.  And whatever you do, don’t<br>forget about them when submitting patches making use of RCU!]</p>
+<pre><code>#define rcu_assign_pointer(p, v)    (&#123; \
+                        smp_wmb(); \
+                        (p) = (v); \
+                    &#125;)
+
+#define rcu_dereference(p)     (&#123; \
+                typeof(p) _________p1 = p; \
+                smp_read_barrier_depends(); \
+                (_________p1); \
+                &#125;)
+</code></pre>
+<p>The rcu_read_lock() and rcu_read_unlock() primitive read-acquire<br>and release a global reader-writer lock.  The synchronize_rcu()<br>primitive write-acquires this same lock, then immediately releases<br>it.  This means that once synchronize_rcu() exits, all RCU read-side<br>critical sections that were in progress before synchronize_rcu() was<br>called are guaranteed to have completed – there is no way that<br>synchronize_rcu() would have been able to write-acquire the lock<br>otherwise.</p>
+<p>It is possible to nest rcu_read_lock(), since reader-writer locks may<br>be recursively acquired.  Note also that rcu_read_lock() is immune<br>from deadlock (an important property of RCU).  The reason for this is<br>that the only thing that can block rcu_read_lock() is a synchronize_rcu().<br>But synchronize_rcu() does not acquire any locks while holding rcu_gp_mutex,<br>so there can be no deadlock cycle.</p>
+<p>Quick Quiz #1:    Why is this argument naive?  How could a deadlock<br>        occur when using this algorithm in a real-world Linux<br>        kernel?  How could this deadlock be avoided?</p>
+<p>5B.  “TOY” EXAMPLE #2: CLASSIC RCU</p>
+<p>This section presents a “toy” RCU implementation that is based on<br>“classic RCU”.  It is also short on performance (but only for updates) and<br>on features such as hotplug CPU and the ability to run in CONFIG_PREEMPT<br>kernels.  The definitions of rcu_dereference() and rcu_assign_pointer()<br>are the same as those shown in the preceding section, so they are omitted.</p>
+<pre><code>void rcu_read_lock(void) &#123; &#125;
+
+void rcu_read_unlock(void) &#123; &#125;
+
+void synchronize_rcu(void)
+&#123;
+    int cpu;
+
+    for_each_possible_cpu(cpu)
+        run_on(cpu);
+&#125;
+</code></pre>
+<p>Note that rcu_read_lock() and rcu_read_unlock() do absolutely nothing.<br>This is the great strength of classic RCU in a non-preemptive kernel:<br>read-side overhead is precisely zero, at least on non-Alpha CPUs.<br>And there is absolutely no way that rcu_read_lock() can possibly<br>participate in a deadlock cycle!</p>
+<p>The implementation of synchronize_rcu() simply schedules itself on each<br>CPU in turn.  The run_on() primitive can be implemented straightforwardly<br>in terms of the sched_setaffinity() primitive.  Of course, a somewhat less<br>“toy” implementation would restore the affinity upon completion rather<br>than just leaving all tasks running on the last CPU, but when I said<br>“toy”, I meant -toy-!</p>
+<p>So how the heck is this supposed to work???</p>
+<p>Remember that it is illegal to block while in an RCU read-side critical<br>section.  Therefore, if a given CPU executes a context switch, we know<br>that it must have completed all preceding RCU read-side critical sections.<br>Once -all- CPUs have executed a context switch, then -all- preceding<br>RCU read-side critical sections will have completed.</p>
+<p>So, suppose that we remove a data item from its structure and then invoke<br>synchronize_rcu().  Once synchronize_rcu() returns, we are guaranteed<br>that there are no RCU read-side critical sections holding a reference<br>to that data item, so we can safely reclaim it.</p>
+<p>Quick Quiz #2:    Give an example where Classic RCU’s read-side<br>        overhead is -negative-.</p>
+<p>Quick Quiz #3:  If it is illegal to block in an RCU read-side<br>        critical section, what the heck do you do in<br>        PREEMPT_RT, where normal spinlocks can block???</p>
+<ol start="6">
+<li> ANALOGY WITH READER-WRITER LOCKING</li>
+</ol>
+<p>Although RCU can be used in many different ways, a very common use of<br>RCU is analogous to reader-writer locking.  The following unified<br>diff shows how closely related RCU and reader-writer locking can be.</p>
+<pre><code>@@ -13,15 +14,15 @@
+    struct list_head *lp;
+    struct el *p;
+
+-    read_lock();
+-    list_for_each_entry(p, head, lp) &#123;
++    rcu_read_lock();
++    list_for_each_entry_rcu(p, head, lp) &#123;
+        if (p-&gt;key == key) &#123;
+            *result = p-&gt;data;
+-            read_unlock();
++            rcu_read_unlock();
+            return 1;
+        &#125;
+    &#125;
+-    read_unlock();
++    rcu_read_unlock();
+    return 0;
+ &#125;
+
+@@ -29,15 +30,16 @@
+ &#123;
+    struct el *p;
+
+-    write_lock(&amp;listmutex);
++    spin_lock(&amp;listmutex);
+    list_for_each_entry(p, head, lp) &#123;
+        if (p-&gt;key == key) &#123;
+-            list_del(&amp;p-&gt;list);
+-            write_unlock(&amp;listmutex);
++            list_del_rcu(&amp;p-&gt;list);
++            spin_unlock(&amp;listmutex);
++            synchronize_rcu();
+            kfree(p);
+            return 1;
+        &#125;
+    &#125;
+-    write_unlock(&amp;listmutex);
++    spin_unlock(&amp;listmutex);
+    return 0;
+ &#125;
+</code></pre>
+<p>Or, for those who prefer a side-by-side listing:</p>
+<p> 1 struct el {                          1 struct el {<br> 2   struct list_head list;             2   struct list_head list;<br> 3   long key;                          3   long key;<br> 4   spinlock_t mutex;                  4   spinlock_t mutex;<br> 5   int data;                          5   int data;<br> 6   /* Other data fields <em>/            6   /</em> Other data fields */<br> 7 };                                   7 };<br> 8 spinlock_t listmutex;                8 spinlock_t listmutex;<br> 9 struct el head;                      9 struct el head;</p>
+<p> 1 int search(long key, int *result)    1 int search(long key, int *result)<br> 2 {                                    2 {<br> 3   struct list_head *lp;              3   struct list_head *lp;<br> 4   struct el *p;                      4   struct el *p;<br> 5                                      5<br> 6   read_lock();                       6   rcu_read_lock();<br> 7   list_for_each_entry(p, head, lp) { 7   list_for_each_entry_rcu(p, head, lp) {<br> 8     if (p-&gt;key == key) {             8     if (p-&gt;key == key) {<br> 9       *result = p-&gt;data;             9       *result = p-&gt;data;<br>10       read_unlock();                10       rcu_read_unlock();<br>11       return 1;                     11       return 1;<br>12     }                               12     }<br>13   }                                 13   }<br>14   read_unlock();                    14   rcu_read_unlock();<br>15   return 0;                         15   return 0;<br>16 }                                   16 }</p>
+<p> 1 int delete(long key)                 1 int delete(long key)<br> 2 {                                    2 {<br> 3   struct el *p;                      3   struct el *p;<br> 4                                      4<br> 5   write_lock(&amp;listmutex);            5   spin_lock(&amp;listmutex);<br> 6   list_for_each_entry(p, head, lp) { 6   list_for_each_entry(p, head, lp) {<br> 7     if (p-&gt;key == key) {             7     if (p-&gt;key == key) {<br> 8       list_del(&amp;p-&gt;list);            8       list_del_rcu(&amp;p-&gt;list);<br> 9       write_unlock(&amp;listmutex);      9       spin_unlock(&amp;listmutex);<br>                                       10       synchronize_rcu();<br>10       kfree(p);                     11       kfree(p);<br>11       return 1;                     12       return 1;<br>12     }                               13     }<br>13   }                                 14   }<br>14   write_unlock(&amp;listmutex);         15   spin_unlock(&amp;listmutex);<br>15   return 0;                         16   return 0;<br>16 }                                   17 }</p>
+<p>Either way, the differences are quite small.  Read-side locking moves<br>to rcu_read_lock() and rcu_read_unlock, update-side locking moves from<br>a reader-writer lock to a simple spinlock, and a synchronize_rcu()<br>precedes the kfree().</p>
+<p>However, there is one potential catch: the read-side and update-side<br>critical sections can now run concurrently.  In many cases, this will<br>not be a problem, but it is necessary to check carefully regardless.<br>For example, if multiple independent list updates must be seen as<br>a single atomic update, converting to RCU will require special care.</p>
+<p>Also, the presence of synchronize_rcu() means that the RCU version of<br>delete() can now block.  If this is a problem, there is a callback-based<br>mechanism that never blocks, namely call_rcu() or kfree_rcu(), that can<br>be used in place of synchronize_rcu().</p>
+<ol start="7">
+<li> FULL LIST OF RCU APIs</li>
+</ol>
+<p>The RCU APIs are documented in docbook-format header comments in the<br>Linux-kernel source code, but it helps to have a full list of the<br>APIs, since there does not appear to be a way to categorize them<br>in docbook.  Here is the list, by category.</p>
+<p>RCU list traversal:</p>
+<pre><code>list_for_each_entry_rcu
+hlist_for_each_entry_rcu
+hlist_nulls_for_each_entry_rcu
+list_for_each_entry_continue_rcu
+</code></pre>
+<p>RCU pointer/list update:</p>
+<pre><code>rcu_assign_pointer
+list_add_rcu
+list_add_tail_rcu
+list_del_rcu
+list_replace_rcu
+hlist_del_rcu
+hlist_add_behind_rcu
+hlist_add_before_rcu
+hlist_add_head_rcu
+hlist_replace_rcu
+list_splice_init_rcu()
+</code></pre>
+<p>RCU:    Critical sections    Grace period        Barrier</p>
+<pre><code>rcu_read_lock        synchronize_net        rcu_barrier
+rcu_read_unlock        synchronize_rcu
+rcu_dereference        synchronize_rcu_expedited
+            call_rcu
+            kfree_rcu
+</code></pre>
+<p>bh:    Critical sections    Grace period        Barrier</p>
+<pre><code>rcu_read_lock_bh    call_rcu_bh        rcu_barrier_bh
+rcu_read_unlock_bh    synchronize_rcu_bh
+rcu_dereference_bh    synchronize_rcu_bh_expedited
+</code></pre>
+<p>sched:    Critical sections    Grace period        Barrier</p>
+<pre><code>rcu_read_lock_sched    synchronize_sched    rcu_barrier_sched
+rcu_read_unlock_sched    call_rcu_sched
+[preempt_disable]    synchronize_sched_expedited
+[and friends]
+rcu_dereference_sched
+</code></pre>
+<p>SRCU:    Critical sections    Grace period        Barrier</p>
+<pre><code>srcu_read_lock        synchronize_srcu    srcu_barrier
+srcu_read_unlock    call_srcu
+srcu_read_lock_raw    synchronize_srcu_expedited
+srcu_read_unlock_raw
+srcu_dereference
+</code></pre>
+<p>SRCU:    Initialization/cleanup<br>    init_srcu_struct<br>    cleanup_srcu_struct</p>
+<p>All:  lockdep-checked RCU-protected pointer access</p>
+<pre><code>rcu_dereference_check
+rcu_dereference_protected
+rcu_access_pointer
+</code></pre>
+<p>See the comment headers in the source code (or the docbook generated<br>from them) for more information.</p>
+<p>However, given that there are no fewer than four families of RCU APIs<br>in the Linux kernel, how do you choose which one to use?  The following<br>list can be helpful:</p>
+<p>a.    Will readers need to block?  If so, you need SRCU.</p>
+<p>b.    Is it necessary to start a read-side critical section in a<br>    hardirq handler or exception handler, and then to complete<br>    this read-side critical section in the task that was<br>    interrupted?  If so, you need SRCU’s srcu_read_lock_raw() and<br>    srcu_read_unlock_raw() primitives.</p>
+<p>c.    What about the -rt patchset?  If readers would need to block<br>    in an non-rt kernel, you need SRCU.  If readers would block<br>    in a -rt kernel, but not in a non-rt kernel, SRCU is not<br>    necessary.</p>
+<p>d.    Do you need to treat NMI handlers, hardirq handlers,<br>    and code segments with preemption disabled (whether<br>    via preempt_disable(), local_irq_save(), local_bh_disable(),<br>    or some other mechanism) as if they were explicit RCU readers?<br>    If so, RCU-sched is the only choice that will work for you.</p>
+<p>e.    Do you need RCU grace periods to complete even in the face<br>    of softirq monopolization of one or more of the CPUs?  For<br>    example, is your code subject to network-based denial-of-service<br>    attacks?  If so, you need RCU-bh.</p>
+<p>f.    Is your workload too update-intensive for normal use of<br>    RCU, but inappropriate for other synchronization mechanisms?<br>    If so, consider SLAB_DESTROY_BY_RCU.  But please be careful!</p>
+<p>g.    Do you need read-side critical sections that are respected<br>    even though they are in the middle of the idle loop, during<br>    user-mode execution, or on an offlined CPU?  If so, SRCU is the<br>    only choice that will work for you.</p>
+<p>h.    Otherwise, use RCU.</p>
+<p>Of course, this all assumes that you have determined that RCU is in fact<br>the right tool for your job.</p>
+<ol start="8">
+<li> ANSWERS TO QUICK QUIZZES</li>
+</ol>
+<p>Quick Quiz #1:    Why is this argument naive?  How could a deadlock<br>        occur when using this algorithm in a real-world Linux<br>        kernel?  [Referring to the lock-based “toy” RCU<br>        algorithm.]</p>
+<p>Answer:        Consider the following sequence of events:</p>
+<pre><code>    1.    CPU 0 acquires some unrelated lock, call it
+        &quot;problematic_lock&quot;, disabling irq via
+        spin_lock_irqsave().
+
+    2.    CPU 1 enters synchronize_rcu(), write-acquiring
+        rcu_gp_mutex.
+
+    3.    CPU 0 enters rcu_read_lock(), but must wait
+        because CPU 1 holds rcu_gp_mutex.
+
+    4.    CPU 1 is interrupted, and the irq handler
+        attempts to acquire problematic_lock.
+
+    The system is now deadlocked.
+
+    One way to avoid this deadlock is to use an approach like
+    that of CONFIG_PREEMPT_RT, where all normal spinlocks
+    become blocking locks, and all irq handlers execute in
+    the context of special tasks.  In this case, in step 4
+    above, the irq handler would block, allowing CPU 1 to
+    release rcu_gp_mutex, avoiding the deadlock.
+
+    Even in the absence of deadlock, this RCU implementation
+    allows latency to &quot;bleed&quot; from readers to other
+    readers through synchronize_rcu().  To see this,
+    consider task A in an RCU read-side critical section
+    (thus read-holding rcu_gp_mutex), task B blocked
+    attempting to write-acquire rcu_gp_mutex, and
+    task C blocked in rcu_read_lock() attempting to
+    read_acquire rcu_gp_mutex.  Task A&#39;s RCU read-side
+    latency is holding up task C, albeit indirectly via
+    task B.
+
+    Realtime RCU implementations therefore use a counter-based
+    approach where tasks in RCU read-side critical sections
+    cannot be blocked by tasks executing synchronize_rcu().
+</code></pre>
+<p>Quick Quiz #2:    Give an example where Classic RCU’s read-side<br>        overhead is -negative-.</p>
+<p>Answer:        Imagine a single-CPU system with a non-CONFIG_PREEMPT<br>        kernel where a routing table is used by process-context<br>        code, but can be updated by irq-context code (for example,<br>        by an “ICMP REDIRECT” packet).    The usual way of handling<br>        this would be to have the process-context code disable<br>        interrupts while searching the routing table.  Use of<br>        RCU allows such interrupt-disabling to be dispensed with.<br>        Thus, without RCU, you pay the cost of disabling interrupts,<br>        and with RCU you don’t.</p>
+<pre><code>    One can argue that the overhead of RCU in this
+    case is negative with respect to the single-CPU
+    interrupt-disabling approach.  Others might argue that
+    the overhead of RCU is merely zero, and that replacing
+    the positive overhead of the interrupt-disabling scheme
+    with the zero-overhead RCU scheme does not constitute
+    negative overhead.
+
+    In real life, of course, things are more complex.  But
+    even the theoretical possibility of negative overhead for
+    a synchronization primitive is a bit unexpected.  ;-)
+</code></pre>
+<p>Quick Quiz #3:  If it is illegal to block in an RCU read-side<br>        critical section, what the heck do you do in<br>        PREEMPT_RT, where normal spinlocks can block???</p>
+<p>Answer:        Just as PREEMPT_RT permits preemption of spinlock<br>        critical sections, it permits preemption of RCU<br>        read-side critical sections.  It also permits<br>        spinlocks blocking while in RCU read-side critical<br>        sections.</p>
+<pre><code>    Why the apparent inconsistency?  Because it is it
+    possible to use priority boosting to keep the RCU
+    grace periods short if need be (for example, if running
+    short of memory).  In contrast, if blocking waiting
+    for (say) network reception, there is no way to know
+    what should be boosted.  Especially given that the
+    process we need to boost might well be a human being
+    who just went out for a pizza or something.  And although
+    a computer-operated cattle prod might arouse serious
+    interest, it might also provoke serious objections.
+    Besides, how does the computer know what pizza parlor
+    the human being went to???
+</code></pre>
+<p>ACKNOWLEDGEMENTS</p>
+<p>My thanks to the people who helped make this human-readable, including<br>Jon Walpole, Josh Triplett, Serge Hallyn, Suzanne Wood, and Alan Stern.</p>
+<p>For more information, see <a target="_blank" rel="noopener" href="http://www.rdrop.com/users/paulmck/RCU">http://www.rdrop.com/users/paulmck/RCU</a>.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/" title="Kernel-3.10.0-957.el7_whatisRCU" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_whatisRCU/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_unevictable-lru/" title="Kernel-3.10.0-957.el7_unevictable-lru"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_xfs-delayed-logging-design/" title="Kernel-3.10.0-957.el7_xfs-delayed-logging-design"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

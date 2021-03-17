@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_highres | oosTech.com</title>
+  <meta name="description" content="High resolution timers and dynamic ticks design notesFurther information can be found in the paper of the OLS 2006 talk “hrtimersand beyond”. The paper is part of the OLS 2006 Proceedings Volume 1, wh">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_highres">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_highres/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="High resolution timers and dynamic ticks design notesFurther information can be found in the paper of the OLS 2006 talk “hrtimersand beyond”. The paper is part of the OLS 2006 Proceedings Volume 1, wh">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_highres/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#High-resolution-timers-and-dynamic-ticks-design-notes"><span class="toc-number">1.</span> <span class="toc-text">High resolution timers and dynamic ticks design notes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hrtimer-base-infrastructure"><span class="toc-number">2.</span> <span class="toc-text">hrtimer base infrastructure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#timeofday-and-clock-source-management"><span class="toc-number">3.</span> <span class="toc-text">timeofday and clock source management</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#clock-event-management"><span class="toc-number">4.</span> <span class="toc-text">clock event management</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#high-resolution-timer-functionality"><span class="toc-number">5.</span> <span class="toc-text">high resolution timer functionality</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dynamic-ticks"><span class="toc-number">6.</span> <span class="toc-text">dynamic ticks</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_highres" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_highres
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_highres/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_highres/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_highres/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="High-resolution-timers-and-dynamic-ticks-design-notes"><a href="#High-resolution-timers-and-dynamic-ticks-design-notes" class="headerlink" title="High resolution timers and dynamic ticks design notes"></a>High resolution timers and dynamic ticks design notes</h2><p>Further information can be found in the paper of the OLS 2006 talk “hrtimers<br>and beyond”. The paper is part of the OLS 2006 Proceedings Volume 1, which can<br>be found on the OLS website:<br><a target="_blank" rel="noopener" href="http://www.linuxsymposium.org/2006/linuxsymposium_procv1.pdf">http://www.linuxsymposium.org/2006/linuxsymposium_procv1.pdf</a></p>
+<p>The slides to this talk are available from:<br><a target="_blank" rel="noopener" href="http://tglx.de/projects/hrtimers/ols2006-hrtimers.pdf">http://tglx.de/projects/hrtimers/ols2006-hrtimers.pdf</a></p>
+<p>The slides contain five figures (pages 2, 15, 18, 20, 22), which illustrate the<br>changes in the time(r) related Linux subsystems. Figure #1 (p. 2) shows the<br>design of the Linux time(r) system before hrtimers and other building blocks<br>got merged into mainline.</p>
+<p>Note: the paper and the slides are talking about “clock event source”, while we<br>switched to the name “clock event devices” in meantime.</p>
+<p>The design contains the following basic building blocks:</p>
+<ul>
+<li>hrtimer base infrastructure</li>
+<li>timeofday and clock source management</li>
+<li>clock event management</li>
+<li>high resolution timer functionality</li>
+<li>dynamic ticks</li>
+</ul>
+<h2 id="hrtimer-base-infrastructure"><a href="#hrtimer-base-infrastructure" class="headerlink" title="hrtimer base infrastructure"></a>hrtimer base infrastructure</h2><p>The hrtimer base infrastructure was merged into the 2.6.16 kernel. Details of<br>the base implementation are covered in Documentation/timers/hrtimers.txt. See<br>also figure #2 (OLS slides p. 15)</p>
+<p>The main differences to the timer wheel, which holds the armed timer_list type<br>timers are:<br>       - time ordered enqueueing into a rb-tree<br>       - independent of ticks (the processing is based on nanoseconds)</p>
+<h2 id="timeofday-and-clock-source-management"><a href="#timeofday-and-clock-source-management" class="headerlink" title="timeofday and clock source management"></a>timeofday and clock source management</h2><p>John Stultz’s Generic Time Of Day (GTOD) framework moves a large portion of<br>code out of the architecture-specific areas into a generic management<br>framework, as illustrated in figure #3 (OLS slides p. 18). The architecture<br>specific portion is reduced to the low level hardware details of the clock<br>sources, which are registered in the framework and selected on a quality based<br>decision. The low level code provides hardware setup and readout routines and<br>initializes data structures, which are used by the generic time keeping code to<br>convert the clock ticks to nanosecond based time values. All other time keeping<br>related functionality is moved into the generic code. The GTOD base patch got<br>merged into the 2.6.18 kernel.</p>
+<p>Further information about the Generic Time Of Day framework is available in the<br>OLS 2005 Proceedings Volume 1:<br><a target="_blank" rel="noopener" href="http://www.linuxsymposium.org/2005/linuxsymposium_procv1.pdf">http://www.linuxsymposium.org/2005/linuxsymposium_procv1.pdf</a></p>
+<p>The paper “We Are Not Getting Any Younger: A New Approach to Time and<br>Timers” was written by J. Stultz, D.V. Hart, &amp; N. Aravamudan.</p>
+<p>Figure #3 (OLS slides p.18) illustrates the transformation.</p>
+<h2 id="clock-event-management"><a href="#clock-event-management" class="headerlink" title="clock event management"></a>clock event management</h2><p>While clock sources provide read access to the monotonically increasing time<br>value, clock event devices are used to schedule the next event<br>interrupt(s). The next event is currently defined to be periodic, with its<br>period defined at compile time. The setup and selection of the event device<br>for various event driven functionalities is hardwired into the architecture<br>dependent code. This results in duplicated code across all architectures and<br>makes it extremely difficult to change the configuration of the system to use<br>event interrupt devices other than those already built into the<br>architecture. Another implication of the current design is that it is necessary<br>to touch all the architecture-specific implementations in order to provide new<br>functionality like high resolution timers or dynamic ticks.</p>
+<p>The clock events subsystem tries to address this problem by providing a generic<br>solution to manage clock event devices and their usage for the various clock<br>event driven kernel functionalities. The goal of the clock event subsystem is<br>to minimize the clock event related architecture dependent code to the pure<br>hardware related handling and to allow easy addition and utilization of new<br>clock event devices. It also minimizes the duplicated code across the<br>architectures as it provides generic functionality down to the interrupt<br>service handler, which is almost inherently hardware dependent.</p>
+<p>Clock event devices are registered either by the architecture dependent boot<br>code or at module insertion time. Each clock event device fills a data<br>structure with clock-specific property parameters and callback functions. The<br>clock event management decides, by using the specified property parameters, the<br>set of system functions a clock event device will be used to support. This<br>includes the distinction of per-CPU and per-system global event devices.</p>
+<p>System-level global event devices are used for the Linux periodic tick. Per-CPU<br>event devices are used to provide local CPU functionality such as process<br>accounting, profiling, and high resolution timers.</p>
+<p>The management layer assigns one or more of the following functions to a clock<br>event device:<br>      - system global periodic tick (jiffies update)<br>      - cpu local update_process_times<br>      - cpu local profiling<br>      - cpu local next event interrupt (non periodic mode)</p>
+<p>The clock event device delegates the selection of those timer interrupt related<br>functions completely to the management layer. The clock management layer stores<br>a function pointer in the device description structure, which has to be called<br>from the hardware level handler. This removes a lot of duplicated code from the<br>architecture specific timer interrupt handlers and hands the control over the<br>clock event devices and the assignment of timer interrupt related functionality<br>to the core code.</p>
+<p>The clock event layer API is rather small. Aside from the clock event device<br>registration interface it provides functions to schedule the next event<br>interrupt, clock event device notification service and support for suspend and<br>resume.</p>
+<p>The framework adds about 700 lines of code which results in a 2KB increase of<br>the kernel binary size. The conversion of i386 removes about 100 lines of<br>code. The binary size decrease is in the range of 400 byte. We believe that the<br>increase of flexibility and the avoidance of duplicated code across<br>architectures justifies the slight increase of the binary size.</p>
+<p>The conversion of an architecture has no functional impact, but allows to<br>utilize the high resolution and dynamic tick functionalities without any change<br>to the clock event device and timer interrupt code. After the conversion the<br>enabling of high resolution timers and dynamic ticks is simply provided by<br>adding the kernel/time/Kconfig file to the architecture specific Kconfig and<br>adding the dynamic tick specific calls to the idle routine (a total of 3 lines<br>added to the idle function and the Kconfig file)</p>
+<p>Figure #4 (OLS slides p.20) illustrates the transformation.</p>
+<h2 id="high-resolution-timer-functionality"><a href="#high-resolution-timer-functionality" class="headerlink" title="high resolution timer functionality"></a>high resolution timer functionality</h2><p>During system boot it is not possible to use the high resolution timer<br>functionality, while making it possible would be difficult and would serve no<br>useful function. The initialization of the clock event device framework, the<br>clock source framework (GTOD) and hrtimers itself has to be done and<br>appropriate clock sources and clock event devices have to be registered before<br>the high resolution functionality can work. Up to the point where hrtimers are<br>initialized, the system works in the usual low resolution periodic mode. The<br>clock source and the clock event device layers provide notification functions<br>which inform hrtimers about availability of new hardware. hrtimers validates<br>the usability of the registered clock sources and clock event devices before<br>switching to high resolution mode. This ensures also that a kernel which is<br>configured for high resolution timers can run on a system which lacks the<br>necessary hardware support.</p>
+<p>The high resolution timer code does not support SMP machines which have only<br>global clock event devices. The support of such hardware would involve IPI<br>calls when an interrupt happens. The overhead would be much larger than the<br>benefit. This is the reason why we currently disable high resolution and<br>dynamic ticks on i386 SMP systems which stop the local APIC in C3 power<br>state. A workaround is available as an idea, but the problem has not been<br>tackled yet.</p>
+<p>The time ordered insertion of timers provides all the infrastructure to decide<br>whether the event device has to be reprogrammed when a timer is added. The<br>decision is made per timer base and synchronized across per-cpu timer bases in<br>a support function. The design allows the system to utilize separate per-CPU<br>clock event devices for the per-CPU timer bases, but currently only one<br>reprogrammable clock event device per-CPU is utilized.</p>
+<p>When the timer interrupt happens, the next event interrupt handler is called<br>from the clock event distribution code and moves expired timers from the<br>red-black tree to a separate double linked list and invokes the softirq<br>handler. An additional mode field in the hrtimer structure allows the system to<br>execute callback functions directly from the next event interrupt handler. This<br>is restricted to code which can safely be executed in the hard interrupt<br>context. This applies, for example, to the common case of a wakeup function as<br>used by nanosleep. The advantage of executing the handler in the interrupt<br>context is the avoidance of up to two context switches - from the interrupted<br>context to the softirq and to the task which is woken up by the expired<br>timer.</p>
+<p>Once a system has switched to high resolution mode, the periodic tick is<br>switched off. This disables the per system global periodic clock event device -<br>e.g. the PIT on i386 SMP systems.</p>
+<p>The periodic tick functionality is provided by an per-cpu hrtimer. The callback<br>function is executed in the next event interrupt context and updates jiffies<br>and calls update_process_times and profiling. The implementation of the hrtimer<br>based periodic tick is designed to be extended with dynamic tick functionality.<br>This allows to use a single clock event device to schedule high resolution<br>timer and periodic events (jiffies tick, profiling, process accounting) on UP<br>systems. This has been proved to work with the PIT on i386 and the Incrementer<br>on PPC.</p>
+<p>The softirq for running the hrtimer queues and executing the callbacks has been<br>separated from the tick bound timer softirq to allow accurate delivery of high<br>resolution timer signals which are used by itimer and POSIX interval<br>timers. The execution of this softirq can still be delayed by other softirqs,<br>but the overall latencies have been significantly improved by this separation.</p>
+<p>Figure #5 (OLS slides p.22) illustrates the transformation.</p>
+<h2 id="dynamic-ticks"><a href="#dynamic-ticks" class="headerlink" title="dynamic ticks"></a>dynamic ticks</h2><p>Dynamic ticks are the logical consequence of the hrtimer based periodic tick<br>replacement (sched_tick). The functionality of the sched_tick hrtimer is<br>extended by three functions:</p>
+<ul>
+<li>hrtimer_stop_sched_tick</li>
+<li>hrtimer_restart_sched_tick</li>
+<li>hrtimer_update_jiffies</li>
+</ul>
+<p>hrtimer_stop_sched_tick() is called when a CPU goes into idle state. The code<br>evaluates the next scheduled timer event (from both hrtimers and the timer<br>wheel) and in case that the next event is further away than the next tick it<br>reprograms the sched_tick to this future event, to allow longer idle sleeps<br>without worthless interruption by the periodic tick. The function is also<br>called when an interrupt happens during the idle period, which does not cause a<br>reschedule. The call is necessary as the interrupt handler might have armed a<br>new timer whose expiry time is before the time which was identified as the<br>nearest event in the previous call to hrtimer_stop_sched_tick.</p>
+<p>hrtimer_restart_sched_tick() is called when the CPU leaves the idle state before<br>it calls schedule(). hrtimer_restart_sched_tick() resumes the periodic tick,<br>which is kept active until the next call to hrtimer_stop_sched_tick().</p>
+<p>hrtimer_update_jiffies() is called from irq_enter() when an interrupt happens<br>in the idle period to make sure that jiffies are up to date and the interrupt<br>handler has not to deal with an eventually stale jiffy value.</p>
+<p>The dynamic tick feature provides statistical values which are exported to<br>userspace via /proc/stats and can be made available for enhanced power<br>management control.</p>
+<p>The implementation leaves room for further development like full tickless<br>systems, where the time slice is controlled by the scheduler, variable<br>frequency profiling, and a complete removal of jiffies in the future.</p>
+<p>Aside the current initial submission of i386 support, the patchset has been<br>extended to x86_64 and ARM already. Initial (work in progress) support is also<br>available for MIPS and PowerPC.</p>
+<pre><code>  Thomas, Ingo
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_highres/" title="Kernel-3.10.0-957.el7_highres" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_highres/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_highmem/" title="Kernel-3.10.0-957.el7_highme"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_highuid/" title="Kernel-3.10.0-957.el7_highui"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

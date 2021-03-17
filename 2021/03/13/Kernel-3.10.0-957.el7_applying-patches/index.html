@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_applying-patches | oosTech.com</title>
+  <meta name="description" content="Applying Patches To The Linux Kernel ------------------------------------  Original by: Jesper Juhl, August 2005 Last update: 2006-01-05  A frequently asked question on the Linux Kernel Mailing List i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_applying-patches">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Applying Patches To The Linux Kernel ------------------------------------  Original by: Jesper Juhl, August 2005 Last update: 2006-01-05  A frequently asked question on the Linux Kernel Mailing List i">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-a-patch"><span class="toc-number">1.</span> <span class="toc-text">What is a patch?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-do-I-apply-or-revert-a-patch"><span class="toc-number">2.</span> <span class="toc-text">How do I apply or revert a patch?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-do-I-feed-a-patch-diff-file-to-patch%E2%80%99"><span class="toc-number">3.</span> <span class="toc-text">How do I feed a patch&#x2F;diff file to &#96;patch’?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Common-errors-when-patching"><span class="toc-number">4.</span> <span class="toc-text">Common errors when patching</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Are-there-any-alternatives-to-patch%E2%80%99"><span class="toc-number">5.</span> <span class="toc-text">Are there any alternatives to &#96;patch’?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Where-can-I-download-the-patches"><span class="toc-number">6.</span> <span class="toc-text">Where can I download the patches?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-2-6-x-kernels"><span class="toc-number">7.</span> <span class="toc-text">The 2.6.x kernels</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#moving-from-2-6-11-to-2-6-12"><span class="toc-number"></span> <span class="toc-text">moving from 2.6.11 to 2.6.12</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#moving-from-2-6-11-1-to-2-6-12"><span class="toc-number"></span> <span class="toc-text">moving from 2.6.11.1 to 2.6.12</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#The-2-6-x-y-kernels"><span class="toc-number">1.</span> <span class="toc-text">The 2.6.x.y kernels</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-rc-kernels"><span class="toc-number">2.</span> <span class="toc-text">The -rc kernels</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#first-an-example-of-moving-from-2-6-12-to-2-6-13-rc3"><span class="toc-number"></span> <span class="toc-text">first an example of moving from 2.6.12 to 2.6.13-rc3</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#now-let%E2%80%99s-move-from-2-6-13-rc3-to-2-6-13-rc5"><span class="toc-number"></span> <span class="toc-text">now let’s move from 2.6.13-rc3 to 2.6.13-rc5</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#finally-let%E2%80%99s-try-and-move-from-2-6-12-3-to-2-6-13-rc5"><span class="toc-number"></span> <span class="toc-text">finally let’s try and move from 2.6.12.3 to 2.6.13-rc5</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#The-git-kernels"><span class="toc-number">1.</span> <span class="toc-text">The -git kernels</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#moving-from-2-6-12-to-2-6-12-git1"><span class="toc-number"></span> <span class="toc-text">moving from 2.6.12 to 2.6.12-git1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#moving-from-2-6-12-git1-to-2-6-13-rc2-git3"><span class="toc-number"></span> <span class="toc-text">moving from 2.6.12-git1 to 2.6.13-rc2-git3</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#The-mm-kernels"><span class="toc-number">1.</span> <span class="toc-text">The -mm kernels</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#moving-from-2-6-12-to-2-6-12-mm1"><span class="toc-number"></span> <span class="toc-text">moving from 2.6.12 to 2.6.12-mm1</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#moving-from-2-6-12-mm1-to-2-6-13-rc3-mm3"><span class="toc-number"></span> <span class="toc-text">moving from 2.6.12-mm1 to 2.6.13-rc3-mm3</span></a>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_applying-patches" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_applying-patches
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>Applying Patches To The Linux Kernel
+------------------------------------
+
+Original by: Jesper Juhl, August 2005
+Last update: 2006-01-05
+</code></pre>
+<p>A frequently asked question on the Linux Kernel Mailing List is how to apply<br>a patch to the kernel or, more specifically, what base kernel a patch for<br>one of the many trees/branches should be applied to. Hopefully this document<br>will explain this to you.</p>
+<p>In addition to explaining how to apply and revert patches, a brief<br>description of the different kernel trees (and examples of how to apply<br>their specific patches) is also provided.</p>
+<h2 id="What-is-a-patch"><a href="#What-is-a-patch" class="headerlink" title="What is a patch?"></a>What is a patch?</h2><p> A patch is a small text document containing a delta of changes between two<br>different versions of a source tree. Patches are created with the `diff’<br>program.<br>To correctly apply a patch you need to know what base it was generated from<br>and what new version the patch will change the source tree into. These<br>should both be present in the patch file metadata or be possible to deduce<br>from the filename.</p>
+<h2 id="How-do-I-apply-or-revert-a-patch"><a href="#How-do-I-apply-or-revert-a-patch" class="headerlink" title="How do I apply or revert a patch?"></a>How do I apply or revert a patch?</h2><p> You apply a patch with the `patch’ program. The patch program reads a diff<br>(or patch) file and makes the changes to the source tree described in it.</p>
+<p>Patches for the Linux kernel are generated relative to the parent directory<br>holding the kernel source dir.</p>
+<p>This means that paths to files inside the patch file contain the name of the<br>kernel source directories it was generated against (or some other directory<br>names like “a/“ and “b/“).<br>Since this is unlikely to match the name of the kernel source dir on your<br>local machine (but is often useful info to see what version an otherwise<br>unlabeled patch was generated against) you should change into your kernel<br>source directory and then strip the first element of the path from filenames<br>in the patch file when applying it (the -p1 argument to `patch’ does this).</p>
+<p>To revert a previously applied patch, use the -R argument to patch.<br>So, if you applied a patch like this:<br>    patch -p1 &lt; ../patch-x.y.z</p>
+<p>You can revert (undo) it like this:<br>    patch -R -p1 &lt; ../patch-x.y.z</p>
+<h2 id="How-do-I-feed-a-patch-diff-file-to-patch’"><a href="#How-do-I-feed-a-patch-diff-file-to-patch’" class="headerlink" title="How do I feed a patch/diff file to `patch’?"></a>How do I feed a patch/diff file to `patch’?</h2><p> This (as usual with Linux and other UNIX like operating systems) can be<br>done in several different ways.<br>In all the examples below I feed the file (in uncompressed form) to patch<br>via stdin using the following syntax:<br>    patch -p1 &lt; path/to/patch-x.y.z</p>
+<p>If you just want to be able to follow the examples below and don’t want to<br>know of more than one way to use patch, then you can stop reading this<br>section here.</p>
+<p>Patch can also get the name of the file to use via the -i argument, like<br>this:<br>    patch -p1 -i path/to/patch-x.y.z</p>
+<p>If your patch file is compressed with gzip or bzip2 and you don’t want to<br>uncompress it before applying it, then you can feed it to patch like this<br>instead:<br>    zcat path/to/patch-x.y.z.gz | patch -p1<br>    bzcat path/to/patch-x.y.z.bz2 | patch -p1</p>
+<p>If you wish to uncompress the patch file by hand first before applying it<br>(what I assume you’ve done in the examples below), then you simply run<br>gunzip or bunzip2 on the file – like this:<br>    gunzip patch-x.y.z.gz<br>    bunzip2 patch-x.y.z.bz2</p>
+<p>Which will leave you with a plain text patch-x.y.z file that you can feed to<br>patch via stdin or the -i argument, as you prefer.</p>
+<p>A few other nice arguments for patch are -s which causes patch to be silent<br>except for errors which is nice to prevent errors from scrolling out of the<br>screen too fast, and –dry-run which causes patch to just print a listing of<br>what would happen, but doesn’t actually make any changes. Finally –verbose<br>tells patch to print more information about the work being done.</p>
+<h2 id="Common-errors-when-patching"><a href="#Common-errors-when-patching" class="headerlink" title="Common errors when patching"></a>Common errors when patching</h2><p> When patch applies a patch file it attempts to verify the sanity of the<br>file in different ways.<br>Checking that the file looks like a valid patch file &amp; checking the code<br>around the bits being modified matches the context provided in the patch are<br>just two of the basic sanity checks patch does.</p>
+<p>If patch encounters something that doesn’t look quite right it has two<br>options. It can either refuse to apply the changes and abort or it can try<br>to find a way to make the patch apply with a few minor changes.</p>
+<p>One example of something that’s not ‘quite right’ that patch will attempt to<br>fix up is if all the context matches, the lines being changed match, but the<br>line numbers are different. This can happen, for example, if the patch makes<br>a change in the middle of the file but for some reasons a few lines have<br>been added or removed near the beginning of the file. In that case<br>everything looks good it has just moved up or down a bit, and patch will<br>usually adjust the line numbers and apply the patch.</p>
+<p>Whenever patch applies a patch that it had to modify a bit to make it fit<br>it’ll tell you about it by saying the patch applied with ‘fuzz’.<br>You should be wary of such changes since even though patch probably got it<br>right it doesn’t /always/ get it right, and the result will sometimes be<br>wrong.</p>
+<p>When patch encounters a change that it can’t fix up with fuzz it rejects it<br>outright and leaves a file with a .rej extension (a reject file). You can<br>read this file to see exactly what change couldn’t be applied, so you can<br>go fix it up by hand if you wish.</p>
+<p>If you don’t have any third-party patches applied to your kernel source, but<br>only patches from kernel.org and you apply the patches in the correct order,<br>and have made no modifications yourself to the source files, then you should<br>never see a fuzz or reject message from patch. If you do see such messages<br>anyway, then there’s a high risk that either your local source tree or the<br>patch file is corrupted in some way. In that case you should probably try<br>re-downloading the patch and if things are still not OK then you’d be advised<br>to start with a fresh tree downloaded in full from kernel.org.</p>
+<p>Let’s look a bit more at some of the messages patch can produce.</p>
+<p>If patch stops and presents a “File to patch:” prompt, then patch could not<br>find a file to be patched. Most likely you forgot to specify -p1 or you are<br>in the wrong directory. Less often, you’ll find patches that need to be<br>applied with -p0 instead of -p1 (reading the patch file should reveal if<br>this is the case – if so, then this is an error by the person who created<br>the patch but is not fatal).</p>
+<p>If you get “Hunk #2 succeeded at 1887 with fuzz 2 (offset 7 lines).” or a<br>message similar to that, then it means that patch had to adjust the location<br>of the change (in this example it needed to move 7 lines from where it<br>expected to make the change to make it fit).<br>The resulting file may or may not be OK, depending on the reason the file<br>was different than expected.<br>This often happens if you try to apply a patch that was generated against a<br>different kernel version than the one you are trying to patch.</p>
+<p>If you get a message like “Hunk #3 FAILED at 2387.”, then it means that the<br>patch could not be applied correctly and the patch program was unable to<br>fuzz its way through. This will generate a .rej file with the change that<br>caused the patch to fail and also a .orig file showing you the original<br>content that couldn’t be changed.</p>
+<p>If you get “Reversed (or previously applied) patch detected!  Assume -R? [n]”<br>then patch detected that the change contained in the patch seems to have<br>already been made.<br>If you actually did apply this patch previously and you just re-applied it<br>in error, then just say [n]o and abort this patch. If you applied this patch<br>previously and actually intended to revert it, but forgot to specify -R,<br>then you can say [y]es here to make patch revert it for you.<br>This can also happen if the creator of the patch reversed the source and<br>destination directories when creating the patch, and in that case reverting<br>the patch will in fact apply it.</p>
+<p>A message similar to “patch: **** unexpected end of file in patch” or “patch<br>unexpectedly ends in middle of line” means that patch could make no sense of<br>the file you fed to it. Either your download is broken, you tried to feed<br>patch a compressed patch file without uncompressing it first, or the patch<br>file that you are using has been mangled by a mail client or mail transfer<br>agent along the way somewhere, e.g., by splitting a long line into two lines.<br>Often these warnings can easily be fixed by joining (concatenating) the<br>two lines that had been split.</p>
+<p>As I already mentioned above, these errors should never happen if you apply<br>a patch from kernel.org to the correct version of an unmodified source tree.<br>So if you get these errors with kernel.org patches then you should probably<br>assume that either your patch file or your tree is broken and I’d advise you<br>to start over with a fresh download of a full kernel tree and the patch you<br>wish to apply.</p>
+<h2 id="Are-there-any-alternatives-to-patch’"><a href="#Are-there-any-alternatives-to-patch’" class="headerlink" title="Are there any alternatives to `patch’?"></a>Are there any alternatives to `patch’?</h2><p> Yes there are alternatives.</p>
+<p> You can use the `interdiff’ program (<a target="_blank" rel="noopener" href="http://cyberelk.net/tim/patchutils/">http://cyberelk.net/tim/patchutils/</a>) to<br>generate a patch representing the differences between two patches and then<br>apply the result.<br>This will let you move from something like 2.6.12.2 to 2.6.12.3 in a single<br>step. The -z flag to interdiff will even let you feed it patches in gzip or<br>bzip2 compressed form directly without the use of zcat or bzcat or manual<br>decompression.</p>
+<p>Here’s how you’d go from 2.6.12.2 to 2.6.12.3 in a single step:<br>    interdiff -z ../patch-2.6.12.2.bz2 ../patch-2.6.12.3.gz | patch -p1</p>
+<p>Although interdiff may save you a step or two you are generally advised to<br>do the additional steps since interdiff can get things wrong in some cases.</p>
+<p> Another alternative is `ketchup’, which is a python script for automatic<br>downloading and applying of patches (<a target="_blank" rel="noopener" href="http://www.selenic.com/ketchup/">http://www.selenic.com/ketchup/</a>).</p>
+<p> Other nice tools are diffstat, which shows a summary of changes made by a<br>patch; lsdiff, which displays a short listing of affected files in a patch<br>file, along with (optionally) the line numbers of the start of each patch;<br>and grepdiff, which displays a list of the files modified by a patch where<br>the patch contains a given regular expression.</p>
+<h2 id="Where-can-I-download-the-patches"><a href="#Where-can-I-download-the-patches" class="headerlink" title="Where can I download the patches?"></a>Where can I download the patches?</h2><p> The patches are available at <a target="_blank" rel="noopener" href="http://kernel.org/">http://kernel.org/</a><br>Most recent patches are linked from the front page, but they also have<br>specific homes.</p>
+<p>The 2.6.x.y (-stable) and 2.6.x patches live at<br> <a href="ftp://ftp.kernel.org/pub/linux/kernel/v2.6/">ftp://ftp.kernel.org/pub/linux/kernel/v2.6/</a></p>
+<p>The -rc patches live at<br> <a href="ftp://ftp.kernel.org/pub/linux/kernel/v2.6/testing/">ftp://ftp.kernel.org/pub/linux/kernel/v2.6/testing/</a></p>
+<p>The -git patches live at<br> <a href="ftp://ftp.kernel.org/pub/linux/kernel/v2.6/snapshots/">ftp://ftp.kernel.org/pub/linux/kernel/v2.6/snapshots/</a></p>
+<p>The -mm kernels live at<br> <a href="ftp://ftp.kernel.org/pub/linux/kernel/people/akpm/patches/2.6/">ftp://ftp.kernel.org/pub/linux/kernel/people/akpm/patches/2.6/</a></p>
+<p>In place of ftp.kernel.org you can use ftp.cc.kernel.org, where cc is a<br>country code. This way you’ll be downloading from a mirror site that’s most<br>likely geographically closer to you, resulting in faster downloads for you,<br>less bandwidth used globally and less load on the main kernel.org servers –<br>these are good things, so do use mirrors when possible.</p>
+<h2 id="The-2-6-x-kernels"><a href="#The-2-6-x-kernels" class="headerlink" title="The 2.6.x kernels"></a>The 2.6.x kernels</h2><p> These are the base stable releases released by Linus. The highest numbered<br>release is the most recent.</p>
+<p>If regressions or other serious flaws are found, then a -stable fix patch<br>will be released (see below) on top of this base. Once a new 2.6.x base<br>kernel is released, a patch is made available that is a delta between the<br>previous 2.6.x kernel and the new one.</p>
+<p>To apply a patch moving from 2.6.11 to 2.6.12, you’d do the following (note<br>that such patches do <em>NOT</em> apply on top of 2.6.x.y kernels but on top of the<br>base 2.6.x kernel – if you need to move from 2.6.x.y to 2.6.x+1 you need to<br>first revert the 2.6.x.y patch).</p>
+<p>Here are some examples:</p>
+<h1 id="moving-from-2-6-11-to-2-6-12"><a href="#moving-from-2-6-11-to-2-6-12" class="headerlink" title="moving from 2.6.11 to 2.6.12"></a>moving from 2.6.11 to 2.6.12</h1><p>$ cd ~/linux-2.6.11            # change to kernel source dir<br>$ patch -p1 &lt; ../patch-2.6.12        # apply the 2.6.12 patch<br>$ cd ..<br>$ mv linux-2.6.11 linux-2.6.12        # rename source dir</p>
+<h1 id="moving-from-2-6-11-1-to-2-6-12"><a href="#moving-from-2-6-11-1-to-2-6-12" class="headerlink" title="moving from 2.6.11.1 to 2.6.12"></a>moving from 2.6.11.1 to 2.6.12</h1><p>$ cd ~/linux-2.6.11.1            # change to kernel source dir<br>$ patch -p1 -R &lt; ../patch-2.6.11.1    # revert the 2.6.11.1 patch<br>                    # source dir is now 2.6.11<br>$ patch -p1 &lt; ../patch-2.6.12        # apply new 2.6.12 patch<br>$ cd ..<br>$ mv linux-2.6.11.1 linux-2.6.12        # rename source dir</p>
+<h2 id="The-2-6-x-y-kernels"><a href="#The-2-6-x-y-kernels" class="headerlink" title="The 2.6.x.y kernels"></a>The 2.6.x.y kernels</h2><p> Kernels with 4-digit versions are -stable kernels. They contain small(ish)<br>critical fixes for security problems or significant regressions discovered<br>in a given 2.6.x kernel.</p>
+<p>This is the recommended branch for users who want the most recent stable<br>kernel and are not interested in helping test development/experimental<br>versions.</p>
+<p>If no 2.6.x.y kernel is available, then the highest numbered 2.6.x kernel is<br>the current stable kernel.</p>
+<p> note: the -stable team usually do make incremental patches available as well<br> as patches against the latest mainline release, but I only cover the<br> non-incremental ones below. The incremental ones can be found at<br> <a href="ftp://ftp.kernel.org/pub/linux/kernel/v2.6/incr/">ftp://ftp.kernel.org/pub/linux/kernel/v2.6/incr/</a></p>
+<p>These patches are not incremental, meaning that for example the 2.6.12.3<br>patch does not apply on top of the 2.6.12.2 kernel source, but rather on top<br>of the base 2.6.12 kernel source .<br>So, in order to apply the 2.6.12.3 patch to your existing 2.6.12.2 kernel<br>source you have to first back out the 2.6.12.2 patch (so you are left with a<br>base 2.6.12 kernel source) and then apply the new 2.6.12.3 patch.</p>
+<p>Here’s a small example:</p>
+<p>$ cd ~/linux-2.6.12.2            # change into the kernel source dir<br>$ patch -p1 -R &lt; ../patch-2.6.12.2    # revert the 2.6.12.2 patch<br>$ patch -p1 &lt; ../patch-2.6.12.3        # apply the new 2.6.12.3 patch<br>$ cd ..<br>$ mv linux-2.6.12.2 linux-2.6.12.3    # rename the kernel source dir</p>
+<h2 id="The-rc-kernels"><a href="#The-rc-kernels" class="headerlink" title="The -rc kernels"></a>The -rc kernels</h2><p> These are release-candidate kernels. These are development kernels released<br>by Linus whenever he deems the current git (the kernel’s source management<br>tool) tree to be in a reasonably sane state adequate for testing.</p>
+<p>These kernels are not stable and you should expect occasional breakage if<br>you intend to run them. This is however the most stable of the main<br>development branches and is also what will eventually turn into the next<br>stable kernel, so it is important that it be tested by as many people as<br>possible.</p>
+<p>This is a good branch to run for people who want to help out testing<br>development kernels but do not want to run some of the really experimental<br>stuff (such people should see the sections about -git and -mm kernels below).</p>
+<p>The -rc patches are not incremental, they apply to a base 2.6.x kernel, just<br>like the 2.6.x.y patches described above. The kernel version before the -rcN<br>suffix denotes the version of the kernel that this -rc kernel will eventually<br>turn into.<br>So, 2.6.13-rc5 means that this is the fifth release candidate for the 2.6.13<br>kernel and the patch should be applied on top of the 2.6.12 kernel source.</p>
+<p>Here are 3 examples of how to apply these patches:</p>
+<h1 id="first-an-example-of-moving-from-2-6-12-to-2-6-13-rc3"><a href="#first-an-example-of-moving-from-2-6-12-to-2-6-13-rc3" class="headerlink" title="first an example of moving from 2.6.12 to 2.6.13-rc3"></a>first an example of moving from 2.6.12 to 2.6.13-rc3</h1><p>$ cd ~/linux-2.6.12            # change into the 2.6.12 source dir<br>$ patch -p1 &lt; ../patch-2.6.13-rc3    # apply the 2.6.13-rc3 patch<br>$ cd ..<br>$ mv linux-2.6.12 linux-2.6.13-rc3    # rename the source dir</p>
+<h1 id="now-let’s-move-from-2-6-13-rc3-to-2-6-13-rc5"><a href="#now-let’s-move-from-2-6-13-rc3-to-2-6-13-rc5" class="headerlink" title="now let’s move from 2.6.13-rc3 to 2.6.13-rc5"></a>now let’s move from 2.6.13-rc3 to 2.6.13-rc5</h1><p>$ cd ~/linux-2.6.13-rc3            # change into the 2.6.13-rc3 dir<br>$ patch -p1 -R &lt; ../patch-2.6.13-rc3    # revert the 2.6.13-rc3 patch<br>$ patch -p1 &lt; ../patch-2.6.13-rc5    # apply the new 2.6.13-rc5 patch<br>$ cd ..<br>$ mv linux-2.6.13-rc3 linux-2.6.13-rc5    # rename the source dir</p>
+<h1 id="finally-let’s-try-and-move-from-2-6-12-3-to-2-6-13-rc5"><a href="#finally-let’s-try-and-move-from-2-6-12-3-to-2-6-13-rc5" class="headerlink" title="finally let’s try and move from 2.6.12.3 to 2.6.13-rc5"></a>finally let’s try and move from 2.6.12.3 to 2.6.13-rc5</h1><p>$ cd ~/linux-2.6.12.3            # change to the kernel source dir<br>$ patch -p1 -R &lt; ../patch-2.6.12.3    # revert the 2.6.12.3 patch<br>$ patch -p1 &lt; ../patch-2.6.13-rc5    # apply new 2.6.13-rc5 patch<br>$ cd ..<br>$ mv linux-2.6.12.3 linux-2.6.13-rc5    # rename the kernel source dir</p>
+<h2 id="The-git-kernels"><a href="#The-git-kernels" class="headerlink" title="The -git kernels"></a>The -git kernels</h2><p> These are daily snapshots of Linus’ kernel tree (managed in a git<br>repository, hence the name).</p>
+<p>These patches are usually released daily and represent the current state of<br>Linus’s tree. They are more experimental than -rc kernels since they are<br>generated automatically without even a cursory glance to see if they are<br>sane.</p>
+<p>-git patches are not incremental and apply either to a base 2.6.x kernel or<br>a base 2.6.x-rc kernel – you can see which from their name.<br>A patch named 2.6.12-git1 applies to the 2.6.12 kernel source and a patch<br>named 2.6.13-rc3-git2 applies to the source of the 2.6.13-rc3 kernel.</p>
+<p>Here are some examples of how to apply these patches:</p>
+<h1 id="moving-from-2-6-12-to-2-6-12-git1"><a href="#moving-from-2-6-12-to-2-6-12-git1" class="headerlink" title="moving from 2.6.12 to 2.6.12-git1"></a>moving from 2.6.12 to 2.6.12-git1</h1><p>$ cd ~/linux-2.6.12            # change to the kernel source dir<br>$ patch -p1 &lt; ../patch-2.6.12-git1    # apply the 2.6.12-git1 patch<br>$ cd ..<br>$ mv linux-2.6.12 linux-2.6.12-git1    # rename the kernel source dir</p>
+<h1 id="moving-from-2-6-12-git1-to-2-6-13-rc2-git3"><a href="#moving-from-2-6-12-git1-to-2-6-13-rc2-git3" class="headerlink" title="moving from 2.6.12-git1 to 2.6.13-rc2-git3"></a>moving from 2.6.12-git1 to 2.6.13-rc2-git3</h1><p>$ cd ~/linux-2.6.12-git1        # change to the kernel source dir<br>$ patch -p1 -R &lt; ../patch-2.6.12-git1    # revert the 2.6.12-git1 patch<br>                    # we now have a 2.6.12 kernel<br>$ patch -p1 &lt; ../patch-2.6.13-rc2    # apply the 2.6.13-rc2 patch<br>                    # the kernel is now 2.6.13-rc2<br>$ patch -p1 &lt; ../patch-2.6.13-rc2-git3    # apply the 2.6.13-rc2-git3 patch<br>                    # the kernel is now 2.6.13-rc2-git3<br>$ cd ..<br>$ mv linux-2.6.12-git1 linux-2.6.13-rc2-git3    # rename source dir</p>
+<h2 id="The-mm-kernels"><a href="#The-mm-kernels" class="headerlink" title="The -mm kernels"></a>The -mm kernels</h2><p> These are experimental kernels released by Andrew Morton.</p>
+<p>The -mm tree serves as a sort of proving ground for new features and other<br>experimental patches.<br>Once a patch has proved its worth in -mm for a while Andrew pushes it on to<br>Linus for inclusion in mainline.</p>
+<p>Although it’s encouraged that patches flow to Linus via the -mm tree, this<br>is not always enforced.<br>Subsystem maintainers (or individuals) sometimes push their patches directly<br>to Linus, even though (or after) they have been merged and tested in -mm (or<br>sometimes even without prior testing in -mm).</p>
+<p>You should generally strive to get your patches into mainline via -mm to<br>ensure maximum testing.</p>
+<p>This branch is in constant flux and contains many experimental features, a<br>lot of debugging patches not appropriate for mainline etc., and is the most<br>experimental of the branches described in this document.</p>
+<p>These kernels are not appropriate for use on systems that are supposed to be<br>stable and they are more risky to run than any of the other branches (make<br>sure you have up-to-date backups – that goes for any experimental kernel but<br>even more so for -mm kernels).</p>
+<p>These kernels in addition to all the other experimental patches they contain<br>usually also contain any changes in the mainline -git kernels available at<br>the time of release.</p>
+<p>Testing of -mm kernels is greatly appreciated since the whole point of the<br>tree is to weed out regressions, crashes, data corruption bugs, build<br>breakage (and any other bug in general) before changes are merged into the<br>more stable mainline Linus tree.<br>But testers of -mm should be aware that breakage in this tree is more common<br>than in any other tree.</p>
+<p>The -mm kernels are not released on a fixed schedule, but usually a few -mm<br>kernels are released in between each -rc kernel (1 to 3 is common).<br>The -mm kernels apply to either a base 2.6.x kernel (when no -rc kernels<br>have been released yet) or to a Linus -rc kernel.</p>
+<p>Here are some examples of applying the -mm patches:</p>
+<h1 id="moving-from-2-6-12-to-2-6-12-mm1"><a href="#moving-from-2-6-12-to-2-6-12-mm1" class="headerlink" title="moving from 2.6.12 to 2.6.12-mm1"></a>moving from 2.6.12 to 2.6.12-mm1</h1><p>$ cd ~/linux-2.6.12            # change to the 2.6.12 source dir<br>$ patch -p1 &lt; ../2.6.12-mm1        # apply the 2.6.12-mm1 patch<br>$ cd ..<br>$ mv linux-2.6.12 linux-2.6.12-mm1    # rename the source appropriately</p>
+<h1 id="moving-from-2-6-12-mm1-to-2-6-13-rc3-mm3"><a href="#moving-from-2-6-12-mm1-to-2-6-13-rc3-mm3" class="headerlink" title="moving from 2.6.12-mm1 to 2.6.13-rc3-mm3"></a>moving from 2.6.12-mm1 to 2.6.13-rc3-mm3</h1><p>$ cd ~/linux-2.6.12-mm1<br>$ patch -p1 -R &lt; ../2.6.12-mm1        # revert the 2.6.12-mm1 patch<br>                    # we now have a 2.6.12 source<br>$ patch -p1 &lt; ../patch-2.6.13-rc3    # apply the 2.6.13-rc3 patch<br>                    # we now have a 2.6.13-rc3 source<br>$ patch -p1 &lt; ../2.6.13-rc3-mm3        # apply the 2.6.13-rc3-mm3 patch<br>$ cd ..<br>$ mv linux-2.6.12-mm1 linux-2.6.13-rc3-mm3    # rename the source dir</p>
+<p>This concludes this list of explanations of the various kernel trees.<br>I hope you are now clear on how to apply the various patches and help testing<br>the kernel.</p>
+<p>Thank you’s to Randy Dunlap, Rolf Eike Beer, Linus Torvalds, Bodo Eggert,<br>Johannes Stezenbach, Grant Coady, Pavel Machek and others that I may have<br>forgotten for their reviews and contributions to this document.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/" title="Kernel-3.10.0-957.el7_applying-patches" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_applying-patches/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_aic7xxx_old/" title="Kernel-3.10.0-957.el7_aic7xxx_ol"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_arcmsr_spec/" title="Kernel-3.10.0-957.el7_arcmsr_spec"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_dsa | oosTech.com</title>
+  <meta name="description" content="Distributed Switch ArchitectureIntroductionThis document describes the Distributed Switch Architecture (DSA) subsystemdesign principles, limitations, interactions with other subsystems, and how todeve">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_dsa">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_dsa/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Distributed Switch ArchitectureIntroductionThis document describes the Distributed Switch Architecture (DSA) subsystemdesign principles, limitations, interactions with other subsystems, and how todeve">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_dsa/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Distributed-Switch-Architecture"><span class="toc-number">1.</span> <span class="toc-text">Distributed Switch Architecture</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">2.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Design-principles"><span class="toc-number">3.</span> <span class="toc-text">Design principles</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Switch-tagging-protocols"><span class="toc-number">3.1.</span> <span class="toc-text">Switch tagging protocols</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Master-network-devices"><span class="toc-number">3.2.</span> <span class="toc-text">Master network devices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Networking-stack-hooks"><span class="toc-number">3.3.</span> <span class="toc-text">Networking stack hooks</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Slave-network-devices"><span class="toc-number">3.4.</span> <span class="toc-text">Slave network devices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Graphical-representation"><span class="toc-number">3.5.</span> <span class="toc-text">Graphical representation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Slave-MDIO-bus"><span class="toc-number">3.6.</span> <span class="toc-text">Slave MDIO bus</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Data-structures"><span class="toc-number">3.7.</span> <span class="toc-text">Data structures</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Design-limitations"><span class="toc-number">4.</span> <span class="toc-text">Design limitations</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#DSA-is-a-platform-device-driver"><span class="toc-number">4.1.</span> <span class="toc-text">DSA is a platform device driver</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Limits-on-the-number-of-devices-and-ports"><span class="toc-number">4.2.</span> <span class="toc-text">Limits on the number of devices and ports</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lack-of-CPU-DSA-network-devices"><span class="toc-number">4.3.</span> <span class="toc-text">Lack of CPU&#x2F;DSA network devices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Common-pitfalls-using-DSA-setups"><span class="toc-number">4.4.</span> <span class="toc-text">Common pitfalls using DSA setups</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Interactions-with-other-subsystems"><span class="toc-number">5.</span> <span class="toc-text">Interactions with other subsystems</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MDIO-PHY-library"><span class="toc-number">5.1.</span> <span class="toc-text">MDIO&#x2F;PHY library</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SWITCHDEV"><span class="toc-number">5.2.</span> <span class="toc-text">SWITCHDEV</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Device-Tree"><span class="toc-number">5.3.</span> <span class="toc-text">Device Tree</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Driver-development"><span class="toc-number">6.</span> <span class="toc-text">Driver development</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Switch-configuration"><span class="toc-number">6.1.</span> <span class="toc-text">Switch configuration</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PHY-devices-and-link-management"><span class="toc-number">6.2.</span> <span class="toc-text">PHY devices and link management</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ethtool-operations"><span class="toc-number">6.3.</span> <span class="toc-text">Ethtool operations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Power-management"><span class="toc-number">6.4.</span> <span class="toc-text">Power management</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bridge-layer"><span class="toc-number">6.5.</span> <span class="toc-text">Bridge layer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bridge-VLAN-filtering"><span class="toc-number">6.6.</span> <span class="toc-text">Bridge VLAN filtering</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#TODO"><span class="toc-number">7.</span> <span class="toc-text">TODO</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Making-SWITCHDEV-and-DSA-converge-towards-an-unified-codebase"><span class="toc-number">7.1.</span> <span class="toc-text">Making SWITCHDEV and DSA converge towards an unified codebase</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-hanging-fruits"><span class="toc-number">7.2.</span> <span class="toc-text">Other hanging fruits</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_dsa" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_dsa
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_dsa/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_dsa/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_dsa/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Distributed-Switch-Architecture"><a href="#Distributed-Switch-Architecture" class="headerlink" title="Distributed Switch Architecture"></a>Distributed Switch Architecture</h1><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>This document describes the Distributed Switch Architecture (DSA) subsystem<br>design principles, limitations, interactions with other subsystems, and how to<br>develop drivers for this subsystem as well as a TODO for developers interested<br>in joining the effort.</p>
+<h1 id="Design-principles"><a href="#Design-principles" class="headerlink" title="Design principles"></a>Design principles</h1><p>The Distributed Switch Architecture is a subsystem which was primarily designed<br>to support Marvell Ethernet switches (MV88E6xxx, a.k.a Linkstreet product line)<br>using Linux, but has since evolved to support other vendors as well.</p>
+<p>The original philosophy behind this design was to be able to use unmodified<br>Linux tools such as bridge, iproute2, ifconfig to work transparently whether<br>they configured/queried a switch port network device or a regular network<br>device.</p>
+<p>An Ethernet switch is typically comprised of multiple front-panel ports, and one<br>or more CPU or management port. The DSA subsystem currently relies on the<br>presence of a management port connected to an Ethernet controller capable of<br>receiving Ethernet frames from the switch. This is a very common setup for all<br>kinds of Ethernet switches found in Small Home and Office products: routers,<br>gateways, or even top-of-the rack switches. This host Ethernet controller will<br>be later referred to as “master” and “cpu” in DSA terminology and code.</p>
+<p>The D in DSA stands for Distributed, because the subsystem has been designed<br>with the ability to configure and manage cascaded switches on top of each other<br>using upstream and downstream Ethernet links between switches. These specific<br>ports are referred to as “dsa” ports in DSA terminology and code. A collection<br>of multiple switches connected to each other is called a “switch tree”.</p>
+<p>For each front-panel port, DSA will create specialized network devices which are<br>used as controlling and data-flowing endpoints for use by the Linux networking<br>stack. These specialized network interfaces are referred to as “slave” network<br>interfaces in DSA terminology and code.</p>
+<p>The ideal case for using DSA is when an Ethernet switch supports a “switch tag”<br>which is a hardware feature making the switch insert a specific tag for each<br>Ethernet frames it received to/from specific ports to help the management<br>interface figure out:</p>
+<ul>
+<li>what port is this frame coming from</li>
+<li>what was the reason why this frame got forwarded</li>
+<li>how to send CPU originated traffic to specific ports</li>
+</ul>
+<p>The subsystem does support switches not capable of inserting/stripping tags, but<br>the features might be slightly limited in that case (traffic separation relies<br>on Port-based VLAN IDs).</p>
+<p>Note that DSA does not currently create network interfaces for the “cpu” and<br>“dsa” ports because:</p>
+<ul>
+<li><p>the “cpu” port is the Ethernet switch facing side of the management<br>controller, and as such, would create a duplication of feature, since you<br>would get two interfaces for the same conduit: master netdev, and “cpu” netdev</p>
+</li>
+<li><p>the “dsa” port(s) are just conduits between two or more switches, and as such<br>cannot really be used as proper network interfaces either, only the<br>downstream, or the top-most upstream interface makes sense with that model</p>
+</li>
+</ul>
+<h2 id="Switch-tagging-protocols"><a href="#Switch-tagging-protocols" class="headerlink" title="Switch tagging protocols"></a>Switch tagging protocols</h2><p>DSA currently supports 5 different tagging protocols, and a tag-less mode as<br>well. The different protocols are implemented in:</p>
+<p>net/dsa/tag_trailer.c: Marvell’s 4 trailer tag mode (legacy)<br>net/dsa/tag_dsa.c: Marvell’s original DSA tag<br>net/dsa/tag_edsa.c: Marvell’s enhanced DSA tag<br>net/dsa/tag_brcm.c: Broadcom’s 4 bytes tag<br>net/dsa/tag_qca.c: Qualcomm’s 2 bytes tag</p>
+<p>The exact format of the tag protocol is vendor specific, but in general, they<br>all contain something which:</p>
+<ul>
+<li>identifies which port the Ethernet frame came from/should be sent to</li>
+<li>provides a reason why this frame was forwarded to the management interface</li>
+</ul>
+<h2 id="Master-network-devices"><a href="#Master-network-devices" class="headerlink" title="Master network devices"></a>Master network devices</h2><p>Master network devices are regular, unmodified Linux network device drivers for<br>the CPU/management Ethernet interface. Such a driver might occasionally need to<br>know whether DSA is enabled (e.g.: to enable/disable specific offload features),<br>but the DSA subsystem has been proven to work with industry standard drivers:<br>e1000e, mv643xx_eth etc. without having to introduce modifications to these<br>drivers. Such network devices are also often referred to as conduit network<br>devices since they act as a pipe between the host processor and the hardware<br>Ethernet switch.</p>
+<h2 id="Networking-stack-hooks"><a href="#Networking-stack-hooks" class="headerlink" title="Networking stack hooks"></a>Networking stack hooks</h2><p>When a master netdev is used with DSA, a small hook is placed in in the<br>networking stack is in order to have the DSA subsystem process the Ethernet<br>switch specific tagging protocol. DSA accomplishes this by registering a<br>specific (and fake) Ethernet type (later becoming skb-&gt;protocol) with the<br>networking stack, this is also known as a ptype or packet_type. A typical<br>Ethernet Frame receive sequence looks like this:</p>
+<p>Master network device (e.g.: e1000e):</p>
+<p>Receive interrupt fires:</p>
+<ul>
+<li>receive function is invoked</li>
+<li>basic packet processing is done: getting length, status etc.</li>
+<li>packet is prepared to be processed by the Ethernet layer by calling<br>eth_type_trans</li>
+</ul>
+<p>net/ethernet/eth.c:</p>
+<p>eth_type_trans(skb, dev)<br>    if (dev-&gt;dsa_ptr != NULL)<br>        -&gt; skb-&gt;protocol = ETH_P_XDSA</p>
+<p>drivers/net/ethernet/*:</p>
+<p>netif_receive_skb(skb)<br>    -&gt; iterate over registered packet_type<br>        -&gt; invoke handler for ETH_P_XDSA, calls dsa_switch_rcv()</p>
+<p>net/dsa/dsa.c:<br>    -&gt; dsa_switch_rcv()<br>        -&gt; invoke switch tag specific protocol handler in<br>           net/dsa/tag_*.c</p>
+<p>net/dsa/tag_*.c:<br>    -&gt; inspect and strip switch tag protocol to determine originating port<br>    -&gt; locate per-port network device<br>    -&gt; invoke eth_type_trans() with the DSA slave network device<br>    -&gt; invoked netif_receive_skb()</p>
+<p>Past this point, the DSA slave network devices get delivered regular Ethernet<br>frames that can be processed by the networking stack.</p>
+<h2 id="Slave-network-devices"><a href="#Slave-network-devices" class="headerlink" title="Slave network devices"></a>Slave network devices</h2><p>Slave network devices created by DSA are stacked on top of their master network<br>device, each of these network interfaces will be responsible for being a<br>controlling and data-flowing end-point for each front-panel port of the switch.<br>These interfaces are specialized in order to:</p>
+<ul>
+<li>insert/remove the switch tag protocol (if it exists) when sending traffic<br>to/from specific switch ports</li>
+<li>query the switch for ethtool operations: statistics, link state,<br>Wake-on-LAN, register dumps…</li>
+<li>external/internal PHY management: link, auto-negotiation etc.</li>
+</ul>
+<p>These slave network devices have custom net_device_ops and ethtool_ops function<br>pointers which allow DSA to introduce a level of layering between the networking<br>stack/ethtool, and the switch driver implementation.</p>
+<p>Upon frame transmission from these slave network devices, DSA will look up which<br>switch tagging protocol is currently registered with these network devices, and<br>invoke a specific transmit routine which takes care of adding the relevant<br>switch tag in the Ethernet frames.</p>
+<p>These frames are then queued for transmission using the master network device<br>ndo_start_xmit() function, since they contain the appropriate switch tag, the<br>Ethernet switch will be able to process these incoming frames from the<br>management interface and delivers these frames to the physical switch port.</p>
+<h2 id="Graphical-representation"><a href="#Graphical-representation" class="headerlink" title="Graphical representation"></a>Graphical representation</h2><p>Summarized, this is basically how DSA looks like from a network device<br>perspective:</p>
+<pre><code>        |---------------------------
+        | CPU network device (eth0)|
+        ----------------------------
+        | &lt;tag added by switch     |
+        |                          |
+        |                          |
+        |        tag added by CPU&gt; |
+    |--------------------------------------------|
+    | Switch driver                     |
+    |--------------------------------------------|
+                ||        ||         ||
+    |-------|  |-------|  |-------|
+    | sw0p0 |  | sw0p1 |  | sw0p2 |
+    |-------|  |-------|  |-------|
+</code></pre>
+<h2 id="Slave-MDIO-bus"><a href="#Slave-MDIO-bus" class="headerlink" title="Slave MDIO bus"></a>Slave MDIO bus</h2><p>In order to be able to read to/from a switch PHY built into it, DSA creates a<br>slave MDIO bus which allows a specific switch driver to divert and intercept<br>MDIO reads/writes towards specific PHY addresses. In most MDIO-connected<br>switches, these functions would utilize direct or indirect PHY addressing mode<br>to return standard MII registers from the switch builtin PHYs, allowing the PHY<br>library and/or to return link status, link partner pages, auto-negotiation<br>results etc..</p>
+<p>For Ethernet switches which have both external and internal MDIO busses, the<br>slave MII bus can be utilized to mux/demux MDIO reads and writes towards either<br>internal or external MDIO devices this switch might be connected to: internal<br>PHYs, external PHYs, or even external switches.</p>
+<h2 id="Data-structures"><a href="#Data-structures" class="headerlink" title="Data structures"></a>Data structures</h2><p>DSA data structures are defined in include/net/dsa.h as well as<br>net/dsa/dsa_priv.h.</p>
+<p>dsa_chip_data: platform data configuration for a given switch device, this<br>structure describes a switch device’s parent device, its address, as well as<br>various properties of its ports: names/labels, and finally a routing table<br>indication (when cascading switches)</p>
+<p>dsa_platform_data: platform device configuration data which can reference a<br>collection of dsa_chip_data structure if multiples switches are cascaded, the<br>master network device this switch tree is attached to needs to be referenced</p>
+<p>dsa_switch_tree: structure assigned to the master network device under<br>“dsa_ptr”, this structure references a dsa_platform_data structure as well as<br>the tagging protocol supported by the switch tree, and which receive/transmit<br>function hooks should be invoked, information about the directly attached switch<br>is also provided: CPU port. Finally, a collection of dsa_switch are referenced<br>to address individual switches in the tree.</p>
+<p>dsa_switch: structure describing a switch device in the tree, referencing a<br>dsa_switch_tree as a backpointer, slave network devices, master network device,<br>and a reference to the backing dsa_switch_ops</p>
+<p>dsa_switch_ops: structure referencing function pointers, see below for a full<br>description.</p>
+<h1 id="Design-limitations"><a href="#Design-limitations" class="headerlink" title="Design limitations"></a>Design limitations</h1><h2 id="DSA-is-a-platform-device-driver"><a href="#DSA-is-a-platform-device-driver" class="headerlink" title="DSA is a platform device driver"></a>DSA is a platform device driver</h2><p>DSA is implemented as a DSA platform device driver which is convenient because<br>it will register the entire DSA switch tree attached to a master network device<br>in one-shot, facilitating the device creation and simplifying the device driver<br>model a bit, this comes however with a number of limitations:</p>
+<ul>
+<li>building DSA and its switch drivers as modules is currently not working</li>
+<li>the device driver parenting does not necessarily reflect the original<br>bus/device the switch can be created from</li>
+<li>supporting non-MDIO and non-MMIO (platform) switches is not possible</li>
+</ul>
+<h2 id="Limits-on-the-number-of-devices-and-ports"><a href="#Limits-on-the-number-of-devices-and-ports" class="headerlink" title="Limits on the number of devices and ports"></a>Limits on the number of devices and ports</h2><p>DSA currently limits the number of maximum switches within a tree to 4<br>(DSA_MAX_SWITCHES), and the number of ports per switch to 12 (DSA_MAX_PORTS).<br>These limits could be extended to support larger configurations would this need<br>arise.</p>
+<h2 id="Lack-of-CPU-DSA-network-devices"><a href="#Lack-of-CPU-DSA-network-devices" class="headerlink" title="Lack of CPU/DSA network devices"></a>Lack of CPU/DSA network devices</h2><p>DSA does not currently create slave network devices for the CPU or DSA ports, as<br>described before. This might be an issue in the following cases:</p>
+<ul>
+<li><p>inability to fetch switch CPU port statistics counters using ethtool, which<br>can make it harder to debug MDIO switch connected using xMII interfaces</p>
+</li>
+<li><p>inability to configure the CPU port link parameters based on the Ethernet<br>controller capabilities attached to it: <a target="_blank" rel="noopener" href="http://patchwork.ozlabs.org/patch/509806/">http://patchwork.ozlabs.org/patch/509806/</a></p>
+</li>
+<li><p>inability to configure specific VLAN IDs / trunking VLANs between switches<br>when using a cascaded setup</p>
+</li>
+</ul>
+<h2 id="Common-pitfalls-using-DSA-setups"><a href="#Common-pitfalls-using-DSA-setups" class="headerlink" title="Common pitfalls using DSA setups"></a>Common pitfalls using DSA setups</h2><p>Once a master network device is configured to use DSA (dev-&gt;dsa_ptr becomes<br>non-NULL), and the switch behind it expects a tagging protocol, this network<br>interface can only exclusively be used as a conduit interface. Sending packets<br>directly through this interface (e.g.: opening a socket using this interface)<br>will not make us go through the switch tagging protocol transmit function, so<br>the Ethernet switch on the other end, expecting a tag will typically drop this<br>frame.</p>
+<p>Slave network devices check that the master network device is UP before allowing<br>you to administratively bring UP these slave network devices. A common<br>configuration mistake is forgetting to bring UP the master network device first.</p>
+<h1 id="Interactions-with-other-subsystems"><a href="#Interactions-with-other-subsystems" class="headerlink" title="Interactions with other subsystems"></a>Interactions with other subsystems</h1><p>DSA currently leverages the following subsystems:</p>
+<ul>
+<li>MDIO/PHY library: drivers/net/phy/phy.c, mdio_bus.c</li>
+<li>Switchdev: net/switchdev/*</li>
+<li>Device Tree for various of_* functions</li>
+</ul>
+<h2 id="MDIO-PHY-library"><a href="#MDIO-PHY-library" class="headerlink" title="MDIO/PHY library"></a>MDIO/PHY library</h2><p>Slave network devices exposed by DSA may or may not be interfacing with PHY<br>devices (struct phy_device as defined in include/linux/phy.h), but the DSA<br>subsystem deals with all possible combinations:</p>
+<ul>
+<li>internal PHY devices, built into the Ethernet switch hardware</li>
+<li>external PHY devices, connected via an internal or external MDIO bus</li>
+<li>internal PHY devices, connected via an internal MDIO bus</li>
+<li>special, non-autonegotiated or non MDIO-managed PHY devices: SFPs, MoCA; a.k.a<br>fixed PHYs</li>
+</ul>
+<p>The PHY configuration is done by the dsa_slave_phy_setup() function and the<br>logic basically looks like this:</p>
+<ul>
+<li><p>if Device Tree is used, the PHY device is looked up using the standard<br>“phy-handle” property, if found, this PHY device is created and registered<br>using of_phy_connect()</p>
+</li>
+<li><p>if Device Tree is used, and the PHY device is “fixed”, that is, conforms to<br>the definition of a non-MDIO managed PHY as defined in<br>Documentation/devicetree/bindings/net/fixed-link.txt, the PHY is registered<br>and connected transparently using the special fixed MDIO bus driver</p>
+</li>
+<li><p>finally, if the PHY is built into the switch, as is very common with<br>standalone switch packages, the PHY is probed using the slave MII bus created<br>by DSA</p>
+</li>
+</ul>
+<h2 id="SWITCHDEV"><a href="#SWITCHDEV" class="headerlink" title="SWITCHDEV"></a>SWITCHDEV</h2><p>DSA directly utilizes SWITCHDEV when interfacing with the bridge layer, and<br>more specifically with its VLAN filtering portion when configuring VLANs on top<br>of per-port slave network devices. Since DSA primarily deals with<br>MDIO-connected switches, although not exclusively, SWITCHDEV’s<br>prepare/abort/commit phases are often simplified into a prepare phase which<br>checks whether the operation is supported by the DSA switch driver, and a commit<br>phase which applies the changes.</p>
+<p>As of today, the only SWITCHDEV objects supported by DSA are the FDB and VLAN<br>objects.</p>
+<h2 id="Device-Tree"><a href="#Device-Tree" class="headerlink" title="Device Tree"></a>Device Tree</h2><p>DSA features a standardized binding which is documented in<br>Documentation/devicetree/bindings/net/dsa/dsa.txt. PHY/MDIO library helper<br>functions such as of_get_phy_mode(), of_phy_connect() are also used to query<br>per-port PHY specific details: interface connection, MDIO bus location etc..</p>
+<h1 id="Driver-development"><a href="#Driver-development" class="headerlink" title="Driver development"></a>Driver development</h1><p>DSA switch drivers need to implement a dsa_switch_ops structure which will<br>contain the various members described below.</p>
+<p>register_switch_driver() registers this dsa_switch_ops in its internal list<br>of drivers to probe for. unregister_switch_driver() does the exact opposite.</p>
+<p>Unless requested differently by setting the priv_size member accordingly, DSA<br>does not allocate any driver private context space.</p>
+<h2 id="Switch-configuration"><a href="#Switch-configuration" class="headerlink" title="Switch configuration"></a>Switch configuration</h2><ul>
+<li><p>tag_protocol: this is to indicate what kind of tagging protocol is supported,<br>should be a valid value from the dsa_tag_protocol enum</p>
+</li>
+<li><p>probe: probe routine which will be invoked by the DSA platform device upon<br>registration to test for the presence/absence of a switch device. For MDIO<br>devices, it is recommended to issue a read towards internal registers using<br>the switch pseudo-PHY and return whether this is a supported device. For other<br>buses, return a non-NULL string</p>
+</li>
+<li><p>setup: setup function for the switch, this function is responsible for setting<br>up the dsa_switch_ops private structure with all it needs: register maps,<br>interrupts, mutexes, locks etc.. This function is also expected to properly<br>configure the switch to separate all network interfaces from each other, that<br>is, they should be isolated by the switch hardware itself, typically by creating<br>a Port-based VLAN ID for each port and allowing only the CPU port and the<br>specific port to be in the forwarding vector. Ports that are unused by the<br>platform should be disabled. Past this function, the switch is expected to be<br>fully configured and ready to serve any kind of request. It is recommended<br>to issue a software reset of the switch during this setup function in order to<br>avoid relying on what a previous software agent such as a bootloader/firmware<br>may have previously configured.</p>
+</li>
+</ul>
+<h2 id="PHY-devices-and-link-management"><a href="#PHY-devices-and-link-management" class="headerlink" title="PHY devices and link management"></a>PHY devices and link management</h2><ul>
+<li><p>get_phy_flags: Some switches are interfaced to various kinds of Ethernet PHYs,<br>if the PHY library PHY driver needs to know about information it cannot obtain<br>on its own (e.g.: coming from switch memory mapped registers), this function<br>should return a 32-bits bitmask of “flags”, that is private between the switch<br>driver and the Ethernet PHY driver in drivers/net/phy/*.</p>
+</li>
+<li><p>phy_read: Function invoked by the DSA slave MDIO bus when attempting to read<br>the switch port MDIO registers. If unavailable, return 0xffff for each read.<br>For builtin switch Ethernet PHYs, this function should allow reading the link<br>status, auto-negotiation results, link partner pages etc..</p>
+</li>
+<li><p>phy_write: Function invoked by the DSA slave MDIO bus when attempting to write<br>to the switch port MDIO registers. If unavailable return a negative error<br>code.</p>
+</li>
+<li><p>adjust_link: Function invoked by the PHY library when a slave network device<br>is attached to a PHY device. This function is responsible for appropriately<br>configuring the switch port link parameters: speed, duplex, pause based on<br>what the phy_device is providing.</p>
+</li>
+<li><p>fixed_link_update: Function invoked by the PHY library, and specifically by<br>the fixed PHY driver asking the switch driver for link parameters that could<br>not be auto-negotiated, or obtained by reading the PHY registers through MDIO.<br>This is particularly useful for specific kinds of hardware such as QSGMII,<br>MoCA or other kinds of non-MDIO managed PHYs where out of band link<br>information is obtained</p>
+</li>
+</ul>
+<h2 id="Ethtool-operations"><a href="#Ethtool-operations" class="headerlink" title="Ethtool operations"></a>Ethtool operations</h2><ul>
+<li><p>get_strings: ethtool function used to query the driver’s strings, will<br>typically return statistics strings, private flags strings etc.</p>
+</li>
+<li><p>get_ethtool_stats: ethtool function used to query per-port statistics and<br>return their values. DSA overlays slave network devices general statistics:<br>RX/TX counters from the network device, with switch driver specific statistics<br>per port</p>
+</li>
+<li><p>get_sset_count: ethtool function used to query the number of statistics items</p>
+</li>
+<li><p>get_wol: ethtool function used to obtain Wake-on-LAN settings per-port, this<br>function may, for certain implementations also query the master network device<br>Wake-on-LAN settings if this interface needs to participate in Wake-on-LAN</p>
+</li>
+<li><p>set_wol: ethtool function used to configure Wake-on-LAN settings per-port,<br>direct counterpart to set_wol with similar restrictions</p>
+</li>
+<li><p>set_eee: ethtool function which is used to configure a switch port EEE (Green<br>Ethernet) settings, can optionally invoke the PHY library to enable EEE at the<br>PHY level if relevant. This function should enable EEE at the switch port MAC<br>controller and data-processing logic</p>
+</li>
+<li><p>get_eee: ethtool function which is used to query a switch port EEE settings,<br>this function should return the EEE state of the switch port MAC controller<br>and data-processing logic as well as query the PHY for its currently configured<br>EEE settings</p>
+</li>
+<li><p>get_eeprom_len: ethtool function returning for a given switch the EEPROM<br>length/size in bytes</p>
+</li>
+<li><p>get_eeprom: ethtool function returning for a given switch the EEPROM contents</p>
+</li>
+<li><p>set_eeprom: ethtool function writing specified data to a given switch EEPROM</p>
+</li>
+<li><p>get_regs_len: ethtool function returning the register length for a given<br>switch</p>
+</li>
+<li><p>get_regs: ethtool function returning the Ethernet switch internal register<br>contents. This function might require user-land code in ethtool to<br>pretty-print register values and registers</p>
+</li>
+</ul>
+<h2 id="Power-management"><a href="#Power-management" class="headerlink" title="Power management"></a>Power management</h2><ul>
+<li><p>suspend: function invoked by the DSA platform device when the system goes to<br>suspend, should quiesce all Ethernet switch activities, but keep ports<br>participating in Wake-on-LAN active as well as additional wake-up logic if<br>supported</p>
+</li>
+<li><p>resume: function invoked by the DSA platform device when the system resumes,<br>should resume all Ethernet switch activities and re-configure the switch to be<br>in a fully active state</p>
+</li>
+<li><p>port_enable: function invoked by the DSA slave network device ndo_open<br>function when a port is administratively brought up, this function should be<br>fully enabling a given switch port. DSA takes care of marking the port with<br>BR_STATE_BLOCKING if the port is a bridge member, or BR_STATE_FORWARDING if it<br>was not, and propagating these changes down to the hardware</p>
+</li>
+<li><p>port_disable: function invoked by the DSA slave network device ndo_close<br>function when a port is administratively brought down, this function should be<br>fully disabling a given switch port. DSA takes care of marking the port with<br>BR_STATE_DISABLED and propagating changes to the hardware if this port is<br>disabled while being a bridge member</p>
+</li>
+</ul>
+<h2 id="Bridge-layer"><a href="#Bridge-layer" class="headerlink" title="Bridge layer"></a>Bridge layer</h2><ul>
+<li><p>port_bridge_join: bridge layer function invoked when a given switch port is<br>added to a bridge, this function should be doing the necessary at the switch<br>level to permit the joining port from being added to the relevant logical<br>domain for it to ingress/egress traffic with other members of the bridge.</p>
+</li>
+<li><p>port_bridge_leave: bridge layer function invoked when a given switch port is<br>removed from a bridge, this function should be doing the necessary at the<br>switch level to deny the leaving port from ingress/egress traffic from the<br>remaining bridge members. When the port leaves the bridge, it should be aged<br>out at the switch hardware for the switch to (re) learn MAC addresses behind<br>this port.</p>
+</li>
+<li><p>port_stp_state_set: bridge layer function invoked when a given switch port STP<br>state is computed by the bridge layer and should be propagated to switch<br>hardware to forward/block/learn traffic. The switch driver is responsible for<br>computing a STP state change based on current and asked parameters and perform<br>the relevant ageing based on the intersection results</p>
+</li>
+</ul>
+<h2 id="Bridge-VLAN-filtering"><a href="#Bridge-VLAN-filtering" class="headerlink" title="Bridge VLAN filtering"></a>Bridge VLAN filtering</h2><ul>
+<li><p>port_vlan_filtering: bridge layer function invoked when the bridge gets<br>configured for turning on or off VLAN filtering. If nothing specific needs to<br>be done at the hardware level, this callback does not need to be implemented.<br>When VLAN filtering is turned on, the hardware must be programmed with<br>rejecting 802.1Q frames which have VLAN IDs outside of the programmed allowed<br>VLAN ID map/rules.  If there is no PVID programmed into the switch port,<br>untagged frames must be rejected as well. When turned off the switch must<br>accept any 802.1Q frames irrespective of their VLAN ID, and untagged frames are<br>allowed.</p>
+</li>
+<li><p>port_vlan_prepare: bridge layer function invoked when the bridge prepares the<br>configuration of a VLAN on the given port. If the operation is not supported<br>by the hardware, this function should return -EOPNOTSUPP to inform the bridge<br>code to fallback to a software implementation. No hardware setup must be done<br>in this function. See port_vlan_add for this and details.</p>
+</li>
+<li><p>port_vlan_add: bridge layer function invoked when a VLAN is configured<br>(tagged or untagged) for the given switch port</p>
+</li>
+<li><p>port_vlan_del: bridge layer function invoked when a VLAN is removed from the<br>given switch port</p>
+</li>
+<li><p>port_vlan_dump: bridge layer function invoked with a switchdev callback<br>function that the driver has to call for each VLAN the given port is a member<br>of. A switchdev object is used to carry the VID and bridge flags.</p>
+</li>
+<li><p>port_fdb_prepare: bridge layer function invoked when the bridge prepares the<br>installation of a Forwarding Database entry. If the operation is not<br>supported, this function should return -EOPNOTSUPP to inform the bridge code<br>to fallback to a software implementation. No hardware setup must be done in<br>this function. See port_fdb_add for this and details.</p>
+</li>
+<li><p>port_fdb_add: bridge layer function invoked when the bridge wants to install a<br>Forwarding Database entry, the switch hardware should be programmed with the<br>specified address in the specified VLAN Id in the forwarding database<br>associated with this VLAN ID</p>
+</li>
+</ul>
+<p>Note: VLAN ID 0 corresponds to the port private database, which, in the context<br>of DSA, would be the its port-based VLAN, used by the associated bridge device.</p>
+<ul>
+<li><p>port_fdb_del: bridge layer function invoked when the bridge wants to remove a<br>Forwarding Database entry, the switch hardware should be programmed to delete<br>the specified MAC address from the specified VLAN ID if it was mapped into<br>this port forwarding database</p>
+</li>
+<li><p>port_fdb_dump: bridge layer function invoked with a switchdev callback<br>function that the driver has to call for each MAC address known to be behind<br>the given port. A switchdev object is used to carry the VID and FDB info.</p>
+</li>
+<li><p>port_mdb_prepare: bridge layer function invoked when the bridge prepares the<br>installation of a multicast database entry. If the operation is not supported,<br>this function should return -EOPNOTSUPP to inform the bridge code to fallback<br>to a software implementation. No hardware setup must be done in this function.<br>See port_fdb_add for this and details.</p>
+</li>
+<li><p>port_mdb_add: bridge layer function invoked when the bridge wants to install<br>a multicast database entry, the switch hardware should be programmed with the<br>specified address in the specified VLAN ID in the forwarding database<br>associated with this VLAN ID.</p>
+</li>
+</ul>
+<p>Note: VLAN ID 0 corresponds to the port private database, which, in the context<br>of DSA, would be the its port-based VLAN, used by the associated bridge device.</p>
+<ul>
+<li><p>port_mdb_del: bridge layer function invoked when the bridge wants to remove a<br>multicast database entry, the switch hardware should be programmed to delete<br>the specified MAC address from the specified VLAN ID if it was mapped into<br>this port forwarding database.</p>
+</li>
+<li><p>port_mdb_dump: bridge layer function invoked with a switchdev callback<br>function that the driver has to call for each MAC address known to be behind<br>the given port. A switchdev object is used to carry the VID and MDB info.</p>
+</li>
+</ul>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><h2 id="Making-SWITCHDEV-and-DSA-converge-towards-an-unified-codebase"><a href="#Making-SWITCHDEV-and-DSA-converge-towards-an-unified-codebase" class="headerlink" title="Making SWITCHDEV and DSA converge towards an unified codebase"></a>Making SWITCHDEV and DSA converge towards an unified codebase</h2><p>SWITCHDEV properly takes care of abstracting the networking stack with offload<br>capable hardware, but does not enforce a strict switch device driver model. On<br>the other DSA enforces a fairly strict device driver model, and deals with most<br>of the switch specific. At some point we should envision a merger between these<br>two subsystems and get the best of both worlds.</p>
+<h2 id="Other-hanging-fruits"><a href="#Other-hanging-fruits" class="headerlink" title="Other hanging fruits"></a>Other hanging fruits</h2><ul>
+<li>making the number of ports fully dynamic and not dependent on DSA_MAX_PORTS</li>
+<li>allowing more than one CPU/management interface:<br><a target="_blank" rel="noopener" href="http://comments.gmane.org/gmane.linux.network/365657">http://comments.gmane.org/gmane.linux.network/365657</a></li>
+<li>porting more drivers from other vendors:<br><a target="_blank" rel="noopener" href="http://comments.gmane.org/gmane.linux.network/365510">http://comments.gmane.org/gmane.linux.network/365510</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_dsa/" title="Kernel-4.18.0-80.el8_dsa" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_dsa/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_draft-ietf-cipso-ipsecurity-01/" title="Kernel-4.18.0-80.el8_draft-ietf-cipso-ipsecurity-01"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_email-clients/" title="Kernel-4.18.0-80.el8_email-clients"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

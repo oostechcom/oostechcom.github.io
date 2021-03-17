@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_xen | oosTech.com</title>
+  <meta name="description" content="Recipe for getting&#x2F;building&#x2F;running Xen&#x2F;ia64 with pv_ops    --------------------------------------------------------  This recipe describes how to get xen-ia64 source and build it,and run domU with">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_xen">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_xen/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Recipe for getting&#x2F;building&#x2F;running Xen&#x2F;ia64 with pv_ops    --------------------------------------------------------  This recipe describes how to get xen-ia64 source and build it,and run domU with">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_xen/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#hg-clone-http-xenbits-xensource-com-ext-ia64-xen-unstable-hg"><span class="toc-number">1.</span> <span class="toc-text">hg clone http:&#x2F;&#x2F;xenbits.xensource.com&#x2F;ext&#x2F;ia64&#x2F;xen-unstable.hg</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cd-xen-unstable-hg"><span class="toc-number">2.</span> <span class="toc-text">cd xen-unstable.hg</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#hg-clone-http-xenbits-xensource-com-ext-ia64-linux-2-6-18-xen-hg"><span class="toc-number">3.</span> <span class="toc-text">hg clone http:&#x2F;&#x2F;xenbits.xensource.com&#x2F;ext&#x2F;ia64&#x2F;linux-2.6.18-xen.hg</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#make-world"><span class="toc-number">4.</span> <span class="toc-text">make world</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#make-install-tools"><span class="toc-number">5.</span> <span class="toc-text">make install-tools</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cp-xen-xen-gz-boot-efi-efi-redhat"><span class="toc-number">6.</span> <span class="toc-text">cp xen&#x2F;xen.gz &#x2F;boot&#x2F;efi&#x2F;efi&#x2F;redhat&#x2F;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cp-build-linux-2-6-18-xen-ia64-vmlinux-gz"><span class="toc-number">7.</span> <span class="toc-text">cp build-linux-2.6.18-xen_ia64&#x2F;vmlinux.gz \</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#make-C-linux-2-6-18-xen-hg-ARCH-ia64-modules-install"><span class="toc-number">8.</span> <span class="toc-text">make -C linux-2.6.18-xen.hg ARCH&#x3D;ia64 modules_install \</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkinitrd-f-boot-efi-efi-redhat-initrd-2-6-18-8-xen-img"><span class="toc-number">9.</span> <span class="toc-text">mkinitrd -f &#x2F;boot&#x2F;efi&#x2F;efi&#x2F;redhat&#x2F;initrd-2.6.18.8-xen.img \</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dd-if-dev-zero-of-root-rhel5-img-bs-1M-seek-4096-count-0"><span class="toc-number">10.</span> <span class="toc-text">dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;&#x2F;root&#x2F;rhel5.img bs&#x3D;1M seek&#x3D;4096 count&#x3D;0</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mke2fs-F-j-root-rhel5-img"><span class="toc-number">11.</span> <span class="toc-text">mke2fs -F -j &#x2F;root&#x2F;rhel5.img</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mount-o-loop-root-rhel5-img-mnt"><span class="toc-number">12.</span> <span class="toc-text">mount -o loop &#x2F;root&#x2F;rhel5.img &#x2F;mnt</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cp-ax-dev-var-etc-usr-bin-sbin-lib-mnt"><span class="toc-number">13.</span> <span class="toc-text">cp -ax &#x2F;{dev,var,etc,usr,bin,sbin,lib} &#x2F;mnt</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkdir-mnt-root-proc-sys-home-tmp"><span class="toc-number">14.</span> <span class="toc-text">mkdir &#x2F;mnt&#x2F;{root,proc,sys,home,tmp}</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vi-mnt-etc-fstab"><span class="toc-number">15.</span> <span class="toc-text">vi &#x2F;mnt&#x2F;etc&#x2F;fstab</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vi-mnt-etc-inittab"><span class="toc-number">16.</span> <span class="toc-text">vi &#x2F;mnt&#x2F;etc&#x2F;inittab</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vi-mnt-etc-securetty-add-hvc0"><span class="toc-number">17.</span> <span class="toc-text">vi &#x2F;mnt&#x2F;etc&#x2F;securetty (add hvc0)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#umount-mnt"><span class="toc-number">18.</span> <span class="toc-text">umount &#x2F;mnt</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cp-elilo-3-6-ia64-efi-boot-efi-efi-redhat-elilo-efi"><span class="toc-number">19.</span> <span class="toc-text">cp elilo-3.6-ia64.efi &#x2F;boot&#x2F;efi&#x2F;efi&#x2F;redhat&#x2F;elilo.efi</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vi-boot-efi-efi-redhat-elilo-conf"><span class="toc-number">20.</span> <span class="toc-text">vi &#x2F;boot&#x2F;efi&#x2F;efi&#x2F;redhat&#x2F;elilo.conf</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#git-clone-http-people-valinux-co-jp-yamahata-xen-ia64-linux-2-6-xen-ia64-git"><span class="toc-number">21.</span> <span class="toc-text">git clone http:&#x2F;&#x2F;people.valinux.co.jp&#x2F;~yamahata&#x2F;xen-ia64&#x2F;linux-2.6-xen-ia64.git&#x2F;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cd-linux-2-6-xen-ia64"><span class="toc-number">22.</span> <span class="toc-text">cd linux-2.6-xen-ia64&#x2F;</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#git-checkout-b-your-branch-origin-xen-ia64-domu-minimal-2008may19"><span class="toc-number">23.</span> <span class="toc-text">git checkout -b your_branch origin&#x2F;xen-ia64-domu-minimal-2008may19</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cp-arch-ia64-configs-xen-domu-wip-defconfig-config"><span class="toc-number">24.</span> <span class="toc-text">cp arch&#x2F;ia64&#x2F;configs&#x2F;xen_domu_wip_defconfig .config</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#make-oldconfig"><span class="toc-number">25.</span> <span class="toc-text">make oldconfig</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#make"><span class="toc-number">26.</span> <span class="toc-text">make</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cp-vmlinux-gz-boot-efi-efi-redhat-vmlinuz-2-6-pv-ops-xenU"><span class="toc-number">27.</span> <span class="toc-text">cp vmlinux.gz &#x2F;boot&#x2F;efi&#x2F;efi&#x2F;redhat&#x2F;vmlinuz-2.6-pv_ops-xenU</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#make-modules-install"><span class="toc-number">28.</span> <span class="toc-text">make modules_install</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mkinitrd-f-boot-efi-efi-redhat-initrd-2-6-pv-ops-xenU-img"><span class="toc-number">29.</span> <span class="toc-text">mkinitrd -f &#x2F;boot&#x2F;efi&#x2F;efi&#x2F;redhat&#x2F;initrd-2.6-pv_ops-xenU.img \</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vi-etc-xen-rhel5"><span class="toc-number">30.</span> <span class="toc-text">vi &#x2F;etc&#x2F;xen&#x2F;rhel5</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#etc-init-d-xend-start"><span class="toc-number">31.</span> <span class="toc-text">&#x2F;etc&#x2F;init.d&#x2F;xend start</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#xm-create-c-rhel5"><span class="toc-number">32.</span> <span class="toc-text">xm create -c rhel5</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_xen" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_xen
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_xen/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_xen/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_xen/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>   Recipe for getting/building/running Xen/ia64 with pv_ops
+   --------------------------------------------------------
+</code></pre>
+<p>This recipe describes how to get xen-ia64 source and build it,<br>and run domU with pv_ops.</p>
+<p>============<br>Requirements<br>============</p>
+<ul>
+<li>python</li>
+<li>mercurial<br>it (aka “hg”) is an open-source source code<br>management software. See the below.<br><a target="_blank" rel="noopener" href="http://www.selenic.com/mercurial/wiki/">http://www.selenic.com/mercurial/wiki/</a></li>
+<li>git</li>
+<li>bridge-utils</li>
+</ul>
+<p>=================================<br>Getting and Building Xen and Dom0<br>=================================</p>
+<p>  My environment is;<br>    Machine  : Tiger4<br>    Domain0 OS  : RHEL5<br>    DomainU OS  : RHEL5</p>
+<ol>
+<li><p>Download source</p>
+<h1 id="hg-clone-http-xenbits-xensource-com-ext-ia64-xen-unstable-hg"><a href="#hg-clone-http-xenbits-xensource-com-ext-ia64-xen-unstable-hg" class="headerlink" title="hg clone http://xenbits.xensource.com/ext/ia64/xen-unstable.hg"></a>hg clone <a target="_blank" rel="noopener" href="http://xenbits.xensource.com/ext/ia64/xen-unstable.hg">http://xenbits.xensource.com/ext/ia64/xen-unstable.hg</a></h1><h1 id="cd-xen-unstable-hg"><a href="#cd-xen-unstable-hg" class="headerlink" title="cd xen-unstable.hg"></a>cd xen-unstable.hg</h1><h1 id="hg-clone-http-xenbits-xensource-com-ext-ia64-linux-2-6-18-xen-hg"><a href="#hg-clone-http-xenbits-xensource-com-ext-ia64-linux-2-6-18-xen-hg" class="headerlink" title="hg clone http://xenbits.xensource.com/ext/ia64/linux-2.6.18-xen.hg"></a>hg clone <a target="_blank" rel="noopener" href="http://xenbits.xensource.com/ext/ia64/linux-2.6.18-xen.hg">http://xenbits.xensource.com/ext/ia64/linux-2.6.18-xen.hg</a></h1></li>
+<li><h1 id="make-world"><a href="#make-world" class="headerlink" title="make world"></a>make world</h1></li>
+<li><h1 id="make-install-tools"><a href="#make-install-tools" class="headerlink" title="make install-tools"></a>make install-tools</h1></li>
+<li><p>copy kernels and xen</p>
+<h1 id="cp-xen-xen-gz-boot-efi-efi-redhat"><a href="#cp-xen-xen-gz-boot-efi-efi-redhat" class="headerlink" title="cp xen/xen.gz /boot/efi/efi/redhat/"></a>cp xen/xen.gz /boot/efi/efi/redhat/</h1><h1 id="cp-build-linux-2-6-18-xen-ia64-vmlinux-gz"><a href="#cp-build-linux-2-6-18-xen-ia64-vmlinux-gz" class="headerlink" title="cp build-linux-2.6.18-xen_ia64/vmlinux.gz \"></a>cp build-linux-2.6.18-xen_ia64/vmlinux.gz \</h1><p>  /boot/efi/efi/redhat/vmlinuz-2.6.18.8-xen</p>
+</li>
+<li><p>make initrd for Dom0/DomU</p>
+<h1 id="make-C-linux-2-6-18-xen-hg-ARCH-ia64-modules-install"><a href="#make-C-linux-2-6-18-xen-hg-ARCH-ia64-modules-install" class="headerlink" title="make -C linux-2.6.18-xen.hg ARCH=ia64 modules_install \"></a>make -C linux-2.6.18-xen.hg ARCH=ia64 modules_install \</h1><p>  O=$(pwd)/build-linux-2.6.18-xen_ia64</p>
+<h1 id="mkinitrd-f-boot-efi-efi-redhat-initrd-2-6-18-8-xen-img"><a href="#mkinitrd-f-boot-efi-efi-redhat-initrd-2-6-18-8-xen-img" class="headerlink" title="mkinitrd -f /boot/efi/efi/redhat/initrd-2.6.18.8-xen.img \"></a>mkinitrd -f /boot/efi/efi/redhat/initrd-2.6.18.8-xen.img \</h1><p>  2.6.18.8-xen –builtin mptspi –builtin mptbase <br>  –builtin mptscsih –builtin uhci-hcd –builtin ohci-hcd <br>  –builtin ehci-hcd</p>
+</li>
+</ol>
+<p>================================<br>Making a disk image for guest OS<br>================================</p>
+<ol>
+<li><p>make file</p>
+<h1 id="dd-if-dev-zero-of-root-rhel5-img-bs-1M-seek-4096-count-0"><a href="#dd-if-dev-zero-of-root-rhel5-img-bs-1M-seek-4096-count-0" class="headerlink" title="dd if=/dev/zero of=/root/rhel5.img bs=1M seek=4096 count=0"></a>dd if=/dev/zero of=/root/rhel5.img bs=1M seek=4096 count=0</h1><h1 id="mke2fs-F-j-root-rhel5-img"><a href="#mke2fs-F-j-root-rhel5-img" class="headerlink" title="mke2fs -F -j /root/rhel5.img"></a>mke2fs -F -j /root/rhel5.img</h1><h1 id="mount-o-loop-root-rhel5-img-mnt"><a href="#mount-o-loop-root-rhel5-img-mnt" class="headerlink" title="mount -o loop /root/rhel5.img /mnt"></a>mount -o loop /root/rhel5.img /mnt</h1><h1 id="cp-ax-dev-var-etc-usr-bin-sbin-lib-mnt"><a href="#cp-ax-dev-var-etc-usr-bin-sbin-lib-mnt" class="headerlink" title="cp -ax /{dev,var,etc,usr,bin,sbin,lib} /mnt"></a>cp -ax /{dev,var,etc,usr,bin,sbin,lib} /mnt</h1><h1 id="mkdir-mnt-root-proc-sys-home-tmp"><a href="#mkdir-mnt-root-proc-sys-home-tmp" class="headerlink" title="mkdir /mnt/{root,proc,sys,home,tmp}"></a>mkdir /mnt/{root,proc,sys,home,tmp}</h1><p>Note: You may miss some device files. If so, please create them<br>with mknod. Or you can use tar instead of cp.</p>
+</li>
+<li><p>modify DomU’s fstab</p>
+<h1 id="vi-mnt-etc-fstab"><a href="#vi-mnt-etc-fstab" class="headerlink" title="vi /mnt/etc/fstab"></a>vi /mnt/etc/fstab</h1><p>   /dev/xvda1  /            ext3    defaults        1 1<br>   none        /dev/pts     devpts  gid=5,mode=620  0 0<br>   none        /dev/shm     tmpfs   defaults        0 0<br>   none        /proc        proc    defaults        0 0<br>   none        /sys         sysfs   defaults        0 0</p>
+</li>
+<li><p>modify inittab<br>set runlevel to 3 to avoid X trying to start</p>
+<h1 id="vi-mnt-etc-inittab"><a href="#vi-mnt-etc-inittab" class="headerlink" title="vi /mnt/etc/inittab"></a>vi /mnt/etc/inittab</h1><p>   id:3:initdefault:<br>Start a getty on the hvc0 console<br>   X0:2345:respawn:/sbin/mingetty hvc0<br>tty1-6 mingetty can be commented out</p>
+</li>
+<li><p>add hvc0 into /etc/securetty</p>
+<h1 id="vi-mnt-etc-securetty-add-hvc0"><a href="#vi-mnt-etc-securetty-add-hvc0" class="headerlink" title="vi /mnt/etc/securetty (add hvc0)"></a>vi /mnt/etc/securetty (add hvc0)</h1></li>
+<li><p>umount</p>
+<h1 id="umount-mnt"><a href="#umount-mnt" class="headerlink" title="umount /mnt"></a>umount /mnt</h1></li>
+</ol>
+<p>FYI, virt-manager can also make a disk image for guest OS.<br>It’s GUI tools and easy to make it.</p>
+<p>==================<br>Boot Xen &amp; Domain0<br>==================</p>
+<ol>
+<li><p>replace elilo<br>elilo of RHEL5 can boot Xen and Dom0.<br>If you use old elilo (e.g RHEL4), please download from the below<br><a target="_blank" rel="noopener" href="http://elilo.sourceforge.net/cgi-bin/blosxom">http://elilo.sourceforge.net/cgi-bin/blosxom</a><br>and copy into /boot/efi/efi/redhat/</p>
+<h1 id="cp-elilo-3-6-ia64-efi-boot-efi-efi-redhat-elilo-efi"><a href="#cp-elilo-3-6-ia64-efi-boot-efi-efi-redhat-elilo-efi" class="headerlink" title="cp elilo-3.6-ia64.efi /boot/efi/efi/redhat/elilo.efi"></a>cp elilo-3.6-ia64.efi /boot/efi/efi/redhat/elilo.efi</h1></li>
+<li><p>modify elilo.conf (like the below)</p>
+<h1 id="vi-boot-efi-efi-redhat-elilo-conf"><a href="#vi-boot-efi-efi-redhat-elilo-conf" class="headerlink" title="vi /boot/efi/efi/redhat/elilo.conf"></a>vi /boot/efi/efi/redhat/elilo.conf</h1><p> prompt<br> timeout=20<br> default=xen<br> relocatable</p>
+<p> image=vmlinuz-2.6.18.8-xen</p>
+<pre><code>     label=xen
+     vmm=xen.gz
+     initrd=initrd-2.6.18.8-xen.img
+     read-only
+     append=&quot; -- rhgb root=/dev/sda2&quot;
+</code></pre>
+</li>
+</ol>
+<p>The append options before “–” are for xen hypervisor,<br>the options after “–” are for dom0.</p>
+<p>FYI, your machine may need console options like<br>“com1=19200,8n1 console=vga,com1”. For example,<br>append=”com1=19200,8n1 console=vga,com1 – rhgb console=tty0 <br>console=ttyS0 root=/dev/sda2”</p>
+<p>=====================================<br>Getting and Building domU with pv_ops<br>=====================================</p>
+<ol>
+<li><p>get pv_ops tree</p>
+<h1 id="git-clone-http-people-valinux-co-jp-yamahata-xen-ia64-linux-2-6-xen-ia64-git"><a href="#git-clone-http-people-valinux-co-jp-yamahata-xen-ia64-linux-2-6-xen-ia64-git" class="headerlink" title="git clone http://people.valinux.co.jp/~yamahata/xen-ia64/linux-2.6-xen-ia64.git/"></a>git clone <a target="_blank" rel="noopener" href="http://people.valinux.co.jp/~yamahata/xen-ia64/linux-2.6-xen-ia64.git/">http://people.valinux.co.jp/~yamahata/xen-ia64/linux-2.6-xen-ia64.git/</a></h1></li>
+<li><p>git branch (if necessary)</p>
+<h1 id="cd-linux-2-6-xen-ia64"><a href="#cd-linux-2-6-xen-ia64" class="headerlink" title="cd linux-2.6-xen-ia64/"></a>cd linux-2.6-xen-ia64/</h1><h1 id="git-checkout-b-your-branch-origin-xen-ia64-domu-minimal-2008may19"><a href="#git-checkout-b-your-branch-origin-xen-ia64-domu-minimal-2008may19" class="headerlink" title="git checkout -b your_branch origin/xen-ia64-domu-minimal-2008may19"></a>git checkout -b your_branch origin/xen-ia64-domu-minimal-2008may19</h1><p>(Note: The current branch is xen-ia64-domu-minimal-2008may19.<br>But you would find the new branch. You can see with<br>“git branch -r” to get the branch lists.<br><a target="_blank" rel="noopener" href="http://people.valinux.co.jp/~yamahata/xen-ia64/for_eagl/linux-2.6-ia64-pv-ops.git/">http://people.valinux.co.jp/~yamahata/xen-ia64/for_eagl/linux-2.6-ia64-pv-ops.git/</a><br>is also available. The tree is based on<br>git://git.kernel.org/pub/scm/linux/kernel/git/aegl/linux-2.6 test)</p>
+</li>
+</ol>
+<ol start="3">
+<li><p>copy .config for pv_ops of domU</p>
+<h1 id="cp-arch-ia64-configs-xen-domu-wip-defconfig-config"><a href="#cp-arch-ia64-configs-xen-domu-wip-defconfig-config" class="headerlink" title="cp arch/ia64/configs/xen_domu_wip_defconfig .config"></a>cp arch/ia64/configs/xen_domu_wip_defconfig .config</h1></li>
+<li><p>make kernel with pv_ops</p>
+<h1 id="make-oldconfig"><a href="#make-oldconfig" class="headerlink" title="make oldconfig"></a>make oldconfig</h1><h1 id="make"><a href="#make" class="headerlink" title="make"></a>make</h1></li>
+<li><p>install the kernel and initrd</p>
+<h1 id="cp-vmlinux-gz-boot-efi-efi-redhat-vmlinuz-2-6-pv-ops-xenU"><a href="#cp-vmlinux-gz-boot-efi-efi-redhat-vmlinuz-2-6-pv-ops-xenU" class="headerlink" title="cp vmlinux.gz /boot/efi/efi/redhat/vmlinuz-2.6-pv_ops-xenU"></a>cp vmlinux.gz /boot/efi/efi/redhat/vmlinuz-2.6-pv_ops-xenU</h1><h1 id="make-modules-install"><a href="#make-modules-install" class="headerlink" title="make modules_install"></a>make modules_install</h1><h1 id="mkinitrd-f-boot-efi-efi-redhat-initrd-2-6-pv-ops-xenU-img"><a href="#mkinitrd-f-boot-efi-efi-redhat-initrd-2-6-pv-ops-xenU-img" class="headerlink" title="mkinitrd -f /boot/efi/efi/redhat/initrd-2.6-pv_ops-xenU.img \"></a>mkinitrd -f /boot/efi/efi/redhat/initrd-2.6-pv_ops-xenU.img \</h1><p>  2.6.26-rc3xen-ia64-08941-g1b12161 –builtin mptspi <br>  –builtin mptbase –builtin mptscsih –builtin uhci-hcd <br>  –builtin ohci-hcd –builtin ehci-hcd</p>
+</li>
+</ol>
+<p>========================<br>Boot DomainU with pv_ops<br>========================</p>
+<ol>
+<li><p>make config of DomU</p>
+<h1 id="vi-etc-xen-rhel5"><a href="#vi-etc-xen-rhel5" class="headerlink" title="vi /etc/xen/rhel5"></a>vi /etc/xen/rhel5</h1><p> kernel = “/boot/efi/efi/redhat/vmlinuz-2.6-pv_ops-xenU”<br> ramdisk = “/boot/efi/efi/redhat/initrd-2.6-pv_ops-xenU.img”<br> vcpus = 1<br> memory = 512<br> name = “rhel5”<br> disk = [ ‘file:/root/rhel5.img,xvda1,w’ ]<br> root = “/dev/xvda1 ro”<br> extra= “rhgb console=hvc0”</p>
+</li>
+<li><p>After boot xen and dom0, start xend</p>
+<h1 id="etc-init-d-xend-start"><a href="#etc-init-d-xend-start" class="headerlink" title="/etc/init.d/xend start"></a>/etc/init.d/xend start</h1><p>( In the debugging case, # XEND_DEBUG=1 xend trace_start )</p>
+</li>
+<li><p>start domU</p>
+<h1 id="xm-create-c-rhel5"><a href="#xm-create-c-rhel5" class="headerlink" title="xm create -c rhel5"></a>xm create -c rhel5</h1></li>
+</ol>
+<p>=========<br>Reference<br>=========</p>
+<ul>
+<li>Wiki of Xen/IA64 upstream merge<br><a target="_blank" rel="noopener" href="http://wiki.xensource.com/xenwiki/XenIA64/UpstreamMerge">http://wiki.xensource.com/xenwiki/XenIA64/UpstreamMerge</a></li>
+</ul>
+<p>Written by Akio Takebe <a href="mailto:&#x74;&#97;&#x6b;&#x65;&#x62;&#101;&#95;&#x61;&#107;&#105;&#111;&#x40;&#x6a;&#x70;&#x2e;&#102;&#x75;&#x6a;&#x69;&#116;&#115;&#x75;&#x2e;&#x63;&#x6f;&#109;">&#x74;&#97;&#x6b;&#x65;&#x62;&#101;&#95;&#x61;&#107;&#105;&#111;&#x40;&#x6a;&#x70;&#x2e;&#102;&#x75;&#x6a;&#x69;&#116;&#115;&#x75;&#x2e;&#x63;&#x6f;&#109;</a> on 28 May 2008</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_xen/" title="Kernel-4.18.0-80.el8_xen" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_xen/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_xen-tpmfront/" title="Kernel-4.18.0-80.el8_xen-tpmfront"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_xfrm_device/" title="Kernel-4.18.0-80.el8_xfrm_device"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

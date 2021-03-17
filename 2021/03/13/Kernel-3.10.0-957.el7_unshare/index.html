@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_unshare | oosTech.com</title>
+  <meta name="description" content="unshare system call:This document describes the new system call, unshare. The documentprovides an overview of the feature, why it is needed, how it canbe used, its interface specification, design, imp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_unshare">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unshare/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="unshare system call:This document describes the new system call, unshare. The documentprovides an overview of the feature, why it is needed, how it canbe used, its interface specification, design, imp">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unshare/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#unshare-system-call"><span class="toc-number">1.</span> <span class="toc-text">unshare system call:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Change-Log"><span class="toc-number">2.</span> <span class="toc-text">Change Log:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Contents"><span class="toc-number">3.</span> <span class="toc-text">Contents:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Per-security-context-namespaces"><span class="toc-number">4.</span> <span class="toc-text">2.1 Per-security context namespaces</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-unsharing-of-virtual-memory-and-or-open-files"><span class="toc-number">5.</span> <span class="toc-text">2.2 unsharing of virtual memory and&#x2F;or open files</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_unshare" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_unshare
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_unshare/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_unshare/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_unshare/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="unshare-system-call"><a href="#unshare-system-call" class="headerlink" title="unshare system call:"></a>unshare system call:</h2><p>This document describes the new system call, unshare. The document<br>provides an overview of the feature, why it is needed, how it can<br>be used, its interface specification, design, implementation and<br>how it can be tested.</p>
+<h2 id="Change-Log"><a href="#Change-Log" class="headerlink" title="Change Log:"></a>Change Log:</h2><p>version 0.1  Initial document, Janak Desai (<a href="mailto:&#x6a;&#97;&#110;&#97;&#x6b;&#x40;&#x75;&#115;&#46;&#105;&#x62;&#x6d;&#46;&#x63;&#111;&#x6d;">&#x6a;&#97;&#110;&#97;&#x6b;&#x40;&#x75;&#115;&#46;&#105;&#x62;&#x6d;&#46;&#x63;&#111;&#x6d;</a>), Jan 11, 2006</p>
+<h2 id="Contents"><a href="#Contents" class="headerlink" title="Contents:"></a>Contents:</h2><pre><code>1) Overview
+2) Benefits
+3) Cost
+4) Requirements
+5) Functional Specification
+6) High Level Design
+7) Low Level Design
+8) Test Specification
+9) Future Work
+</code></pre>
+<ol>
+<li>Overview</li>
+</ol>
+<hr>
+<p>Most legacy operating system kernels support an abstraction of threads<br>as multiple execution contexts within a process. These kernels provide<br>special resources and mechanisms to maintain these “threads”. The Linux<br>kernel, in a clever and simple manner, does not make distinction<br>between processes and “threads”. The kernel allows processes to share<br>resources and thus they can achieve legacy “threads” behavior without<br>requiring additional data structures and mechanisms in the kernel. The<br>power of implementing threads in this manner comes not only from<br>its simplicity but also from allowing application programmers to work<br>outside the confinement of all-or-nothing shared resources of legacy<br>threads. On Linux, at the time of thread creation using the clone system<br>call, applications can selectively choose which resources to share<br>between threads.</p>
+<p>unshare system call adds a primitive to the Linux thread model that<br>allows threads to selectively ‘unshare’ any resources that were being<br>shared at the time of their creation. unshare was conceptualized by<br>Al Viro in the August of 2000, on the Linux-Kernel mailing list, as part<br>of the discussion on POSIX threads on Linux.  unshare augments the<br>usefulness of Linux threads for applications that would like to control<br>shared resources without creating a new process. unshare is a natural<br>addition to the set of available primitives on Linux that implement<br>the concept of process/thread as a virtual machine.</p>
+<ol start="2">
+<li>Benefits</li>
+</ol>
+<hr>
+<p>unshare would be useful to large application frameworks such as PAM<br>where creating a new process to control sharing/unsharing of process<br>resources is not possible. Since namespaces are shared by default<br>when creating a new process using fork or clone, unshare can benefit<br>even non-threaded applications if they have a need to disassociate<br>from default shared namespace. The following lists two use-cases<br>where unshare can be used.</p>
+<h2 id="2-1-Per-security-context-namespaces"><a href="#2-1-Per-security-context-namespaces" class="headerlink" title="2.1 Per-security context namespaces"></a>2.1 Per-security context namespaces</h2><p>unshare can be used to implement polyinstantiated directories using<br>the kernel’s per-process namespace mechanism. Polyinstantiated directories,<br>such as per-user and/or per-security context instance of /tmp, /var/tmp or<br>per-security context instance of a user’s home directory, isolate user<br>processes when working with these directories. Using unshare, a PAM<br>module can easily setup a private namespace for a user at login.<br>Polyinstantiated directories are required for Common Criteria certification<br>with Labeled System Protection Profile, however, with the availability<br>of shared-tree feature in the Linux kernel, even regular Linux systems<br>can benefit from setting up private namespaces at login and<br>polyinstantiating /tmp, /var/tmp and other directories deemed<br>appropriate by system administrators.</p>
+<h2 id="2-2-unsharing-of-virtual-memory-and-or-open-files"><a href="#2-2-unsharing-of-virtual-memory-and-or-open-files" class="headerlink" title="2.2 unsharing of virtual memory and/or open files"></a>2.2 unsharing of virtual memory and/or open files</h2><p>Consider a client/server application where the server is processing<br>client requests by creating processes that share resources such as<br>virtual memory and open files. Without unshare, the server has to<br>decide what needs to be shared at the time of creating the process<br>which services the request. unshare allows the server an ability to<br>disassociate parts of the context during the servicing of the<br>request. For large and complex middleware application frameworks, this<br>ability to unshare after the process was created can be very<br>useful.</p>
+<ol start="3">
+<li>Cost</li>
+</ol>
+<hr>
+<p>In order to not duplicate code and to handle the fact that unshare<br>works on an active task (as opposed to clone/fork working on a newly<br>allocated inactive task) unshare had to make minor reorganizational<br>changes to copy_* functions utilized by clone/fork system call.<br>There is a cost associated with altering existing, well tested and<br>stable code to implement a new feature that may not get exercised<br>extensively in the beginning. However, with proper design and code<br>review of the changes and creation of an unshare test for the LTP<br>the benefits of this new feature can exceed its cost.</p>
+<ol start="4">
+<li>Requirements</li>
+</ol>
+<hr>
+<p>unshare reverses sharing that was done using clone(2) system call,<br>so unshare should have a similar interface as clone(2). That is,<br>since flags in clone(int flags, void *stack) specifies what should<br>be shared, similar flags in unshare(int flags) should specify<br>what should be unshared. Unfortunately, this may appear to invert<br>the meaning of the flags from the way they are used in clone(2).<br>However, there was no easy solution that was less confusing and that<br>allowed incremental context unsharing in future without an ABI change.</p>
+<p>unshare interface should accommodate possible future addition of<br>new context flags without requiring a rebuild of old applications.<br>If and when new context flags are added, unshare design should allow<br>incremental unsharing of those resources on an as needed basis.</p>
+<ol start="5">
+<li>Functional Specification</li>
+</ol>
+<hr>
+<p>NAME<br>    unshare - disassociate parts of the process execution context</p>
+<p>SYNOPSIS<br>    #include &lt;sched.h&gt;</p>
+<pre><code>int unshare(int flags);
+</code></pre>
+<p>DESCRIPTION<br>    unshare allows a process to disassociate parts of its execution<br>    context that are currently being shared with other processes. Part<br>    of execution context, such as the namespace, is shared by default<br>    when a new process is created using fork(2), while other parts,<br>    such as the virtual memory, open file descriptors, etc, may be<br>    shared by explicit request to share them when creating a process<br>    using clone(2).</p>
+<pre><code>The main use of unshare is to allow a process to control its
+shared execution context without creating a new process.
+
+The flags argument specifies one or bitwise-or&#39;ed of several of
+the following constants.
+
+CLONE_FS
+    If CLONE_FS is set, file system information of the caller
+    is disassociated from the shared file system information.
+
+CLONE_FILES
+    If CLONE_FILES is set, the file descriptor table of the
+    caller is disassociated from the shared file descriptor
+    table.
+
+CLONE_NEWNS
+    If CLONE_NEWNS is set, the namespace of the caller is
+    disassociated from the shared namespace.
+
+CLONE_VM
+    If CLONE_VM is set, the virtual memory of the caller is
+    disassociated from the shared virtual memory.
+</code></pre>
+<p>RETURN VALUE<br>    On success, zero returned. On failure, -1 is returned and errno is</p>
+<p>ERRORS<br>    EPERM    CLONE_NEWNS was specified by a non-root process (process<br>        without CAP_SYS_ADMIN).</p>
+<pre><code>ENOMEM    Cannot allocate sufficient memory to copy parts of caller&#39;s
+    context that need to be unshared.
+
+EINVAL    Invalid flag was specified as an argument.
+</code></pre>
+<p>CONFORMING TO<br>    The unshare() call is Linux-specific and  should  not be used<br>    in programs intended to be portable.</p>
+<p>SEE ALSO<br>    clone(2), fork(2)</p>
+<ol start="6">
+<li>High Level Design</li>
+</ol>
+<hr>
+<p>Depending on the flags argument, the unshare system call allocates<br>appropriate process context structures, populates it with values from<br>the current shared version, associates newly duplicated structures<br>with the current task structure and releases corresponding shared<br>versions. Helper functions of clone (copy_*) could not be used<br>directly by unshare because of the following two reasons.</p>
+<ol>
+<li>clone operates on a newly allocated not-yet-active task<br>structure, where as unshare operates on the current active<br>task. Therefore unshare has to take appropriate task_lock()<br>before associating newly duplicated context structures</li>
+<li>unshare has to allocate and duplicate all context structures<br>that are being unshared, before associating them with the<br>current task and releasing older shared structures. Failure<br>do so will create race conditions and/or oops when trying<br>to backout due to an error. Consider the case of unsharing<br>both virtual memory and namespace. After successfully unsharing<br>vm, if the system call encounters an error while allocating<br>new namespace structure, the error return code will have to<br>reverse the unsharing of vm. As part of the reversal the<br>system call will have to go back to older, shared, vm<br>structure, which may not exist anymore.</li>
+</ol>
+<p>Therefore code from copy_* functions that allocated and duplicated<br>current context structure was moved into new dup_* functions. Now,<br>copy_* functions call dup_* functions to allocate and duplicate<br>appropriate context structures and then associate them with the<br>task structure that is being constructed. unshare system call on<br>the other hand performs the following:</p>
+<ol>
+<li><p>Check flags to force missing, but implied, flags</p>
+</li>
+<li><p>For each context structure, call the corresponding unshare<br>helper function to allocate and duplicate a new context<br>structure, if the appropriate bit is set in the flags argument.</p>
+</li>
+<li><p>If there is no error in allocation and duplication and there<br>are new context structures then lock the current task structure,<br>associate new context structures with the current task structure,<br>and release the lock on the current task structure.</p>
+</li>
+<li><p>Appropriately release older, shared, context structures.</p>
+</li>
+<li><p>Low Level Design</p>
+</li>
+</ol>
+<hr>
+<p>Implementation of unshare can be grouped in the following 4 different<br>items:<br>  a) Reorganization of existing copy_* functions<br>  b) unshare system call service function<br>  c) unshare helper functions for each different process context<br>  d) Registration of system call number for different architectures</p>
+<p>  7.1) Reorganization of copy_* functions<br>       Each copy function such as copy_mm, copy_namespace, copy_files,<br>       etc, had roughly two components. The first component allocated<br>       and duplicated the appropriate structure and the second component<br>       linked it to the task structure passed in as an argument to the copy<br>       function. The first component was split into its own function.<br>       These dup_* functions allocated and duplicated the appropriate<br>       context structure. The reorganized copy_* functions invoked<br>       their corresponding dup_* functions and then linked the newly<br>       duplicated structures to the task structure with which the<br>       copy function was called.</p>
+<p>  7.2) unshare system call service function<br>       * Check flags<br>     Force implied flags. If CLONE_THREAD is set force CLONE_VM.<br>     If CLONE_VM is set, force CLONE_SIGHAND. If CLONE_SIGHAND is<br>     set and signals are also being shared, force CLONE_THREAD. If<br>     CLONE_NEWNS is set, force CLONE_FS.<br>       * For each context flag, invoke the corresponding unshare_*<br>     helper routine with flags passed into the system call and a<br>     reference to pointer pointing the new unshared structure<br>       * If any new structures are created by unshare_* helper<br>     functions, take the task_lock() on the current task,<br>     modify appropriate context pointers, and release the<br>         task lock.<br>       * For all newly unshared structures, release the corresponding<br>         older, shared, structures.</p>
+<p>  7.3) unshare_* helper functions<br>       For unshare_* helpers corresponding to CLONE_SYSVSEM, CLONE_SIGHAND,<br>       and CLONE_THREAD, return -EINVAL since they are not implemented yet.<br>       For others, check the flag value to see if the unsharing is<br>       required for that structure. If it is, invoke the corresponding<br>       dup_* function to allocate and duplicate the structure and return<br>       a pointer to it.</p>
+<p>  7.4) Appropriately modify architecture specific code to register the<br>       new system call.</p>
+<ol start="8">
+<li>Test Specification</li>
+</ol>
+<hr>
+<p>The test for unshare should test the following:</p>
+<ol>
+<li><p>Valid flags: Test to check that clone flags for signal and<br>signal handlers, for which unsharing is not implemented<br>yet, return -EINVAL.</p>
+</li>
+<li><p>Missing/implied flags: Test to make sure that if unsharing<br>namespace without specifying unsharing of filesystem, correctly<br>unshares both namespace and filesystem information.</p>
+</li>
+<li><p>For each of the four (namespace, filesystem, files and vm)<br>supported unsharing, verify that the system call correctly<br>unshares the appropriate structure. Verify that unsharing<br>them individually as well as in combination with each<br>other works as expected.</p>
+</li>
+<li><p>Concurrent execution: Use shared memory segments and futex on<br>an address in the shm segment to synchronize execution of<br>about 10 threads. Have a couple of threads execute execve,<br>a couple _exit and the rest unshare with different combination<br>of flags. Verify that unsharing is performed as expected and<br>that there are no oops or hangs.</p>
+</li>
+<li><p>Future Work</p>
+</li>
+</ol>
+<hr>
+<p>The current implementation of unshare does not allow unsharing of<br>signals and signal handlers. Signals are complex to begin with and<br>to unshare signals and/or signal handlers of a currently running<br>process is even more complex. If in the future there is a specific<br>need to allow unsharing of signals and/or signal handlers, it can<br>be incrementally added to unshare without affecting legacy<br>applications using unshare.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unshare/" title="Kernel-3.10.0-957.el7_unshare" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_unshare/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_unicode/" title="Kernel-3.10.0-957.el7_unicode"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_uprobetracer/" title="Kernel-3.10.0-957.el7_uprobetracer"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

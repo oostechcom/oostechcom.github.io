@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_sysrq | oosTech.com</title>
+  <meta name="description" content="Linux Magic System Request Key HacksDocumentation for sysrq.c  What is the magic SysRq key?1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_sysrq">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_sysrq/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Linux Magic System Request Key HacksDocumentation for sysrq.c  What is the magic SysRq key?1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_sysrq/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_sysrq" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_sysrq
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_sysrq/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_sysrq/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_sysrq/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Linux Magic System Request Key Hacks<br>Documentation for sysrq.c</p>
+<ul>
+<li>What is the magic SysRq key?<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">It is a &#39;magical&#39; key combo you can hit which the kernel will respond to</span><br><span class="line">regardless of whatever else it is doing, unless it is completely locked up.</span><br><span class="line"></span><br><span class="line">*  How do I enable the magic SysRq key?</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">You need to say &quot;yes&quot; to &#39;Magic SysRq key (CONFIG_MAGIC_SYSRQ)&#39; when</span><br><span class="line">configuring the kernel. When running a kernel with SysRq compiled in,</span><br><span class="line">&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sysrq controls the functions allowed to be invoked via</span><br><span class="line">the SysRq key. By default the file contains 1 which means that every</span><br><span class="line">possible SysRq request is allowed (in older versions SysRq was disabled</span><br><span class="line">by default, and you were required to specifically enable it at run-time</span><br><span class="line">but this is not the case any more). Here is the list of possible values</span><br><span class="line">in &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sysrq:</span><br><span class="line">   0 - disable sysrq completely</span><br><span class="line">   1 - enable all functions of sysrq</span><br><span class="line">  &gt;1 - bitmask of allowed sysrq functions (see below for detailed function</span><br><span class="line">       description):</span><br><span class="line">          2 - enable control of console logging level</span><br><span class="line">          4 - enable control of keyboard (SAK, unraw)</span><br><span class="line">          8 - enable debugging dumps of processes etc.</span><br><span class="line">         16 - enable sync command</span><br><span class="line">         32 - enable remount read-only</span><br><span class="line">         64 - enable signalling of processes (term, kill, oom-kill)</span><br><span class="line">        128 - allow reboot&#x2F;poweroff</span><br><span class="line">        256 - allow nicing of all RT tasks</span><br><span class="line"></span><br><span class="line">You can set the value in the file by the following command:</span><br><span class="line">    echo &quot;number&quot; &gt;&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sysrq</span><br><span class="line"></span><br><span class="line">Note that the value of &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sysrq influences only the invocation</span><br><span class="line">via a keyboard. Invocation of any operation via &#x2F;proc&#x2F;sysrq-trigger is always</span><br><span class="line">allowed (by a user with admin privileges).</span><br><span class="line"></span><br><span class="line">*  How do I use the magic SysRq key?</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">On x86   - You press the key combo &#39;ALT-SysRq-&lt;command key&gt;&#39;. Note - Some</span><br><span class="line">           keyboards may not have a key labeled &#39;SysRq&#39;. The &#39;SysRq&#39; key is</span><br><span class="line">           also known as the &#39;Print Screen&#39; key. Also some keyboards cannot</span><br><span class="line">	   handle so many keys being pressed at the same time, so you might</span><br><span class="line">	   have better luck with &quot;press Alt&quot;, &quot;press SysRq&quot;, &quot;release SysRq&quot;,</span><br><span class="line">	   &quot;press &lt;command key&gt;&quot;, release everything.</span><br><span class="line"></span><br><span class="line">On SPARC - You press &#39;ALT-STOP-&lt;command key&gt;&#39;, I believe.</span><br><span class="line"></span><br><span class="line">On the serial console (PC style standard serial ports only) -</span><br><span class="line">           You send a BREAK, then within 5 seconds a command key. Sending</span><br><span class="line">           BREAK twice is interpreted as a normal BREAK.</span><br><span class="line"></span><br><span class="line">On PowerPC - Press &#39;ALT - Print Screen (or F13) - &lt;command key&gt;,  </span><br><span class="line">             Print Screen (or F13) - &lt;command key&gt; may suffice.</span><br><span class="line"></span><br><span class="line">On other - If you know of the key combos for other architectures, please</span><br><span class="line">           let me know so I can add them to this section.</span><br><span class="line"></span><br><span class="line">On all -  write a character to &#x2F;proc&#x2F;sysrq-trigger.  e.g.:</span><br><span class="line"></span><br><span class="line">		echo t &gt; &#x2F;proc&#x2F;sysrq-trigger</span><br><span class="line"></span><br><span class="line">*  What are the &#39;command&#39; keys?</span><br></pre></td></tr></table></figure>
+‘b’     - Will immediately reboot the system without syncing or unmounting<pre><code>    your disks.
+</code></pre>
+</li>
+</ul>
+<p>‘c’    - Will perform a system crash by a NULL pointer dereference.<br>          A crashdump will be taken if configured.</p>
+<p>‘d’    - Shows all locks that are held.</p>
+<p>‘e’     - Send a SIGTERM to all processes, except for init.</p>
+<p>‘f’    - Will call oom_kill to kill a memory hog process.</p>
+<p>‘g’    - Used by kgdb (kernel debugger)</p>
+<p>‘h’     - Will display help (actually any other key than those listed<br>          here will display help. but ‘h’ is easy to remember :-)</p>
+<p>‘i’     - Send a SIGKILL to all processes, except for init.</p>
+<p>‘j’     - Forcibly “Just thaw it” - filesystems frozen by the FIFREEZE ioctl.</p>
+<p>‘k’     - Secure Access Key (SAK) Kills all programs on the current virtual<br>          console. NOTE: See important comments below in SAK section.</p>
+<p>‘l’     - Shows a stack backtrace for all active CPUs.</p>
+<p>‘m’     - Will dump current memory info to your console.</p>
+<p>‘n’    - Used to make RT tasks nice-able</p>
+<p>‘o’     - Will shut your system off (if configured and supported).</p>
+<p>‘p’     - Will dump the current registers and flags to your console.</p>
+<p>‘q’     - Will dump per CPU lists of all armed hrtimers (but NOT regular<br>          timer_list timers) and detailed information about all<br>          clockevent devices.</p>
+<p>‘r’     - Turns off keyboard raw mode and sets it to XLATE.</p>
+<p>‘s’     - Will attempt to sync all mounted filesystems.</p>
+<p>‘t’     - Will dump a list of current tasks and their information to your<br>          console.</p>
+<p>‘u’     - Will attempt to remount all mounted filesystems read-only.</p>
+<p>‘v’    - Forcefully restores framebuffer console<br>‘v’    - Causes ETM buffer dump [ARM-specific]</p>
+<p>‘w’    - Dumps tasks that are in uninterruptable (blocked) state.</p>
+<p>‘x’    - Used by xmon interface on ppc/powerpc platforms.<br>          Show global PMU Registers on sparc64.</p>
+<p>‘y’    - Show global CPU Registers [SPARC-64 specific]</p>
+<p>‘z’    - Dump the ftrace buffer</p>
+<p>‘0’-‘9’ - Sets the console log level, controlling which kernel messages<br>          will be printed to your console. (‘0’, for example would make<br>          it so that only emergency messages like PANICs or OOPSes would<br>          make it to your console.)</p>
+<ul>
+<li> Okay, so what can I use them for?<pre><code>Well, unraw(r) is very handy when your X server or a svgalib program crashes.
+</code></pre>
+</li>
+</ul>
+<p>sak(k) (Secure Access Key) is useful when you want to be sure there is no<br>trojan program running at console which could grab your password<br>when you would try to login. It will kill all programs on given console,<br>thus letting you make sure that the login prompt you see is actually<br>the one from init, not some trojan program.<br>IMPORTANT: In its true form it is not a true SAK like the one in a :IMPORTANT<br>IMPORTANT: c2 compliant system, and it should not be mistaken as   :IMPORTANT<br>IMPORTANT: such.                                                   :IMPORTANT<br>       It seems others find it useful as (System Attention Key) which is<br>useful when you want to exit a program that will not let you switch consoles.<br>(For example, X or a svgalib program.)</p>
+<p>reboot(b) is good when you’re unable to shut down. But you should also<br>sync(s) and umount(u) first.</p>
+<p>crash(c) can be used to manually trigger a crashdump when the system is hung.<br>Note that this just triggers a crash if there is no dump mechanism available.</p>
+<p>sync(s) is great when your system is locked up, it allows you to sync your<br>disks and will certainly lessen the chance of data loss and fscking. Note<br>that the sync hasn’t taken place until you see the “OK” and “Done” appear<br>on the screen. (If the kernel is really in strife, you may not ever get the<br>OK or Done message…)</p>
+<p>umount(u) is basically useful in the same ways as sync(s). I generally sync(s),<br>umount(u), then reboot(b) when my system locks. It’s saved me many a fsck.<br>Again, the unmount (remount read-only) hasn’t taken place until you see the<br>“OK” and “Done” message appear on the screen.</p>
+<p>The loglevels ‘0’-‘9’ are useful when your console is being flooded with<br>kernel messages you do not want to see. Selecting ‘0’ will prevent all but<br>the most urgent kernel messages from reaching your console. (They will<br>still be logged if syslogd/klogd are alive, though.)</p>
+<p>term(e) and kill(i) are useful if you have some sort of runaway process you<br>are unable to kill any other way, especially if it’s spawning other<br>processes.</p>
+<p>“just thaw it(j)” is useful if your system becomes unresponsive due to a frozen<br>(probably root) filesystem via the FIFREEZE ioctl.</p>
+<ul>
+<li> Sometimes SysRq seems to get ‘stuck’ after using it, what can I do?<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">That happens to me, also. I&#39;ve found that tapping shift, alt, and control</span><br><span class="line">on both sides of the keyboard, and hitting an invalid sysrq sequence again</span><br><span class="line">will fix the problem. (i.e., something like alt-sysrq-z). Switching to another</span><br><span class="line">virtual console (ALT+Fn) and then back again should also help.</span><br><span class="line"></span><br><span class="line">*  I hit SysRq, but nothing seems to happen, what&#39;s wrong?</span><br><span class="line">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">There are some keyboards that produce a different keycode for SysRq than the</span><br><span class="line">pre-defined value of 99 (see KEY_SYSRQ in include&#x2F;linux&#x2F;input.h), or which</span><br><span class="line">don&#39;t have a SysRq key at all. In these cases, run &#39;showkey -s&#39; to find an</span><br><span class="line">appropriate scancode sequence, and use &#39;setkeycodes &lt;sequence&gt; 99&#39; to map</span><br><span class="line">this sequence to the usual SysRq code (e.g., &#39;setkeycodes e05b 99&#39;). It&#39;s</span><br><span class="line">probably best to put this command in a boot script. Oh, and by the way, you</span><br><span class="line">exit &#39;showkey&#39; by not typing anything for ten seconds.</span><br><span class="line"></span><br><span class="line">*  I want to add SysRQ key events to a module, how does it work?</span><br></pre></td></tr></table></figure>
+In order to register a basic function with the table, you must first include<br>the header ‘include/linux/sysrq.h’, this will define everything else you need.<br>Next, you must create a sysrq_key_op struct, and populate it with A) the key<br>handler function you will use, B) a help_msg string, that will print when SysRQ<br>prints help, and C) an action_msg string, that will print right before your<br>handler is called. Your handler must conform to the prototype in ‘sysrq.h’.</li>
+</ul>
+<p>After the sysrq_key_op is created, you can call the kernel function<br>register_sysrq_key(int key, struct sysrq_key_op *op_p); this will<br>register the operation pointed to by ‘op_p’ at table key ‘key’,<br>if that slot in the table is blank. At module unload time, you must call<br>the function unregister_sysrq_key(int key, struct sysrq_key_op *op_p), which<br>will remove the key op pointed to by ‘op_p’ from the key ‘key’, if and only if<br>it is currently registered in that slot. This is in case the slot has been<br>overwritten since you registered it.</p>
+<p>The Magic SysRQ system works by registering key operations against a key op<br>lookup table, which is defined in ‘drivers/char/sysrq.c’. This key table has<br>a number of operations registered into it at compile time, but is mutable,<br>and 2 functions are exported for interface to it:<br>    register_sysrq_key and unregister_sysrq_key.<br>Of course, never ever leave an invalid pointer in the table. I.e., when<br>your module that called register_sysrq_key() exits, it must call<br>unregister_sysrq_key() to clean up the sysrq key table entry that it used.<br>Null pointers in the table are always safe. :)</p>
+<p>If for some reason you feel the need to call the handle_sysrq function from<br>within a function called by handle_sysrq, you must be aware that you are in<br>a lock (you are also in an interrupt handler, which means don’t sleep!), so<br>you must call __handle_sysrq_nolock instead.</p>
+<ul>
+<li><p>When I hit a SysRq key combination only the header appears on the console?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Sysrq output is subject to the same console loglevel control as all</span><br><span class="line">other console output.  This means that if the kernel was booted &#39;quiet&#39;</span><br><span class="line">as is common on distro kernels the output may not appear on the actual</span><br><span class="line">console, even though it will appear in the dmesg buffer, and be accessible</span><br><span class="line">via the dmesg command and to the consumers of &#x2F;proc&#x2F;kmsg.  As a specific</span><br><span class="line">exception the header line from the sysrq command is passed to all console</span><br><span class="line">consumers as if the current loglevel was maximum.  If only the header</span><br><span class="line">is emitted it is almost certain that the kernel loglevel is too low.</span><br><span class="line">Should you require the output on the console channel then you will need</span><br><span class="line">to temporarily up the console loglevel using alt-sysrq-8 or:</span><br><span class="line"></span><br><span class="line">    echo 8 &gt; &#x2F;proc&#x2F;sysrq-trigger</span><br><span class="line"></span><br><span class="line">Remember to return the loglevel to normal after triggering the sysrq</span><br><span class="line">command you are interested in.</span><br><span class="line"></span><br><span class="line">*  I have more questions, who can I ask?</span><br></pre></td></tr></table></figure>
+<p>Just ask them on the linux-kernel mailing list:<br>  <a href="mailto:&#108;&#x69;&#x6e;&#x75;&#120;&#45;&#107;&#x65;&#114;&#x6e;&#x65;&#x6c;&#64;&#118;&#103;&#101;&#x72;&#x2e;&#107;&#101;&#x72;&#x6e;&#101;&#108;&#x2e;&#x6f;&#x72;&#x67;">&#108;&#x69;&#x6e;&#x75;&#120;&#45;&#107;&#x65;&#114;&#x6e;&#x65;&#x6c;&#64;&#118;&#103;&#101;&#x72;&#x2e;&#107;&#101;&#x72;&#x6e;&#101;&#108;&#x2e;&#x6f;&#x72;&#x67;</a></p>
+</li>
+<li><p> Credits</p>
+<pre><code>Written by Mydraal &lt;vulpyne@vulpyne.net&gt;
+Updated by Adam Sulmicki &lt;adam@cfar.umd.edu&gt;
+Updated by Jeremy M. Dolan &lt;jmd@turbogeek.org&gt; 2001/01/28 10:15:59
+Added to by Crutcher Dunnavant &lt;crutcher+kernel@datastacks.com&gt;
+</code></pre>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_sysrq/" title="Kernel-3.10.0-957.el7_sysrq" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_sysrq/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_sysreg/" title="Kernel-3.10.0-957.el7_sysreg"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_sysv-fs/" title="Kernel-3.10.0-957.el7_sysv-fs"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

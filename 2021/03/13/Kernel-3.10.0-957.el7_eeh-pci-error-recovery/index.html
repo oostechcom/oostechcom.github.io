@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_eeh-pci-error-recovery | oosTech.com</title>
+  <meta name="description" content="PCI Bus EEH Error Recovery                   --------------------------                        Linas Vepstas                    &lt;linas@austin.ibm.com&gt;                       12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_eeh-pci-error-recovery">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="PCI Bus EEH Error Recovery                   --------------------------                        Linas Vepstas                    &lt;linas@austin.ibm.com&gt;                       12">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Causes-of-EEH-Errors"><span class="toc-number">2.</span> <span class="toc-text">Causes of EEH Errors</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Detection-and-Recovery"><span class="toc-number">3.</span> <span class="toc-text">Detection and Recovery</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Current-PPC64-Linux-EEH-Implementation"><span class="toc-number">4.</span> <span class="toc-text">Current PPC64 Linux EEH Implementation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Device-Shutdown-and-User-Space-Events"><span class="toc-number">5.</span> <span class="toc-text">Device Shutdown and User-Space Events</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pro%E2%80%99s-and-Con%E2%80%99s-of-the-Current-Design"><span class="toc-number">6.</span> <span class="toc-text">Pro’s and Con’s of the Current Design</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusions"><span class="toc-number">7.</span> <span class="toc-text">Conclusions</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_eeh-pci-error-recovery" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_eeh-pci-error-recovery
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>                  PCI Bus EEH Error Recovery
+                  --------------------------
+                       Linas Vepstas
+                   &lt;linas@austin.ibm.com&gt;
+                      12 January 2005
+</code></pre>
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview:"></a>Overview:</h2><p>The IBM POWER-based pSeries and iSeries computers include PCI bus<br>controller chips that have extended capabilities for detecting and<br>reporting a large variety of PCI bus error conditions.  These features<br>go under the name of “EEH”, for “Extended Error Handling”.  The EEH<br>hardware features allow PCI bus errors to be cleared and a PCI<br>card to be “rebooted”, without also having to reboot the operating<br>system.</p>
+<p>This is in contrast to traditional PCI error handling, where the<br>PCI chip is wired directly to the CPU, and an error would cause<br>a CPU machine-check/check-stop condition, halting the CPU entirely.<br>Another “traditional” technique is to ignore such errors, which<br>can lead to data corruption, both of user data or of kernel data,<br>hung/unresponsive adapters, or system crashes/lockups.  Thus,<br>the idea behind EEH is that the operating system can become more<br>reliable and robust by protecting it from PCI errors, and giving<br>the OS the ability to “reboot”/recover individual PCI devices.</p>
+<p>Future systems from other vendors, based on the PCI-E specification,<br>may contain similar features.</p>
+<h2 id="Causes-of-EEH-Errors"><a href="#Causes-of-EEH-Errors" class="headerlink" title="Causes of EEH Errors"></a>Causes of EEH Errors</h2><p>EEH was originally designed to guard against hardware failure, such<br>as PCI cards dying from heat, humidity, dust, vibration and bad<br>electrical connections. The vast majority of EEH errors seen in<br>“real life” are due to either poorly seated PCI cards, or,<br>unfortunately quite commonly, due to device driver bugs, device firmware<br>bugs, and sometimes PCI card hardware bugs.</p>
+<p>The most common software bug, is one that causes the device to<br>attempt to DMA to a location in system memory that has not been<br>reserved for DMA access for that card.  This is a powerful feature,<br>as it prevents what; otherwise, would have been silent memory<br>corruption caused by the bad DMA.  A number of device driver<br>bugs have been found and fixed in this way over the past few<br>years.  Other possible causes of EEH errors include data or<br>address line parity errors (for example, due to poor electrical<br>connectivity due to a poorly seated card), and PCI-X split-completion<br>errors (due to software, device firmware, or device PCI hardware bugs).<br>The vast majority of “true hardware failures” can be cured by<br>physically removing and re-seating the PCI card.</p>
+<h2 id="Detection-and-Recovery"><a href="#Detection-and-Recovery" class="headerlink" title="Detection and Recovery"></a>Detection and Recovery</h2><p>In the following discussion, a generic overview of how to detect<br>and recover from EEH errors will be presented. This is followed<br>by an overview of how the current implementation in the Linux<br>kernel does it.  The actual implementation is subject to change,<br>and some of the finer points are still being debated.  These<br>may in turn be swayed if or when other architectures implement<br>similar functionality.</p>
+<p>When a PCI Host Bridge (PHB, the bus controller connecting the<br>PCI bus to the system CPU electronics complex) detects a PCI error<br>condition, it will “isolate” the affected PCI card.  Isolation<br>will block all writes (either to the card from the system, or<br>from the card to the system), and it will cause all reads to<br>return all-ff’s (0xff, 0xffff, 0xffffffff for 8/16/32-bit reads).<br>This value was chosen because it is the same value you would<br>get if the device was physically unplugged from the slot.<br>This includes access to PCI memory, I/O space, and PCI config<br>space.  Interrupts; however, will continued to be delivered.</p>
+<p>Detection and recovery are performed with the aid of ppc64<br>firmware.  The programming interfaces in the Linux kernel<br>into the firmware are referred to as RTAS (Run-Time Abstraction<br>Services).  The Linux kernel does not (should not) access<br>the EEH function in the PCI chipsets directly, primarily because<br>there are a number of different chipsets out there, each with<br>different interfaces and quirks. The firmware provides a<br>uniform abstraction layer that will work with all pSeries<br>and iSeries hardware (and be forwards-compatible).</p>
+<p>If the OS or device driver suspects that a PCI slot has been<br>EEH-isolated, there is a firmware call it can make to determine if<br>this is the case. If so, then the device driver should put itself<br>into a consistent state (given that it won’t be able to complete any<br>pending work) and start recovery of the card.  Recovery normally<br>would consist of resetting the PCI device (holding the PCI #RST<br>line high for two seconds), followed by setting up the device<br>config space (the base address registers (BAR’s), latency timer,<br>cache line size, interrupt line, and so on).  This is followed by a<br>reinitialization of the device driver.  In a worst-case scenario,<br>the power to the card can be toggled, at least on hot-plug-capable<br>slots.  In principle, layers far above the device driver probably<br>do not need to know that the PCI card has been “rebooted” in this<br>way; ideally, there should be at most a pause in Ethernet/disk/USB<br>I/O while the card is being reset.</p>
+<p>If the card cannot be recovered after three or four resets, the<br>kernel/device driver should assume the worst-case scenario, that the<br>card has died completely, and report this error to the sysadmin.<br>In addition, error messages are reported through RTAS and also through<br>syslogd (/var/log/messages) to alert the sysadmin of PCI resets.<br>The correct way to deal with failed adapters is to use the standard<br>PCI hotplug tools to remove and replace the dead card.</p>
+<h2 id="Current-PPC64-Linux-EEH-Implementation"><a href="#Current-PPC64-Linux-EEH-Implementation" class="headerlink" title="Current PPC64 Linux EEH Implementation"></a>Current PPC64 Linux EEH Implementation</h2><p>At this time, a generic EEH recovery mechanism has been implemented,<br>so that individual device drivers do not need to be modified to support<br>EEH recovery.  This generic mechanism piggy-backs on the PCI hotplug<br>infrastructure,  and percolates events up through the userspace/udev<br>infrastructure.  Following is a detailed description of how this is<br>accomplished.</p>
+<p>EEH must be enabled in the PHB’s very early during the boot process,<br>and if a PCI slot is hot-plugged. The former is performed by<br>eeh_init() in arch/powerpc/platforms/pseries/eeh.c, and the later by<br>drivers/pci/hotplug/pSeries_pci.c calling in to the eeh.c code.<br>EEH must be enabled before a PCI scan of the device can proceed.<br>Current Power5 hardware will not work unless EEH is enabled;<br>although older Power4 can run with it disabled.  Effectively,<br>EEH can no longer be turned off.  PCI devices <em>must</em> be<br>registered with the EEH code; the EEH code needs to know about<br>the I/O address ranges of the PCI device in order to detect an<br>error.  Given an arbitrary address, the routine<br>pci_get_device_by_addr() will find the pci device associated<br>with that address (if any).</p>
+<p>The default arch/powerpc/include/asm/io.h macros readb(), inb(), insb(),<br>etc. include a check to see if the i/o read returned all-0xff’s.<br>If so, these make a call to eeh_dn_check_failure(), which in turn<br>asks the firmware if the all-ff’s value is the sign of a true EEH<br>error.  If it is not, processing continues as normal.  The grand<br>total number of these false alarms or “false positives” can be<br>seen in /proc/ppc64/eeh (subject to change).  Normally, almost<br>all of these occur during boot, when the PCI bus is scanned, where<br>a large number of 0xff reads are part of the bus scan procedure.</p>
+<p>If a frozen slot is detected, code in<br>arch/powerpc/platforms/pseries/eeh.c will print a stack trace to<br>syslog (/var/log/messages).  This stack trace has proven to be very<br>useful to device-driver authors for finding out at what point the EEH<br>error was detected, as the error itself usually occurs slightly<br>beforehand.</p>
+<p>Next, it uses the Linux kernel notifier chain/work queue mechanism to<br>allow any interested parties to find out about the failure.  Device<br>drivers, or other parts of the kernel, can use<br>eeh_register_notifier(struct notifier_block *) to find out about EEH<br>events.  The event will include a pointer to the pci device, the<br>device node and some state info.  Receivers of the event can “do as<br>they wish”; the default handler will be described further in this<br>section.</p>
+<p>To assist in the recovery of the device, eeh.c exports the<br>following functions:</p>
+<p>rtas_set_slot_reset() – assert the  PCI #RST line for 1/8th of a second<br>rtas_configure_bridge() – ask firmware to configure any PCI bridges<br>   located topologically under the pci slot.<br>eeh_save_bars() and eeh_restore_bars(): save and restore the PCI<br>   config-space info for a device and any devices under it.</p>
+<p>A handler for the EEH notifier_block events is implemented in<br>drivers/pci/hotplug/pSeries_pci.c, called handle_eeh_events().<br>It saves the device BAR’s and then calls rpaphp_unconfig_pci_adapter().<br>This last call causes the device driver for the card to be stopped,<br>which causes uevents to go out to user space. This triggers<br>user-space scripts that might issue commands such as “ifdown eth0”<br>for ethernet cards, and so on.  This handler then sleeps for 5 seconds,<br>hoping to give the user-space scripts enough time to complete.<br>It then resets the PCI card, reconfigures the device BAR’s, and<br>any bridges underneath. It then calls rpaphp_enable_pci_slot(),<br>which restarts the device driver and triggers more user-space<br>events (for example, calling “ifup eth0” for ethernet cards).</p>
+<h2 id="Device-Shutdown-and-User-Space-Events"><a href="#Device-Shutdown-and-User-Space-Events" class="headerlink" title="Device Shutdown and User-Space Events"></a>Device Shutdown and User-Space Events</h2><p>This section documents what happens when a pci slot is unconfigured,<br>focusing on how the device driver gets shut down, and on how the<br>events get delivered to user-space scripts.</p>
+<p>Following is an example sequence of events that cause a device driver<br>close function to be called during the first phase of an EEH reset.<br>The following sequence is an example of the pcnet32 device driver.</p>
+<pre><code>rpa_php_unconfig_pci_adapter (struct slot *)  // in rpaphp_pci.c
+&#123;
+  calls
+  pci_remove_bus_device (struct pci_dev *) // in /drivers/pci/remove.c
+  &#123;
+    calls
+    pci_destroy_dev (struct pci_dev *)
+    &#123;
+      calls
+      device_unregister (&amp;dev-&gt;dev) // in /drivers/base/core.c
+      &#123;
+        calls
+        device_del (struct device *)
+        &#123;
+          calls
+          bus_remove_device() // in /drivers/base/bus.c
+          &#123;
+            calls
+            device_release_driver()
+            &#123;
+              calls
+              struct device_driver-&gt;remove() which is just
+              pci_device_remove()  // in /drivers/pci/pci_driver.c
+              &#123;
+                calls
+                struct pci_driver-&gt;remove() which is just
+                pcnet32_remove_one() // in /drivers/net/pcnet32.c
+                &#123;
+                  calls
+                  unregister_netdev() // in /net/core/dev.c
+                  &#123;
+                    calls
+                    dev_close()  // in /net/core/dev.c
+                    &#123;
+                       calls dev-&gt;stop();
+                       which is just pcnet32_close() // in pcnet32.c
+                       &#123;
+                         which does what you wanted
+                         to stop the device
+                       &#125;
+                    &#125;
+                 &#125;
+               which
+               frees pcnet32 device driver memory
+            &#125;
+ &#125;&#125;&#125;&#125;&#125;&#125;
+
+
+in drivers/pci/pci_driver.c,
+struct device_driver-&gt;remove() is just pci_device_remove()
+which calls struct pci_driver-&gt;remove() which is pcnet32_remove_one()
+which calls unregister_netdev()  (in net/core/dev.c)
+which calls dev_close()  (in net/core/dev.c)
+which calls dev-&gt;stop() which is pcnet32_close()
+which then does the appropriate shutdown.
+</code></pre>
+<hr>
+<p>Following is the analogous stack trace for events sent to user-space<br>when the pci device is unconfigured.</p>
+<p>rpa_php_unconfig_pci_adapter() {             // in rpaphp_pci.c<br>  calls<br>  pci_remove_bus_device (struct pci_dev *) { // in /drivers/pci/remove.c<br>    calls<br>    pci_destroy_dev (struct pci_dev *) {<br>      calls<br>      device_unregister (&amp;dev-&gt;dev) {        // in /drivers/base/core.c<br>        calls<br>        device_del(struct device * dev) {    // in /drivers/base/core.c<br>          calls<br>          kobject_del() {                    //in /libs/kobject.c<br>            calls<br>            kobject_uevent() {               // in /libs/kobject.c<br>              calls<br>              kset_uevent() {                // in /lib/kobject.c<br>                calls<br>                kset-&gt;uevent_ops-&gt;uevent()   // which is really just<br>                a call to<br>                dev_uevent() {               // in /drivers/base/core.c<br>                  calls<br>                  dev-&gt;bus-&gt;uevent() which is really just a call to<br>                  pci_uevent () {            // in drivers/pci/hotplug.c<br>                    which prints device name, etc….<br>                 }<br>               }<br>               then kobject_uevent() sends a netlink uevent to userspace<br>               –&gt; userspace uevent<br>               (during early boot, nobody listens to netlink events and<br>               kobject_uevent() executes uevent_helper[], which runs the<br>               event process /sbin/hotplug)<br>           }<br>         }<br>         kobject_del() then calls sysfs_remove_dir(), which would<br>         trigger any user-space daemon that was watching /sysfs,<br>         and notice the delete event.</p>
+<h2 id="Pro’s-and-Con’s-of-the-Current-Design"><a href="#Pro’s-and-Con’s-of-the-Current-Design" class="headerlink" title="Pro’s and Con’s of the Current Design"></a>Pro’s and Con’s of the Current Design</h2><p>There are several issues with the current EEH software recovery design,<br>which may be addressed in future revisions.  But first, note that the<br>big plus of the current design is that no changes need to be made to<br>individual device drivers, so that the current design throws a wide net.<br>The biggest negative of the design is that it potentially disturbs<br>network daemons and file systems that didn’t need to be disturbed.</p>
+<p>– A minor complaint is that resetting the network card causes<br>   user-space back-to-back ifdown/ifup burps that potentially disturb<br>   network daemons, that didn’t need to even know that the pci<br>   card was being rebooted.</p>
+<p>– A more serious concern is that the same reset, for SCSI devices,<br>   causes havoc to mounted file systems.  Scripts cannot post-facto<br>   unmount a file system without flushing pending buffers, but this<br>   is impossible, because I/O has already been stopped.  Thus,<br>   ideally, the reset should happen at or below the block layer,<br>   so that the file systems are not disturbed.</p>
+<p>   Reiserfs does not tolerate errors returned from the block device.<br>   Ext3fs seems to be tolerant, retrying reads/writes until it does<br>   succeed. Both have been only lightly tested in this scenario.</p>
+<p>   The SCSI-generic subsystem already has built-in code for performing<br>   SCSI device resets, SCSI bus resets, and SCSI host-bus-adapter<br>   (HBA) resets.  These are cascaded into a chain of attempted<br>   resets if a SCSI command fails. These are completely hidden<br>   from the block layer.  It would be very natural to add an EEH<br>   reset into this chain of events.</p>
+<p>– If a SCSI error occurs for the root device, all is lost unless<br>   the sysadmin had the foresight to run /bin, /sbin, /etc, /var<br>   and so on, out of ramdisk/tmpfs.</p>
+<h2 id="Conclusions"><a href="#Conclusions" class="headerlink" title="Conclusions"></a>Conclusions</h2><p>There’s forward progress …</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/" title="Kernel-3.10.0-957.el7_eeh-pci-error-recovery" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_eeh-pci-error-recovery/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_eeprom/" title="Kernel-3.10.0-957.el7_eepro"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_efi-stub/" title="Kernel-3.10.0-957.el7_efi-stub"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

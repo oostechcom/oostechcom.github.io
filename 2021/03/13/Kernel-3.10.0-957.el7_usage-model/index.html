@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_usage-model | oosTech.com</title>
+  <meta name="description" content="Linux and the Device TreeThe Linux usage model for device tree data Author: Grant Likely &amp;#x67;&amp;#114;&amp;#97;&amp;#x6e;&amp;#116;&amp;#x2e;&amp;#x6c;&amp;#x69;&amp;#107;&amp;#101;&amp;#x6c;&amp;#x79;&amp;#64;&amp;#x73;&amp;#x65;&amp;#99;&amp;#114;&amp;#x65;&amp;#x74;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_usage-model">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_usage-model/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Linux and the Device TreeThe Linux usage model for device tree data Author: Grant Likely &amp;#x67;&amp;#114;&amp;#97;&amp;#x6e;&amp;#116;&amp;#x2e;&amp;#x6c;&amp;#x69;&amp;#107;&amp;#101;&amp;#x6c;&amp;#x79;&amp;#64;&amp;#x73;&amp;#x65;&amp;#99;&amp;#114;&amp;#x65;&amp;#x74;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_usage-model/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux-and-the-Device-Tree"><span class="toc-number">1.</span> <span class="toc-text">Linux and the Device Tree</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-High-Level-View"><span class="toc-number">2.</span> <span class="toc-text">2.1 High Level View</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Platform-Identification"><span class="toc-number">3.</span> <span class="toc-text">2.2 Platform Identification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Runtime-configuration"><span class="toc-number">4.</span> <span class="toc-text">2.3 Runtime configuration</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-Device-population"><span class="toc-number">5.</span> <span class="toc-text">2.4 Device population</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Appendix-A-AMBA-devices"><span class="toc-number">6.</span> <span class="toc-text">Appendix A: AMBA devices</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_usage-model" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_usage-model
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_usage-model/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_usage-model/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_usage-model/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="Linux-and-the-Device-Tree"><a href="#Linux-and-the-Device-Tree" class="headerlink" title="Linux and the Device Tree"></a>Linux and the Device Tree</h2><p>The Linux usage model for device tree data</p>
+<p>Author: Grant Likely <a href="mailto:&#x67;&#114;&#97;&#x6e;&#116;&#x2e;&#x6c;&#x69;&#107;&#101;&#x6c;&#x79;&#64;&#x73;&#x65;&#99;&#114;&#x65;&#x74;&#108;&#x61;&#x62;&#x2e;&#x63;&#97;">&#x67;&#114;&#97;&#x6e;&#116;&#x2e;&#x6c;&#x69;&#107;&#101;&#x6c;&#x79;&#64;&#x73;&#x65;&#99;&#114;&#x65;&#x74;&#108;&#x61;&#x62;&#x2e;&#x63;&#97;</a></p>
+<p>This article describes how Linux uses the device tree.  An overview of<br>the device tree data format can be found on the device tree usage page<br>at devicetree.org[1].</p>
+<p>[1] <a target="_blank" rel="noopener" href="http://devicetree.org/Device_Tree_Usage">http://devicetree.org/Device_Tree_Usage</a></p>
+<p>The “Open Firmware Device Tree”, or simply Device Tree (DT), is a data<br>structure and language for describing hardware.  More specifically, it<br>is a description of hardware that is readable by an operating system<br>so that the operating system doesn’t need to hard code details of the<br>machine.</p>
+<p>Structurally, the DT is a tree, or acyclic graph with named nodes, and<br>nodes may have an arbitrary number of named properties encapsulating<br>arbitrary data.  A mechanism also exists to create arbitrary<br>links from one node to another outside of the natural tree structure.</p>
+<p>Conceptually, a common set of usage conventions, called ‘bindings’,<br>is defined for how data should appear in the tree to describe typical<br>hardware characteristics including data busses, interrupt lines, GPIO<br>connections, and peripheral devices.</p>
+<p>As much as possible, hardware is described using existing bindings to<br>maximize use of existing support code, but since property and node<br>names are simply text strings, it is easy to extend existing bindings<br>or create new ones by defining new nodes and properties.  Be wary,<br>however, of creating a new binding without first doing some homework<br>about what already exists.  There are currently two different,<br>incompatible, bindings for i2c busses that came about because the new<br>binding was created without first investigating how i2c devices were<br>already being enumerated in existing systems.</p>
+<ol>
+<li>History</li>
+</ol>
+<hr>
+<p>The DT was originally created by Open Firmware as part of the<br>communication method for passing data from Open Firmware to a client<br>program (like to an operating system).  An operating system used the<br>Device Tree to discover the topology of the hardware at runtime, and<br>thereby support a majority of available hardware without hard coded<br>information (assuming drivers were available for all devices).</p>
+<p>Since Open Firmware is commonly used on PowerPC and SPARC platforms,<br>the Linux support for those architectures has for a long time used the<br>Device Tree.</p>
+<p>In 2005, when PowerPC Linux began a major cleanup and to merge 32-bit<br>and 64-bit support, the decision was made to require DT support on all<br>powerpc platforms, regardless of whether or not they used Open<br>Firmware.  To do this, a DT representation called the Flattened Device<br>Tree (FDT) was created which could be passed to the kernel as a binary<br>blob without requiring a real Open Firmware implementation.  U-Boot,<br>kexec, and other bootloaders were modified to support both passing a<br>Device Tree Binary (dtb) and to modify a dtb at boot time.  DT was<br>also added to the PowerPC boot wrapper (arch/powerpc/boot/*) so that<br>a dtb could be wrapped up with the kernel image to support booting<br>existing non-DT aware firmware.</p>
+<p>Some time later, FDT infrastructure was generalized to be usable by<br>all architectures.  At the time of this writing, 6 mainlined<br>architectures (arm, microblaze, mips, powerpc, sparc, and x86) and 1<br>out of mainline (nios) have some level of DT support.</p>
+<ol start="2">
+<li>Data Model</li>
+</ol>
+<hr>
+<p>If you haven’t already read the Device Tree Usage[1] page,<br>then go read it now.  It’s okay, I’ll wait….</p>
+<h2 id="2-1-High-Level-View"><a href="#2-1-High-Level-View" class="headerlink" title="2.1 High Level View"></a>2.1 High Level View</h2><p>The most important thing to understand is that the DT is simply a data<br>structure that describes the hardware.  There is nothing magical about<br>it, and it doesn’t magically make all hardware configuration problems<br>go away.  What it does do is provide a language for decoupling the<br>hardware configuration from the board and device driver support in the<br>Linux kernel (or any other operating system for that matter).  Using<br>it allows board and device support to become data driven; to make<br>setup decisions based on data passed into the kernel instead of on<br>per-machine hard coded selections.</p>
+<p>Ideally, data driven platform setup should result in less code<br>duplication and make it easier to support a wide range of hardware<br>with a single kernel image.</p>
+<p>Linux uses DT data for three major purposes:</p>
+<ol>
+<li>platform identification,</li>
+<li>runtime configuration, and</li>
+<li>device population.</li>
+</ol>
+<h2 id="2-2-Platform-Identification"><a href="#2-2-Platform-Identification" class="headerlink" title="2.2 Platform Identification"></a>2.2 Platform Identification</h2><p>First and foremost, the kernel will use data in the DT to identify the<br>specific machine.  In a perfect world, the specific platform shouldn’t<br>matter to the kernel because all platform details would be described<br>perfectly by the device tree in a consistent and reliable manner.<br>Hardware is not perfect though, and so the kernel must identify the<br>machine during early boot so that it has the opportunity to run<br>machine-specific fixups.</p>
+<p>In the majority of cases, the machine identity is irrelevant, and the<br>kernel will instead select setup code based on the machine’s core<br>CPU or SoC.  On ARM for example, setup_arch() in<br>arch/arm/kernel/setup.c will call setup_machine_fdt() in<br>arch/arm/kernel/devicetree.c which searches through the machine_desc<br>table and selects the machine_desc which best matches the device tree<br>data.  It determines the best match by looking at the ‘compatible’<br>property in the root device tree node, and comparing it with the<br>dt_compat list in struct machine_desc.</p>
+<p>The ‘compatible’ property contains a sorted list of strings starting<br>with the exact name of the machine, followed by an optional list of<br>boards it is compatible with sorted from most compatible to least.  For<br>example, the root compatible properties for the TI BeagleBoard and its<br>successor, the BeagleBoard xM board might look like:</p>
+<pre><code>compatible = &quot;ti,omap3-beagleboard&quot;, &quot;ti,omap3450&quot;, &quot;ti,omap3&quot;;
+compatible = &quot;ti,omap3-beagleboard-xm&quot;, &quot;ti,omap3450&quot;, &quot;ti,omap3&quot;;
+</code></pre>
+<p>Where “ti,omap3-beagleboard-xm” specifies the exact model, it also<br>claims that it compatible with the OMAP 3450 SoC, and the omap3 family<br>of SoCs in general.  You’ll notice that the list is sorted from most<br>specific (exact board) to least specific (SoC family).</p>
+<p>Astute readers might point out that the Beagle xM could also claim<br>compatibility with the original Beagle board.  However, one should be<br>cautioned about doing so at the board level since there is typically a<br>high level of change from one board to another, even within the same<br>product line, and it is hard to nail down exactly what is meant when one<br>board claims to be compatible with another.  For the top level, it is<br>better to err on the side of caution and not claim one board is<br>compatible with another.  The notable exception would be when one<br>board is a carrier for another, such as a CPU module attached to a<br>carrier board.</p>
+<p>One more note on compatible values.  Any string used in a compatible<br>property must be documented as to what it indicates.  Add<br>documentation for compatible strings in Documentation/devicetree/bindings.</p>
+<p>Again on ARM, for each machine_desc, the kernel looks to see if<br>any of the dt_compat list entries appear in the compatible property.<br>If one does, then that machine_desc is a candidate for driving the<br>machine.  After searching the entire table of machine_descs,<br>setup_machine_fdt() returns the ‘most compatible’ machine_desc based<br>on which entry in the compatible property each machine_desc matches<br>against.  If no matching machine_desc is found, then it returns NULL.</p>
+<p>The reasoning behind this scheme is the observation that in the majority<br>of cases, a single machine_desc can support a large number of boards<br>if they all use the same SoC, or same family of SoCs.  However,<br>invariably there will be some exceptions where a specific board will<br>require special setup code that is not useful in the generic case.<br>Special cases could be handled by explicitly checking for the<br>troublesome board(s) in generic setup code, but doing so very quickly<br>becomes ugly and/or unmaintainable if it is more than just a couple of<br>cases.</p>
+<p>Instead, the compatible list allows a generic machine_desc to provide<br>support for a wide common set of boards by specifying “less<br>compatible” value in the dt_compat list.  In the example above,<br>generic board support can claim compatibility with “ti,omap3” or<br>“ti,omap3450”.  If a bug was discovered on the original beagleboard<br>that required special workaround code during early boot, then a new<br>machine_desc could be added which implements the workarounds and only<br>matches on “ti,omap3-beagleboard”.</p>
+<p>PowerPC uses a slightly different scheme where it calls the .probe()<br>hook from each machine_desc, and the first one returning TRUE is used.<br>However, this approach does not take into account the priority of the<br>compatible list, and probably should be avoided for new architecture<br>support.</p>
+<h2 id="2-3-Runtime-configuration"><a href="#2-3-Runtime-configuration" class="headerlink" title="2.3 Runtime configuration"></a>2.3 Runtime configuration</h2><p>In most cases, a DT will be the sole method of communicating data from<br>firmware to the kernel, so also gets used to pass in runtime and<br>configuration data like the kernel parameters string and the location<br>of an initrd image.</p>
+<p>Most of this data is contained in the /chosen node, and when booting<br>Linux it will look something like this:</p>
+<pre><code>chosen &#123;
+    bootargs = &quot;console=ttyS0,115200 loglevel=8&quot;;
+    initrd-start = &lt;0xc8000000&gt;;
+    initrd-end = &lt;0xc8200000&gt;;
+&#125;;
+</code></pre>
+<p>The bootargs property contains the kernel arguments, and the initrd-*<br>properties define the address and size of an initrd blob.  Note that<br>initrd-end is the first address after the initrd image, so this doesn’t<br>match the usual semantic of struct resource.  The chosen node may also<br>optionally contain an arbitrary number of additional properties for<br>platform-specific configuration data.</p>
+<p>During early boot, the architecture setup code calls of_scan_flat_dt()<br>several times with different helper callbacks to parse device tree<br>data before paging is setup.  The of_scan_flat_dt() code scans through<br>the device tree and uses the helpers to extract information required<br>during early boot.  Typically the early_init_dt_scan_chosen() helper<br>is used to parse the chosen node including kernel parameters,<br>early_init_dt_scan_root() to initialize the DT address space model,<br>and early_init_dt_scan_memory() to determine the size and<br>location of usable RAM.</p>
+<p>On ARM, the function setup_machine_fdt() is responsible for early<br>scanning of the device tree after selecting the correct machine_desc<br>that supports the board.</p>
+<h2 id="2-4-Device-population"><a href="#2-4-Device-population" class="headerlink" title="2.4 Device population"></a>2.4 Device population</h2><p>After the board has been identified, and after the early configuration data<br>has been parsed, then kernel initialization can proceed in the normal<br>way.  At some point in this process, unflatten_device_tree() is called<br>to convert the data into a more efficient runtime representation.<br>This is also when machine-specific setup hooks will get called, like<br>the machine_desc .init_early(), .init_irq() and .init_machine() hooks<br>on ARM.  The remainder of this section uses examples from the ARM<br>implementation, but all architectures will do pretty much the same<br>thing when using a DT.</p>
+<p>As can be guessed by the names, .init_early() is used for any machine-<br>specific setup that needs to be executed early in the boot process,<br>and .init_irq() is used to set up interrupt handling.  Using a DT<br>doesn’t materially change the behaviour of either of these functions.<br>If a DT is provided, then both .init_early() and .init_irq() are able<br>to call any of the DT query functions (of_* in include/linux/of*.h) to<br>get additional data about the platform.</p>
+<p>The most interesting hook in the DT context is .init_machine() which<br>is primarily responsible for populating the Linux device model with<br>data about the platform.  Historically this has been implemented on<br>embedded platforms by defining a set of static clock structures,<br>platform_devices, and other data in the board support .c file, and<br>registering it en-masse in .init_machine().  When DT is used, then<br>instead of hard coding static devices for each platform, the list of<br>devices can be obtained by parsing the DT, and allocating device<br>structures dynamically.</p>
+<p>The simplest case is when .init_machine() is only responsible for<br>registering a block of platform_devices.  A platform_device is a concept<br>used by Linux for memory or I/O mapped devices which cannot be detected<br>by hardware, and for ‘composite’ or ‘virtual’ devices (more on those<br>later).  While there is no ‘platform device’ terminology for the DT,<br>platform devices roughly correspond to device nodes at the root of the<br>tree and children of simple memory mapped bus nodes.</p>
+<p>About now is a good time to lay out an example.  Here is part of the<br>device tree for the NVIDIA Tegra board.</p>
+<p>/{<br>    compatible = “nvidia,harmony”, “nvidia,tegra20”;<br>    #address-cells = &lt;1&gt;;<br>    #size-cells = &lt;1&gt;;<br>    interrupt-parent = &lt;&amp;intc&gt;;</p>
+<pre><code>chosen &#123; &#125;;
+aliases &#123; &#125;;
+
+memory &#123;
+    device_type = &quot;memory&quot;;
+    reg = &lt;0x00000000 0x40000000&gt;;
+&#125;;
+
+soc &#123;
+    compatible = &quot;nvidia,tegra20-soc&quot;, &quot;simple-bus&quot;;
+    #address-cells = &lt;1&gt;;
+    #size-cells = &lt;1&gt;;
+    ranges;
+
+    intc: interrupt-controller@50041000 &#123;
+        compatible = &quot;nvidia,tegra20-gic&quot;;
+        interrupt-controller;
+        #interrupt-cells = &lt;1&gt;;
+        reg = &lt;0x50041000 0x1000&gt;, &lt; 0x50040100 0x0100 &gt;;
+    &#125;;
+
+    serial@70006300 &#123;
+        compatible = &quot;nvidia,tegra20-uart&quot;;
+        reg = &lt;0x70006300 0x100&gt;;
+        interrupts = &lt;122&gt;;
+    &#125;;
+
+    i2s1: i2s@70002800 &#123;
+        compatible = &quot;nvidia,tegra20-i2s&quot;;
+        reg = &lt;0x70002800 0x100&gt;;
+        interrupts = &lt;77&gt;;
+        codec = &lt;&amp;wm8903&gt;;
+    &#125;;
+
+    i2c@7000c000 &#123;
+        compatible = &quot;nvidia,tegra20-i2c&quot;;
+        #address-cells = &lt;1&gt;;
+        #size-cells = &lt;0&gt;;
+        reg = &lt;0x7000c000 0x100&gt;;
+        interrupts = &lt;70&gt;;
+
+        wm8903: codec@1a &#123;
+            compatible = &quot;wlf,wm8903&quot;;
+            reg = &lt;0x1a&gt;;
+            interrupts = &lt;347&gt;;
+        &#125;;
+    &#125;;
+&#125;;
+
+sound &#123;
+    compatible = &quot;nvidia,harmony-sound&quot;;
+    i2s-controller = &lt;&amp;i2s1&gt;;
+    i2s-codec = &lt;&amp;wm8903&gt;;
+&#125;;
+</code></pre>
+<p>};</p>
+<p>At .init_machine() time, Tegra board support code will need to look at<br>this DT and decide which nodes to create platform_devices for.<br>However, looking at the tree, it is not immediately obvious what kind<br>of device each node represents, or even if a node represents a device<br>at all.  The /chosen, /aliases, and /memory nodes are informational<br>nodes that don’t describe devices (although arguably memory could be<br>considered a device).  The children of the /soc node are memory mapped<br>devices, but the codec@1a is an i2c device, and the sound node<br>represents not a device, but rather how other devices are connected<br>together to create the audio subsystem.  I know what each device is<br>because I’m familiar with the board design, but how does the kernel<br>know what to do with each node?</p>
+<p>The trick is that the kernel starts at the root of the tree and looks<br>for nodes that have a ‘compatible’ property.  First, it is generally<br>assumed that any node with a ‘compatible’ property represents a device<br>of some kind, and second, it can be assumed that any node at the root<br>of the tree is either directly attached to the processor bus, or is a<br>miscellaneous system device that cannot be described any other way.<br>For each of these nodes, Linux allocates and registers a<br>platform_device, which in turn may get bound to a platform_driver.</p>
+<p>Why is using a platform_device for these nodes a safe assumption?<br>Well, for the way that Linux models devices, just about all bus_types<br>assume that its devices are children of a bus controller.  For<br>example, each i2c_client is a child of an i2c_master.  Each spi_device<br>is a child of an SPI bus.  Similarly for USB, PCI, MDIO, etc.  The<br>same hierarchy is also found in the DT, where I2C device nodes only<br>ever appear as children of an I2C bus node.  Ditto for SPI, MDIO, USB,<br>etc.  The only devices which do not require a specific type of parent<br>device are platform_devices (and amba_devices, but more on that<br>later), which will happily live at the base of the Linux /sys/devices<br>tree.  Therefore, if a DT node is at the root of the tree, then it<br>really probably is best registered as a platform_device.</p>
+<p>Linux board support code calls of_platform_populate(NULL, NULL, NULL, NULL)<br>to kick off discovery of devices at the root of the tree.  The<br>parameters are all NULL because when starting from the root of the<br>tree, there is no need to provide a starting node (the first NULL), a<br>parent struct device (the last NULL), and we’re not using a match<br>table (yet).  For a board that only needs to register devices,<br>.init_machine() can be completely empty except for the<br>of_platform_populate() call.</p>
+<p>In the Tegra example, this accounts for the /soc and /sound nodes, but<br>what about the children of the SoC node?  Shouldn’t they be registered<br>as platform devices too?  For Linux DT support, the generic behaviour<br>is for child devices to be registered by the parent’s device driver at<br>driver .probe() time.  So, an i2c bus device driver will register a<br>i2c_client for each child node, an SPI bus driver will register<br>its spi_device children, and similarly for other bus_types.<br>According to that model, a driver could be written that binds to the<br>SoC node and simply registers platform_devices for each of its<br>children.  The board support code would allocate and register an SoC<br>device, a (theoretical) SoC device driver could bind to the SoC device,<br>and register platform_devices for /soc/interrupt-controller, /soc/serial,<br>/soc/i2s, and /soc/i2c in its .probe() hook.  Easy, right?</p>
+<p>Actually, it turns out that registering children of some<br>platform_devices as more platform_devices is a common pattern, and the<br>device tree support code reflects that and makes the above example<br>simpler.  The second argument to of_platform_populate() is an<br>of_device_id table, and any node that matches an entry in that table<br>will also get its child nodes registered.  In the tegra case, the code<br>can look something like this:</p>
+<p>static void __init harmony_init_machine(void)<br>{<br>    /* … */<br>    of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);<br>}</p>
+<p>“simple-bus” is defined in the ePAPR 1.0 specification as a property<br>meaning a simple memory mapped bus, so the of_platform_populate() code<br>could be written to just assume simple-bus compatible nodes will<br>always be traversed.  However, we pass it in as an argument so that<br>board support code can always override the default behaviour.</p>
+<p>[Need to add discussion of adding i2c/spi/etc child devices]</p>
+<h2 id="Appendix-A-AMBA-devices"><a href="#Appendix-A-AMBA-devices" class="headerlink" title="Appendix A: AMBA devices"></a>Appendix A: AMBA devices</h2><p>ARM Primecells are a certain kind of device attached to the ARM AMBA<br>bus which include some support for hardware detection and power<br>management.  In Linux, struct amba_device and the amba_bus_type is<br>used to represent Primecell devices.  However, the fiddly bit is that<br>not all devices on an AMBA bus are Primecells, and for Linux it is<br>typical for both amba_device and platform_device instances to be<br>siblings of the same bus segment.</p>
+<p>When using the DT, this creates problems for of_platform_populate()<br>because it must decide whether to register each node as either a<br>platform_device or an amba_device.  This unfortunately complicates the<br>device creation model a little bit, but the solution turns out not to<br>be too invasive.  If a node is compatible with “arm,amba-primecell”, then<br>of_platform_populate() will register it as an amba_device instead of a<br>platform_device.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_usage-model/" title="Kernel-3.10.0-957.el7_usage-model" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_usage-model/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_transhuge/" title="Kernel-3.10.0-957.el7_transhuge"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_usb-serial/" title="Kernel-3.10.0-957.el7_usb-serial"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

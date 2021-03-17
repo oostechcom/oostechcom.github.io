@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_modules | oosTech.com</title>
+  <meta name="description" content="Building External Modules This document describes how to build an out-of-tree kernel module. &#x3D;&#x3D;&#x3D; Table of Contents &#x3D;&#x3D;&#x3D; 1 Introduction &#x3D;&#x3D;&#x3D; 2 How to Build External Modules    --- 2.1 Command Syntax    -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_modules">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_modules/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Building External Modules This document describes how to build an out-of-tree kernel module. &#x3D;&#x3D;&#x3D; Table of Contents &#x3D;&#x3D;&#x3D; 1 Introduction &#x3D;&#x3D;&#x3D; 2 How to Build External Modules    --- 2.1 Command Syntax    -">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_modules/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_modules" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_modules
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_modules/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_modules/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_modules/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Building External Modules</p>
+<p>This document describes how to build an out-of-tree kernel module.</p>
+<p>=== Table of Contents</p>
+<pre><code>=== 1 Introduction
+=== 2 How to Build External Modules
+   --- 2.1 Command Syntax
+   --- 2.2 Options
+   --- 2.3 Targets
+   --- 2.4 Building Separate Files
+=== 3. Creating a Kbuild File for an External Module
+   --- 3.1 Shared Makefile
+   --- 3.2 Separate Kbuild file and Makefile
+   --- 3.3 Binary Blobs
+   --- 3.4 Building Multiple Modules
+=== 4. Include Files
+   --- 4.1 Kernel Includes
+   --- 4.2 Single Subdirectory
+   --- 4.3 Several Subdirectories
+=== 5. Module Installation
+   --- 5.1 INSTALL_MOD_PATH
+   --- 5.2 INSTALL_MOD_DIR
+=== 6. Module Versioning
+   --- 6.1 Symbols From the Kernel (vmlinux + modules)
+   --- 6.2 Symbols and External Modules
+   --- 6.3 Symbols From Another External Module
+=== 7. Tips &amp; Tricks
+   --- 7.1 Testing for CONFIG_FOO_BAR
+</code></pre>
+<p>=== 1. Introduction</p>
+<p>“kbuild” is the build system used by the Linux kernel. Modules must use<br>kbuild to stay compatible with changes in the build infrastructure and<br>to pick up the right flags to “gcc.” Functionality for building modules<br>both in-tree and out-of-tree is provided. The method for building<br>either is similar, and all modules are initially developed and built<br>out-of-tree.</p>
+<p>Covered in this document is information aimed at developers interested<br>in building out-of-tree (or “external”) modules. The author of an<br>external module should supply a makefile that hides most of the<br>complexity, so one only has to type “make” to build the module. This is<br>easily accomplished, and a complete example will be presented in<br>section 3.</p>
+<p>=== 2. How to Build External Modules</p>
+<p>To build external modules, you must have a prebuilt kernel available<br>that contains the configuration and header files used in the build.<br>Also, the kernel must have been built with modules enabled. If you are<br>using a distribution kernel, there will be a package for the kernel you<br>are running provided by your distribution.</p>
+<p>An alternative is to use the “make” target “modules_prepare.” This will<br>make sure the kernel contains the information required. The target<br>exists solely as a simple way to prepare a kernel source tree for<br>building external modules.</p>
+<p>NOTE: “modules_prepare” will not build Module.symvers even if<br>CONFIG_MODVERSIONS is set; therefore, a full kernel build needs to be<br>executed to make module versioning work.</p>
+<p>— 2.1 Command Syntax</p>
+<pre><code>The command to build an external module is:
+
+    $ make -C &lt;path_to_kernel_src&gt; M=$PWD
+
+The kbuild system knows that an external module is being built
+due to the &quot;M=&lt;dir&gt;&quot; option given in the command.
+
+To build against the running kernel use:
+
+    $ make -C /lib/modules/`uname -r`/build M=$PWD
+
+Then to install the module(s) just built, add the target
+&quot;modules_install&quot; to the command:
+
+    $ make -C /lib/modules/`uname -r`/build M=$PWD modules_install
+</code></pre>
+<p>— 2.2 Options</p>
+<pre><code>($KDIR refers to the path of the kernel source directory.)
+
+make -C $KDIR M=$PWD
+
+-C $KDIR
+    The directory where the kernel source is located.
+    &quot;make&quot; will actually change to the specified directory
+    when executing and will change back when finished.
+
+M=$PWD
+    Informs kbuild that an external module is being built.
+    The value given to &quot;M&quot; is the absolute path of the
+    directory where the external module (kbuild file) is
+    located.
+</code></pre>
+<p>— 2.3 Targets</p>
+<pre><code>When building an external module, only a subset of the &quot;make&quot;
+targets are available.
+
+make -C $KDIR M=$PWD [target]
+
+The default will build the module(s) located in the current
+directory, so a target does not need to be specified. All
+output files will also be generated in this directory. No
+attempts are made to update the kernel source, and it is a
+precondition that a successful &quot;make&quot; has been executed for the
+kernel.
+
+modules
+    The default target for external modules. It has the
+    same functionality as if no target was specified. See
+    description above.
+
+modules_install
+    Install the external module(s). The default location is
+    /lib/modules/&lt;kernel_release&gt;/extra/, but a prefix may
+    be added with INSTALL_MOD_PATH (discussed in section 5).
+
+clean
+    Remove all generated files in the module directory only.
+
+help
+    List the available targets for external modules.
+</code></pre>
+<p>— 2.4 Building Separate Files</p>
+<pre><code>It is possible to build single files that are part of a module.
+This works equally well for the kernel, a module, and even for
+external modules.
+
+Example (The module foo.ko, consist of bar.o and baz.o):
+    make -C $KDIR M=$PWD bar.lst
+    make -C $KDIR M=$PWD baz.o
+    make -C $KDIR M=$PWD foo.ko
+    make -C $KDIR M=$PWD /
+</code></pre>
+<p>=== 3. Creating a Kbuild File for an External Module</p>
+<p>In the last section we saw the command to build a module for the<br>running kernel. The module is not actually built, however, because a<br>build file is required. Contained in this file will be the name of<br>the module(s) being built, along with the list of requisite source<br>files. The file may be as simple as a single line:</p>
+<pre><code>obj-m := &lt;module_name&gt;.o
+</code></pre>
+<p>The kbuild system will build <module_name>.o from <module_name>.c,<br>and, after linking, will result in the kernel module <module_name>.ko.<br>The above line can be put in either a “Kbuild” file or a “Makefile.”<br>When the module is built from multiple sources, an additional line is<br>needed listing the files:</p>
+<pre><code>&lt;module_name&gt;-y := &lt;src1&gt;.o &lt;src2&gt;.o ...
+</code></pre>
+<p>NOTE: Further documentation describing the syntax used by kbuild is<br>located in Documentation/kbuild/makefiles.txt.</p>
+<p>The examples below demonstrate how to create a build file for the<br>module 8123.ko, which is built from the following files:</p>
+<pre><code>8123_if.c
+8123_if.h
+8123_pci.c
+8123_bin.o_shipped    &lt;= Binary blob
+</code></pre>
+<p>— 3.1 Shared Makefile</p>
+<pre><code>An external module always includes a wrapper makefile that
+supports building the module using &quot;make&quot; with no arguments.
+This target is not used by kbuild; it is only for convenience.
+Additional functionality, such as test targets, can be included
+but should be filtered out from kbuild due to possible name
+clashes.
+
+Example 1:
+    --&gt; filename: Makefile
+    ifneq ($(KERNELRELEASE),)
+    # kbuild part of makefile
+    obj-m  := 8123.o
+    8123-y := 8123_if.o 8123_pci.o 8123_bin.o
+
+    else
+    # normal makefile
+    KDIR ?= /lib/modules/`uname -r`/build
+
+    default:
+        $(MAKE) -C $(KDIR) M=$$PWD
+
+    # Module specific targets
+    genbin:
+        echo &quot;X&quot; &gt; 8123_bin.o_shipped
+
+    endif
+
+The check for KERNELRELEASE is used to separate the two parts
+of the makefile. In the example, kbuild will only see the two
+assignments, whereas &quot;make&quot; will see everything except these
+two assignments. This is due to two passes made on the file:
+the first pass is by the &quot;make&quot; instance run on the command
+line; the second pass is by the kbuild system, which is
+initiated by the parameterized &quot;make&quot; in the default target.
+</code></pre>
+<p>— 3.2 Separate Kbuild File and Makefile</p>
+<pre><code>In newer versions of the kernel, kbuild will first look for a
+file named &quot;Kbuild,&quot; and only if that is not found, will it
+then look for a makefile. Utilizing a &quot;Kbuild&quot; file allows us
+to split up the makefile from example 1 into two files:
+
+Example 2:
+    --&gt; filename: Kbuild
+    obj-m  := 8123.o
+    8123-y := 8123_if.o 8123_pci.o 8123_bin.o
+
+    --&gt; filename: Makefile
+    KDIR ?= /lib/modules/`uname -r`/build
+
+    default:
+        $(MAKE) -C $(KDIR) M=$$PWD
+
+    # Module specific targets
+    genbin:
+        echo &quot;X&quot; &gt; 8123_bin.o_shipped
+
+The split in example 2 is questionable due to the simplicity of
+each file; however, some external modules use makefiles
+consisting of several hundred lines, and here it really pays
+off to separate the kbuild part from the rest.
+
+The next example shows a backward compatible version.
+
+Example 3:
+    --&gt; filename: Kbuild
+    obj-m  := 8123.o
+    8123-y := 8123_if.o 8123_pci.o 8123_bin.o
+
+    --&gt; filename: Makefile
+    ifneq ($(KERNELRELEASE),)
+    # kbuild part of makefile
+    include Kbuild
+
+    else
+    # normal makefile
+    KDIR ?= /lib/modules/`uname -r`/build
+
+    default:
+        $(MAKE) -C $(KDIR) M=$$PWD
+
+    # Module specific targets
+    genbin:
+        echo &quot;X&quot; &gt; 8123_bin.o_shipped
+
+    endif
+
+Here the &quot;Kbuild&quot; file is included from the makefile. This
+allows an older version of kbuild, which only knows of
+makefiles, to be used when the &quot;make&quot; and kbuild parts are
+split into separate files.
+</code></pre>
+<p>— 3.3 Binary Blobs</p>
+<pre><code>Some external modules need to include an object file as a blob.
+kbuild has support for this, but requires the blob file to be
+named &lt;filename&gt;_shipped. When the kbuild rules kick in, a copy
+of &lt;filename&gt;_shipped is created with _shipped stripped off,
+giving us &lt;filename&gt;. This shortened filename can be used in
+the assignment to the module.
+
+Throughout this section, 8123_bin.o_shipped has been used to
+build the kernel module 8123.ko; it has been included as
+8123_bin.o.
+
+    8123-y := 8123_if.o 8123_pci.o 8123_bin.o
+
+Although there is no distinction between the ordinary source
+files and the binary file, kbuild will pick up different rules
+when creating the object file for the module.
+</code></pre>
+<p>— 3.4 Building Multiple Modules</p>
+<pre><code>kbuild supports building multiple modules with a single build
+file. For example, if you wanted to build two modules, foo.ko
+and bar.ko, the kbuild lines would be:
+
+    obj-m := foo.o bar.o
+    foo-y := &lt;foo_srcs&gt;
+    bar-y := &lt;bar_srcs&gt;
+
+It is that simple!
+</code></pre>
+<p>=== 4. Include Files</p>
+<p>Within the kernel, header files are kept in standard locations<br>according to the following rule:</p>
+<pre><code>* If the header file only describes the internal interface of a
+  module, then the file is placed in the same directory as the
+  source files.
+* If the header file describes an interface used by other parts
+  of the kernel that are located in different directories, then
+  the file is placed in include/linux/.
+
+  NOTE: There are two notable exceptions to this rule: larger
+  subsystems have their own directory under include/, such as
+  include/scsi; and architecture specific headers are located
+  under arch/$(ARCH)/include/.
+</code></pre>
+<p>— 4.1 Kernel Includes</p>
+<pre><code>To include a header file located under include/linux/, simply
+use:
+
+    #include &lt;linux/module.h&gt;
+
+kbuild will add options to &quot;gcc&quot; so the relevant directories
+are searched.
+</code></pre>
+<p>— 4.2 Single Subdirectory</p>
+<pre><code>External modules tend to place header files in a separate
+include/ directory where their source is located, although this
+is not the usual kernel style. To inform kbuild of the
+directory, use either ccflags-y or CFLAGS_&lt;filename&gt;.o.
+
+Using the example from section 3, if we moved 8123_if.h to a
+subdirectory named include, the resulting kbuild file would
+look like:
+
+    --&gt; filename: Kbuild
+    obj-m := 8123.o
+
+    ccflags-y := -Iinclude
+    8123-y := 8123_if.o 8123_pci.o 8123_bin.o
+
+Note that in the assignment there is no space between -I and
+the path. This is a limitation of kbuild: there must be no
+space present.
+</code></pre>
+<p>— 4.3 Several Subdirectories</p>
+<pre><code>kbuild can handle files that are spread over several directories.
+Consider the following example:
+
+.
+|__ src
+|   |__ complex_main.c
+|   |__ hal
+|    |__ hardwareif.c
+|    |__ include
+|        |__ hardwareif.h
+|__ include
+    |__ complex.h
+
+To build the module complex.ko, we then need the following
+kbuild file:
+
+    --&gt; filename: Kbuild
+    obj-m := complex.o
+    complex-y := src/complex_main.o
+    complex-y += src/hal/hardwareif.o
+
+    ccflags-y := -I$(src)/include
+    ccflags-y += -I$(src)/src/hal/include
+
+As you can see, kbuild knows how to handle object files located
+in other directories. The trick is to specify the directory
+relative to the kbuild file&#39;s location. That being said, this
+is NOT recommended practice.
+
+For the header files, kbuild must be explicitly told where to
+look. When kbuild executes, the current directory is always the
+root of the kernel tree (the argument to &quot;-C&quot;) and therefore an
+absolute path is needed. $(src) provides the absolute path by
+pointing to the directory where the currently executing kbuild
+file is located.
+</code></pre>
+<p>=== 5. Module Installation</p>
+<p>Modules which are included in the kernel are installed in the<br>directory:</p>
+<pre><code>/lib/modules/$(KERNELRELEASE)/kernel/
+</code></pre>
+<p>And external modules are installed in:</p>
+<pre><code>/lib/modules/$(KERNELRELEASE)/extra/
+</code></pre>
+<p>— 5.1 INSTALL_MOD_PATH</p>
+<pre><code>Above are the default directories but as always some level of
+customization is possible. A prefix can be added to the
+installation path using the variable INSTALL_MOD_PATH:
+
+    $ make INSTALL_MOD_PATH=/frodo modules_install
+    =&gt; Install dir: /frodo/lib/modules/$(KERNELRELEASE)/kernel/
+
+INSTALL_MOD_PATH may be set as an ordinary shell variable or,
+as shown above, can be specified on the command line when
+calling &quot;make.&quot; This has effect when installing both in-tree
+and out-of-tree modules.
+</code></pre>
+<p>— 5.2 INSTALL_MOD_DIR</p>
+<pre><code>External modules are by default installed to a directory under
+/lib/modules/$(KERNELRELEASE)/extra/, but you may wish to
+locate modules for a specific functionality in a separate
+directory. For this purpose, use INSTALL_MOD_DIR to specify an
+alternative name to &quot;extra.&quot;
+
+    $ make INSTALL_MOD_DIR=gandalf -C $KDIR \
+           M=$PWD modules_install
+    =&gt; Install dir: /lib/modules/$(KERNELRELEASE)/gandalf/
+</code></pre>
+<p>=== 6. Module Versioning</p>
+<p>Module versioning is enabled by the CONFIG_MODVERSIONS tag, and is used<br>as a simple ABI consistency check. A CRC value of the full prototype<br>for an exported symbol is created. When a module is loaded/used, the<br>CRC values contained in the kernel are compared with similar values in<br>the module; if they are not equal, the kernel refuses to load the<br>module.</p>
+<p>Module.symvers contains a list of all exported symbols from a kernel<br>build.</p>
+<p>— 6.1 Symbols From the Kernel (vmlinux + modules)</p>
+<pre><code>During a kernel build, a file named Module.symvers will be
+generated. Module.symvers contains all exported symbols from
+the kernel and compiled modules. For each symbol, the
+corresponding CRC value is also stored.
+
+The syntax of the Module.symvers file is:
+    &lt;CRC&gt;        &lt;Symbol&gt;           &lt;module&gt;
+
+    0x2d036834  scsi_remove_host   drivers/scsi/scsi_mod
+
+For a kernel build without CONFIG_MODVERSIONS enabled, the CRC
+would read 0x00000000.
+
+Module.symvers serves two purposes:
+1) It lists all exported symbols from vmlinux and all modules.
+2) It lists the CRC if CONFIG_MODVERSIONS is enabled.
+</code></pre>
+<p>— 6.2 Symbols and External Modules</p>
+<pre><code>When building an external module, the build system needs access
+to the symbols from the kernel to check if all external symbols
+are defined. This is done in the MODPOST step. modpost obtains
+the symbols by reading Module.symvers from the kernel source
+tree. If a Module.symvers file is present in the directory
+where the external module is being built, this file will be
+read too. During the MODPOST step, a new Module.symvers file
+will be written containing all exported symbols that were not
+defined in the kernel.
+</code></pre>
+<p>— 6.3 Symbols From Another External Module</p>
+<pre><code>Sometimes, an external module uses exported symbols from
+another external module. kbuild needs to have full knowledge of
+all symbols to avoid spitting out warnings about undefined
+symbols. Three solutions exist for this situation.
+
+NOTE: The method with a top-level kbuild file is recommended
+but may be impractical in certain situations.
+
+Use a top-level kbuild file
+    If you have two modules, foo.ko and bar.ko, where
+    foo.ko needs symbols from bar.ko, you can use a
+    common top-level kbuild file so both modules are
+    compiled in the same build. Consider the following
+    directory layout:
+
+    ./foo/ &lt;= contains foo.ko
+    ./bar/ &lt;= contains bar.ko
+
+    The top-level kbuild file would then look like:
+
+    #./Kbuild (or ./Makefile):
+        obj-y := foo/ bar/
+
+    And executing
+
+        $ make -C $KDIR M=$PWD
+
+    will then do the expected and compile both modules with
+    full knowledge of symbols from either module.
+
+Use an extra Module.symvers file
+    When an external module is built, a Module.symvers file
+    is generated containing all exported symbols which are
+    not defined in the kernel. To get access to symbols
+    from bar.ko, copy the Module.symvers file from the
+    compilation of bar.ko to the directory where foo.ko is
+    built. During the module build, kbuild will read the
+    Module.symvers file in the directory of the external
+    module, and when the build is finished, a new
+    Module.symvers file is created containing the sum of
+    all symbols defined and not part of the kernel.
+
+Use &quot;make&quot; variable KBUILD_EXTRA_SYMBOLS
+    If it is impractical to copy Module.symvers from
+    another module, you can assign a space separated list
+    of files to KBUILD_EXTRA_SYMBOLS in your build file.
+    These files will be loaded by modpost during the
+    initialization of its symbol tables.
+</code></pre>
+<p>=== 7. Tips &amp; Tricks</p>
+<p>— 7.1 Testing for CONFIG_FOO_BAR</p>
+<pre><code>Modules often need to check for certain CONFIG_ options to
+decide if a specific feature is included in the module. In
+kbuild this is done by referencing the CONFIG_ variable
+directly.
+
+    #fs/ext2/Makefile
+    obj-$(CONFIG_EXT2_FS) += ext2.o
+
+    ext2-y := balloc.o bitmap.o dir.o
+    ext2-$(CONFIG_EXT2_FS_XATTR) += xattr.o
+
+External modules have traditionally used &quot;grep&quot; to check for
+specific CONFIG_ settings directly in .config. This usage is
+broken. As introduced before, external modules should use
+kbuild for building and can therefore use the same methods as
+in-tree modules when testing for CONFIG_ definitions.
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_modules/" title="Kernel-4.18.0-80.el8_modules" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_modules/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_memory-hotplug/" title="Kernel-4.18.0-80.el8_memory-hotplug"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_namespace/" title="Kernel-4.18.0-80.el8_namespace"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

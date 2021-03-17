@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_eql | oosTech.com</title>
+  <meta name="description" content="EQL Driver: Serial IP Load Balancing HOWTO  Simon “Guru Aleph-Null” Janes, &amp;#x73;&amp;#x69;&amp;#x6d;&amp;#111;&amp;#110;&amp;#64;&amp;#110;&amp;#x63;&amp;#109;&amp;#46;&amp;#99;&amp;#111;&amp;#x6d;  v1.1, February 27, 1995   This is the manual f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_eql">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_eql/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="EQL Driver: Serial IP Load Balancing HOWTO  Simon “Guru Aleph-Null” Janes, &amp;#x73;&amp;#x69;&amp;#x6d;&amp;#111;&amp;#110;&amp;#64;&amp;#110;&amp;#x63;&amp;#109;&amp;#46;&amp;#99;&amp;#111;&amp;#x6d;  v1.1, February 27, 1995   This is the manual f">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_eql/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_eql" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_eql
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_eql/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_eql/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_eql/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>  EQL Driver: Serial IP Load Balancing HOWTO<br>  Simon “Guru Aleph-Null” Janes, <a href="mailto:&#x73;&#x69;&#x6d;&#111;&#110;&#64;&#110;&#x63;&#109;&#46;&#99;&#111;&#x6d;">&#x73;&#x69;&#x6d;&#111;&#110;&#64;&#110;&#x63;&#109;&#46;&#99;&#111;&#x6d;</a><br>  v1.1, February 27, 1995</p>
+<p>  This is the manual for the EQL device driver. EQL is a software device<br>  that lets you load-balance IP serial links (SLIP or uncompressed PPP)<br>  to increase your bandwidth. It will not reduce your latency (i.e. ping<br>  times) except in the case where you already have lots of traffic on<br>  your link, in which it will help them out. This driver has been tested<br>  with the 1.1.75 kernel, and is known to have patched cleanly with<br>  1.1.86.  Some testing with 1.1.92 has been done with the v1.1 patch<br>  which was only created to patch cleanly in the very latest kernel<br>  source trees. (Yes, it worked fine.)</p>
+<ol>
+<li><p>Introduction</p>
+<p>Which is worse? A huge fee for a 56K leased line or two phone lines?<br>It’s probably the former.  If you find yourself craving more bandwidth,<br>and have a ISP that is flexible, it is now possible to bind modems<br>together to work as one point-to-point link to increase your<br>bandwidth.  All without having to have a special black box on either<br>side.</p>
+</li>
+</ol>
+<p>  The eql driver has only been tested with the Livingston PortMaster-2e<br>  terminal server. I do not know if other terminal servers support load-<br>  balancing, but I do know that the PortMaster does it, and does it<br>  almost as well as the eql driver seems to do it (– Unfortunately, in<br>  my testing so far, the Livingston PortMaster 2e’s load-balancing is a<br>  good 1 to 2 KB/s slower than the test machine working with a 28.8 Kbps<br>  and 14.4 Kbps connection.  However, I am not sure that it really is<br>  the PortMaster, or if it’s Linux’s TCP drivers. I’m told that Linux’s<br>  TCP implementation is pretty fast though.–)</p>
+<p>  I suggest to ISPs out there that it would probably be fair to charge<br>  a load-balancing client 75% of the cost of the second line and 50% of<br>  the cost of the third line etc…</p>
+<p>  Hey, we can all dream you know…</p>
+<ol start="2">
+<li><p>Kernel Configuration</p>
+<p>Here I describe the general steps of getting a kernel up and working<br>with the eql driver.    From patching, building, to installing.</p>
+</li>
+</ol>
+<p>  2.1.    Patching The Kernel</p>
+<p>  If you do not have or cannot get a copy of the kernel with the eql<br>  driver folded into it, get your copy of the driver from<br>  <a href="ftp://slaughter.ncm.com/pub/Linux/LOAD_BALANCING/eql-1.1.tar.gz">ftp://slaughter.ncm.com/pub/Linux/LOAD_BALANCING/eql-1.1.tar.gz</a>.<br>  Unpack this archive someplace obvious like /usr/local/src/.  It will<br>  create the following files:</p>
+<pre><code>   ______________________________________________________________________
+   -rw-r--r-- guru/ncm    198 Jan 19 18:53 1995 eql-1.1/NO-WARRANTY
+   -rw-r--r-- guru/ncm    30620 Feb 27 21:40 1995 eql-1.1/eql-1.1.patch
+   -rwxr-xr-x guru/ncm    16111 Jan 12 22:29 1995 eql-1.1/eql_enslave
+   -rw-r--r-- guru/ncm    2195 Jan 10 21:48 1995 eql-1.1/eql_enslave.c
+   ______________________________________________________________________
+</code></pre>
+<p>  Unpack a recent kernel (something after 1.1.92) someplace convenient<br>  like say /usr/src/linux-1.1.92.eql. Use symbolic links to point<br>  /usr/src/linux to this development directory.</p>
+<p>  Apply the patch by running the commands:</p>
+<pre><code>   ______________________________________________________________________
+   cd /usr/src
+   patch &lt;/usr/local/src/eql-1.1/eql-1.1.patch
+   ______________________________________________________________________
+</code></pre>
+<p>  2.2.    Building The Kernel</p>
+<p>  After patching the kernel, run make config and configure the kernel<br>  for your hardware.</p>
+<p>  After configuration, make and install according to your habit.</p>
+<ol start="3">
+<li><p>Network Configuration</p>
+<p>So far, I have only used the eql device with the DSLIP SLIP connection<br>manager by Matt Dillon (– “The man who sold his soul to code so much<br>so quickly.”–) .  How you configure it for other “connection”<br>managers is up to you.  Most other connection managers that I’ve seen<br>don’t do a very good job when it comes to handling more than one<br>connection.</p>
+</li>
+</ol>
+<p>  3.1.    /etc/rc.d/rc.inet1</p>
+<p>  In rc.inet1, ifconfig the eql device to the IP address you usually use<br>  for your machine, and the MTU you prefer for your SLIP lines.    One<br>  could argue that MTU should be roughly half the usual size for two<br>  modems, one-third for three, one-fourth for four, etc…  But going<br>  too far below 296 is probably overkill. Here is an example ifconfig<br>  command that sets up the eql device:</p>
+<pre><code>   ______________________________________________________________________
+   ifconfig eql 198.67.33.239 mtu 1006
+   ______________________________________________________________________
+</code></pre>
+<p>  Once the eql device is up and running, add a static default route to<br>  it in the routing table using the cool new route syntax that makes<br>  life so much easier:</p>
+<pre><code>   ______________________________________________________________________
+   route add default eql
+   ______________________________________________________________________
+</code></pre>
+<p>  3.2.    Enslaving Devices By Hand</p>
+<p>  Enslaving devices by hand requires two utility programs: eql_enslave<br>  and eql_emancipate (– eql_emancipate hasn’t been written because when<br>  an enslaved device “dies”, it is automatically taken out of the queue.<br>  I haven’t found a good reason to write it yet… other than for<br>  completeness, but that isn’t a good motivator is it?–)</p>
+<p>  The syntax for enslaving a device is “eql_enslave <master-name><br>  <slave-name> <estimated-bps>“.  Here are some example enslavings:</p>
+<pre><code>   ______________________________________________________________________
+   eql_enslave eql sl0 28800
+   eql_enslave eql ppp0 14400
+   eql_enslave eql sl1 57600
+   ______________________________________________________________________
+</code></pre>
+<p>  When you want to free a device from its life of slavery, you can<br>  either down the device with ifconfig (eql will automatically bury the<br>  dead slave and remove it from its queue) or use eql_emancipate to free<br>  it. (– Or just ifconfig it down, and the eql driver will take it out<br>  for you.–)</p>
+<pre><code>   ______________________________________________________________________
+   eql_emancipate eql sl0
+   eql_emancipate eql ppp0
+   eql_emancipate eql sl1
+   ______________________________________________________________________
+</code></pre>
+<p>  3.3.    DSLIP Configuration for the eql Device</p>
+<p>  The general idea is to bring up and keep up as many SLIP connections<br>  as you need, automatically.</p>
+<p>  3.3.1.  /etc/slip/runslip.conf</p>
+<p>  Here is an example runslip.conf:</p>
+<hr>
+<p>  name        sl-line-1<br>  enabled<br>  baud        38400<br>  mtu        576<br>  ducmd        -e /etc/slip/dialout/cua2-288.xp -t 9<br>  command     eql_enslave eql $interface 28800<br>  address     198.67.33.239<br>  line        /dev/cua2</p>
+<p>  name        sl-line-2<br>  enabled<br>  baud        38400<br>  mtu        576<br>  ducmd        -e /etc/slip/dialout/cua3-288.xp -t 9<br>  command     eql_enslave eql $interface 28800<br>  address     198.67.33.239<br>  line        /dev/cua3</p>
+<hr>
+<p>  3.4.    Using PPP and the eql Device</p>
+<p>  I have not yet done any load-balancing testing for PPP devices, mainly<br>  because I don’t have a PPP-connection manager like SLIP has with<br>  DSLIP. I did find a good tip from LinuxNET:Billy for PPP performance:<br>  make sure you have asyncmap set to something so that control<br>  characters are not escaped.</p>
+<p>  I tried to fix up a PPP script/system for redialing lost PPP<br>  connections for use with the eql driver the weekend of Feb 25-26 ‘95<br>  (Hereafter known as the 8-hour PPP Hate Festival).  Perhaps later this<br>  year.</p>
+<ol start="4">
+<li><p>About the Slave Scheduler Algorithm</p>
+<p>The slave scheduler probably could be replaced with a dozen other<br>things and push traffic much faster.    The formula in the current set<br>up of the driver was tuned to handle slaves with wildly different<br>bits-per-second “priorities”.</p>
+</li>
+</ol>
+<p>  All testing I have done was with two 28.8 V.FC modems, one connecting<br>  at 28800 bps or slower, and the other connecting at 14400 bps all the<br>  time.</p>
+<p>  One version of the scheduler was able to push 5.3 K/s through the<br>  28800 and 14400 connections, but when the priorities on the links were<br>  very wide apart (57600 vs. 14400) the “faster” modem received all<br>  traffic and the “slower” modem starved.</p>
+<ol start="5">
+<li><p>Testers’ Reports</p>
+<p>Some people have experimented with the eql device with newer<br>kernels (than 1.1.75).  I have since updated the driver to patch<br>cleanly in newer kernels because of the removal of the old “slave-<br>balancing” driver config option.</p>
+</li>
+</ol>
+<p>  o  icee from LinuxNET patched 1.1.86 without any rejects and was able<br>     to boot the kernel and enslave a couple of ISDN PPP links.</p>
+<p>  5.1.    Randolph Bentson’s Test Report</p>
+<p>  From <a href="mailto:&#98;&#101;&#x6e;&#116;&#115;&#111;&#x6e;&#64;&#x67;&#x72;&#x69;&#101;&#103;&#46;&#115;&#x65;&#x61;&#x73;&#108;&#117;&#x67;&#46;&#111;&#x72;&#x67;">&#98;&#101;&#x6e;&#116;&#115;&#111;&#x6e;&#64;&#x67;&#x72;&#x69;&#101;&#103;&#46;&#115;&#x65;&#x61;&#x73;&#108;&#117;&#x67;&#46;&#111;&#x72;&#x67;</a> Wed Feb  8 19:08:09 1995<br>  Date: Tue, 7 Feb 95 22:57 PST<br>  From: Randolph Bentson <a href="mailto:&#98;&#101;&#x6e;&#116;&#115;&#x6f;&#x6e;&#x40;&#x67;&#x72;&#x69;&#101;&#103;&#x2e;&#115;&#101;&#x61;&#x73;&#108;&#117;&#103;&#46;&#111;&#x72;&#x67;">&#98;&#101;&#x6e;&#116;&#115;&#x6f;&#x6e;&#x40;&#x67;&#x72;&#x69;&#101;&#103;&#x2e;&#115;&#101;&#x61;&#x73;&#108;&#117;&#103;&#46;&#111;&#x72;&#x67;</a><br>  To: <a href="mailto:&#x67;&#x75;&#114;&#117;&#x40;&#x6e;&#x63;&#x6d;&#46;&#x63;&#x6f;&#x6d;">&#x67;&#x75;&#114;&#117;&#x40;&#x6e;&#x63;&#x6d;&#46;&#x63;&#x6f;&#x6d;</a><br>  Subject: EQL driver tests</p>
+<p>  I have been checking out your eql driver.  (Nice work, that!)<br>  Although you may already done this performance testing, here<br>  are some data I’ve discovered.</p>
+<p>  Randolph Bentson<br>  <a href="mailto:&#x62;&#101;&#110;&#x74;&#115;&#111;&#x6e;&#x40;&#103;&#114;&#x69;&#x65;&#x67;&#46;&#115;&#101;&#97;&#115;&#108;&#117;&#103;&#x2e;&#x6f;&#114;&#103;">&#x62;&#101;&#110;&#x74;&#115;&#111;&#x6e;&#x40;&#103;&#114;&#x69;&#x65;&#x67;&#46;&#115;&#101;&#97;&#115;&#108;&#117;&#103;&#x2e;&#x6f;&#114;&#103;</a></p>
+<hr>
+<p>  A pseudo-device driver, EQL, written by Simon Janes, can be used<br>  to bundle multiple SLIP connections into what appears to be a<br>  single connection.  This allows one to improve dial-up network<br>  connectivity gradually, without having to buy expensive DSU/CSU<br>  hardware and services.</p>
+<p>  I have done some testing of this software, with two goals in<br>  mind: first, to ensure it actually works as described and<br>  second, as a method of exercising my device driver.</p>
+<p>  The following performance measurements were derived from a set<br>  of SLIP connections run between two Linux systems (1.1.84) using<br>  a 486DX2/66 with a Cyclom-8Ys and a 486SLC/40 with a Cyclom-16Y.<br>  (Ports 0,1,2,3 were used.  A later configuration will distribute<br>  port selection across the different Cirrus chips on the boards.)<br>  Once a link was established, I timed a binary ftp transfer of<br>  289284 bytes of data.    If there were no overhead (packet headers,<br>  inter-character and inter-packet delays, etc.) the transfers<br>  would take the following times:</p>
+<pre><code>  bits/sec    seconds
+  345600    8.3
+  234600    12.3
+  172800    16.7
+  153600    18.8
+  76800    37.6
+  57600    50.2
+  38400    75.3
+  28800    100.4
+  19200    150.6
+  9600    301.3
+</code></pre>
+<p>  A single line running at the lower speeds and with large packets<br>  comes to within 2% of this.  Performance is limited for the higher<br>  speeds (as predicted by the Cirrus databook) to an aggregate of<br>  about 160 kbits/sec.    The next round of testing will distribute<br>  the load across two or more Cirrus chips.</p>
+<p>  The good news is that one gets nearly the full advantage of the<br>  second, third, and fourth line’s bandwidth.  (The bad news is<br>  that the connection establishment seemed fragile for the higher<br>  speeds.  Once established, the connection seemed robust enough.)</p>
+<p>  #lines  speed    mtu  seconds    theory  actual  %of<br>     kbit/sec      duration    speed    speed    max<br>  3    115200  900    _    345600<br>  3    115200  400    18.1    345600  159825  46<br>  2    115200  900    _    230400<br>  2    115200  600    18.1    230400  159825  69<br>  2    115200  400    19.3    230400  149888  65<br>  4    57600    900    _    234600<br>  4    57600    600    _    234600<br>  4    57600    400    _    234600<br>  3    57600    600    20.9    172800  138413  80<br>  3    57600    900    21.2    172800  136455  78<br>  3    115200  600    21.7    345600  133311  38<br>  3    57600    400    22.5    172800  128571  74<br>  4    38400    900    25.2    153600  114795  74<br>  4    38400    600    26.4    153600  109577  71<br>  4    38400    400    27.3    153600  105965  68<br>  2    57600    900    29.1    115200  99410.3 86<br>  1    115200  900    30.7    115200  94229.3 81<br>  2    57600    600    30.2    115200  95789.4 83<br>  3    38400    900    30.3    115200  95473.3 82<br>  3    38400    600    31.2    115200  92719.2 80<br>  1    115200  600    31.3    115200  92423    80<br>  2    57600    400    32.3    115200  89561.6 77<br>  1    115200  400    32.8    115200  88196.3 76<br>  3    38400    400    33.5    115200  86353.4 74<br>  2    38400    900    43.7    76800    66197.7 86<br>  2    38400    600    44    76800    65746.4 85<br>  2    38400    400    47.2    76800    61289    79<br>  4    19200    900    50.8    76800    56945.7 74<br>  4    19200    400    53.2    76800    54376.7 70<br>  4    19200    600    53.7    76800    53870.4 70<br>  1    57600    900    54.6    57600    52982.4 91<br>  1    57600    600    56.2    57600    51474    89<br>  3    19200    900    60.5    57600    47815.5 83<br>  1    57600    400    60.2    57600    48053.8 83<br>  3    19200    600    62    57600    46658.7 81<br>  3    19200    400    64.7    57600    44711.6 77<br>  1    38400    900    79.4    38400    36433.8 94<br>  1    38400    600    82.4    38400    35107.3 91<br>  2    19200    900    84.4    38400    34275.4 89<br>  1    38400    400    86.8    38400    33327.6 86<br>  2    19200    600    87.6    38400    33023.3 85<br>  2    19200    400    91.2    38400    31719.7 82<br>  4    9600    900    94.7    38400    30547.4 79<br>  4    9600    400    106    38400    27290.9 71<br>  4    9600    600    110    38400    26298.5 68<br>  3    9600    900    118    28800    24515.6 85<br>  3    9600    600    120    28800    24107    83<br>  3    9600    400    131    28800    22082.7 76<br>  1    19200    900    155    19200    18663.5 97<br>  1    19200    600    161    19200    17968    93<br>  1    19200    400    170    19200    17016.7 88<br>  2    9600    600    176    19200    16436.6 85<br>  2    9600    900    180    19200    16071.3 83<br>  2    9600    400    181    19200    15982.5 83<br>  1    9600    900    305    9600    9484.72 98<br>  1    9600    600    314    9600    9212.87 95<br>  1    9600    400    332    9600    8713.37 90</p>
+<p>  5.2.    Anthony Healy’s Report</p>
+<p>  Date: Mon, 13 Feb 1995 16:17:29 +1100 (EST)<br>  From: Antony Healey <a href="mailto:&#97;&#104;&#101;&#x61;&#x6c;&#x65;&#x79;&#x40;&#115;&#116;&#x2e;&#110;&#x65;&#x70;&#x65;&#97;&#110;&#46;&#117;&#x77;&#115;&#46;&#101;&#x64;&#117;&#x2e;&#97;&#117;">&#97;&#104;&#101;&#x61;&#x6c;&#x65;&#x79;&#x40;&#115;&#116;&#x2e;&#110;&#x65;&#x70;&#x65;&#97;&#110;&#46;&#117;&#x77;&#115;&#46;&#101;&#x64;&#117;&#x2e;&#97;&#117;</a><br>  To: Simon Janes <a href="mailto:&#103;&#x75;&#114;&#117;&#x40;&#x6e;&#99;&#109;&#46;&#99;&#x6f;&#x6d;">&#103;&#x75;&#114;&#117;&#x40;&#x6e;&#99;&#109;&#46;&#99;&#x6f;&#x6d;</a><br>  Subject: Re: Load Balancing</p>
+<p>  Hi Simon,<br>      I’ve installed your patch and it works great. I have trialed<br>      it over twin SL/IP lines, just over null modems, but I was<br>      able to data at over 48Kb/s [ISDN link -Simon]. I managed a<br>      transfer of up to 7.5 Kbyte/s on one go, but averaged around<br>      6.4 Kbyte/s, which I think is pretty cool.  :)</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_eql/" title="Kernel-4.18.0-80.el8_eql" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_eql/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_epson,rx8900/" title="Kernel-4.18.0-80.el8_epson,rx8900"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_era/" title="Kernel-4.18.0-80.el8_era"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

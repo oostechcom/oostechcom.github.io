@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_afs | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;              kAFS: AFS FILESYSTEM              &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  Contents:  Overview. Usage. Mountpoints. Dynamic root. Proc filesystem. The cell database. Securi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_afs">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_afs/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;              kAFS: AFS FILESYSTEM              &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  Contents:  Overview. Usage. Mountpoints. Dynamic root. Proc filesystem. The cell database. Securi">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_afs/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_afs" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_afs
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_afs/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_afs/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_afs/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <pre><code>             ====================
+             kAFS: AFS FILESYSTEM
+             ====================
+</code></pre>
+<p>Contents:</p>
+<ul>
+<li>Overview.</li>
+<li>Usage.</li>
+<li>Mountpoints.</li>
+<li>Dynamic root.</li>
+<li>Proc filesystem.</li>
+<li>The cell database.</li>
+<li>Security.</li>
+<li>The @sys substitution.</li>
+</ul>
+<p>========<br>OVERVIEW<br>========</p>
+<p>This filesystem provides a fairly simple secure AFS filesystem driver. It is<br>under development and does not yet provide the full feature set.  The features<br>it does support include:</p>
+<p> (*) Security (currently only AFS kaserver and KerberosIV tickets).</p>
+<p> (*) File reading and writing.</p>
+<p> (*) Automounting.</p>
+<p> (*) Local caching (via fscache).</p>
+<p>It does not yet support the following AFS features:</p>
+<p> (*) pioctl() system call.</p>
+<p>===========<br>COMPILATION<br>===========</p>
+<p>The filesystem should be enabled by turning on the kernel configuration<br>options:</p>
+<pre><code>CONFIG_AF_RXRPC        - The RxRPC protocol transport
+CONFIG_RXKAD        - The RxRPC Kerberos security handler
+CONFIG_AFS        - The AFS filesystem
+</code></pre>
+<p>Additionally, the following can be turned on to aid debugging:</p>
+<pre><code>CONFIG_AF_RXRPC_DEBUG    - Permit AF_RXRPC debugging to be enabled
+CONFIG_AFS_DEBUG    - Permit AFS debugging to be enabled
+</code></pre>
+<p>They permit the debugging messages to be turned on dynamically by manipulating<br>the masks in the following files:</p>
+<pre><code>/sys/module/af_rxrpc/parameters/debug
+/sys/module/kafs/parameters/debug
+</code></pre>
+<p>=====<br>USAGE<br>=====</p>
+<p>When inserting the driver modules the root cell must be specified along with a<br>list of volume location server IP addresses:</p>
+<pre><code>modprobe rxrpc
+modprobe kafs rootcell=cambridge.redhat.com:172.16.18.73:172.16.18.91
+</code></pre>
+<p>The first module is the AF_RXRPC network protocol driver.  This provides the<br>RxRPC remote operation protocol and may also be accessed from userspace.  See:</p>
+<pre><code>Documentation/networking/rxrpc.txt
+</code></pre>
+<p>The second module is the kerberos RxRPC security driver, and the third module<br>is the actual filesystem driver for the AFS filesystem.</p>
+<p>Once the module has been loaded, more modules can be added by the following<br>procedure:</p>
+<pre><code>echo add grand.central.org 18.9.48.14:128.2.203.61:130.237.48.87 &gt;/proc/fs/afs/cells
+</code></pre>
+<p>Where the parameters to the “add” command are the name of a cell and a list of<br>volume location servers within that cell, with the latter separated by colons.</p>
+<p>Filesystems can be mounted anywhere by commands similar to the following:</p>
+<pre><code>mount -t afs &quot;%cambridge.redhat.com:root.afs.&quot; /afs
+mount -t afs &quot;#cambridge.redhat.com:root.cell.&quot; /afs/cambridge
+mount -t afs &quot;#root.afs.&quot; /afs
+mount -t afs &quot;#root.cell.&quot; /afs/cambridge
+</code></pre>
+<p>Where the initial character is either a hash or a percent symbol depending on<br>whether you definitely want a R/W volume (percent) or whether you’d prefer a<br>R/O volume, but are willing to use a R/W volume instead (hash).</p>
+<p>The name of the volume can be suffixes with “.backup” or “.readonly” to<br>specify connection to only volumes of those types.</p>
+<p>The name of the cell is optional, and if not given during a mount, then the<br>named volume will be looked up in the cell specified during modprobe.</p>
+<p>Additional cells can be added through /proc (see later section).</p>
+<p>===========<br>MOUNTPOINTS<br>===========</p>
+<p>AFS has a concept of mountpoints. In AFS terms, these are specially formatted<br>symbolic links (of the same form as the “device name” passed to mount).  kAFS<br>presents these to the user as directories that have a follow-link capability<br>(ie: symbolic link semantics).  If anyone attempts to access them, they will<br>automatically cause the target volume to be mounted (if possible) on that site.</p>
+<p>Automatically mounted filesystems will be automatically unmounted approximately<br>twenty minutes after they were last used.  Alternatively they can be unmounted<br>directly with the umount() system call.</p>
+<p>Manually unmounting an AFS volume will cause any idle submounts upon it to be<br>culled first.  If all are culled, then the requested volume will also be<br>unmounted, otherwise error EBUSY will be returned.</p>
+<p>This can be used by the administrator to attempt to unmount the whole AFS tree<br>mounted on /afs in one go by doing:</p>
+<pre><code>umount /afs
+</code></pre>
+<p>============<br>DYNAMIC ROOT<br>============</p>
+<p>A mount option is available to create a serverless mount that is only usable<br>for dynamic lookup.  Creating such a mount can be done by, for example:</p>
+<pre><code>mount -t afs none /afs -o dyn
+</code></pre>
+<p>This creates a mount that just has an empty directory at the root.  Attempting<br>to look up a name in this directory will cause a mountpoint to be created that<br>looks up a cell of the same name, for example:</p>
+<pre><code>ls /afs/grand.central.org/
+</code></pre>
+<p>===============<br>PROC FILESYSTEM<br>===============</p>
+<p>The AFS modules creates a “/proc/fs/afs/“ directory and populates it:</p>
+<p>  (*) A “cells” file that lists cells currently known to the afs module and<br>      their usage counts:</p>
+<pre><code>[root@andromeda ~]# cat /proc/fs/afs/cells
+USE NAME
+  3 cambridge.redhat.com
+</code></pre>
+<p>  (*) A directory per cell that contains files that list volume location<br>      servers, volumes, and active servers known within that cell.</p>
+<pre><code>[root@andromeda ~]# cat /proc/fs/afs/cambridge.redhat.com/servers
+USE ADDR            STATE
+  4 172.16.18.91        0
+[root@andromeda ~]# cat /proc/fs/afs/cambridge.redhat.com/vlservers
+ADDRESS
+172.16.18.91
+[root@andromeda ~]# cat /proc/fs/afs/cambridge.redhat.com/volumes
+USE STT VLID[0]  VLID[1]  VLID[2]  NAME
+  1 Val 20000000 20000001 20000002 root.afs
+</code></pre>
+<p>=================<br>THE CELL DATABASE<br>=================</p>
+<p>The filesystem maintains an internal database of all the cells it knows and the<br>IP addresses of the volume location servers for those cells.  The cell to which<br>the system belongs is added to the database when modprobe is performed by the<br>“rootcell=” argument or, if compiled in, using a “kafs.rootcell=” argument on<br>the kernel command line.</p>
+<p>Further cells can be added by commands similar to the following:</p>
+<pre><code>echo add CELLNAME VLADDR[:VLADDR][:VLADDR]... &gt;/proc/fs/afs/cells
+echo add grand.central.org 18.9.48.14:128.2.203.61:130.237.48.87 &gt;/proc/fs/afs/cells
+</code></pre>
+<p>No other cell database operations are available at this time.</p>
+<p>========<br>SECURITY<br>========</p>
+<p>Secure operations are initiated by acquiring a key using the klog program.  A<br>very primitive klog program is available at:</p>
+<pre><code>http://people.redhat.com/~dhowells/rxrpc/klog.c
+</code></pre>
+<p>This should be compiled by:</p>
+<pre><code>make klog LDLIBS=&quot;-lcrypto -lcrypt -lkrb4 -lkeyutils&quot;
+</code></pre>
+<p>And then run as:</p>
+<pre><code>./klog
+</code></pre>
+<p>Assuming it’s successful, this adds a key of type RxRPC, named for the service<br>and cell, eg: “afs@<cellname>“.  This can be viewed with the keyctl program or<br>by cat’ing /proc/keys:</p>
+<pre><code>[root@andromeda ~]# keyctl show
+Session Keyring
+       -3 --alswrv      0     0  keyring: _ses.3268
+    2 --alswrv      0     0   \_ keyring: _uid.0
+111416553 --als--v      0     0   \_ rxrpc: afs@CAMBRIDGE.REDHAT.COM
+</code></pre>
+<p>Currently the username, realm, password and proposed ticket lifetime are<br>compiled in to the program.</p>
+<p>It is not required to acquire a key before using AFS facilities, but if one is<br>not acquired then all operations will be governed by the anonymous user parts<br>of the ACLs.</p>
+<p>If a key is acquired, then all AFS operations, including mounts and automounts,<br>made by a possessor of that key will be secured with that key.</p>
+<p>If a file is opened with a particular key and then the file descriptor is<br>passed to a process that doesn’t have that key (perhaps over an AF_UNIX<br>socket), then the operations on the file will be made with key that was used to<br>open the file.</p>
+<p>=====================<br>THE @SYS SUBSTITUTION<br>=====================</p>
+<p>The list of up to 16 @sys substitutions for the current network namespace can<br>be configured by writing a list to /proc/fs/afs/sysname:</p>
+<pre><code>[root@andromeda ~]# echo foo amd64_linux_26 &gt;/proc/fs/afs/sysname
+</code></pre>
+<p>or cleared entirely by writing an empty list:</p>
+<pre><code>[root@andromeda ~]# echo &gt;/proc/fs/afs/sysname
+</code></pre>
+<p>The current list for current network namespace can be retrieved by:</p>
+<pre><code>[root@andromeda ~]# cat /proc/fs/afs/sysname
+foo
+amd64_linux_26
+</code></pre>
+<p>When @sys is being substituted for, each element of the list is tried in the<br>order given.</p>
+<p>By default, the list will contain one item that conforms to the pattern<br>“<arch>_linux_26”, amd64 being the name for x86_64.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_afs/" title="Kernel-4.18.0-80.el8_afs" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_afs/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_affs/" title="Kernel-4.18.0-80.el8_affs"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_aha152x/" title="Kernel-4.18.0-80.el8_aha152x"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_autofs4-mount-control | oosTech.com</title>
+  <meta name="description" content="Miscellaneous Device control operations for the autofs4 kernel moduleThe problemThere is a problem with active restarts in autofs (that is to sayrestarting autofs when there are busy mounts). During n">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_autofs4-mount-control">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Miscellaneous Device control operations for the autofs4 kernel moduleThe problemThere is a problem with active restarts in autofs (that is to sayrestarting autofs when there are busy mounts). During n">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Miscellaneous-Device-control-operations-for-the-autofs4-kernel-module"><span class="toc-number">1.</span> <span class="toc-text">Miscellaneous Device control operations for the autofs4 kernel module</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-problem"><span class="toc-number">2.</span> <span class="toc-text">The problem</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Solution"><span class="toc-number">3.</span> <span class="toc-text">The Solution</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#autofs4-Miscellaneous-Device-mount-control-interface"><span class="toc-number">4.</span> <span class="toc-text">autofs4 Miscellaneous Device mount control interface</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-ioctls"><span class="toc-number">5.</span> <span class="toc-text">The ioctls</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-VERSION"><span class="toc-number">5.1.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_VERSION</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-PROTOVER-CMD-and-AUTOFS-DEV-IOCTL-PROTOSUBVER-CMD"><span class="toc-number">5.2.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_PROTOVER_CMD and AUTOFS_DEV_IOCTL_PROTOSUBVER_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-OPENMOUNT-and-AUTOFS-DEV-IOCTL-CLOSEMOUNT"><span class="toc-number">5.3.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_OPENMOUNT and AUTOFS_DEV_IOCTL_CLOSEMOUNT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-READY-CMD-and-AUTOFS-DEV-IOCTL-FAIL-CMD"><span class="toc-number">5.4.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_READY_CMD and AUTOFS_DEV_IOCTL_FAIL_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-SETPIPEFD-CMD"><span class="toc-number">5.5.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_SETPIPEFD_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-CATATONIC-CMD"><span class="toc-number">5.6.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_CATATONIC_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-TIMEOUT-CMD"><span class="toc-number">5.7.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_TIMEOUT_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-REQUESTER-CMD"><span class="toc-number">5.8.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_REQUESTER_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-EXPIRE-CMD"><span class="toc-number">5.9.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_EXPIRE_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-ASKUMOUNT-CMD"><span class="toc-number">5.10.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_ASKUMOUNT_CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AUTOFS-DEV-IOCTL-ISMOUNTPOINT-CMD"><span class="toc-number">5.11.</span> <span class="toc-text">AUTOFS_DEV_IOCTL_ISMOUNTPOINT_CMD</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_autofs4-mount-control" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_autofs4-mount-control
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Miscellaneous-Device-control-operations-for-the-autofs4-kernel-module"><a href="#Miscellaneous-Device-control-operations-for-the-autofs4-kernel-module" class="headerlink" title="Miscellaneous Device control operations for the autofs4 kernel module"></a>Miscellaneous Device control operations for the autofs4 kernel module</h1><h1 id="The-problem"><a href="#The-problem" class="headerlink" title="The problem"></a>The problem</h1><p>There is a problem with active restarts in autofs (that is to say<br>restarting autofs when there are busy mounts).</p>
+<p>During normal operation autofs uses a file descriptor opened on the<br>directory that is being managed in order to be able to issue control<br>operations. Using a file descriptor gives ioctl operations access to<br>autofs specific information stored in the super block. The operations<br>are things such as setting an autofs mount catatonic, setting the<br>expire timeout and requesting expire checks. As is explained below,<br>certain types of autofs triggered mounts can end up covering an autofs<br>mount itself which prevents us being able to use open(2) to obtain a<br>file descriptor for these operations if we don’t already have one open.</p>
+<p>Currently autofs uses “umount -l” (lazy umount) to clear active mounts<br>at restart. While using lazy umount works for most cases, anything that<br>needs to walk back up the mount tree to construct a path, such as<br>getcwd(2) and the proc file system /proc/<pid>/cwd, no longer works<br>because the point from which the path is constructed has been detached<br>from the mount tree.</p>
+<p>The actual problem with autofs is that it can’t reconnect to existing<br>mounts. Immediately one thinks of just adding the ability to remount<br>autofs file systems would solve it, but alas, that can’t work. This is<br>because autofs direct mounts and the implementation of “on demand mount<br>and expire” of nested mount trees have the file system mounted directly<br>on top of the mount trigger directory dentry.</p>
+<p>For example, there are two types of automount maps, direct (in the kernel<br>module source you will see a third type called an offset, which is just<br>a direct mount in disguise) and indirect.</p>
+<p>Here is a master map with direct and indirect map entries:</p>
+<p>/-      /etc/auto.direct<br>/test   /etc/auto.indirect</p>
+<p>and the corresponding map files:</p>
+<p>/etc/auto.direct:</p>
+<p>/automount/dparse/g6  budgie:/autofs/export1<br>/automount/dparse/g1  shark:/autofs/export1<br>and so on.</p>
+<p>/etc/auto.indirect:</p>
+<p>g1    shark:/autofs/export1<br>g6    budgie:/autofs/export1<br>and so on.</p>
+<p>For the above indirect map an autofs file system is mounted on /test and<br>mounts are triggered for each sub-directory key by the inode lookup<br>operation. So we see a mount of shark:/autofs/export1 on /test/g1, for<br>example.</p>
+<p>The way that direct mounts are handled is by making an autofs mount on<br>each full path, such as /automount/dparse/g1, and using it as a mount<br>trigger. So when we walk on the path we mount shark:/autofs/export1 “on<br>top of this mount point”. Since these are always directories we can<br>use the follow_link inode operation to trigger the mount.</p>
+<p>But, each entry in direct and indirect maps can have offsets (making<br>them multi-mount map entries).</p>
+<p>For example, an indirect mount map entry could also be:</p>
+<p>g1  <br>   /        shark:/autofs/export5/testing/test <br>   /s1      shark:/autofs/export/testing/test/s1 <br>   /s2      shark:/autofs/export5/testing/test/s2 <br>   /s1/ss1  shark:/autofs/export1 <br>   /s2/ss2  shark:/autofs/export2</p>
+<p>and a similarly a direct mount map entry could also be:</p>
+<p>/automount/dparse/g1 <br>    /       shark:/autofs/export5/testing/test <br>    /s1     shark:/autofs/export/testing/test/s1 <br>    /s2     shark:/autofs/export5/testing/test/s2 <br>    /s1/ss1 shark:/autofs/export2 <br>    /s2/ss2 shark:/autofs/export2</p>
+<p>One of the issues with version 4 of autofs was that, when mounting an<br>entry with a large number of offsets, possibly with nesting, we needed<br>to mount and umount all of the offsets as a single unit. Not really a<br>problem, except for people with a large number of offsets in map entries.<br>This mechanism is used for the well known “hosts” map and we have seen<br>cases (in 2.4) where the available number of mounts are exhausted or<br>where the number of privileged ports available is exhausted.</p>
+<p>In version 5 we mount only as we go down the tree of offsets and<br>similarly for expiring them which resolves the above problem. There is<br>somewhat more detail to the implementation but it isn’t needed for the<br>sake of the problem explanation. The one important detail is that these<br>offsets are implemented using the same mechanism as the direct mounts<br>above and so the mount points can be covered by a mount.</p>
+<p>The current autofs implementation uses an ioctl file descriptor opened<br>on the mount point for control operations. The references held by the<br>descriptor are accounted for in checks made to determine if a mount is<br>in use and is also used to access autofs file system information held<br>in the mount super block. So the use of a file handle needs to be<br>retained.</p>
+<h1 id="The-Solution"><a href="#The-Solution" class="headerlink" title="The Solution"></a>The Solution</h1><p>To be able to restart autofs leaving existing direct, indirect and<br>offset mounts in place we need to be able to obtain a file handle<br>for these potentially covered autofs mount points. Rather than just<br>implement an isolated operation it was decided to re-implement the<br>existing ioctl interface and add new operations to provide this<br>functionality.</p>
+<p>In addition, to be able to reconstruct a mount tree that has busy mounts,<br>the uid and gid of the last user that triggered the mount needs to be<br>available because these can be used as macro substitution variables in<br>autofs maps. They are recorded at mount request time and an operation<br>has been added to retrieve them.</p>
+<p>Since we’re re-implementing the control interface, a couple of other<br>problems with the existing interface have been addressed. First, when<br>a mount or expire operation completes a status is returned to the<br>kernel by either a “send ready” or a “send fail” operation. The<br>“send fail” operation of the ioctl interface could only ever send<br>ENOENT so the re-implementation allows user space to send an actual<br>status. Another expensive operation in user space, for those using<br>very large maps, is discovering if a mount is present. Usually this<br>involves scanning /proc/mounts and since it needs to be done quite<br>often it can introduce significant overhead when there are many entries<br>in the mount table. An operation to lookup the mount status of a mount<br>point dentry (covered or not) has also been added.</p>
+<p>Current kernel development policy recommends avoiding the use of the<br>ioctl mechanism in favor of systems such as Netlink. An implementation<br>using this system was attempted to evaluate its suitability and it was<br>found to be inadequate, in this case. The Generic Netlink system was<br>used for this as raw Netlink would lead to a significant increase in<br>complexity. There’s no question that the Generic Netlink system is an<br>elegant solution for common case ioctl functions but it’s not a complete<br>replacement probably because its primary purpose in life is to be a<br>message bus implementation rather than specifically an ioctl replacement.<br>While it would be possible to work around this there is one concern<br>that lead to the decision to not use it. This is that the autofs<br>expire in the daemon has become far to complex because umount<br>candidates are enumerated, almost for no other reason than to “count”<br>the number of times to call the expire ioctl. This involves scanning<br>the mount table which has proved to be a big overhead for users with<br>large maps. The best way to improve this is try and get back to the<br>way the expire was done long ago. That is, when an expire request is<br>issued for a mount (file handle) we should continually call back to<br>the daemon until we can’t umount any more mounts, then return the<br>appropriate status to the daemon. At the moment we just expire one<br>mount at a time. A Generic Netlink implementation would exclude this<br>possibility for future development due to the requirements of the<br>message bus architecture.</p>
+<h1 id="autofs4-Miscellaneous-Device-mount-control-interface"><a href="#autofs4-Miscellaneous-Device-mount-control-interface" class="headerlink" title="autofs4 Miscellaneous Device mount control interface"></a>autofs4 Miscellaneous Device mount control interface</h1><p>The control interface is opening a device node, typically /dev/autofs.</p>
+<p>All the ioctls use a common structure to pass the needed parameter<br>information and return operation results:</p>
+<p>struct autofs_dev_ioctl {<br>    __u32 ver_major;<br>    __u32 ver_minor;<br>    __u32 size;             /* total size of data passed in<br>                 * including this struct <em>/<br>    __s32 ioctlfd;          /</em> automount command fd */</p>
+<pre><code>/* Command parameters */
+union &#123;
+    struct args_protover        protover;
+    struct args_protosubver        protosubver;
+    struct args_openmount        openmount;
+    struct args_ready        ready;
+    struct args_fail        fail;
+    struct args_setpipefd        setpipefd;
+    struct args_timeout        timeout;
+    struct args_requester        requester;
+    struct args_expire        expire;
+    struct args_askumount        askumount;
+    struct args_ismountpoint    ismountpoint;
+&#125;;
+
+char path[0];
+</code></pre>
+<p>};</p>
+<p>The ioctlfd field is a mount point file descriptor of an autofs mount<br>point. It is returned by the open call and is used by all calls except<br>the check for whether a given path is a mount point, where it may<br>optionally be used to check a specific mount corresponding to a given<br>mount point file descriptor, and when requesting the uid and gid of the<br>last successful mount on a directory within the autofs file system.</p>
+<p>The union is used to communicate parameters and results of calls made<br>as described below.</p>
+<p>The path field is used to pass a path where it is needed and the size field<br>is used account for the increased structure length when translating the<br>structure sent from user space.</p>
+<p>This structure can be initialized before setting specific fields by using<br>the void function call init_autofs_dev_ioctl(struct autofs_dev_ioctl *).</p>
+<p>All of the ioctls perform a copy of this structure from user space to<br>kernel space and return -EINVAL if the size parameter is smaller than<br>the structure size itself, -ENOMEM if the kernel memory allocation fails<br>or -EFAULT if the copy itself fails. Other checks include a version check<br>of the compiled in user space version against the module version and a<br>mismatch results in a -EINVAL return. If the size field is greater than<br>the structure size then a path is assumed to be present and is checked to<br>ensure it begins with a “/“ and is NULL terminated, otherwise -EINVAL is<br>returned. Following these checks, for all ioctl commands except<br>AUTOFS_DEV_IOCTL_VERSION_CMD, AUTOFS_DEV_IOCTL_OPENMOUNT_CMD and<br>AUTOFS_DEV_IOCTL_CLOSEMOUNT_CMD the ioctlfd is validated and if it is<br>not a valid descriptor or doesn’t correspond to an autofs mount point<br>an error of -EBADF, -ENOTTY or -EINVAL (not an autofs descriptor) is<br>returned.</p>
+<h1 id="The-ioctls"><a href="#The-ioctls" class="headerlink" title="The ioctls"></a>The ioctls</h1><p>An example of an implementation which uses this interface can be seen<br>in autofs version 5.0.4 and later in file lib/dev-ioctl-lib.c of the<br>distribution tar available for download from kernel.org in directory<br>/pub/linux/daemons/autofs/v5.</p>
+<p>The device node ioctl operations implemented by this interface are:</p>
+<h2 id="AUTOFS-DEV-IOCTL-VERSION"><a href="#AUTOFS-DEV-IOCTL-VERSION" class="headerlink" title="AUTOFS_DEV_IOCTL_VERSION"></a>AUTOFS_DEV_IOCTL_VERSION</h2><p>Get the major and minor version of the autofs4 device ioctl kernel module<br>implementation. It requires an initialized struct autofs_dev_ioctl as an<br>input parameter and sets the version information in the passed in structure.<br>It returns 0 on success or the error -EINVAL if a version mismatch is<br>detected.</p>
+<h2 id="AUTOFS-DEV-IOCTL-PROTOVER-CMD-and-AUTOFS-DEV-IOCTL-PROTOSUBVER-CMD"><a href="#AUTOFS-DEV-IOCTL-PROTOVER-CMD-and-AUTOFS-DEV-IOCTL-PROTOSUBVER-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_PROTOVER_CMD and AUTOFS_DEV_IOCTL_PROTOSUBVER_CMD"></a>AUTOFS_DEV_IOCTL_PROTOVER_CMD and AUTOFS_DEV_IOCTL_PROTOSUBVER_CMD</h2><p>Get the major and minor version of the autofs4 protocol version understood<br>by loaded module. This call requires an initialized struct autofs_dev_ioctl<br>with the ioctlfd field set to a valid autofs mount point descriptor<br>and sets the requested version number in version field of struct args_protover<br>or sub_version field of struct args_protosubver. These commands return<br>0 on success or one of the negative error codes if validation fails.</p>
+<h2 id="AUTOFS-DEV-IOCTL-OPENMOUNT-and-AUTOFS-DEV-IOCTL-CLOSEMOUNT"><a href="#AUTOFS-DEV-IOCTL-OPENMOUNT-and-AUTOFS-DEV-IOCTL-CLOSEMOUNT" class="headerlink" title="AUTOFS_DEV_IOCTL_OPENMOUNT and AUTOFS_DEV_IOCTL_CLOSEMOUNT"></a>AUTOFS_DEV_IOCTL_OPENMOUNT and AUTOFS_DEV_IOCTL_CLOSEMOUNT</h2><p>Obtain and release a file descriptor for an autofs managed mount point<br>path. The open call requires an initialized struct autofs_dev_ioctl with<br>the the path field set and the size field adjusted appropriately as well<br>as the devid field of struct args_openmount set to the device number of<br>the autofs mount. The device number can be obtained from the mount options<br>shown in /proc/mounts. The close call requires an initialized struct<br>autofs_dev_ioct with the ioctlfd field set to the descriptor obtained<br>from the open call. The release of the file descriptor can also be done<br>with close(2) so any open descriptors will also be closed at process exit.<br>The close call is included in the implemented operations largely for<br>completeness and to provide for a consistent user space implementation.</p>
+<h2 id="AUTOFS-DEV-IOCTL-READY-CMD-and-AUTOFS-DEV-IOCTL-FAIL-CMD"><a href="#AUTOFS-DEV-IOCTL-READY-CMD-and-AUTOFS-DEV-IOCTL-FAIL-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_READY_CMD and AUTOFS_DEV_IOCTL_FAIL_CMD"></a>AUTOFS_DEV_IOCTL_READY_CMD and AUTOFS_DEV_IOCTL_FAIL_CMD</h2><p>Return mount and expire result status from user space to the kernel.<br>Both of these calls require an initialized struct autofs_dev_ioctl<br>with the ioctlfd field set to the descriptor obtained from the open<br>call and the token field of struct args_ready or struct args_fail set<br>to the wait queue token number, received by user space in the foregoing<br>mount or expire request. The status field of struct args_fail is set to<br>the errno of the operation. It is set to 0 on success.</p>
+<h2 id="AUTOFS-DEV-IOCTL-SETPIPEFD-CMD"><a href="#AUTOFS-DEV-IOCTL-SETPIPEFD-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_SETPIPEFD_CMD"></a>AUTOFS_DEV_IOCTL_SETPIPEFD_CMD</h2><p>Set the pipe file descriptor used for kernel communication to the daemon.<br>Normally this is set at mount time using an option but when reconnecting<br>to a existing mount we need to use this to tell the autofs mount about<br>the new kernel pipe descriptor. In order to protect mounts against<br>incorrectly setting the pipe descriptor we also require that the autofs<br>mount be catatonic (see next call).</p>
+<p>The call requires an initialized struct autofs_dev_ioctl with the<br>ioctlfd field set to the descriptor obtained from the open call and<br>the pipefd field of struct args_setpipefd set to descriptor of the pipe.<br>On success the call also sets the process group id used to identify the<br>controlling process (eg. the owning automount(8) daemon) to the process<br>group of the caller.</p>
+<h2 id="AUTOFS-DEV-IOCTL-CATATONIC-CMD"><a href="#AUTOFS-DEV-IOCTL-CATATONIC-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_CATATONIC_CMD"></a>AUTOFS_DEV_IOCTL_CATATONIC_CMD</h2><p>Make the autofs mount point catatonic. The autofs mount will no longer<br>issue mount requests, the kernel communication pipe descriptor is released<br>and any remaining waits in the queue released.</p>
+<p>The call requires an initialized struct autofs_dev_ioctl with the<br>ioctlfd field set to the descriptor obtained from the open call.</p>
+<h2 id="AUTOFS-DEV-IOCTL-TIMEOUT-CMD"><a href="#AUTOFS-DEV-IOCTL-TIMEOUT-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_TIMEOUT_CMD"></a>AUTOFS_DEV_IOCTL_TIMEOUT_CMD</h2><p>Set the expire timeout for mounts within an autofs mount point.</p>
+<p>The call requires an initialized struct autofs_dev_ioctl with the<br>ioctlfd field set to the descriptor obtained from the open call.</p>
+<h2 id="AUTOFS-DEV-IOCTL-REQUESTER-CMD"><a href="#AUTOFS-DEV-IOCTL-REQUESTER-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_REQUESTER_CMD"></a>AUTOFS_DEV_IOCTL_REQUESTER_CMD</h2><p>Return the uid and gid of the last process to successfully trigger a the<br>mount on the given path dentry.</p>
+<p>The call requires an initialized struct autofs_dev_ioctl with the path<br>field set to the mount point in question and the size field adjusted<br>appropriately. Upon return the uid field of struct args_requester contains<br>the uid and gid field the gid.</p>
+<p>When reconstructing an autofs mount tree with active mounts we need to<br>re-connect to mounts that may have used the original process uid and<br>gid (or string variations of them) for mount lookups within the map entry.<br>This call provides the ability to obtain this uid and gid so they may be<br>used by user space for the mount map lookups.</p>
+<h2 id="AUTOFS-DEV-IOCTL-EXPIRE-CMD"><a href="#AUTOFS-DEV-IOCTL-EXPIRE-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_EXPIRE_CMD"></a>AUTOFS_DEV_IOCTL_EXPIRE_CMD</h2><p>Issue an expire request to the kernel for an autofs mount. Typically<br>this ioctl is called until no further expire candidates are found.</p>
+<p>The call requires an initialized struct autofs_dev_ioctl with the<br>ioctlfd field set to the descriptor obtained from the open call. In<br>addition an immediate expire, independent of the mount timeout, can be<br>requested by setting the how field of struct args_expire to 1. If no<br>expire candidates can be found the ioctl returns -1 with errno set to<br>EAGAIN.</p>
+<p>This call causes the kernel module to check the mount corresponding<br>to the given ioctlfd for mounts that can be expired, issues an expire<br>request back to the daemon and waits for completion.</p>
+<h2 id="AUTOFS-DEV-IOCTL-ASKUMOUNT-CMD"><a href="#AUTOFS-DEV-IOCTL-ASKUMOUNT-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_ASKUMOUNT_CMD"></a>AUTOFS_DEV_IOCTL_ASKUMOUNT_CMD</h2><p>Checks if an autofs mount point is in use.</p>
+<p>The call requires an initialized struct autofs_dev_ioctl with the<br>ioctlfd field set to the descriptor obtained from the open call and<br>it returns the result in the may_umount field of struct args_askumount,<br>1 for busy and 0 otherwise.</p>
+<h2 id="AUTOFS-DEV-IOCTL-ISMOUNTPOINT-CMD"><a href="#AUTOFS-DEV-IOCTL-ISMOUNTPOINT-CMD" class="headerlink" title="AUTOFS_DEV_IOCTL_ISMOUNTPOINT_CMD"></a>AUTOFS_DEV_IOCTL_ISMOUNTPOINT_CMD</h2><p>Check if the given path is a mountpoint.</p>
+<p>The call requires an initialized struct autofs_dev_ioctl. There are two<br>possible variations. Both use the path field set to the path of the mount<br>point to check and the size field adjusted appropriately. One uses the<br>ioctlfd field to identify a specific mount point to check while the other<br>variation uses the path and optionally in.type field of struct args_ismountpoint<br>set to an autofs mount type. The call returns 1 if this is a mount point<br>and sets out.devid field to the device number of the mount and out.magic<br>field to the relevant super block magic number (described below) or 0 if<br>it isn’t a mountpoint. In both cases the the device number (as returned<br>by new_encode_dev()) is returned in out.devid field.</p>
+<p>If supplied with a file descriptor we’re looking for a specific mount,<br>not necessarily at the top of the mounted stack. In this case the path<br>the descriptor corresponds to is considered a mountpoint if it is itself<br>a mountpoint or contains a mount, such as a multi-mount without a root<br>mount. In this case we return 1 if the descriptor corresponds to a mount<br>point and and also returns the super magic of the covering mount if there<br>is one or 0 if it isn’t a mountpoint.</p>
+<p>If a path is supplied (and the ioctlfd field is set to -1) then the path<br>is looked up and is checked to see if it is the root of a mount. If a<br>type is also given we are looking for a particular autofs mount and if<br>a match isn’t found a fail is returned. If the the located path is the<br>root of a mount 1 is returned along with the super magic of the mount<br>or 0 otherwise.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/" title="Kernel-3.10.0-957.el7_autofs4-mount-control" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_autofs4-mount-control/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_atomic_ops/" title="Kernel-3.10.0-957.el7_atomic_ops"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_autofs4/" title="Kernel-3.10.0-957.el7_autofs4"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_memory-hotplug | oosTech.com</title>
+  <meta name="description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Memory Hotplug&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Created:                    Jul 28 2007Add description of notifier of memory hotplug    Oct 11 2007 This document is about memory hotplug including how-to-us">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_memory-hotplug">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Memory Hotplug&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Created:                    Jul 28 2007Add description of notifier of memory hotplug    Oct 11 2007 This document is about memory hotplug including how-to-us">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-purpose-of-memory-hotplug"><span class="toc-number">1.</span> <span class="toc-text">1.1 purpose of memory hotplug</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-Phases-of-memory-hotplug"><span class="toc-number">2.</span> <span class="toc-text">1.2. Phases of memory hotplug</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-Unit-of-Memory-online-offline-operation"><span class="toc-number">3.</span> <span class="toc-text">1.3. Unit of Memory online&#x2F;offline operation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-sysfs-files-for-memory-hotplug"><span class="toc-number">4.</span> <span class="toc-text">4 sysfs files for memory hotplug</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-Hardware-Firmware-Support"><span class="toc-number">5.</span> <span class="toc-text">4.1 Hardware(Firmware) Support</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-Notify-memory-hot-add-event-by-hand"><span class="toc-number">6.</span> <span class="toc-text">4.2 Notify memory hot-add event by hand</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-State-of-memory"><span class="toc-number">7.</span> <span class="toc-text">5.1. State of memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-How-to-online-memory"><span class="toc-number">8.</span> <span class="toc-text">5.2. How to online memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-Memory-offline-and-ZONE-MOVABLE"><span class="toc-number">9.</span> <span class="toc-text">6.1 Memory offline and ZONE_MOVABLE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-How-to-offline-memory"><span class="toc-number">10.</span> <span class="toc-text">6.2. How to offline memory</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_memory-hotplug" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_memory-hotplug
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>==============<br>Memory Hotplug<br>==============</p>
+<p>Created:                    Jul 28 2007<br>Add description of notifier of memory hotplug    Oct 11 2007</p>
+<p>This document is about memory hotplug including how-to-use and current status.<br>Because Memory Hotplug is still under development, contents of this text will<br>be changed often.</p>
+<ol>
+<li>Introduction</li>
+<li>1 purpose of memory hotplug</li>
+<li><ol start="2">
+<li>Phases of memory hotplug</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>Unit of Memory online/offline operation</li>
+</ol>
+</li>
+<li>Kernel Configuration</li>
+<li>sysfs files for memory hotplug</li>
+<li>Physical memory hot-add phase</li>
+<li>1 Hardware(Firmware) Support</li>
+<li>2 Notify memory hot-add event by hand</li>
+<li>Logical Memory hot-add phase</li>
+<li><ol>
+<li>State of memory</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>How to online memory</li>
+</ol>
+</li>
+<li>Logical memory remove</li>
+<li>1 Memory offline and ZONE_MOVABLE</li>
+<li><ol start="2">
+<li>How to offline memory</li>
+</ol>
+</li>
+<li>Physical memory remove</li>
+<li>Memory hotplug event notifier</li>
+<li>Future Work List</li>
+</ol>
+<p>Note(1): x86_64’s has special implementation for memory hotplug.<br>         This text does not describe it.<br>Note(2): This text assumes that sysfs is mounted at /sys.</p>
+<hr>
+<ol>
+<li>Introduction</li>
+</ol>
+<hr>
+<h2 id="1-1-purpose-of-memory-hotplug"><a href="#1-1-purpose-of-memory-hotplug" class="headerlink" title="1.1 purpose of memory hotplug"></a>1.1 purpose of memory hotplug</h2><p>Memory Hotplug allows users to increase/decrease the amount of memory.<br>Generally, there are two purposes.</p>
+<p>(A) For changing the amount of memory.<br>    This is to allow a feature like capacity on demand.<br>(B) For installing/removing DIMMs or NUMA-nodes physically.<br>    This is to exchange DIMMs/NUMA-nodes, reduce power consumption, etc.</p>
+<p>(A) is required by highly virtualized environments and (B) is required by<br>hardware which supports memory power management.</p>
+<p>Linux memory hotplug is designed for both purpose.</p>
+<h2 id="1-2-Phases-of-memory-hotplug"><a href="#1-2-Phases-of-memory-hotplug" class="headerlink" title="1.2. Phases of memory hotplug"></a>1.2. Phases of memory hotplug</h2><p>There are 2 phases in Memory Hotplug.</p>
+<ol>
+<li>Physical Memory Hotplug phase</li>
+<li>Logical Memory Hotplug phase.</li>
+</ol>
+<p>The First phase is to communicate hardware/firmware and make/erase<br>environment for hotplugged memory. Basically, this phase is necessary<br>for the purpose (B), but this is good phase for communication between<br>highly virtualized environments too.</p>
+<p>When memory is hotplugged, the kernel recognizes new memory, makes new memory<br>management tables, and makes sysfs files for new memory’s operation.</p>
+<p>If firmware supports notification of connection of new memory to OS,<br>this phase is triggered automatically. ACPI can notify this event. If not,<br>“probe” operation by system administration is used instead.<br>(see Section 4.).</p>
+<p>Logical Memory Hotplug phase is to change memory state into<br>available/unavailable for users. Amount of memory from user’s view is<br>changed by this phase. The kernel makes all memory in it as free pages<br>when a memory range is available.</p>
+<p>In this document, this phase is described as online/offline.</p>
+<p>Logical Memory Hotplug phase is triggered by write of sysfs file by system<br>administrator. For the hot-add case, it must be executed after Physical Hotplug<br>phase by hand.<br>(However, if you writes udev’s hotplug scripts for memory hotplug, these<br> phases can be execute in seamless way.)</p>
+<h2 id="1-3-Unit-of-Memory-online-offline-operation"><a href="#1-3-Unit-of-Memory-online-offline-operation" class="headerlink" title="1.3. Unit of Memory online/offline operation"></a>1.3. Unit of Memory online/offline operation</h2><p>Memory hotplug uses SPARSEMEM memory model. SPARSEMEM divides the whole memory<br>into chunks of the same size. The chunk is called a “section”. The size of<br>a section is architecture dependent. For example, power uses 16MiB, ia64 uses<br>1GiB. The unit of online/offline operation is “one section”. (see Section 3.)</p>
+<p>To determine the size of sections, please read this file:</p>
+<p>/sys/devices/system/memory/block_size_bytes</p>
+<p>This file shows the size of sections in byte.</p>
+<hr>
+<ol start="2">
+<li>Kernel Configuration</li>
+</ol>
+<hr>
+<p>To use memory hotplug feature, kernel must be compiled with following<br>config options.</p>
+<ul>
+<li><p>For all memory hotplug<br>  Memory model -&gt; Sparse Memory  (CONFIG_SPARSEMEM)<br>  Allow for memory hot-add       (CONFIG_MEMORY_HOTPLUG)</p>
+</li>
+<li><p>To enable memory removal, the followings are also necessary<br>  Allow for memory hot remove    (CONFIG_MEMORY_HOTREMOVE)<br>  Page Migration                 (CONFIG_MIGRATION)</p>
+</li>
+<li><p>For ACPI memory hotplug, the followings are also necessary<br>  Memory hotplug (under ACPI Support menu) (CONFIG_ACPI_HOTPLUG_MEMORY)<br>  This option can be kernel module.</p>
+</li>
+<li><p>As a related configuration, if your box has a feature of NUMA-node hotplug<br>via ACPI, then this option is necessary too.<br>  ACPI0004,PNP0A05 and PNP0A06 Container Driver (under ACPI Support menu)<br>  (CONFIG_ACPI_CONTAINER).<br>  This option can be kernel module too.</p>
+</li>
+</ul>
+<hr>
+<h2 id="4-sysfs-files-for-memory-hotplug"><a href="#4-sysfs-files-for-memory-hotplug" class="headerlink" title="4 sysfs files for memory hotplug"></a>4 sysfs files for memory hotplug</h2><p>All sections have their device information in sysfs.  Each section is part of<br>a memory block under /sys/devices/system/memory as</p>
+<p>/sys/devices/system/memory/memoryXXX<br>(XXX is the section id.)</p>
+<p>Now, XXX is defined as (start_address_of_section / section_size) of the first<br>section contained in the memory block.  The files ‘phys_index’ and<br>‘end_phys_index’ under each directory report the beginning and end section id’s<br>for the memory block covered by the sysfs directory.  It is expected that all<br>memory sections in this range are present and no memory holes exist in the<br>range. Currently there is no way to determine if there is a memory hole, but<br>the existence of one should not affect the hotplug capabilities of the memory<br>block.</p>
+<p>For example, assume 1GiB section size. A device for a memory starting at<br>0x100000000 is /sys/device/system/memory/memory4<br>(0x100000000 / 1Gib = 4)<br>This device covers address range [0x100000000 … 0x140000000)</p>
+<p>Under each section, you can see 4 or 5 files, the end_phys_index file being<br>a recent addition and not present on older kernels.</p>
+<p>/sys/devices/system/memory/memoryXXX/start_phys_index<br>/sys/devices/system/memory/memoryXXX/end_phys_index<br>/sys/devices/system/memory/memoryXXX/phys_device<br>/sys/devices/system/memory/memoryXXX/state<br>/sys/devices/system/memory/memoryXXX/removable</p>
+<p>‘phys_index’      : read-only and contains section id of the first section<br>            in the memory block, same as XXX.<br>‘end_phys_index’  : read-only and contains section id of the last section<br>            in the memory block.<br>‘state’           : read-write<br>                    at read:  contains online/offline state of memory.<br>                    at write: user can specify “online_kernel”,<br>                    “online_movable”, “online”, “offline” command<br>                    which will be performed on al sections in the block.<br>‘phys_device’     : read-only: designed to show the name of physical memory<br>                    device.  This is not well implemented now.<br>‘removable’       : read-only: contains an integer value indicating<br>                    whether the memory block is removable or not<br>                    removable.  A value of 1 indicates that the memory<br>                    block is removable and a value of 0 indicates that<br>                    it is not removable. A memory block is removable only if<br>                    every section in the block is removable.</p>
+<p>NOTE:<br>  These directories/files appear after physical memory hotplug phase.</p>
+<p>If CONFIG_NUMA is enabled the memoryXXX/ directories can also be accessed<br>via symbolic links located in the /sys/devices/system/node/node* directories.</p>
+<p>For example:<br>/sys/devices/system/node/node0/memory9 -&gt; ../../memory/memory9</p>
+<p>A backlink will also be created:<br>/sys/devices/system/memory/memory9/node0 -&gt; ../../node/node0</p>
+<hr>
+<ol start="4">
+<li>Physical memory hot-add phase</li>
+</ol>
+<hr>
+<h2 id="4-1-Hardware-Firmware-Support"><a href="#4-1-Hardware-Firmware-Support" class="headerlink" title="4.1 Hardware(Firmware) Support"></a>4.1 Hardware(Firmware) Support</h2><p>On x86_64/ia64 platform, memory hotplug by ACPI is supported.</p>
+<p>In general, the firmware (ACPI) which supports memory hotplug defines<br>memory class object of _HID “PNP0C80”. When a notify is asserted to PNP0C80,<br>Linux’s ACPI handler does hot-add memory to the system and calls a hotplug udev<br>script. This will be done automatically.</p>
+<p>But scripts for memory hotplug are not contained in generic udev package(now).<br>You may have to write it by yourself or online/offline memory by hand.<br>Please see “How to online memory”, “How to offline memory” in this text.</p>
+<p>If firmware supports NUMA-node hotplug, and defines an object _HID “ACPI0004”,<br>“PNP0A05”, or “PNP0A06”, notification is asserted to it, and ACPI handler<br>calls hotplug code for all of objects which are defined in it.<br>If memory device is found, memory hotplug code will be called.</p>
+<h2 id="4-2-Notify-memory-hot-add-event-by-hand"><a href="#4-2-Notify-memory-hot-add-event-by-hand" class="headerlink" title="4.2 Notify memory hot-add event by hand"></a>4.2 Notify memory hot-add event by hand</h2><p>In some environments, especially virtualized environment, firmware will not<br>notify memory hotplug event to the kernel. For such environment, “probe”<br>interface is supported. This interface depends on CONFIG_ARCH_MEMORY_PROBE.</p>
+<p>Now, CONFIG_ARCH_MEMORY_PROBE is supported only by powerpc but it does not<br>contain highly architecture codes. Please add config if you need “probe”<br>interface.</p>
+<p>Probe interface is located at<br>/sys/devices/system/memory/probe</p>
+<p>You can tell the physical address of new memory to the kernel by</p>
+<p>% echo start_address_of_new_memory &gt; /sys/devices/system/memory/probe</p>
+<p>Then, [start_address_of_new_memory, start_address_of_new_memory + section_size)<br>memory range is hot-added. In this case, hotplug script is not called (in<br>current implementation). You’ll have to online memory by yourself.<br>Please see “How to online memory” in this text.</p>
+<hr>
+<ol start="5">
+<li>Logical Memory hot-add phase</li>
+</ol>
+<hr>
+<h2 id="5-1-State-of-memory"><a href="#5-1-State-of-memory" class="headerlink" title="5.1. State of memory"></a>5.1. State of memory</h2><p>To see (online/offline) state of memory section, read ‘state’ file.</p>
+<p>% cat /sys/device/system/memory/memoryXXX/state</p>
+<p>If the memory section is online, you’ll read “online”.<br>If the memory section is offline, you’ll read “offline”.</p>
+<h2 id="5-2-How-to-online-memory"><a href="#5-2-How-to-online-memory" class="headerlink" title="5.2. How to online memory"></a>5.2. How to online memory</h2><p>Even if the memory is hot-added, it is not at ready-to-use state.<br>For using newly added memory, you have to “online” the memory section.</p>
+<p>For onlining, you have to write “online” to the section’s state file as:</p>
+<p>% echo online &gt; /sys/devices/system/memory/memoryXXX/state</p>
+<p>This onlining will not change the ZONE type of the target memory section,<br>If the memory section is in ZONE_NORMAL, you can change it to ZONE_MOVABLE:</p>
+<p>% echo online_movable &gt; /sys/devices/system/memory/memoryXXX/state<br>(NOTE: current limit: this memory section must be adjacent to ZONE_MOVABLE)</p>
+<p>And if the memory section is in ZONE_MOVABLE, you can change it to ZONE_NORMAL:</p>
+<p>% echo online_kernel &gt; /sys/devices/system/memory/memoryXXX/state<br>(NOTE: current limit: this memory section must be adjacent to ZONE_NORMAL)</p>
+<p>After this, section memoryXXX’s state will be ‘online’ and the amount of<br>available memory will be increased.</p>
+<p>Currently, newly added memory is added as ZONE_NORMAL (for powerpc, ZONE_DMA).<br>This may be changed in future.</p>
+<hr>
+<ol start="6">
+<li>Logical memory remove</li>
+</ol>
+<hr>
+<h2 id="6-1-Memory-offline-and-ZONE-MOVABLE"><a href="#6-1-Memory-offline-and-ZONE-MOVABLE" class="headerlink" title="6.1 Memory offline and ZONE_MOVABLE"></a>6.1 Memory offline and ZONE_MOVABLE</h2><p>Memory offlining is more complicated than memory online. Because memory offline<br>has to make the whole memory section be unused, memory offline can fail if<br>the section includes memory which cannot be freed.</p>
+<p>In general, memory offline can use 2 techniques.</p>
+<p>(1) reclaim and free all memory in the section.<br>(2) migrate all pages in the section.</p>
+<p>In the current implementation, Linux’s memory offline uses method (2), freeing<br>all  pages in the section by page migration. But not all pages are<br>migratable. Under current Linux, migratable pages are anonymous pages and<br>page caches. For offlining a section by migration, the kernel has to guarantee<br>that the section contains only migratable pages.</p>
+<p>Now, a boot option for making a section which consists of migratable pages is<br>supported. By specifying “kernelcore=” or “movablecore=” boot option, you can<br>create ZONE_MOVABLE…a zone which is just used for movable pages.<br>(See also Documentation/kernel-parameters.txt)</p>
+<p>Assume the system has “TOTAL” amount of memory at boot time, this boot option<br>creates ZONE_MOVABLE as following.</p>
+<ol>
+<li><p>When kernelcore=YYYY boot option is used,<br>Size of memory not for movable pages (not for offline) is YYYY.<br>Size of memory for movable pages (for offline) is TOTAL-YYYY.</p>
+</li>
+<li><p>When movablecore=ZZZZ boot option is used,<br>Size of memory not for movable pages (not for offline) is TOTAL - ZZZZ.<br>Size of memory for movable pages (for offline) is ZZZZ.</p>
+</li>
+</ol>
+<p>Note) Unfortunately, there is no information to show which section belongs<br>to ZONE_MOVABLE. This is TBD.</p>
+<h2 id="6-2-How-to-offline-memory"><a href="#6-2-How-to-offline-memory" class="headerlink" title="6.2. How to offline memory"></a>6.2. How to offline memory</h2><p>You can offline a section by using the same sysfs interface that was used in<br>memory onlining.</p>
+<p>% echo offline &gt; /sys/devices/system/memory/memoryXXX/state</p>
+<p>If offline succeeds, the state of the memory section is changed to be “offline”.<br>If it fails, some error core (like -EBUSY) will be returned by the kernel.<br>Even if a section does not belong to ZONE_MOVABLE, you can try to offline it.<br>If it doesn’t contain ‘unmovable’ memory, you’ll get success.</p>
+<p>A section under ZONE_MOVABLE is considered to be able to be offlined easily.<br>But under some busy state, it may return -EBUSY. Even if a memory section<br>cannot be offlined due to -EBUSY, you can retry offlining it and may be able to<br>offline it (or not).<br>(For example, a page is referred to by some kernel internal call and released<br> soon.)</p>
+<p>Consideration:<br>Memory hotplug’s design direction is to make the possibility of memory offlining<br>higher and to guarantee unplugging memory under any situation. But it needs<br>more work. Returning -EBUSY under some situation may be good because the user<br>can decide to retry more or not by himself. Currently, memory offlining code<br>does some amount of retry with 120 seconds timeout.</p>
+<hr>
+<ol start="7">
+<li>Physical memory remove</li>
+</ol>
+<hr>
+<p>Need more implementation yet….</p>
+<ul>
+<li>Notification completion of remove works by OS to firmware.</li>
+<li>Guard from remove if not yet.</li>
+</ul>
+<hr>
+<ol start="8">
+<li>Memory hotplug event notifier</li>
+</ol>
+<hr>
+<p>Memory hotplug has event notifier. There are 6 types of notification.</p>
+<p>MEMORY_GOING_ONLINE<br>  Generated before new memory becomes available in order to be able to<br>  prepare subsystems to handle memory. The page allocator is still unable<br>  to allocate from the new memory.</p>
+<p>MEMORY_CANCEL_ONLINE<br>  Generated if MEMORY_GOING_ONLINE fails.</p>
+<p>MEMORY_ONLINE<br>  Generated when memory has successfully brought online. The callback may<br>  allocate pages from the new memory.</p>
+<p>MEMORY_GOING_OFFLINE<br>  Generated to begin the process of offlining memory. Allocations are no<br>  longer possible from the memory but some of the memory to be offlined<br>  is still in use. The callback can be used to free memory known to a<br>  subsystem from the indicated memory section.</p>
+<p>MEMORY_CANCEL_OFFLINE<br>  Generated if MEMORY_GOING_OFFLINE fails. Memory is available again from<br>  the section that we attempted to offline.</p>
+<p>MEMORY_OFFLINE<br>  Generated after offlining memory is complete.</p>
+<p>A callback routine can be registered by<br>  hotplug_memory_notifier(callback_func, priority)</p>
+<p>The second argument of callback function (action) is event types of above.<br>The third argument is passed by pointer of struct memory_notify.</p>
+<p>struct memory_notify {<br>       unsigned long start_pfn;<br>       unsigned long nr_pages;<br>       int status_change_nid_normal;<br>       int status_change_nid_high;<br>       int status_change_nid;<br>}</p>
+<p>start_pfn is start_pfn of online/offline memory.<br>nr_pages is # of pages of online/offline memory.<br>status_change_nid_normal is set node id when N_NORMAL_MEMORY of nodemask<br>is (will be) set/clear, if this is -1, then nodemask status is not changed.<br>status_change_nid_high is set node id when N_HIGH_MEMORY of nodemask<br>is (will be) set/clear, if this is -1, then nodemask status is not changed.<br>status_change_nid is set node id when N_MEMORY of nodemask is (will be)<br>set/clear. It means a new(memoryless) node gets new memory by online and a<br>node loses all memory. If this is -1, then nodemask status is not changed.<br>If status_changed_nid* &gt;= 0, callback should create/discard structures for the<br>node if necessary.</p>
+<hr>
+<ol start="9">
+<li>Future Work</li>
+</ol>
+<hr>
+<ul>
+<li>allowing memory hot-add to ZONE_MOVABLE. maybe we need some switch like<br>sysctl or new control file.</li>
+<li>showing memory section and physical device relationship.</li>
+<li>showing memory section is under ZONE_MOVABLE or not</li>
+<li>test and make it better memory offlining.</li>
+<li>support HugeTLB page migration and offlining.</li>
+<li>memmap removing at memory offline.</li>
+<li>physical remove memory.</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/" title="Kernel-3.10.0-957.el7_memory-hotplug" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_memory-hotplug/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_md/" title="Kernel-3.10.0-957.el7_"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_modules/" title="Kernel-3.10.0-957.el7_modules"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

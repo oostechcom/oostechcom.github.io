@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-3.10.0-957.el7_dynamic-debug-howto | oosTech.com</title>
+  <meta name="description" content="IntroductionThis document describes how to use the dynamic debug (dyndbg) feature. Dynamic debug is designed to allow you to dynamically enable&#x2F;disablekernel code to obtain additional kernel informati">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-3.10.0-957.el7_dynamic-debug-howto">
+<meta property="og:url" content="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="IntroductionThis document describes how to use the dynamic debug (dyndbg) feature. Dynamic debug is designed to allow you to dynamically enable&#x2F;disablekernel code to obtain additional kernel informati">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-12T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Controlling-dynamic-debug-Behaviour"><span class="toc-number">2.</span> <span class="toc-text">Controlling dynamic debug Behaviour</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Viewing-Dynamic-Debug-Behaviour"><span class="toc-number">3.</span> <span class="toc-text">Viewing Dynamic Debug Behaviour</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#filename-lineno-module-function-flags-format"><span class="toc-number">4.</span> <span class="toc-text">filename:lineno [module]function flags format</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#filename-lineno-module-function-flags-format-1"><span class="toc-number">5.</span> <span class="toc-text">filename:lineno [module]function flags format</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Command-Language-Reference"><span class="toc-number">6.</span> <span class="toc-text">Command Language Reference</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debug-messages-during-Boot-Process"><span class="toc-number">7.</span> <span class="toc-text">Debug messages during Boot Process</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Debug-Messages-at-Module-Initialization-Time"><span class="toc-number">8.</span> <span class="toc-text">Debug Messages at Module Initialization Time</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#parameters-given-via-etc-modprobe-d-conf"><span class="toc-number">9.</span> <span class="toc-text">parameters given via &#x2F;etc&#x2F;modprobe.d&#x2F;*.conf</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#foo-dyndbg-as-given-in-boot-args-%E2%80%9Cfoo-%E2%80%9D-is-stripped-and-passed"><span class="toc-number">10.</span> <span class="toc-text">foo.dyndbg as given in boot args, “foo.” is stripped and passed</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#args-to-modprobe"><span class="toc-number">11.</span> <span class="toc-text">args to modprobe</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Examples"><span class="toc-number">12.</span> <span class="toc-text">Examples</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-3.10.0-957.el7_dynamic-debug-howto" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-3.10.0-957.el7_dynamic-debug-howto
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/" class="article-date">
+	 published: <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/" class="article-date">
+	   updated: <time datetime="2021-03-12T16:00:00.000Z" itemprop="dateUpdated">2021-03-13</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>This document describes how to use the dynamic debug (dyndbg) feature.</p>
+<p>Dynamic debug is designed to allow you to dynamically enable/disable<br>kernel code to obtain additional kernel information.  Currently, if<br>CONFIG_DYNAMIC_DEBUG is set, then all pr_debug()/dev_dbg() and<br>print_hex_dump_debug()/print_hex_dump_bytes() calls can be dynamically<br>enabled per-callsite.</p>
+<p>If CONFIG_DYNAMIC_DEBUG is not set, print_hex_dump_debug() is just<br>shortcut for print_hex_dump(KERN_DEBUG).</p>
+<p>For print_hex_dump_debug()/print_hex_dump_bytes(), format string is<br>its ‘prefix_str’ argument, if it is constant string; or “hexdump”<br>in case ‘prefix_str’ is build dynamically.</p>
+<p>Dynamic debug has even more useful features:</p>
+<ul>
+<li><p>Simple query language allows turning on and off debugging<br>statements by matching any combination of 0 or 1 of:</p>
+<ul>
+<li>source filename</li>
+<li>function name</li>
+<li>line number (including ranges of line numbers)</li>
+<li>module name</li>
+<li>format string</li>
+</ul>
+</li>
+<li><p>Provides a debugfs control file: <debugfs>/dynamic_debug/control<br>which can be read to display the complete list of known debug<br>statements, to help guide you</p>
+</li>
+</ul>
+<h1 id="Controlling-dynamic-debug-Behaviour"><a href="#Controlling-dynamic-debug-Behaviour" class="headerlink" title="Controlling dynamic debug Behaviour"></a>Controlling dynamic debug Behaviour</h1><p>The behaviour of pr_debug()/dev_dbg()s are controlled via writing to a<br>control file in the ‘debugfs’ filesystem. Thus, you must first mount<br>the debugfs filesystem, in order to make use of this feature.<br>Subsequently, we refer to the control file as:<br><debugfs>/dynamic_debug/control. For example, if you want to enable<br>printing from source file ‘svcsock.c’, line 1603 you simply do:</p>
+<p>nullarbor:~ # echo ‘file svcsock.c line 1603 +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>If you make a mistake with the syntax, the write will fail thus:</p>
+<p>nullarbor:~ # echo ‘file svcsock.c wtf 1 +p’ &gt;<br>                <debugfs>/dynamic_debug/control<br>-bash: echo: write error: Invalid argument</p>
+<h1 id="Viewing-Dynamic-Debug-Behaviour"><a href="#Viewing-Dynamic-Debug-Behaviour" class="headerlink" title="Viewing Dynamic Debug Behaviour"></a>Viewing Dynamic Debug Behaviour</h1><p>You can view the currently configured behaviour of all the debug<br>statements via:</p>
+<p>nullarbor:~ # cat <debugfs>/dynamic_debug/control</p>
+<h1 id="filename-lineno-module-function-flags-format"><a href="#filename-lineno-module-function-flags-format" class="headerlink" title="filename:lineno [module]function flags format"></a>filename:lineno [module]function flags format</h1><p>/usr/src/packages/BUILD/sgi-enhancednfs-1.4/default/net/sunrpc/svc_rdma.c:323 [svcxprt_rdma]svc_rdma_cleanup =_ “SVCRDMA Module Removed, deregister RPC RDMA transport\012”<br>/usr/src/packages/BUILD/sgi-enhancednfs-1.4/default/net/sunrpc/svc_rdma.c:341 [svcxprt_rdma]svc_rdma_init =_ “\011max_inline       : %d\012”<br>/usr/src/packages/BUILD/sgi-enhancednfs-1.4/default/net/sunrpc/svc_rdma.c:340 [svcxprt_rdma]svc_rdma_init =_ “\011sq_depth         : %d\012”<br>/usr/src/packages/BUILD/sgi-enhancednfs-1.4/default/net/sunrpc/svc_rdma.c:338 [svcxprt_rdma]svc_rdma_init =_ “\011max_requests     : %d\012”<br>…</p>
+<p>You can also apply standard Unix text manipulation filters to this<br>data, e.g.</p>
+<p>nullarbor:~ # grep -i rdma <debugfs>/dynamic_debug/control  | wc -l<br>62</p>
+<p>nullarbor:~ # grep -i tcp <debugfs>/dynamic_debug/control | wc -l<br>42</p>
+<p>The third column shows the currently enabled flags for each debug<br>statement callsite (see below for definitions of the flags).  The<br>default value, with no flags enabled, is “=_”.  So you can view all<br>the debug statement callsites with any non-default flags:</p>
+<p>nullarbor:~ # awk ‘$3 != “=_”‘ <debugfs>/dynamic_debug/control</p>
+<h1 id="filename-lineno-module-function-flags-format-1"><a href="#filename-lineno-module-function-flags-format-1" class="headerlink" title="filename:lineno [module]function flags format"></a>filename:lineno [module]function flags format</h1><p>/usr/src/packages/BUILD/sgi-enhancednfs-1.4/default/net/sunrpc/svcsock.c:1603 [sunrpc]svc_send p “svc_process: st_sendto returned %d\012”</p>
+<h1 id="Command-Language-Reference"><a href="#Command-Language-Reference" class="headerlink" title="Command Language Reference"></a>Command Language Reference</h1><p>At the lexical level, a command comprises a sequence of words separated<br>by spaces or tabs.  So these are all equivalent:</p>
+<p>nullarbor:~ # echo -c ‘file svcsock.c line 1603 +p’ &gt;<br>                <debugfs>/dynamic_debug/control<br>nullarbor:~ # echo -c ‘  file   svcsock.c     line  1603 +p  ‘ &gt;<br>                <debugfs>/dynamic_debug/control<br>nullarbor:~ # echo -n ‘file svcsock.c line 1603 +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>Command submissions are bounded by a write() system call.<br>Multiple commands can be written together, separated by ‘;’ or ‘\n’.</p>
+<p>  ~# echo “func pnpacpi_get_resources +p; func pnp_assign_mem +p” <br>     &gt; <debugfs>/dynamic_debug/control</p>
+<p>If your query set is big, you can batch them too:</p>
+<p>  ~# cat query-batch-file &gt; <debugfs>/dynamic_debug/control</p>
+<p>At the syntactical level, a command comprises a sequence of match<br>specifications, followed by a flags change specification.</p>
+<p>command ::= match-spec* flags-spec</p>
+<p>The match-spec’s are used to choose a subset of the known pr_debug()<br>callsites to which to apply the flags-spec.  Think of them as a query<br>with implicit ANDs between each pair.  Note that an empty list of<br>match-specs will select all debug statement callsites.</p>
+<p>A match specification comprises a keyword, which controls the<br>attribute of the callsite to be compared, and a value to compare<br>against.  Possible keywords are:</p>
+<p>match-spec ::= ‘func’ string |<br>           ‘file’ string |<br>           ‘module’ string |<br>           ‘format’ string |<br>           ‘line’ line-range</p>
+<p>line-range ::= lineno |<br>           ‘-‘lineno |<br>           lineno’-‘ |<br>           lineno’-‘lineno<br>// Note: line-range cannot contain space, e.g.<br>// “1-30” is valid range but “1 - 30” is not.</p>
+<p>lineno ::= unsigned-int</p>
+<p>The meanings of each keyword are:</p>
+<p>func<br>    The given string is compared against the function name<br>    of each callsite.  Example:</p>
+<pre><code>func svc_tcp_accept
+</code></pre>
+<p>file<br>    The given string is compared against either the full pathname, the<br>    src-root relative pathname, or the basename of the source file of<br>    each callsite.  Examples:</p>
+<pre><code>file svcsock.c
+file kernel/freezer.c
+file /usr/src/packages/BUILD/sgi-enhancednfs-1.4/default/net/sunrpc/svcsock.c
+</code></pre>
+<p>module<br>    The given string is compared against the module name<br>    of each callsite.  The module name is the string as<br>    seen in “lsmod”, i.e. without the directory or the .ko<br>    suffix and with ‘-‘ changed to ‘_’.  Examples:</p>
+<pre><code>module sunrpc
+module nfsd
+</code></pre>
+<p>format<br>    The given string is searched for in the dynamic debug format<br>    string.  Note that the string does not need to match the<br>    entire format, only some part.  Whitespace and other<br>    special characters can be escaped using C octal character<br>    escape \ooo notation, e.g. the space character is \040.<br>    Alternatively, the string can be enclosed in double quote<br>    characters (“) or single quote characters (‘).<br>    Examples:</p>
+<pre><code>format svcrdma:        // many of the NFS/RDMA server pr_debugs
+format readahead        // some pr_debugs in the readahead cache
+format nfsd:\040SETATTR // one way to match a format with whitespace
+format &quot;nfsd: SETATTR&quot;  // a neater way to match a format with whitespace
+format &#39;nfsd: SETATTR&#39;  // yet another way to match a format with whitespace
+</code></pre>
+<p>line<br>    The given line number or range of line numbers is compared<br>    against the line number of each pr_debug() callsite.  A single<br>    line number matches the callsite line number exactly.  A<br>    range of line numbers matches any callsite between the first<br>    and last line number inclusive.  An empty first number means<br>    the first line in the file, an empty line number means the<br>    last number in the file.  Examples:</p>
+<pre><code>line 1603        // exactly line 1603
+line 1600-1605  // the six lines from line 1600 to line 1605
+line -1605        // the 1605 lines from line 1 to line 1605
+line 1600-        // all lines from line 1600 to the end of the file
+</code></pre>
+<p>The flags specification comprises a change operation followed<br>by one or more flag characters.  The change operation is one<br>of the characters:</p>
+<ul>
+<li>   remove the given flags</li>
+</ul>
+<ul>
+<li>add the given flags<br>=    set the flags to the given flags</li>
+</ul>
+<p>The flags are:</p>
+<p>  p    enables the pr_debug() callsite.<br>  f    Include the function name in the printed message<br>  l    Include line number in the printed message<br>  m    Include module name in the printed message<br>  t    Include thread ID in messages not generated from interrupt context<br>  _    No flags are set. (Or’d with others on input)</p>
+<p>For print_hex_dump_debug() and print_hex_dump_bytes(), only ‘p’ flag<br>have meaning, other flags ignored.</p>
+<p>For display, the flags are preceded by ‘=’<br>(mnemonic: what the flags are currently equal to).</p>
+<p>Note the regexp ^[-+=][flmpt_]+$ matches a flags specification.<br>To clear all flags at once, use “=_” or “-flmpt”.</p>
+<h1 id="Debug-messages-during-Boot-Process"><a href="#Debug-messages-during-Boot-Process" class="headerlink" title="Debug messages during Boot Process"></a>Debug messages during Boot Process</h1><p>To activate debug messages for core code and built-in modules during<br>the boot process, even before userspace and debugfs exists, use<br>dyndbg=”QUERY”, module.dyndbg=”QUERY”, or ddebug_query=”QUERY”<br>(ddebug_query is obsoleted by dyndbg, and deprecated).  QUERY follows<br>the syntax described above, but must not exceed 1023 characters.  Your<br>bootloader may impose lower limits.</p>
+<p>These dyndbg params are processed just after the ddebug tables are<br>processed, as part of the arch_initcall.  Thus you can enable debug<br>messages in all code run after this arch_initcall via this boot<br>parameter.</p>
+<p>On an x86 system for example ACPI enablement is a subsys_initcall and<br>   dyndbg=”file ec.c +p”<br>will show early Embedded Controller transactions during ACPI setup if<br>your machine (typically a laptop) has an Embedded Controller.<br>PCI (or other devices) initialization also is a hot candidate for using<br>this boot parameter for debugging purposes.</p>
+<p>If foo module is not built-in, foo.dyndbg will still be processed at<br>boot time, without effect, but will be reprocessed when module is<br>loaded later.  dyndbg_query= and bare dyndbg= are only processed at<br>boot.</p>
+<h1 id="Debug-Messages-at-Module-Initialization-Time"><a href="#Debug-Messages-at-Module-Initialization-Time" class="headerlink" title="Debug Messages at Module Initialization Time"></a>Debug Messages at Module Initialization Time</h1><p>When “modprobe foo” is called, modprobe scans /proc/cmdline for<br>foo.params, strips “foo.”, and passes them to the kernel along with<br>params given in modprobe args or /etc/modprob.d/*.conf files,<br>in the following order:</p>
+<ol>
+<li><h1 id="parameters-given-via-etc-modprobe-d-conf"><a href="#parameters-given-via-etc-modprobe-d-conf" class="headerlink" title="parameters given via /etc/modprobe.d/*.conf"></a>parameters given via /etc/modprobe.d/*.conf</h1><p>options foo dyndbg=+pt<br>options foo dyndbg # defaults to +p</p>
+</li>
+<li><h1 id="foo-dyndbg-as-given-in-boot-args-“foo-”-is-stripped-and-passed"><a href="#foo-dyndbg-as-given-in-boot-args-“foo-”-is-stripped-and-passed" class="headerlink" title="foo.dyndbg as given in boot args, “foo.” is stripped and passed"></a>foo.dyndbg as given in boot args, “foo.” is stripped and passed</h1><p>foo.dyndbg=” func bar +p; func buz +mp”</p>
+</li>
+<li><h1 id="args-to-modprobe"><a href="#args-to-modprobe" class="headerlink" title="args to modprobe"></a>args to modprobe</h1><p>modprobe foo dyndbg==pmf # override previous settings</p>
+</li>
+</ol>
+<p>These dyndbg queries are applied in order, with last having final say.<br>This allows boot args to override or modify those from /etc/modprobe.d<br>(sensible, since 1 is system wide, 2 is kernel or boot specific), and<br>modprobe args to override both.</p>
+<p>In the foo.dyndbg=”QUERY” form, the query must exclude “module foo”.<br>“foo” is extracted from the param-name, and applied to each query in<br>“QUERY”, and only 1 match-spec of each type is allowed.</p>
+<p>The dyndbg option is a “fake” module parameter, which means:</p>
+<ul>
+<li>modules do not need to define it explicitly</li>
+<li>every module gets it tacitly, whether they use pr_debug or not</li>
+<li>it doesnt appear in /sys/module/$module/parameters/<br>To see it, grep the control file, or inspect /proc/cmdline.</li>
+</ul>
+<p>For CONFIG_DYNAMIC_DEBUG kernels, any settings given at boot-time (or<br>enabled by -DDEBUG flag during compilation) can be disabled later via<br>the sysfs interface if the debug messages are no longer needed:</p>
+<p>   echo “module module_name -p” &gt; <debugfs>/dynamic_debug/control</p>
+<h1 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h1><p>// enable the message at line 1603 of file svcsock.c<br>nullarbor:~ # echo -n ‘file svcsock.c line 1603 +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>// enable all the messages in file svcsock.c<br>nullarbor:~ # echo -n ‘file svcsock.c +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>// enable all the messages in the NFS server module<br>nullarbor:~ # echo -n ‘module nfsd +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>// enable all 12 messages in the function svc_process()<br>nullarbor:~ # echo -n ‘func svc_process +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>// disable all 12 messages in the function svc_process()<br>nullarbor:~ # echo -n ‘func svc_process -p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>// enable messages for NFS calls READ, READLINK, READDIR and READDIR+.<br>nullarbor:~ # echo -n ‘format “nfsd: READ” +p’ &gt;<br>                <debugfs>/dynamic_debug/control</p>
+<p>// enable all messages<br>nullarbor:~ # echo -n ‘+p’ &gt; <debugfs>/dynamic_debug/control</p>
+<p>// add module, function to all enabled messages<br>nullarbor:~ # echo -n ‘+mf’ &gt; <debugfs>/dynamic_debug/control</p>
+<p>// boot-args example, with newlines and comments for readability<br>Kernel command line: …<br>  // see whats going on in dyndbg=value processing<br>  dynamic_debug.verbose=1<br>  // enable pr_debugs in 2 builtins, #cmt is stripped<br>  dyndbg=”module params +p #cmt ; module sys +p”<br>  // enable pr_debugs in 2 functions in a module loaded later<br>  pc87360.dyndbg=”func pc87360_init_device +p; func pc87360_find +p”</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/" title="Kernel-3.10.0-957.el7_dynamic-debug-howto" target="_blank" rel="external">http://www.oostech.com/2021/03/13/Kernel-3.10.0-957.el7_dynamic-debug-howto/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_dwc3/" title="Kernel-3.10.0-957.el7_dwc3"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/13/Kernel-3.10.0-957.el7_e100/" title="Kernel-3.10.0-957.el7_e100"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

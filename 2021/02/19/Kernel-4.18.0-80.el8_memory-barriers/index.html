@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_memory-barriers | oosTech.com</title>
+  <meta name="description" content="NOTE:This is a version of Documentation&#x2F;memory-barriers.txt translated into Korean.This document is maintained by SeongJae Park &amp;#115;&amp;#x6a;&amp;#51;&amp;#x38;&amp;#x2e;&amp;#x70;&amp;#97;&amp;#x72;&amp;#107;&amp;#64;&amp;#103;&amp;#x6d;&amp;#x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_memory-barriers">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="NOTE:This is a version of Documentation&#x2F;memory-barriers.txt translated into Korean.This document is maintained by SeongJae Park &amp;#115;&amp;#x6a;&amp;#51;&amp;#x38;&amp;#x2e;&amp;#x70;&amp;#97;&amp;#x72;&amp;#107;&amp;#64;&amp;#103;&amp;#x6d;&amp;#x">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#i%C2%97%C2%ADi%C2%9E%C2%90i%C2%BC%C2%9A-e%C2%B0%C2%95i%C2%84%C2%B1i%C2%9E%C2%AC-115-x6a-51-56-46-112-x61-114-107-x40-x67-x6d-97-105-108-46-99-x6f-x6d"><span class="toc-number">1.</span> <span class="toc-text">ì­ìï¼ ë°ì±ì¬ &amp;#115;&amp;#x6a;&amp;#51;&amp;#56;&amp;#46;&amp;#112;&amp;#x61;&amp;#114;&amp;#107;&amp;#x40;&amp;#x67;&amp;#x6d;&amp;#97;&amp;#105;&amp;#108;&amp;#46;&amp;#99;&amp;#x6f;&amp;#x6d;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%94%C2%94e%C2%B0%C2%94i%C2%9D%C2%B4i%C2%8A%C2%A4-i%C2%98%C2%A4i%C2%8D%C2%BCe-%C2%88i%C2%9D%C2%B4i%C2%85%C2%98"><span class="toc-number">1.1.</span> <span class="toc-text">ëë°ì´ì¤ ì¤í¼ë ì´ì</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%B3%C2%B4i%C2%9E%C2%A5i%C2%82%C2%ACi%C2%95%C2%AD"><span class="toc-number">1.2.</span> <span class="toc-text">ë³´ì¥ì¬í­</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%A9%C2%94e%C2%AA%C2%A8e%C2%A6%C2%AC-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4i%C2%9D%C2%98-i%C2%A2%C2%85e%C2%A5%C2%98"><span class="toc-number">1.3.</span> <span class="toc-text">ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ì¢ë¥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%A9%C2%94e%C2%AA%C2%A8e%C2%A6%C2%AC-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4i%C2%97%C2%90-eOE%C2%80i%C2%95%C2%B4-e%C2%B0%C2%80i-%C2%95i%C2%95%C2%B4i%C2%84-i%C2%95%C2%88e%C2%90-e%C2%B2%C2%83"><span class="toc-number">1.4.</span> <span class="toc-text">ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ëí´ ê°ì í´ì  ìë  ê²</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%8D%C2%B0i%C2%9D%C2%B4i%C2%84%C2%B0-i%C2%9D%C2%98i%C2%A1%C2%B4i%C2%84%C2%B1-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4-i%C2%97%C2%ADi%C2%82%C2%ACi-%C2%81"><span class="toc-number">1.5.</span> <span class="toc-text">ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ (ì­ì¬ì )</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%BB%C2%A8i%C2%8A%C2%B8e%C2%A1%C2%A4-i%C2%9D%C2%98i%C2%A1%C2%B4i%C2%84%C2%B1"><span class="toc-number">1.6.</span> <span class="toc-text">ì»¨í¸ë¡¤ ìì¡´ì±</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SMP-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4-i%C2%A7%C2%9De%C2%A7%C2%9Ei%C2%B6%C2%94e%C2%B8%C2%B0"><span class="toc-number">1.7.</span> <span class="toc-text">SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%A9%C2%94e%C2%AA%C2%A8e%C2%A6%C2%AC-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4-i%C2%8Boei%C2%80%C2%80i%C2%8A%C2%A4i%C2%9D%C2%98-i%C2%98%C2%88"><span class="toc-number">1.8.</span> <span class="toc-text">ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ìíì¤ì ì</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%9D%C2%BDe%C2%B8%C2%B0-e%C2%A9%C2%94e%C2%AA%C2%A8e%C2%A6%C2%AC-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4-VS-e%C2%A1oee%C2%93oe-i%C2%98%C2%88i%C2%B8%C2%A1"><span class="toc-number">1.9.</span> <span class="toc-text">ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ VS ë¡ë ìì¸¡</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MULTICOPY-i%C2%9B%C2%90i%C2%9E%C2%90i%C2%84%C2%B1"><span class="toc-number">1.10.</span> <span class="toc-text">MULTICOPY ììì±</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%BB%C2%B4iOEOEi%C2%9D%C2%BCe%C2%9F%C2%AC-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4"><span class="toc-number">1.11.</span> <span class="toc-text">ì»´íì¼ë¬ ë°°ë¦¬ì´</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-e%C2%A9%C2%94e%C2%AA%C2%A8e%C2%A6%C2%AC-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4"><span class="toc-number">1.12.</span> <span class="toc-text">CPU ë©ëª¨ë¦¬ ë°°ë¦¬ì´</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MMIO-i%C2%93%C2%B0e%C2%B8%C2%B0-e%C2%B0%C2%B0e%C2%A6%C2%ACi%C2%96%C2%B4"><span class="toc-number">1.13.</span> <span class="toc-text">MMIO ì°ê¸° ë°°ë¦¬ì´</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%9D%C2%BD-ACQUISITION-i%C2%95%C2%A8i%C2%88%C2%98"><span class="toc-number">1.14.</span> <span class="toc-text">ë½ ACQUISITION í¨ì</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%9D%C2%B8i%C2%84%C2%B0e%C2%9F%C2%BDi%C2%8A%C2%B8-e%C2%B9%C2%84i%C2%99oei%C2%84%C2%B1i%C2%99%C2%94-i%C2%95%C2%A8i%C2%88%C2%98"><span class="toc-number">1.15.</span> <span class="toc-text">ì¸í°ë½í¸ ë¹íì±í í¨ì</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%8A%C2%ACe%C2%A6%C2%BDe%C2%B3%C2%BC-i%C2%9B%C2%A8i%C2%9D%C2%B4i%C2%81%C2%ACi%C2%97%C2%85-i%C2%95%C2%A8i%C2%88%C2%98"><span class="toc-number">1.16.</span> <span class="toc-text">ì¬ë¦½ê³¼ ì¨ì´í¬ì í¨ì</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%B7%C2%B8i%C2%99%C2%B8i%C2%9D%C2%98-i%C2%95%C2%A8i%C2%88%C2%98e%C2%93%C2%A4"><span class="toc-number">1.17.</span> <span class="toc-text">ê·¸ì¸ì í¨ìë¤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ACQUIRE-VS-e%C2%A9%C2%94e%C2%AA%C2%A8e%C2%A6%C2%AC-i%C2%95%C2%A1i%C2%84%C2%B8i%C2%8A%C2%A4"><span class="toc-number">1.18.</span> <span class="toc-text">ACQUIRE VS ë©ëª¨ë¦¬ ì¡ì¸ì¤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ACQUIRE-VS-I-O-i%C2%95%C2%A1i%C2%84%C2%B8i%C2%8A%C2%A4"><span class="toc-number">1.19.</span> <span class="toc-text">ACQUIRE VS I&#x2F;O ì¡ì¸ì¤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%94%C2%84e%C2%A1oei%C2%84%C2%B8i%C2%84oee%C2%B0%C2%84-i%C2%83%C2%81i%C2%98%C2%B8-i%C2%9E%C2%91i%C2%9A%C2%A9"><span class="toc-number">1.20.</span> <span class="toc-text">íë¡ì¸ìê° ìí¸ ìì©</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%96%C2%B4i%C2%86-e%C2%AF%C2%B9-i%C2%98%C2%A4i%C2%8D%C2%BCe-%C2%88i%C2%9D%C2%B4i%C2%85%C2%98"><span class="toc-number">1.21.</span> <span class="toc-text">ì´í ë¯¹ ì¤í¼ë ì´ì</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%94%C2%94e%C2%B0%C2%94i%C2%9D%C2%B4i%C2%8A%C2%A4-i%C2%95%C2%A1i%C2%84%C2%B8i%C2%8A%C2%A4"><span class="toc-number">1.22.</span> <span class="toc-text">ëë°ì´ì¤ ì¡ì¸ì¤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%9D%C2%B8i%C2%84%C2%B0e%C2%9F%C2%BDi%C2%8A%C2%B8"><span class="toc-number">1.23.</span> <span class="toc-text">ì¸í°ë½í¸</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%BA%C2%90i%C2%8Boe-i%C2%9D%C2%BCe%C2%B4%C2%80i%C2%84%C2%B1"><span class="toc-number">1.24.</span> <span class="toc-text">ìºì ì¼ê´ì±</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%BA%C2%90i%C2%8Boe-i%C2%9D%C2%BCe%C2%B4%C2%80i%C2%84%C2%B1-VS-DMA"><span class="toc-number">1.25.</span> <span class="toc-text">ìºì ì¼ê´ì± VS DMA</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%BA%C2%90i%C2%8Boe-i%C2%9D%C2%BCe%C2%B4%C2%80i%C2%84%C2%B1-VS-MMIO"><span class="toc-number">1.26.</span> <span class="toc-text">ìºì ì¼ê´ì± VS MMIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%B7%C2%B8e%C2%A6%C2%ACe%C2%B3-ALPHA-e%C2%B0%C2%80-i%C2%9E%C2%88e%C2%8B%C2%A4"><span class="toc-number">1.27.</span> <span class="toc-text">ê·¸ë¦¬ê³ , ALPHA ê° ìë¤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#e%C2%B0%C2%80i%C2%83%C2%81-e%C2%A8%C2%B8i%C2%8B-e%C2%B2OEi%C2%8A%C2%A4i%C2%8A%C2%B8"><span class="toc-number">1.28.</span> <span class="toc-text">ê°ì ë¨¸ì  ê²ì¤í¸</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#i%C2%88oei%C2%99%C2%98i%C2%8B%C2%9D-e%C2%B2%C2%84i%C2%8D%C2%BC"><span class="toc-number">1.29.</span> <span class="toc-text">ìíì ë²í¼</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_memory-barriers" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_memory-barriers
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>NOTE:<br>This is a version of Documentation/memory-barriers.txt translated into Korean.<br>This document is maintained by SeongJae Park <a href="mailto:&#115;&#x6a;&#51;&#x38;&#x2e;&#x70;&#97;&#x72;&#107;&#64;&#103;&#x6d;&#x61;&#105;&#108;&#x2e;&#99;&#x6f;&#x6d;">&#115;&#x6a;&#51;&#x38;&#x2e;&#x70;&#97;&#x72;&#107;&#64;&#103;&#x6d;&#x61;&#105;&#108;&#x2e;&#99;&#x6f;&#x6d;</a>.<br>If you find any difference between this document and the original file or<br>a problem with the translation, please contact the maintainer of this file.</p>
+<p>Please also note that the purpose of this file is to be easier to<br>read for non English (read: Korean) speakers and is not intended as<br>a fork.  So if you have any comments or updates for this file please<br>update the original English file first.  The English version is<br>definitive, and readers should look there if they have any doubt.</p>
+<p>===================================<br>ì´ ë¬¸ìë<br>Documentation/memory-barriers.txt<br>ì íê¸ ë²ì­ìëë¤.</p>
+<h1 id="i­ii¼-e°i±i¬-115-x6a-51-56-46-112-x61-114-107-x40-x67-x6d-97-105-108-46-99-x6f-x6d"><a href="#i­ii¼-e°i±i¬-115-x6a-51-56-46-112-x61-114-107-x40-x67-x6d-97-105-108-46-99-x6f-x6d" class="headerlink" title="ì­ìï¼ ë°ì±ì¬ &#115;&#x6a;&#51;&#56;&#46;&#112;&#x61;&#114;&#107;&#x40;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#99;&#x6f;&#x6d;"></a>ì­ìï¼ ë°ì±ì¬ <a href="mailto:&#115;&#x6a;&#51;&#56;&#46;&#112;&#x61;&#114;&#107;&#x40;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#99;&#x6f;&#x6d;">&#115;&#x6a;&#51;&#56;&#46;&#112;&#x61;&#114;&#107;&#x40;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#99;&#x6f;&#x6d;</a></h1><pre><code>         =========================
+         ë¦¬ëì¤ ì»¤ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´
+         =========================
+</code></pre>
+<p>ì ì: David Howells <a href="mailto:&#100;&#104;&#111;&#x77;&#x65;&#108;&#108;&#115;&#x40;&#x72;&#x65;&#100;&#104;&#x61;&#x74;&#x2e;&#99;&#x6f;&#109;">&#100;&#104;&#111;&#x77;&#x65;&#108;&#108;&#115;&#x40;&#x72;&#x65;&#100;&#104;&#x61;&#x74;&#x2e;&#99;&#x6f;&#109;</a><br>      Paul E. McKenney <a href="mailto:&#x70;&#97;&#117;&#x6c;&#109;&#x63;&#x6b;&#64;&#x6c;&#105;&#110;&#x75;&#120;&#46;&#x76;&#x6e;&#x65;&#116;&#46;&#x69;&#x62;&#109;&#46;&#99;&#x6f;&#x6d;">&#x70;&#97;&#117;&#x6c;&#109;&#x63;&#x6b;&#64;&#x6c;&#105;&#110;&#x75;&#120;&#46;&#x76;&#x6e;&#x65;&#116;&#46;&#x69;&#x62;&#109;&#46;&#99;&#x6f;&#x6d;</a><br>      Will Deacon <a href="mailto:&#119;&#x69;&#x6c;&#x6c;&#46;&#x64;&#101;&#x61;&#99;&#111;&#x6e;&#x40;&#x61;&#114;&#109;&#46;&#99;&#111;&#109;">&#119;&#x69;&#x6c;&#x6c;&#46;&#x64;&#101;&#x61;&#99;&#111;&#x6e;&#x40;&#x61;&#114;&#109;&#46;&#99;&#111;&#109;</a><br>      Peter Zijlstra <a href="mailto:&#x70;&#x65;&#116;&#x65;&#114;&#x7a;&#64;&#x69;&#110;&#102;&#x72;&#97;&#x64;&#101;&#x61;&#x64;&#x2e;&#111;&#x72;&#103;">&#x70;&#x65;&#116;&#x65;&#114;&#x7a;&#64;&#x69;&#110;&#102;&#x72;&#97;&#x64;&#101;&#x61;&#x64;&#x2e;&#111;&#x72;&#103;</a></p>
+<p>========<br>ë©´ì±ì¡°í­<br>========</p>
+<p>ì´ ë¬¸ìë ëªì¸ìê° ìëëë¤; ì´ ë¬¸ìë ìë²½íì§ ììë°, ê°ê²°ì±ì ìí´ ìëë<br>ë¶ë¶ë ìê³ , ìëíì§ ììì§ë§ ì¬ëì ìí´ ì°ìë¤ë³´ë ë¶ìì í ë¶ë¶ë ììµëë¤.<br>ì´ ë¬¸ìë ë¦¬ëì¤ìì ì ê³µíë ë¤ìí ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì ì¬ì©íê¸° ìí<br>ìë´ììëë¤ë§, ë­ê° ì´ìíë¤ ì¶ì¼ë©´ (ê·¸ë°ê² ë§ì ê²ëë¤) ì§ë¬¸ì ë¶íëë¦½ëë¤.<br>ì¼ë¶ ì´ìí ì ë¤ì ê³µìì ì¸ ë©ëª¨ë¦¬ ì¼ê´ì± ëª¨ë¸ê³¼ tools/memory-model/ ì ìë<br>ê´ë ¨ ë¬¸ìë¥¼ ì°¸ê³ í´ì í´ê²°ë  ì ìì ê²ëë¤.  ê·¸ë¬ë, ì´ ë©ëª¨ë¦¬ ëª¨ë¸ì¡°ì°¨ë ê·¸<br>ê´ë¦¬ìë¤ì ìê²¬ì ì§í©ì¼ë¡ ë´ì¼ì§, ì ë ì³ì ìì¸ìë¡ ì ë´í´ì  ìë  ê²ëë¤.</p>
+<p>ë¤ì ë§íì§ë§, ì´ ë¬¸ìë ë¦¬ëì¤ê° íëì¨ì´ì ê¸°ëíë ì¬í­ì ëí ëªì¸ìê°<br>ìëëë¤.</p>
+<p>ì´ ë¬¸ìì ëª©ì ì ëê°ì§ìëë¤:</p>
+<p> (1) ì´ë¤ í¹ì  ë°°ë¦¬ì´ì ëí´ ê¸°ëí  ì ìë ìµìíì ê¸°ë¥ì ëªì¸íê¸° ìí´ì,<br>     ê·¸ë¦¬ê³ </p>
+<p> (2) ì¬ì© ê°ë¥í ë°°ë¦¬ì´ë¤ì ëí´ ì´ë»ê² ì¬ì©í´ì¼ íëì§ì ëí ìë´ë¥¼ ì ê³µíê¸°<br>     ìí´ì.</p>
+<p>ì´ë¤ ìí¤íì³ë í¹ì í ë°°ë¦¬ì´ë¤ì ëí´ìë ì¬ê¸°ì ì´ì¼ê¸°íë ìµìíì<br>ìêµ¬ì¬í­ë¤ë³´ë¤ ë§ì ê¸°ë¥ì ì ê³µí  ìë ììµëë¤ë§, ì¬ê¸°ì ì´ì¼ê¸°íë<br>ìêµ¬ì¬í­ë¤ì ì¶©ì¡±íì§ ìë ìí¤íì³ê° ìë¤ë©´ ê·¸ ìí¤íì³ê° ìëª»ë ê²ì´ë ì ì<br>ììëìê¸° ë°ëëë¤.</p>
+<p>ëí, í¹ì  ìí¤íì³ìì ì¼ë¶ ë°°ë¦¬ì´ë í´ë¹ ìí¤íì³ì í¹ìí ëì ë°©ìì¼ë¡ ì¸í´<br>í´ë¹ ë°°ë¦¬ì´ì ëªìì  ì¬ì©ì´ ë¶íìí´ì no-op ì´ ë ìë ììì ììëìê¸°<br>ë°ëëë¤.</p>
+<p>ì­ì: ë³¸ ë²ì­ ì­ì ìë²½íì§ ììë°, ì´ ì­ì ë¶ë¶ì ì¼ë¡ë ìëë ê²ì´ê¸°ë<br>í©ëë¤.  ì¬í ê¸°ì  ë¬¸ìë¤ì´ ê·¸ë ë¯ ìë²½í ì´í´ë¥¼ ìí´ìë ë²ì­ë¬¸ê³¼ ìë¬¸ì í¨ê»<br>ì½ì¼ìë ë²ì­ë¬¸ì íëì ê°ì´ëë¡ íì©íìê¸¸ ì¶ì²ëë¦¬ë©°, ë°ê²¬ëë ì¤ì­ ë±ì<br>ëí´ìë ì¸ì ë  ìê²¬ì ë¶íëë¦½ëë¤.  ê³¼í ë²ì­ì¼ë¡ ì¸í ì¤í´ë¥¼ ìµìííê¸° ìí´<br>ì ë§¤í ë¶ë¶ì´ ìì ê²½ì°ìë ì´ìí¨ì´ ìëë¼ë ìëì ì©ì´ë¥¼ ì°¨ì©í©ëë¤.</p>
+<p>=====<br>ëª©ì°¨:<br>=====</p>
+<p> (*) ì¶ì ë©ëª¨ë¦¬ ì¡ì¸ì¤ ëª¨ë¸.</p>
+<pre><code> - ëë°ì´ì¤ ì¤í¼ë ì´ì.
+ - ë³´ì¥ì¬í­.
+</code></pre>
+<p> (*) ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë¬´ìì¸ê°?</p>
+<pre><code> - ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ì¢ë¥.
+ - ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ëí´ ê°ì í´ì  ìë  ê².
+ - ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ (ì­ì¬ì ).
+ - ì»¨í¸ë¡¤ ìì¡´ì±.
+ - SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°.
+ - ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ìíì¤ì ì.
+ - ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ vs ë¡ë ìì¸¡.
+ - Multicopy ììì±.
+</code></pre>
+<p> (*) ëªìì  ì»¤ë ë°°ë¦¬ì´.</p>
+<pre><code> - ì»´íì¼ë¬ ë°°ë¦¬ì´.
+ - CPU ë©ëª¨ë¦¬ ë°°ë¦¬ì´.
+ - MMIO ì°ê¸° ë°°ë¦¬ì´.
+</code></pre>
+<p> (*) ìë¬µì  ì»¤ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´.</p>
+<pre><code> - ë½ Acquisition í¨ì.
+ - ì¸í°ë½í¸ ë¹íì±í í¨ì.
+ - ì¬ë¦½ê³¼ ì¨ì´í¬ì í¨ì.
+ - ê·¸ì¸ì í¨ìë¤.
+</code></pre>
+<p> (*) CPU ê° ACQUIRING ë°°ë¦¬ì´ì í¨ê³¼.</p>
+<pre><code> - Acquire vs ë©ëª¨ë¦¬ ì¡ì¸ì¤.
+ - Acquire vs I/O ì¡ì¸ì¤.
+</code></pre>
+<p> (*) ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° íìí ê³³</p>
+<pre><code> - íë¡ì¸ìê° ìí¸ ìì©.
+ - ì´í ë¯¹ ì¤í¼ë ì´ì.
+ - ëë°ì´ì¤ ì¡ì¸ì¤.
+ - ì¸í°ë½í¸.
+</code></pre>
+<p> (*) ì»¤ë I/O ë°°ë¦¬ì´ì í¨ê³¼.</p>
+<p> (*) ê°ì ëë ê°ì¥ ìíë ì¤í ìì ëª¨ë¸.</p>
+<p> (*) CPU ìºìì ìí¥.</p>
+<pre><code> - ìºì ì¼ê´ì±.
+ - ìºì ì¼ê´ì± vs DMA.
+ - ìºì ì¼ê´ì± vs MMIO.
+</code></pre>
+<p> (*) CPU ë¤ì´ ì ì§ë¥´ë ì¼ë¤.</p>
+<pre><code> - ê·¸ë¦¬ê³ , Alpha ê° ìë¤.
+ - ê°ì ë¨¸ì  ê²ì¤í¸.
+</code></pre>
+<p> (*) ì¬ì© ì.</p>
+<pre><code> - ìíì ë²í¼.
+</code></pre>
+<p> (*) ì°¸ê³  ë¬¸í.</p>
+<p>=======================<br>ì¶ì ë©ëª¨ë¦¬ ì¡ì¸ì¤ ëª¨ë¸<br>=======================</p>
+<p>ë¤ìê³¼ ê°ì´ ì¶ìíë ìì¤í ëª¨ë¸ì ìê°í´ ë´ìë¤:</p>
+<pre><code>                :                :
+                :                :
+                :                :
+    +-------+   :   +--------+   :   +-------+
+    |       |   :   |        |   :   |       |
+    |       |   :   |        |   :   |       |
+    | CPU 1 |&lt;-----&gt;| Memory |&lt;-----&gt;| CPU 2 |
+    |       |   :   |        |   :   |       |
+    |       |   :   |        |   :   |       |
+    +-------+   :   +--------+   :   +-------+
+        ^       :       ^        :       ^
+        |       :       |        :       |
+        |       :       |        :       |
+        |       :       v        :       |
+        |       :   +--------+   :       |
+        |       :   |        |   :       |
+        |       :   |        |   :       |
+        +----------&gt;| Device |&lt;----------+
+                :   |        |   :
+                :   |        |   :
+                :   +--------+   :
+                :                :
+</code></pre>
+<p>íë¡ê·¸ë¨ì ì¬ë¬ ë©ëª¨ë¦¬ ì¡ì¸ì¤ ì¤í¼ë ì´ìì ë°ììí¤ê³ , ê°ê°ì CPU ë ê·¸ë°<br>íë¡ê·¸ë¨ë¤ì ì¤íí©ëë¤.  ì¶ìíë CPU ëª¨ë¸ìì ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì ììë<br>ë§¤ì° ìíëì´ ìê³ , CPU ë íë¡ê·¸ë¨ì´ ì¸ê³¼ê´ê³ë¥¼ ì´ê¸°ì§ ìë ìíë¡ ê´ë¦¬ëë¤ê³ <br>ë³´ì¼ ìë§ ìë¤ë©´ ë©ëª¨ë¦¬ ì¤í¼ë ì´ìì ìì ì´ ìíë ì´ë¤ ììëë¡ë  ì¬ë°°ì¹í´<br>ëììí¬ ì ììµëë¤.  ë¹ì·íê², ì»´íì¼ë¬ ëí íë¡ê·¸ë¨ì ì ìì  ëìì í´ì¹ì§<br>ìë íë ë´ììë ì´ë¤ ììë¡ë  ìì ì´ ìíë ëë¡ ì¸ì¤í¸ë­ìì ì¬ë°°ì¹ í  ì<br>ììµëë¤.</p>
+<p>ë°ë¼ì ìì ë¤ì´ì´ê·¸ë¨ìì í CPUê° ëììí¤ë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìì´ ë§ë¤ì´ë´ë<br>ë³íë í´ë¹ ì¤í¼ë ì´ìì´ CPU ì ìì¤íì ë¤ë¥¸ ë¶ë¶ë¤ ì¬ì´ì ì¸í°íì´ì¤(ì ì )ë¥¼<br>ì§ëê°ë©´ì ìì¤íì ëë¨¸ì§ ë¶ë¶ë¤ì ì¸ì§ë©ëë¤.</p>
+<p>ìë¥¼ ë¤ì´, ë¤ìì ì¼ë ¨ì ì´ë²¤í¸ë¤ì ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1        CPU 2
+===============    ===============
+&#123; A == 1; B == 2 &#125;
+A = 3;        x = B;
+B = 4;        y = A;
+</code></pre>
+<p>ë¤ì´ì´ê·¸ë¨ì ê°ì´ë°ì ìì¹í ë©ëª¨ë¦¬ ìì¤íì ë³´ì¬ì§ê² ëë ì¡ì¸ì¤ë¤ì ë¤ìì ì´<br>24ê°ì ì¡°í©ì¼ë¡ ì¬êµ¬ì±ë  ì ììµëë¤:</p>
+<pre><code>STORE A=3,    STORE B=4,    y=LOAD A-&gt;3,    x=LOAD B-&gt;4
+STORE A=3,    STORE B=4,    x=LOAD B-&gt;4,    y=LOAD A-&gt;3
+STORE A=3,    y=LOAD A-&gt;3,    STORE B=4,    x=LOAD B-&gt;4
+STORE A=3,    y=LOAD A-&gt;3,    x=LOAD B-&gt;2,    STORE B=4
+STORE A=3,    x=LOAD B-&gt;2,    STORE B=4,    y=LOAD A-&gt;3
+STORE A=3,    x=LOAD B-&gt;2,    y=LOAD A-&gt;3,    STORE B=4
+STORE B=4,    STORE A=3,    y=LOAD A-&gt;3,    x=LOAD B-&gt;4
+STORE B=4, ...
+...
+</code></pre>
+<p>ë°ë¼ì ë¤ìì ë¤ê°ì§ ì¡°í©ì ê°ë¤ì´ ëì¬ ì ììµëë¤:</p>
+<pre><code>x == 2, y == 1
+x == 2, y == 3
+x == 4, y == 1
+x == 4, y == 3
+</code></pre>
+<p>íë° ë ëìê°ì, í CPU ê° ë©ëª¨ë¦¬ ìì¤íì ë°ìí ì¤í ì´ ì¤í¼ë ì´ìë¤ì ê²°ê³¼ë<br>ë¤ë¥¸ CPU ììì ë¡ë ì¤í¼ë ì´ìì íµí´ ì¸ì§ëëë°, ì´ ë ì¤í ì´ê° ë°ìë ììì<br>ë¤ë¥¸ ììë¡ ì¸ì§ë  ìë ììµëë¤.</p>
+<p>ìë¡, ìëì ì¼ë ¨ì ì´ë²¤í¸ë¤ì ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1        CPU 2
+===============    ===============
+&#123; A == 1, B == 2, C == 3, P == &amp;A, Q == &amp;C &#125;
+B = 4;        Q = P;
+P = &amp;B        D = *Q;
+</code></pre>
+<p>D ë¡ ì½íì§ë ê°ì CPU 2 ìì P ë¡ë¶í° ì½íì§ ì£¼ìê°ì ìì¡´ì ì´ê¸° ëë¬¸ì ì¬ê¸°ì<br>ë¶ëªí ë°ì´í° ìì¡´ì±ì´ ììµëë¤.  íì§ë§ ì´ ì´ë²¤í¸ë¤ì ì¤í ê²°ê³¼ë¡ë ìëì<br>ê²°ê³¼ë¤ì´ ëª¨ë ëíë  ì ììµëë¤:</p>
+<pre><code>(Q == &amp;A) and (D == 1)
+(Q == &amp;B) and (D == 2)
+(Q == &amp;B) and (D == 4)
+</code></pre>
+<p>CPU 2 ë *Q ì ë¡ëë¥¼ ìì²­íê¸° ì ì P ë¥¼ Q ì ë£ê¸° ëë¬¸ì D ì C ë¥¼ ì§ì´ë£ë<br>ì¼ì ììì ììëì¸ì.</p>
+<h2 id="ee°i´i¤-i¤i¼e-i´i"><a href="#ee°i´i¤-i¤i¼e-i´i" class="headerlink" title="ëë°ì´ì¤ ì¤í¼ë ì´ì"></a>ëë°ì´ì¤ ì¤í¼ë ì´ì</h2><p>ì¼ë¶ ëë°ì´ì¤ë ìì ì ì»¨í¸ë¡¤ ì¸í°íì´ì¤ë¥¼ ë©ëª¨ë¦¬ì í¹ì  ìì­ì¼ë¡ ë§¤íí´ì<br>ì ê³µíëë°(Memory mapped I/O), í´ë¹ ì»¨í¸ë¡¤ ë ì§ì¤í°ì ì ê·¼íë ììë ë§¤ì°<br>ì¤ìí©ëë¤.  ìë¥¼ ë¤ì´, ì´ëë ì¤ í¬í¸ ë ì§ì¤í° (A) ì ë°ì´í° í¬í¸ ë ì§ì¤í° (D)<br>ë¥¼ íµí´ ì ê·¼ëë ë´ë¶ ë ì§ì¤í° ì§í©ì ê°ë ì´ëë· ì¹´ëë¥¼ ìê°í´ ë´ìë¤.  ë´ë¶ì<br>5ë² ë ì§ì¤í°ë¥¼ ì½ê¸° ìí´ ë¤ìì ì½ëê° ì¬ì©ë  ì ììµëë¤:</p>
+<pre><code>*A = 5;
+x = *D;
+</code></pre>
+<p>íì§ë§, ì´ê±´ ë¤ìì ë ì¡°í© ì¤ íëë¡ ë§ë¤ì´ì§ ì ììµëë¤:</p>
+<pre><code>STORE *A = 5, x = LOAD *D
+x = LOAD *D, STORE *A = 5
+</code></pre>
+<p>ëë²ì§¸ ì¡°í©ì ë°ì´í°ë¥¼ ì½ì´ì¨ <em>íì</em> ì£¼ìë¥¼ ì¤ì íë¯ë¡, ì¤ëìì ì¼ì¼í¬ ê²ëë¤.</p>
+<h2 id="e³´i¥i¬i­"><a href="#e³´i¥i¬i­" class="headerlink" title="ë³´ì¥ì¬í­"></a>ë³´ì¥ì¬í­</h2><p>CPU ìê² ê¸°ëí  ì ìë ìµìíì ë³´ì¥ì¬í­ ëªê°ì§ê° ììµëë¤:</p>
+<p> (*) ì´ë¤ CPU ë , ìì¡´ì±ì´ ì¡´ì¬íë ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì í´ë¹ CPU ìì ìê²<br>     ìì´ìë ììëë¡ ë©ëª¨ë¦¬ ìì¤íì ìí ìì²­ë©ëë¤. ì¦, ë¤ìì ëí´ì:</p>
+<pre><code>Q = READ_ONCE(P); D = READ_ONCE(*Q);
+
+ CPU ë ë¤ìê³¼ ê°ì ë©ëª¨ë¦¬ ì¤í¼ë ì´ì ìíì¤ë¥¼ ìí ìì²­í©ëë¤:
+
+Q = LOAD P, D = LOAD *Q
+
+ ê·¸ë¦¬ê³  ê·¸ ìíì¤ ë´ììì ììë í­ì ì§ì¼ì§ëë¤.  íì§ë§, DEC Alpha ìì
+ READ_ONCE() ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ëªë ¹ë ë´ê² ëì´ ìì´ì, DEC Alpha CPU ë
+ ë¤ìê³¼ ê°ì ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì ë´ëê² ë©ëë¤:
+
+Q = LOAD P, MEMORY_BARRIER, D = LOAD *Q, MEMORY_BARRIER
+
+ DEC Alpha ìì ìíëë  ìëë , READ_ONCE() ë ì»´íì¼ë¬ë¡ë¶í°ì ììí¥
+ ëí ì ê±°í©ëë¤.
+</code></pre>
+<p> (*) í¹ì  CPU ë´ìì ê²¹ì¹ë ìì­ì ë©ëª¨ë¦¬ì íí´ì§ë ë¡ëì ì¤í ì´ ë¤ì í´ë¹<br>     CPU ìììë ììê° ë°ëì§ ìì ê²ì¼ë¡ ë³´ì¬ì§ëë¤.  ì¦, ë¤ìì ëí´ì:</p>
+<pre><code>a = READ_ONCE(*X); WRITE_ONCE(*X, b);
+
+ CPU ë ë¤ìì ë©ëª¨ë¦¬ ì¤í¼ë ì´ì ìíì¤ë§ì ë©ëª¨ë¦¬ì ìì²­í  ê²ëë¤:
+
+a = LOAD *X, STORE *X = b
+
+ ê·¸ë¦¬ê³  ë¤ìì ëí´ìë:
+
+WRITE_ONCE(*X, c); d = READ_ONCE(*X);
+
+ CPU ë ë¤ìì ìí ìì²­ë§ì ë§ë¤ì´ ëëë¤:
+
+STORE *X = c, d = LOAD *X
+
+ (ë¡ë ì¤í¼ë ì´ìê³¼ ì¤í ì´ ì¤í¼ë ì´ìì´ ê²¹ì¹ë ë©ëª¨ë¦¬ ìì­ì ëí´
+ ìíëë¤ë©´ í´ë¹ ì¤í¼ë ì´ìë¤ì ê²¹ì¹ë¤ê³  ííë©ëë¤).
+</code></pre>
+<p>ê·¸ë¦¬ê³  <em>ë°ëì</em> ëë <em>ì ëë¡</em> ê°ì íê±°ë ê°ì íì§ ë§ìì¼ íë ê²ë¤ì´ ììµëë¤:</p>
+<p> (*) ì»´íì¼ë¬ê° READ_ONCE() ë WRITE_ONCE() ë¡ ë³´í¸ëì§ ìì ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¥¼<br>     ë¹ì ì´ ìíë ëë¡ í  ê²ì´ë¼ë ê°ì ì <em>ì ëë¡</em> í´ì  ìë©ëë¤.  ê·¸ê²ë¤ì´<br>     ìë¤ë©´, ì»´íì¼ë¬ë ì»´íì¼ë¬ ë°°ë¦¬ì´ ì¹ììì ë¤ë£¨ê² ë , ëª¨ë  “ì°½ìì ì¸”<br>     ë³ê²½ë¤ì ë§ë¤ì´ë¼ ê¶íì ê°ê² ë©ëë¤.</p>
+<p> (*) ê°ë³ì ì¸ ë¡ëì ì¤í ì´ë¤ì´ ì£¼ì´ì§ ììëë¡ ìì²­ë  ê²ì´ë¼ë ê°ì ì <em>ì ëë¡</em><br>     íì§ ë§ìì¼ í©ëë¤.  ì´ ë§ì ê³§:</p>
+<pre><code>X = *A; Y = *B; *D = Z;
+
+ ë ë¤ìì ê²ë¤ ì¤ ì´ë ê²ì¼ë¡ë  ë§ë¤ì´ì§ ì ìë¤ë ìë¯¸ìëë¤:
+
+X = LOAD *A,  Y = LOAD *B,  STORE *D = Z
+X = LOAD *A,  STORE *D = Z, Y = LOAD *B
+Y = LOAD *B,  X = LOAD *A,  STORE *D = Z
+Y = LOAD *B,  STORE *D = Z, X = LOAD *A
+STORE *D = Z, X = LOAD *A,  Y = LOAD *B
+STORE *D = Z, Y = LOAD *B,  X = LOAD *A
+</code></pre>
+<p> (*) ê²¹ì¹ë ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì í©ì³ì§ê±°ë ë²ë ¤ì§ ì ììì <em>ë°ëì</em> ê°ì í´ì¼<br>     í©ëë¤.  ë¤ìì ì½ëë:</p>
+<pre><code>X = *A; Y = *(A + 4);
+
+ ë¤ìì ê²ë¤ ì¤ ë­ë  ë  ì ììµëë¤:
+
+X = LOAD *A; Y = LOAD *(A + 4);
+Y = LOAD *(A + 4); X = LOAD *A;
+&#123;X, Y&#125; = LOAD &#123;*A, *(A + 4) &#125;;
+
+ ê·¸ë¦¬ê³ :
+
+*A = X; *(A + 4) = Y;
+
+ ë ë¤ì ì¤ ë­ë  ë  ì ììµëë¤:
+
+STORE *A = X; STORE *(A + 4) = Y;
+STORE *(A + 4) = Y; STORE *A = X;
+STORE &#123;*A, *(A + 4) &#125; = &#123;X, Y&#125;;
+</code></pre>
+<p>ê·¸ë¦¬ê³  ë³´ì¥ì¬í­ì ë°ëëë ê²ë¤(anti-guarantees)ì´ ììµëë¤:</p>
+<p> (*) ì´ ë³´ì¥ì¬í­ë¤ì bitfield ìë ì ì©ëì§ ìëë°, ì»´íì¼ë¬ë¤ì bitfield ë¥¼<br>     ìì íë ì½ëë¥¼ ìì±í  ë ììì± ìë(non-atomic) ì½ê³ -ìì íê³ -ì°ë<br>     ì¸ì¤í¸ë­ìë¤ì ì¡°í©ì ë§ëë ê²½ì°ê° ë§ê¸° ëë¬¸ìëë¤.  ë³ë ¬ ìê³ ë¦¬ì¦ì<br>     ëê¸°íì bitfield ë¥¼ ì¬ì©íë ¤ íì§ ë§ì­ìì¤.</p>
+<p> (*) bitfield ë¤ì´ ì¬ë¬ ë½ì¼ë¡ ë³´í¸ëë ê²½ì°ë¼ íëë¼ë, íëì bitfield ì<br>     ëª¨ë  íëë¤ì íëì ë½ì¼ë¡ ë³´í¸ëì´ì¼ í©ëë¤.  ë§ì½ í bitfield ì ë<br>     íëê° ìë¡ ë¤ë¥¸ ë½ì¼ë¡ ë³´í¸ëë¤ë©´, ì»´íì¼ë¬ì ììì± ìë<br>     ì½ê³ -ìì íê³ -ì°ë ì¸ì¤í¸ë­ì ì¡°í©ì í íëìì ìë°ì´í¸ê° ê·¼ì²ì<br>     íëìë ìí¥ì ë¼ì¹ê² í  ì ììµëë¤.</p>
+<p> (*) ì´ ë³´ì¥ì¬í­ë¤ì ì ì íê² ì ë ¬ëê³  í¬ê¸°ê° ì¡í ì¤ì¹¼ë¼ ë³ìë¤ì ëí´ìë§<br>     ì ì©ë©ëë¤.  “ì ì íê² í¬ê¸°ê° ì¡í” ì´ë¼í¨ì íì¬ë¡ì¨ë “char”, “short”,<br>     “int” ê·¸ë¦¬ê³  “long” ê³¼ ê°ì í¬ê¸°ì ë³ìë¤ì ìë¯¸í©ëë¤.  “ì ì íê² ì ë ¬ë”<br>     ì ìì°ì¤ë° ì ë ¬ì ìë¯¸íëë°, ë°ë¼ì “char” ì ëí´ìë ìë¬´ ì ì½ì´ ìê³ ,<br>     “short” ì ëí´ìë 2ë°ì´í¸ ì ë ¬ì, “int” ìë 4ë°ì´í¸ ì ë ¬ì, ê·¸ë¦¬ê³ <br>     “long” ì ëí´ìë 32-bit ìì¤íì¸ì§ 64-bit ìì¤íì¸ì§ì ë°ë¼ 4ë°ì´í¸ ëë<br>     8ë°ì´í¸ ì ë ¬ì ìë¯¸í©ëë¤.  ì´ ë³´ì¥ì¬í­ë¤ì C11 íì¤ìì ìê°ëìì¼ë¯ë¡,<br>     C11 ì ì ì¤ëë ì»´íì¼ë¬(ìë¥¼ ë¤ì´, gcc 4.6) ë¥¼ ì¬ì©í  ëì ì£¼ìíìê¸°<br>     ë°ëëë¤.  íì¤ì ì´ ë³´ì¥ì¬í­ë¤ì “memory location” ì ì ìíë 3.14<br>     ì¹ìì ë¤ìê³¼ ê°ì´ ì¤ëªëì´ ììµëë¤:<br>     (ì­ì: ì¸ì©ë¬¸ì´ë¯ë¡ ë²ì­íì§ ììµëë¤)</p>
+<pre><code>memory location
+    either an object of scalar type, or a maximal sequence
+    of adjacent bit-fields all having nonzero width
+
+    NOTE 1: Two threads of execution can update and access
+    separate memory locations without interfering with
+    each other.
+
+    NOTE 2: A bit-field and an adjacent non-bit-field member
+    are in separate memory locations. The same applies
+    to two bit-fields, if one is declared inside a nested
+    structure declaration and the other is not, or if the two
+    are separated by a zero-length bit-field declaration,
+    or if they are separated by a non-bit-field member
+    declaration. It is not safe to concurrently update two
+    bit-fields in the same structure if all members declared
+    between them are also bit-fields, no matter what the
+    sizes of those intervening bit-fields happen to be.
+</code></pre>
+<p>=========================<br>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë¬´ìì¸ê°?<br>=========================</p>
+<p>ììì ë´¤ë¯ì´, ìí¸ê° ìì¡´ì±ì´ ìë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì ì¤ì ë¡ë ë¬´ììì <br>ììë¡ ìíë  ì ìì¼ë©°, ì´ë CPU ì CPU ê°ì ìí¸ìì©ì´ë I/O ì ë¬¸ì ê° ë  ì<br>ììµëë¤.  ë°ë¼ì ì»´íì¼ë¬ì CPU ê° ììë¥¼ ë°ê¾¸ëë° ì ì½ì ê±¸ ì ìëë¡ ê°ìí <br>ì ìë ì´ë¤ ë°©ë²ì´ íìí©ëë¤.</p>
+<p>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ê·¸ë° ê°ì ìë¨ìëë¤.  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë°°ë¦¬ì´ë¥¼ ì¬ì´ì ë ìê³¼<br>ë¤ ìì¸¡ì ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ ê°ì ë¶ë¶ì  ììê° ì¡´ì¬íëë¡ íë í¨ê³¼ë¥¼ ì¤ëë¤.</p>
+<p>ìì¤íì CPU ë¤ê³¼ ì¬ë¬ ëë°ì´ì¤ë¤ì ì±ë¥ì ì¬ë¦¬ê¸° ìí´ ëªë ¹ì´ ì¬ë°°ì¹, ì¤í<br>ì ì, ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì ì¡°í©, ìì¸¡ì  ë¡ë(speculative load), ë¸ëì¹<br>ìì¸¡(speculative branch prediction), ë¤ìí ì¢ë¥ì ìºì±(caching) ë±ì ë¤ìí<br>í¸ë¦­ì ì¬ì©í  ì ìê¸° ëë¬¸ì ì´ë° ê°ì ë ¥ì ì¤ìí©ëë¤.  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì ì´ë°<br>í¸ë¦­ë¤ì ë¬´í¨ë¡ íê±°ë ìµì íë ëª©ì ì¼ë¡ ì¬ì©ëì´ì ¸ì ì½ëê° ì¬ë¬ CPU ì<br>ëë°ì´ì¤ë¤ ê°ì ìí¸ìì©ì ì ìì ì¼ë¡ ì ì´í  ì ìê² í´ì¤ëë¤.</p>
+<h2 id="e©eª¨e¦¬-e°°e¦¬i´i-i¢e¥"><a href="#e©eª¨e¦¬-e°°e¦¬i´i-i¢e¥" class="headerlink" title="ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ì¢ë¥"></a>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ì¢ë¥</h2><p>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë¤ê°ì ê¸°ë³¸ íìì¼ë¡ ë¶ë¥ë©ëë¤:</p>
+<p> (1) ì°ê¸° (ëë ì¤í ì´) ë©ëª¨ë¦¬ ë°°ë¦¬ì´.</p>
+<pre><code> ì°ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ìì¤íì ë¤ë¥¸ ì»´í¬ëí¸ë¤ì í´ë¹ ë°°ë¦¬ì´ë³´ë¤ ìì
+ ëªìë ëª¨ë  STORE ì¤í¼ë ì´ìë¤ì´ í´ë¹ ë°°ë¦¬ì´ ë¤ì ëªìë ëª¨ë  STORE
+ ì¤í¼ë ì´ìë¤ë³´ë¤ ë¨¼ì  ìíë ê²ì¼ë¡ ë³´ì¼ ê²ì ë³´ì¥í©ëë¤.
+
+ ì°ê¸° ë°°ë¦¬ì´ë ì¤í ì´ ì¤í¼ë ì´ìë¤ì ëí ë¶ë¶ì  ìì ì¸ì°ê¸°ìëë¤; ë¡ë
+ ì¤í¼ë ì´ìë¤ì ëí´ìë ì´ë¤ ìí¥ë ë¼ì¹ì§ ììµëë¤.
+
+ CPU ë ìê°ì íë¦ì ë°ë¼ ë©ëª¨ë¦¬ ìì¤íì ì¼ë ¨ì ì¤í ì´ ì¤í¼ë ì´ìë¤ì
+ íëì© ìì²­í´ ì§ì´ë£ìµëë¤.  ì°ê¸° ë°°ë¦¬ì´ ìì ëª¨ë  ì¤í ì´ ì¤í¼ë ì´ìë¤ì
+ ì°ê¸° ë°°ë¦¬ì´ ë¤ì ëª¨ë  ì¤í ì´ ì¤í¼ë ì´ìë¤ë³´ë¤ _ìì_ ìíë  ê²ëë¤.
+
+ [!] ì°ê¸° ë°°ë¦¬ì´ë¤ì ì½ê¸° ëë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ì í¨ê» ì§ì ë§ì¶°
+ ì¬ì©ëì´ì¼ë§ í¨ì ììëì¸ì; &quot;SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°&quot; ìë¸ì¹ìì ì°¸ê³ íì¸ì.
+</code></pre>
+<p> (2) ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´.</p>
+<pre><code> ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ì½ê¸° ë°°ë¦¬ì´ì ë³´ë¤ ìíë ííìëë¤.  ëê°ì ë¡ë
+ ì¤í¼ë ì´ìì´ ìê³  ëë²ì§¸ ê²ì´ ì²«ë²ì§¸ ê²ì ê²°ê³¼ì ìì¡´íê³  ìì ë(ì:
+ ëë²ì§¸ ë¡ëê° ì°¸ì¡°í  ì£¼ìë¥¼ ì²«ë²ì§¸ ë¡ëê° ì½ë ê²½ì°), ëë²ì§¸ ë¡ëê° ì½ì´ì¬
+ ë°ì´í°ë ì²«ë²ì§¸ ë¡ëì ìí´ ê·¸ ì£¼ìê° ì»ì´ì§ ë¤ì ìë°ì´í¸ ë¨ì ë³´ì¥íê¸°
+ ìí´ì ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ê° íìí  ì ììµëë¤.
+
+ ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ìí¸ ìì¡´ì ì¸ ë¡ë ì¤í¼ë ì´ìë¤ ì¬ì´ì ë¶ë¶ì  ìì
+ ì¸ì°ê¸°ìëë¤; ì¤í ì´ ì¤í¼ë ì´ìë¤ì´ë ëë¦½ì ì¸ ë¡ëë¤, ëë ì¤ë³µëë
+ ë¡ëë¤ì ëí´ìë ì´ë¤ ìí¥ë ë¼ì¹ì§ ììµëë¤.
+
+ (1) ìì ì¸ê¸íë¯ì´, ìì¤íì CPU ë¤ì ë©ëª¨ë¦¬ ìì¤íì ì¼ë ¨ì ì¤í ì´
+ ì¤í¼ë ì´ìë¤ì ëì ¸ ë£ê³  ìì¼ë©°, ê±°ê¸°ì ê´ì¬ì´ ìë ë¤ë¥¸ CPU ë ê·¸
+ ì¤í¼ë ì´ìë¤ì ë©ëª¨ë¦¬ ìì¤íì´ ì¤íí ê²°ê³¼ë¥¼ ì¸ì§í  ì ììµëë¤.  ì´ì²ë¼
+ ë¤ë¥¸ CPU ì ì¤í ì´ ì¤í¼ë ì´ìì ê²°ê³¼ì ê´ì¬ì ëê³  ìë CPU ê° ìí ìì²­í
+ ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë, ë°°ë¦¬ì´ ìì ì´ë¤ ë¡ë ì¤í¼ë ì´ìì´ ë¤ë¥¸ CPU ìì
+ ëì ¸ ë£ì ì¤í ì´ ì¤í¼ë ì´ìê³¼ ê°ì ìì­ì í¥íë¤ë©´, ê·¸ë° ì¤í ì´
+ ì¤í¼ë ì´ìë¤ì´ ë§ë¤ì´ë´ë ê²°ê³¼ê° ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ ë¤ì ë¡ë
+ ì¤í¼ë ì´ìë¤ìê²ë ë³´ì¼ ê²ì ë³´ì¥í©ëë¤.
+
+ ì´ ìì ì¸ì°ê¸° ì ì½ì ëí ê·¸ë¦¼ì ë³´ê¸° ìí´ì  &quot;ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ìíì¤ì ì&quot;
+ ìë¸ì¹ìì ì°¸ê³ íìê¸° ë°ëëë¤.
+
+ [!] ì²«ë²ì§¸ ë¡ëë ë°ëì _ë°ì´í°_ ìì¡´ì±ì ê°ì ¸ì¼ì§ ì»¨í¸ë¡¤ ìì¡´ì±ì ê°ì ¸ì¼
+ íëê² ìëì ììëì­ìì¤.  ë§ì½ ëë²ì§¸ ë¡ëë¥¼ ìí ì£¼ìê° ì²«ë²ì§¸ ë¡ëì
+ ìì¡´ì ì´ì§ë§ ê·¸ ìì¡´ì±ì ì¡°ê±´ì ì´ì§ ê·¸ ì£¼ì ìì²´ë¥¼ ê°ì ¸ì¤ëê² ìëë¼ë©´,
+ ê·¸ê²ì _ì»¨í¸ë¡¤_ ìì¡´ì±ì´ê³ , ì´ ê²½ì°ìë ì½ê¸° ë°°ë¦¬ì´ë ê·¸ë³´ë¤ ê°ë ¥í
+ ë¬´ì¸ê°ê° íìí©ëë¤.  ë ìì¸í ë´ì©ì ìí´ìë &quot;ì»¨í¸ë¡¤ ìì¡´ì±&quot; ìë¸ì¹ìì
+ ì°¸ê³ íìê¸° ë°ëëë¤.
+
+ [!] ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ë³´íµ ì°ê¸° ë°°ë¦¬ì´ë¤ê³¼ í¨ê» ì§ì ë§ì¶° ì¬ì©ëì´ì¼
+ í©ëë¤; &quot;SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°&quot; ìë¸ì¹ìì ì°¸ê³ íì¸ì.
+</code></pre>
+<p> (3) ì½ê¸° (ëë ë¡ë) ë©ëª¨ë¦¬ ë°°ë¦¬ì´.</p>
+<pre><code> ì½ê¸° ë°°ë¦¬ì´ë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ ê¸°ë¥ì ë³´ì¥ì¬í­ì ëí´ì ë°°ë¦¬ì´ë³´ë¤
+ ìì ëªìë ëª¨ë  LOAD ì¤í¼ë ì´ìë¤ì´ ë°°ë¦¬ì´ ë¤ì ëªìëë ëª¨ë  LOAD
+ ì¤í¼ë ì´ìë¤ë³´ë¤ ë¨¼ì  íí´ì§ ê²ì¼ë¡ ìì¤íì ë¤ë¥¸ ì»´í¬ëí¸ë¤ì ë³´ì¬ì§ ê²ì
+ ë³´ì¥í©ëë¤.
+
+ ì½ê¸° ë°°ë¦¬ì´ë ë¡ë ì¤í¼ë ì´ìì íí´ì§ë ë¶ë¶ì  ìì ì¸ì°ê¸°ìëë¤; ì¤í ì´
+ ì¤í¼ë ì´ìì ëí´ìë ì´ë¤ ìí¥ë ë¼ì¹ì§ ììµëë¤.
+
+ ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë¥¼ ë´ì¥íë¯ë¡ ë°ì´í° ìì¡´ì±
+ ë°°ë¦¬ì´ë¥¼ ëì í  ì ììµëë¤.
+
+ [!] ì½ê¸° ë°°ë¦¬ì´ë ì¼ë°ì ì¼ë¡ ì°ê¸° ë°°ë¦¬ì´ë¤ê³¼ í¨ê» ì§ì ë§ì¶° ì¬ì©ëì´ì¼
+ í©ëë¤; &quot;SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°&quot; ìë¸ì¹ìì ì°¸ê³ íì¸ì.
+</code></pre>
+<p> (4) ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´.</p>
+<pre><code> ë²ì©(general) ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë°°ë¦¬ì´ë³´ë¤ ìì ëªìë ëª¨ë  LOAD ì STORE
+ ì¤í¼ë ì´ìë¤ì´ ë°°ë¦¬ì´ ë¤ì ëªìë ëª¨ë  LOAD ì STORE ì¤í¼ë ì´ìë¤ë³´ë¤
+ ë¨¼ì  ìíë ê²ì¼ë¡ ìì¤íì ëë¨¸ì§ ì»´í¬ëí¸ë¤ì ë³´ì´ê² ë¨ì ë³´ì¥í©ëë¤.
+
+ ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë¡ëì ì¤í ì´ ëª¨ëì ëí ë¶ë¶ì  ìì ì¸ì°ê¸°ìëë¤.
+
+ ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´, ì°ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ëª¨ëë¥¼
+ ë´ì¥íë¯ë¡, ë ë°°ë¦¬ì´ë¥¼ ëª¨ë ëì í  ì ììµëë¤.
+</code></pre>
+<p>ê·¸ë¦¬ê³  ëê°ì ëªìì ì´ì§ ìì íìì´ ììµëë¤:</p>
+<p> (5) ACQUIRE ì¤í¼ë ì´ì.</p>
+<pre><code> ì´ íìì ì¤í¼ë ì´ìì ë¨ë°©í¥ì í¬ê³¼ì± ë°°ë¦¬ì´ì²ë¼ ëìí©ëë¤.  ACQUIRE
+ ì¤í¼ë ì´ì ë¤ì ëª¨ë  ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì´ ACQUIRE ì¤í¼ë ì´ì íì
+ ì¼ì´ë ê²ì¼ë¡ ìì¤íì ëë¨¸ì§ ì»´í¬ëí¸ë¤ì ë³´ì´ê² ë  ê²ì´ ë³´ì¥ë©ëë¤.
+ LOCK ì¤í¼ë ì´ìê³¼ smp_load_acquire(), smp_cond_acquire() ì¤í¼ë ì´ìë
+ ACQUIRE ì¤í¼ë ì´ìì í¬í¨ë©ëë¤.  smp_cond_acquire() ì¤í¼ë ì´ìì ì»¨í¸ë¡¤
+ ìì¡´ì±ê³¼ smp_rmb() ë¥¼ ì¬ì©í´ì ACQUIRE ì ìë¯¸ì  ìêµ¬ì¬í­(semantic)ì
+ ì¶©ì¡±ìíµëë¤.
+
+ ACQUIRE ì¤í¼ë ì´ì ìì ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì ACQUIRE ì¤í¼ë ì´ì ìë£ íì
+ ìíë ê²ì²ë¼ ë³´ì¼ ì ììµëë¤.
+
+ ACQUIRE ì¤í¼ë ì´ìì ê±°ì í­ì RELEASE ì¤í¼ë ì´ìê³¼ ì§ì ì§ì´ ì¬ì©ëì´ì¼
+ í©ëë¤.
+</code></pre>
+<p> (6) RELEASE ì¤í¼ë ì´ì.</p>
+<pre><code> ì´ íìì ì¤í¼ë ì´ìë¤ë ë¨ë°©í¥ í¬ê³¼ì± ë°°ë¦¬ì´ì²ë¼ ëìí©ëë¤.  RELEASE
+ ì¤í¼ë ì´ì ìì ëª¨ë  ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì RELEASE ì¤í¼ë ì´ì ì ì ìë£ë
+ ê²ì¼ë¡ ìì¤íì ë¤ë¥¸ ì»´í¬ëí¸ë¤ì ë³´ì¬ì§ ê²ì´ ë³´ì¥ë©ëë¤.  UNLOCK ë¥ì
+ ì¤í¼ë ì´ìë¤ê³¼ smp_store_release() ì¤í¼ë ì´ìë RELEASE ì¤í¼ë ì´ìì
+ ì¼ì¢ìëë¤.
+
+ RELEASE ì¤í¼ë ì´ì ë¤ì ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì RELEASE ì¤í¼ë ì´ìì´
+ ìë£ëê¸° ì ì íí´ì§ ê²ì²ë¼ ë³´ì¼ ì ììµëë¤.
+
+ ACQUIRE ì RELEASE ì¤í¼ë ì´ìì ì¬ì©ì ì¼ë°ì ì¼ë¡ ë¤ë¥¸ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì
+ íìì±ì ìì±ëë¤ (íì§ë§ &quot;MMIO ì°ê¸° ë°°ë¦¬ì´&quot; ìë¸ì¹ììì ì¤ëªëë ìì¸ë¥¼
+ ììëì¸ì).  ëí, RELEASE+ACQUIRE ì¡°í©ì ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì²ë¼ ëìí 
+ ê²ì ë³´ì¥íì§ -ììµëë¤-.  íì§ë§, ì´ë¤ ë³ìì ëí RELEASE ì¤í¼ë ì´ìì
+ ììë ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì ìí ê²°ê³¼ë ì´ RELEASE ì¤í¼ë ì´ìì ë¤ì´ì´ ê°ì
+ ë³ìì ëí´ ìíë ACQUIRE ì¤í¼ë ì´ìì ë¤ë°ë¥´ë ë©ëª¨ë¦¬ ì¡ì¸ì¤ìë ë³´ì¬ì§
+ ê²ì´ ë³´ì¥ë©ëë¤.  ë¤ë¥´ê² ë§íìë©´, ì£¼ì´ì§ ë³ìì í¬ë¦¬í°ì»¬ ì¹ìììë, í´ë¹
+ ë³ìì ëí ìì í¬ë¦¬í°ì»¬ ì¹ìììì ëª¨ë  ì¡ì¸ì¤ë¤ì´ ìë£ëìì ê²ì
+ ë³´ì¥í©ëë¤.
+
+ ì¦, ACQUIRE ë ìµìíì &quot;ì·¨ë&quot; ëìì²ë¼, ê·¸ë¦¬ê³  RELEASE ë ìµìíì &quot;ê³µê°&quot;
+ ì²ë¼ ëìíë¤ë ìë¯¸ìëë¤.
+</code></pre>
+<p>atomic_t.txt ì ì¤ëªë ì´í ë¯¹ ì¤í¼ë ì´ìë¤ ì¤ ì¼ë¶ë ìì í ììì¡í ê²ë¤ê³¼<br>(ë°°ë¦¬ì´ë¥¼ ì¬ì©íì§ ìë) ìíë ììì ê²ë¤ ì¸ì ACQUIRE ì RELEASE ë¶ë¥ì<br>ê²ë¤ë ì¡´ì¬í©ëë¤.  ë¡ëì ì¤í ì´ë¥¼ ëª¨ë ìííë ì¡°í©ë ì´í ë¯¹ ì¤í¼ë ì´ììì,<br>ACQUIRE ë í´ë¹ ì¤í¼ë ì´ìì ë¡ë ë¶ë¶ìë§ ì ì©ëê³  RELEASE ë í´ë¹<br>ì¤í¼ë ì´ìì ì¤í ì´ ë¶ë¶ìë§ ì ì©ë©ëë¤.</p>
+<p>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì ë CPU ê°, ëë CPU ì ëë°ì´ì¤ ê°ì ìí¸ìì©ì ê°ë¥ì±ì´ ìì<br>ëìë§ íìí©ëë¤.  ë§ì½ ì´ë¤ ì½ëì ê·¸ë° ìí¸ìì©ì´ ìì ê²ì´ ë³´ì¥ëë¤ë©´, í´ë¹<br>ì½ëììë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì¬ì©í  íìê° ììµëë¤.</p>
+<p>ì´ê²ë¤ì <em>ìµìíì</em> ë³´ì¥ì¬í­ë¤ìì ììëì¸ì.  ë¤ë¥¸ ìí¤íì³ììë ë ê°ë ¥í<br>ë³´ì¥ì¬í­ì ì ê³µí  ìë ììµëë¤ë§, ê·¸ë° ë³´ì¥ì¬í­ì ìí¤íì³ ì¢ìì  ì½ë ì´ì¸ì<br>ë¶ë¶ììë ì ë¢°ëì§ <em>ìì</em> ê²ëë¤.</p>
+<h2 id="e©eª¨e¦¬-e°°e¦¬i´i-eOEi´-e°i-i´i-ie-e²"><a href="#e©eª¨e¦¬-e°°e¦¬i´i-eOEi´-e°i-i´i-ie-e²" class="headerlink" title="ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ëí´ ê°ì í´ì  ìë  ê²"></a>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ëí´ ê°ì í´ì  ìë  ê²</h2><p>ë¦¬ëì¤ ì»¤ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì´ ë³´ì¥íì§ ìë ê²ë¤ì´ ììµëë¤:</p>
+<p> (*) ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ììì ëªìë ì´ë¤ ë©ëª¨ë¦¬ ì¡ì¸ì¤ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ëªë ¹ì ìí<br>     ìë£ ìì ê¹ì§ <em>ìë£</em> ë  ê²ì´ë ë³´ì¥ì ììµëë¤; ë°°ë¦¬ì´ê° íë ì¼ì CPU ì<br>     ì¡ì¸ì¤ íì í¹ì  íìì ì¡ì¸ì¤ë¤ì ëì ì ìë ì ì ê¸ë ê²ì¼ë¡ ìê°ë  ì<br>     ììµëë¤.</p>
+<p> (*) í CPU ìì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ìííëê² ìì¤íì ë¤ë¥¸ CPU ë íëì¨ì´ì<br>     ì´ë¤ ì§ì ì ì¸ ìí¥ì ë¼ì¹ë¤ë ë³´ì¥ì ì¡´ì¬íì§ ììµëë¤.  ë°°ë¦¬ì´ ìíì´<br>     ë§ëë ê°ì ì  ìí¥ì ëë²ì§¸ CPU ê° ì²«ë²ì§¸ CPU ì ì¡ì¸ì¤ë¤ì ê²°ê³¼ë¥¼<br>     ë°ë¼ë³´ë ììê° ë©ëë¤ë§, ë¤ì í­ëª©ì ë³´ì¸ì:</p>
+<p> (*) ì²«ë²ì§¸ CPU ê° ëë²ì§¸ CPU ì ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì ê²°ê³¼ë¥¼ ë°ë¼ë³¼ ë, <em>ì¤ë ¹</em><br>     ëë²ì§¸ CPU ê° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì¬ì©íë¤ í´ë, ì²«ë²ì§¸ CPU <em>ëí</em> ê·¸ì ë§ë<br>     ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì¬ì©íì§ ìëë¤ë©´ (“SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°” ìë¸ì¹ìì<br>     ì°¸ê³ íì¸ì) ê·¸ ê²°ê³¼ê° ì¬ë°ë¥¸ ììë¡ ë³´ì¬ì§ë¤ë ë³´ì¥ì ììµëë¤.</p>
+<p> (<em>) CPU ë°ê¹¥ì íëì¨ì´[</em>] ê° ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì ììë¥¼ ë°ê¾¸ì§ ìëë¤ë ë³´ì¥ì<br>     ì¡´ì¬íì§ ììµëë¤.  CPU ìºì ì¼ê´ì± ë©ì»¤ëì¦ì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ê°ì ì <br>     ìí¥ì CPU ì¬ì´ì ì ííê¸´ íì§ë§, ììëë¡ ì ííì§ë ìì ì ììµëë¤.</p>
+<pre><code>[*] ë²ì¤ ë§ì¤í°ë§ DMA ì ì¼ê´ì±ì ëí´ìë ë¤ìì ì°¸ê³ íìê¸° ë°ëëë¤:
+
+    Documentation/PCI/pci.txt
+    Documentation/DMA-API-HOWTO.txt
+    Documentation/DMA-API.txt
+</code></pre>
+<h2 id="e°i´i°-ii¡´i±-e°°e¦¬i´-i­i¬i-"><a href="#e°i´i°-ii¡´i±-e°°e¦¬i´-i­i¬i-" class="headerlink" title="ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ (ì­ì¬ì )"></a>ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ (ì­ì¬ì )</h2><p>ë¦¬ëì¤ ì»¤ë v4.15 ê¸°ì¤ì¼ë¡, smp_read_barrier_depends() ê° READ_ONCE() ì<br>ì¶ê°ëìëë°, ì´ë ì´ ì¹ìì ì£¼ìë¥¼ ê¸°ì¸ì¬ì¼ íë ì¬ëë¤ì DEC Alpha ìí¤íì³<br>ì ì© ì½ëë¥¼ ë§ëë ì¬ëë¤ê³¼ READ_ONCE() ìì²´ë¥¼ ë§ëë ì¬ëë¤ ë¿ìì ìë¯¸í©ëë¤.<br>ê·¸ë° ë¶ë¤ì ìí´, ê·¸ë¦¬ê³  ì­ì¬ì ê´ì¬ ìë ë¶ë¤ì ìí´, ì¬ê¸° ë°ì´í° ìì¡´ì±<br>ë°°ë¦¬ì´ì ëí ì´ì¼ê¸°ë¥¼ ì ìµëë¤.</p>
+<p>ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ì ì¬ì©ì ìì´ ì§ì¼ì¼ íë ì¬í­ë¤ì ì½ê° ë¯¸ë¬íê³ , ë°ì´í°<br>ìì¡´ì± ë°°ë¦¬ì´ê° ì¬ì©ëì´ì¼ íë ìí©ë í­ì ëªë°±íì§ë ììµëë¤.  ì¤ëªì ìí´<br>ë¤ìì ì´ë²¤í¸ ìíì¤ë¥¼ ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1              CPU 2
+===============          ===============
+&#123; A == 1, B == 2, C == 3, P == &amp;A, Q == &amp;C &#125;
+B = 4;
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+WRITE_ONCE(P, &amp;B)
+              Q = READ_ONCE(P);
+              D = *Q;
+</code></pre>
+<p>ì¬ê¸°ì ë¶ëªí ë°ì´í° ìì¡´ì±ì´ ì¡´ì¬íë¯ë¡, ì´ ìíì¤ê° ëë¬ì ë Q ë &amp;A ëë &amp;B<br>ì¼ ê²ì´ê³ , ë°ë¼ì:</p>
+<pre><code>(Q == &amp;A) ë (D == 1) ë¥¼,
+(Q == &amp;B) ë (D == 4) ë¥¼ ìë¯¸í©ëë¤.
+</code></pre>
+<p>íì§ë§!  CPU 2 ë B ì ìë°ì´í¸ë¥¼ ì¸ìíê¸° ì ì P ì ìë°ì´í¸ë¥¼ ì¸ìí  ì ìê³ ,<br>ë°ë¼ì ë¤ìì ê²°ê³¼ê° ê°ë¥í©ëë¤:</p>
+<pre><code>(Q == &amp;B) and (D == 2) ????
+</code></pre>
+<p>ì´ë° ê²°ê³¼ë ì¼ê´ì±ì´ë ì¸ê³¼ ê´ê³ ì ì§ê° ì¤í¨í ê²ì²ë¼ ë³´ì¼ ìë ìê² ì§ë§,<br>ê·¸ë ì§ ììµëë¤, ê·¸ë¦¬ê³  ì´ íìì (DEC Alpha ì ê°ì) ì¬ë¬ CPU ìì ì¤ì ë¡<br>ë°ê²¬ë  ì ììµëë¤.</p>
+<p>ì´ ë¬¸ì  ìí©ì ì ëë¡ í´ê²°íê¸° ìí´, ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ê·¸ë³´ë¤ ê°íë<br>ë¬´ì¸ê°ê° ì£¼ìë¥¼ ì½ì´ì¬ ëì ë°ì´í°ë¥¼ ì½ì´ì¬ ë ì¬ì´ì ì¶ê°ëì´ì¼ë§ í©ëë¤:</p>
+<pre><code>CPU 1              CPU 2
+===============          ===============
+&#123; A == 1, B == 2, C == 3, P == &amp;A, Q == &amp;C &#125;
+B = 4;
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+WRITE_ONCE(P, &amp;B);
+              Q = READ_ONCE(P);
+              &lt;ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´&gt;
+              D = *Q;
+</code></pre>
+<p>ì´ ë³ê²½ì ìì ì²ì ëê°ì§ ê²°ê³¼ ì¤ íëë§ì´ ë°ìí  ì ìê³ , ì¸ë²ì§¸ì ê²°ê³¼ë<br>ë°ìí  ì ìëë¡ í©ëë¤.</p>
+<p>[!] ì´ ìë¹í ë°ì§ê´ì ì¸ ìí©ì ë¶ë¦¬ë ìºìë¥¼ ê°ì§ë ê¸°ê³ë¤ìì ê°ì¥ ì<br>ë°ìíëë°, ìë¥¼ ë¤ë©´ í ìºì ë±í¬ë ì§ì ë²í¸ì ìºì ë¼ì¸ë¤ì ì²ë¦¬íê³ , ë¤ë¥¸<br>ë±í¬ë íì ë²í¸ì ìºì ë¼ì¸ë¤ì ì²ë¦¬íë ê²½ì°ìì ììëìê¸° ë°ëëë¤.  í¬ì¸í°<br>P ë ì§ì ë²í¸ ìºì ë¼ì¸ì ì ì¥ëì´ ìê³ , ë³ì B ë íì ë²í¸ ìºì ë¼ì¸ì<br>ì ì¥ëì´ ìì ì ììµëë¤.  ì¬ê¸°ì ê°ì ì½ì´ì¤ë CPU ì ìºìì íì ë²í¸ ì²ë¦¬<br>ë±í¬ë ì´ì¬í ì¼ê°ì ì²ë¦¬ì¤ì¸ ë°ë©´ íì ë²í¸ ì²ë¦¬ ë±í¬ë í  ì¼ ìì´ íê°í<br>ì¤ì´ë¼ë©´ í¬ì¸í° P (&amp;B) ì ìë¡ì´ ê°ê³¼ ë³ì B ì ê¸°ì¡´ ê° (2) ë¥¼ ë³¼ ì ììµëë¤.</p>
+<p>ìì¡´ì  ì°ê¸°ë¤ì ììë¥¼ ë§ì¶ëë°ìë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ê° íìì¹ ììë°, ì´ë<br>ë¦¬ëì¤ ì»¤ëì´ ì§ìíë CPU ë¤ì (1) ì°ê¸°ê° ì ë§ë¡ ì¼ì´ë ì§, (2) ì°ê¸°ê° ì´ëì<br>ì´ë£¨ì´ì§ì§, ê·¸ë¦¬ê³  (3) ì°ì¬ì§ ê°ì íì¤í ìê¸° ì ê¹ì§ë ì°ê¸°ë¥¼ ìííì§ ìê¸°<br>ëë¬¸ìëë¤.  íì§ë§ “ì»¨í¸ë¡¤ ìì¡´ì±” ì¹ìê³¼<br>Documentation/RCU/rcu_dereference.txt íì¼ì ì£¼ì ê¹ê² ì½ì´ ì£¼ìê¸° ë°ëëë¤:<br>ì»´íì¼ë¬ë ë§¤ì° ì°½ìì ì¸ ë§ì ë°©ë²ì¼ë¡ ì¢ìì±ì ê¹° ì ììµëë¤.</p>
+<pre><code>CPU 1              CPU 2
+===============          ===============
+&#123; A == 1, B == 2, C = 3, P == &amp;A, Q == &amp;C &#125;
+B = 4;
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+WRITE_ONCE(P, &amp;B);
+              Q = READ_ONCE(P);
+              WRITE_ONCE(*Q, 5);
+</code></pre>
+<p>ë°ë¼ì, Q ë¡ì ì½ê¸°ì *Q ë¡ì ì°ê¸° ì¬ì´ìë ë°ì´í° ì¢ìì± ë°°ë¦¬ì´ê° íìì¹<br>ììµëë¤.  ë¬ë¦¬ ë§íë©´, ë°ì´í° ì¢ìì± ë°°ë¦¬ì´ê° ìëë¼ë ë¤ì ê²°ê³¼ë ìê¸°ì§<br>ììµëë¤:</p>
+<pre><code>(Q == &amp;B) &amp;&amp; (B == 4)
+</code></pre>
+<p>ì´ë° í¨í´ì ëë¬¼ê² ì¬ì©ëì´ì¼ í¨ì ìì ëìê¸° ë°ëëë¤.  ë¬´ìë³´ë¤ë, ìì¡´ì±<br>ìì ê·ì¹ì ìëë ì°ê¸° ììì -ìë°©- í´ì ê·¸ë¡ ì¸í´ ë°ìíë ë¹ì¼ ìºì ë¯¸ì¤ë<br>ìì ë ¤ë ê²ìëë¤.  ì´ í¨í´ì ëë¬¼ê² ë°ìíë ìë¬ ì¡°ê±´ ê°ìê²ë¤ì ê¸°ë¡íëë°<br>ì¬ì©ë  ì ìì¼ë©°, CPUì ìì°ì ì¸ ìì ë³´ì¥ì´ ê·¸ë° ê¸°ë¡ë¤ì ì¬ë¼ì§ì§ ìê²<br>í´ì¤ëë¤.</p>
+<p>ë°ì´í° ìì¡´ì±ì ìí´ ì ê³µëë ì´ ììê·ì¹ì ì´ë¥¼ í¬í¨íê³  ìë CPU ì<br>ì§ì­ì ìì ììëìê¸° ë°ëëë¤.  ë ë§ì ì ë³´ë¥¼ ìí´ì  “Multicopy ììì±”<br>ì¹ìì ì°¸ê³ íì¸ì.</p>
+<p>ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ë§¤ì° ì¤ìíë°, ìë¥¼ ë¤ì´ RCU ìì¤íìì ê·¸ë ìµëë¤.<br>include/linux/rcupdate.h ì rcu_assign_pointer() ì rcu_dereference() ë¥¼<br>ì°¸ê³ íì¸ì.  ì¬ê¸°ì ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë RCU ë¡ ê´ë¦¬ëë í¬ì¸í°ì íê²ì íì¬<br>íê²ìì ìì ë ìë¡ì´ íê²ì¼ë¡ ë°ê¾¸ë ìììì ìë¡ ìì ë íê²ì´ ì´ê¸°íê°<br>ìë£ëì§ ìì ì±ë¡ ë³´ì¬ì§ë ì¼ì´ ì¼ì´ëì§ ìê² í´ì¤ëë¤.</p>
+<p>ë ë§ì ìë¥¼ ìí´ì  “ìºì ì¼ê´ì±” ìë¸ì¹ìì ì°¸ê³ íì¸ì.</p>
+<h2 id="i»¨i¸e¡¤-ii¡´i±"><a href="#i»¨i¸e¡¤-ii¡´i±" class="headerlink" title="ì»¨í¸ë¡¤ ìì¡´ì±"></a>ì»¨í¸ë¡¤ ìì¡´ì±</h2><p>íì¬ì ì»´íì¼ë¬ë¤ì ì»¨í¸ë¡¤ ìì¡´ì±ì ì´í´íê³  ìì§ ìê¸° ëë¬¸ì ì»¨í¸ë¡¤ ìì¡´ì±ì<br>ì½ê° ë¤ë£¨ê¸° ì´ë ¤ì¸ ì ììµëë¤.  ì´ ì¹ìì ëª©ì ì ì¬ë¬ë¶ì´ ì»´íì¼ë¬ì ë¬´ìë¡<br>ì¸í´ ì¬ë¬ë¶ì ì½ëê° ë§ê°ì§ë ê±¸ ë§ì ì ìëë¡ ëëê²ëë¤.</p>
+<p>ë¡ë-ë¡ë ì»¨í¸ë¡¤ ìì¡´ì±ì ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë§ì¼ë¡ë ì íí ëìí  ìê°<br>ìì´ì ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ íìë¡ í©ëë¤.  ìëì ì½ëë¥¼ ë´ìë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    &lt;ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´&gt;  /* BUG: No data dependency!!! */
+    p = READ_ONCE(b);
+&#125;
+</code></pre>
+<p>ì´ ì½ëë ìíë ëë¡ì í¨ê³¼ë¥¼ ë´ì§ ëª»í  ì ìëë°, ì´ ì½ëìë ë°ì´í° ìì¡´ì±ì´<br>ìëë¼ ì»¨í¸ë¡¤ ìì¡´ì±ì´ ì¡´ì¬íê¸° ëë¬¸ì¼ë¡, ì´ë° ìí©ìì CPU ë ì¤í ìëë¥¼ ë<br>ë¹ ë¥´ê² íê¸° ìí´ ë¶ê¸° ì¡°ê±´ì ê²°ê³¼ë¥¼ ìì¸¡íê³  ì½ëë¥¼ ì¬ë°°ì¹ í  ì ìì´ì ë¤ë¥¸<br>CPU ë b ë¡ë¶í°ì ë¡ë ì¤í¼ë ì´ìì´ a ë¡ë¶í°ì ë¡ë ì¤í¼ë ì´ìë³´ë¤ ë¨¼ì  ë°ìí<br>ê±¸ë¡ ì¸ìí  ì ììµëë¤.  ì¬ê¸°ì ì ë§ë¡ íìíë ê±´ ë¤ìê³¼ ê°ìµëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+    p = READ_ONCE(b);
+&#125;
+</code></pre>
+<p>íì§ë§, ì¤í ì´ ì¤í¼ë ì´ìì ìì¸¡ì ì¼ë¡ ìíëì§ ììµëë¤.  ì¦, ë¤ì ìììì<br>ê°ì´ ë¡ë-ì¤í ì´ ì»¨í¸ë¡¤ ìì¡´ì±ì´ ì¡´ì¬íë ê²½ì°ìë ììê° -ì§ì¼ì§ë¤-ë<br>ìë¯¸ìëë¤.</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    WRITE_ONCE(b, 1);
+&#125;
+</code></pre>
+<p>ì»¨í¸ë¡¤ ìì¡´ì±ì ë³´íµ ë¤ë¥¸ íìì ë°°ë¦¬ì´ë¤ê³¼ ì§ì ë§ì¶° ì¬ì©ë©ëë¤.  ê·¸ë ë¤ê³¤<br>íë, READ_ONCE() ë WRITE_ONCE() ë ì íì¬í­ì´ ìëë¼ íìì¬í­ìì ë¶ë<br>ëªì¬íì¸ì!  READ_ONCE() ê° ìë¤ë©´, ì»´íì¼ë¬ë ‘a’ ë¡ë¶í°ì ë¡ëë¥¼ ‘a’ ë¡ë¶í°ì<br>ëë¤ë¥¸ ë¡ëì ì¡°í©í  ì ììµëë¤.  WRITE_ONCE() ê° ìë¤ë©´, ì»´íì¼ë¬ë ‘b’ ë¡ì<br>ì¤í ì´ë¥¼ ‘b’ ë¡ì ëë¼ë ì¤í ì´ë¤ê³¼ ì¡°í©í  ì ììµëë¤.  ë ê²½ì° ëª¨ë ììì<br>ìì´ ìë¹í ë¹ì§ê´ì ì¸ ê²°ê³¼ë¥¼ ì´ëí  ì ììµëë¤.</p>
+<p>ì´ê±¸ë¡ ëì´ ìëê², ì»´íì¼ë¬ê° ë³ì ‘a’ ì ê°ì´ í­ì 0ì´ ìëë¼ê³  ì¦ëªí  ì<br>ìë¤ë©´, ìì ììì “if” ë¬¸ì ìì ì ë¤ìê³¼ ê°ì´ ìµì í í  ìë ììµëë¤:</p>
+<pre><code>q = a;
+b = 1;  /* BUG: Compiler and CPU can both reorder!!! */
+</code></pre>
+<p>ê·¸ë¬ë READ_ONCE() ë¥¼ ë°ëì ì¬ì©íì¸ì.</p>
+<p>ë¤ìê³¼ ê°ì´ “if” ë¬¸ì ìê°ë ë¸ëì¹ì ëª¨ë ì¡´ì¬íë ëì¼í ì¤í ì´ì ëí´ ììë¥¼<br>ê°ì íê³  ì¶ì ê²½ì°ê° ìì ì ììµëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    barrier();
+    WRITE_ONCE(b, 1);
+    do_something();
+&#125; else &#123;
+    barrier();
+    WRITE_ONCE(b, 1);
+    do_something_else();
+&#125;
+</code></pre>
+<p>ìíê¹ê²ë, íì¬ì ì»´íì¼ë¬ë¤ì ëì ìµì í ë ë²¨ììë ì´ê±¸ ë¤ìê³¼ ê°ì´<br>ë°ê¿ë²ë¦½ëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+barrier();
+WRITE_ONCE(b, 1);  /* BUG: No ordering vs. load from a!!! */
+if (q) &#123;
+    /* WRITE_ONCE(b, 1); -- moved up, BUG!!! */
+    do_something();
+&#125; else &#123;
+    /* WRITE_ONCE(b, 1); -- moved up, BUG!!! */
+    do_something_else();
+&#125;
+</code></pre>
+<p>ì´ì  ‘a’ ììì ë¡ëì ‘b’ ë¡ì ì¤í ì´ ì¬ì´ìë ì¡°ê±´ì  ê´ê³ê° ìê¸° ëë¬¸ì CPU<br>ë ì´ë¤ì ììë¥¼ ë°ê¿ ì ìê² ë©ëë¤: ì´ë° ê²½ì°ì ì¡°ê±´ì  ê´ê³ë ë°ëì<br>íìíë°, ëª¨ë  ì»´íì¼ë¬ ìµì íê° ì´ë£¨ì´ì§ê³  ë íì ì´ìë¸ë¦¬ ì½ëììë<br>ë§ì°¬ê°ì§ìëë¤.  ë°ë¼ì, ì´ ììì ììë¥¼ ì§í¤ê¸° ìí´ìë smp_store_release()<br>ì ê°ì ëªìì  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° íìí©ëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    smp_store_release(&amp;b, 1);
+    do_something();
+&#125; else &#123;
+    smp_store_release(&amp;b, 1);
+    do_something_else();
+&#125;
+</code></pre>
+<p>ë°ë©´ì ëªìì  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° ìë¤ë©´, ì´ë° ê²½ì°ì ììë ì¤í ì´ ì¤í¼ë ì´ìë¤ì´<br>ìë¡ ë¤ë¥¼ ëìë§ ë³´ì¥ëëë°, ìë¥¼ ë¤ë©´ ë¤ìê³¼ ê°ì ê²½ì°ìëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    WRITE_ONCE(b, 1);
+    do_something();
+&#125; else &#123;
+    WRITE_ONCE(b, 2);
+    do_something_else();
+&#125;
+</code></pre>
+<p>ì²ìì READ_ONCE() ë ì»´íì¼ë¬ê° ‘a’ ì ê°ì ì¦ëªí´ë´ë ê²ì ë§ê¸° ìí´ ì¬ì í<br>íìí©ëë¤.</p>
+<p>ëí, ë¡ì»¬ ë³ì ‘q’ ë¥¼ ê°ì§ê³  íë ì¼ì ëí´ ì£¼ìí´ì¼ íëë°, ê·¸ë¬ì§ ìì¼ë©´<br>ì»´íì¼ë¬ë ê·¸ ê°ì ì¶ì¸¡íê³  ëë¤ì íìí ì¡°ê±´ê´ê³ë¥¼ ìì ë²ë¦´ ì ììµëë¤.<br>ìë¥¼ ë¤ë©´:</p>
+<pre><code>q = READ_ONCE(a);
+if (q % MAX) &#123;
+    WRITE_ONCE(b, 1);
+    do_something();
+&#125; else &#123;
+    WRITE_ONCE(b, 2);
+    do_something_else();
+&#125;
+</code></pre>
+<p>ë§ì½ MAX ê° 1 ë¡ ì ìë ììë¼ë©´, ì»´íì¼ë¬ë (q % MAX) ë 0ì´ë ê²ì ììì±ê³ ,<br>ìì ì½ëë¥¼ ìëì ê°ì´ ë°ê¿ë²ë¦´ ì ììµëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+WRITE_ONCE(b, 2);
+do_something_else();
+</code></pre>
+<p>ì´ë ê² ëë©´, CPU ë ë³ì ‘a’ ë¡ë¶í°ì ë¡ëì ë³ì ‘b’ ë¡ì ì¤í ì´ ì¬ì´ì ììë¥¼<br>ì§ì¼ì¤ íìê° ìì´ì§ëë¤.  barrier() ë¥¼ ì¶ê°í´ í´ê²°í´ ë³´ê³  ì¶ê² ì§ë§, ê·¸ê±´<br>ëìì´ ìë©ëë¤.  ì¡°ê±´ ê´ê³ë ì¬ë¼ì¡ê³ , barrier() ë ì´ë¥¼ ëëë¦¬ì§ ëª»í©ëë¤.<br>ë°ë¼ì, ì´ ììë¥¼ ì§ì¼ì¼ íë¤ë©´, MAX ê° 1 ë³´ë¤ í¬ë¤ë ê²ì, ë¤ìê³¼ ê°ì ë°©ë²ì<br>ì¬ì©í´ ë¶ëªí í´ì¼ í©ëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+BUILD_BUG_ON(MAX &lt;= 1); /* Order load from a with store to b. */
+if (q % MAX) &#123;
+    WRITE_ONCE(b, 1);
+    do_something();
+&#125; else &#123;
+    WRITE_ONCE(b, 2);
+    do_something_else();
+&#125;
+</code></pre>
+<p>‘b’ ë¡ì ì¤í ì´ë¤ì ì¬ì í ìë¡ ë¤ë¦ì ììëì¸ì.  ë§ì½ ê·¸ê²ë¤ì´ ëì¼íë©´,<br>ììì ì´ì¼ê¸°íë¯, ì»´íì¼ë¬ê° ê·¸ ì¤í ì´ ì¤í¼ë ì´ìë¤ì ‘if’ ë¬¸ ë°ê¹¥ì¼ë¡<br>ëì§ì´ë¼ ì ììµëë¤.</p>
+<p>ëí ì´ì§ ì¡°ê±´ë¬¸ íê°ì ëë¬´ ìì¡´íì§ ìëë¡ ì¡°ì¬í´ì¼ í©ëë¤.  ë¤ìì ìë¥¼<br>ë´ìë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q || 1 &gt; 0)
+    WRITE_ONCE(b, 1);
+</code></pre>
+<p>ì²«ë²ì§¸ ì¡°ê±´ë§ì¼ë¡ë ë¸ëì¹ ì¡°ê±´ ì ì²´ë¥¼ ê±°ì§ì¼ë¡ ë§ë¤ ì ìê³  ëë²ì§¸ ì¡°ê±´ì í­ì<br>ì°¸ì´ê¸° ëë¬¸ì, ì»´íì¼ë¬ë ì´ ìë¥¼ ë¤ìê³¼ ê°ì´ ë°ê¿ì ì»¨í¸ë¡¤ ìì¡´ì±ì ìì ë²ë¦´<br>ì ììµëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+WRITE_ONCE(b, 1);
+</code></pre>
+<p>ì´ ìë ì»´íì¼ë¬ê° ì½ëë¥¼ ì¶ì¸¡ì¼ë¡ ìì í  ì ìëë¡ ë¶ëªí í´ì¼ íë¤ë ì ì<br>ê°ì¡°í©ëë¤.  ì¡°ê¸ ë ì¼ë°ì ì¼ë¡ ë§í´ì, READ_ONCE() ë ì»´íì¼ë¬ìê² ì£¼ì´ì§ ë¡ë<br>ì¤í¼ë ì´ìì ìí ì½ëë¥¼ ì ë§ë¡ ë§ë¤ëë¡ íì§ë§, ì»´íì¼ë¬ê° ê·¸ë ê² ë§ë¤ì´ì§<br>ì½ëì ìí ê²°ê³¼ë¥¼ ì¬ì©íëë¡ ê°ì íì§ë ììµëë¤.</p>
+<p>ëí, ì»¨í¸ë¡¤ ìì¡´ì±ì if ë¬¸ì then ì ê³¼ else ì ì ëí´ìë§ ì ì©ë©ëë¤.  ìì¸í<br>ë§í´ì, ì»¨í¸ë¡¤ ìì¡´ì±ì if ë¬¸ì ë¤ë°ë¥´ë ì½ëìë ì ì©ëì§ ììµëë¤:</p>
+<pre><code>q = READ_ONCE(a);
+if (q) &#123;
+    WRITE_ONCE(b, 1);
+&#125; else &#123;
+    WRITE_ONCE(b, 2);
+&#125;
+WRITE_ONCE(c, 1);  /* BUG: No ordering against the read from &#39;a&#39;. */
+</code></pre>
+<p>ì»´íì¼ë¬ë volatile íìì ëí ì¡ì¸ì¤ë¥¼ ì¬ë°°ì¹ í  ì ìê³  ì´ ì¡°ê±´ íì ‘b’<br>ë¡ì ì°ê¸°ë¥¼ ì¬ë°°ì¹ í  ì ìê¸° ëë¬¸ì ì¬ê¸°ì ìì ê·ì¹ì´ ì¡´ì¬íë¤ê³  ì£¼ì¥íê³ <br>ì¶ì ê²ëë¤.  ë¶ííë ì´ ê²½ì°ì, ì»´íì¼ë¬ë ë¤ìì ê°ìì pseudo-assembly ì¸ì´<br>ì½ëì²ë¼ ‘b’ ë¡ì ëê°ì ì°ê¸° ì¤í¼ë ì´ìì conditional-move ì¸ì¤í¸ë­ìì¼ë¡<br>ë²ì­í  ì ììµëë¤:</p>
+<pre><code>ld r1,a
+cmp r1,$0
+cmov,ne r4,$1
+cmov,eq r4,$2
+st r4,b
+st $1,c
+</code></pre>
+<p>ìíë ìì ê·ì¹ì CPU ë ‘a’ ë¡ë¶í°ì ë¡ëì ‘c’ ë¡ì ì¤í ì´ ì¬ì´ì ì´ë¤<br>ì¢ë¥ì ìì¡´ì±ë ê°ì§ ìì ê²ëë¤.  ì´ ì»¨í¸ë¡¤ ìì¡´ì±ì ëê°ì cmov ì¸ì¤í¸ë­ìê³¼<br>ê±°ê¸°ì ìì¡´íë ì¤í ì´ ìê²ë§ ì ì©ë  ê²ëë¤.  ì§§ê² ë§íìë©´, ì»¨í¸ë¡¤ ìì¡´ì±ì<br>ì£¼ì´ì§ if ë¬¸ì then ì ê³¼ else ì ìê²ë§ (ê·¸ë¦¬ê³  ì´ ë ì  ë´ìì í¸ì¶ëë<br>í¨ìë¤ìê²ê¹ì§) ì ì©ëì§, ì´ if ë¬¸ì ë¤ë°ë¥´ë ì½ëìë ì ì©ëì§ ììµëë¤.</p>
+<p>ì»¨í¸ë¡¤ ìì¡´ì±ì ìí´ ì ê³µëë ì´ ììê·ì¹ì ì´ë¥¼ í¬í¨íê³  ìë CPU ì<br>ì§ì­ì ìëë¤.  ë ë§ì ì ë³´ë¥¼ ìí´ì  “Multicopy ììì±” ì¹ìì ì°¸ê³ íì¸ì.</p>
+<p>ìì½íìë©´:</p>
+<p>  (*) ì»¨í¸ë¡¤ ìì¡´ì±ì ìì ë¡ëë¤ì ë¤ì ì¤í ì´ë¤ì ëí´ ììë¥¼ ë§ì¶°ì¤ëë¤.<br>      íì§ë§, ê·¸ ì¸ì ì´ë¤ ììë ë³´ì¥íì§ -ììµëë¤-: ìì ë¡ëì ë¤ì ë¡ëë¤<br>      ì¬ì´ìë, ìì ì¤í ì´ì ë¤ì ì¤í ì´ë¤ ì¬ì´ìëì.  ì´ë° ë¤ë¥¸ ííì<br>      ììê° íìíë¤ë©´ smp_rmb() ë smp_wmb()ë¥¼, ëë, ìì ì¤í ì´ë¤ê³¼ ë¤ì<br>      ë¡ëë¤ ì¬ì´ì ììë¥¼ ìí´ìë smp_mb() ë¥¼ ì¬ì©íì¸ì.</p>
+<p>  (*) “if” ë¬¸ì ìê°ë ë¸ëì¹ê° ê°ì ë³ììì ëì¼í ì¤í ì´ë¡ ììíë¤ë©´, ê·¸<br>      ì¤í ì´ë¤ì ê° ì¤í ì´ ìì smp_mb() ë¥¼ ë£ê±°ë smp_store_release() ë¥¼<br>      ì¬ì©í´ì ì¤í ì´ë¥¼ íë ìì¼ë¡ ììë¥¼ ë§ì¶°ì¤ì¼ í©ëë¤.  ì´ ë¬¸ì ë¥¼ í´ê²°íê¸°<br>      ìí´ “if” ë¬¸ì ìê°ë ë¸ëì¹ì ìì ì§ì ì barrier() ë¥¼ ë£ë ê²ë§ì¼ë¡ë<br>      ì¶©ë¶í í´ê²°ì´ ëì§ ìëë°, ì´ë ìì ììì ë³¸ê²ê³¼ ê°ì´, ì»´íì¼ë¬ì<br>      ìµì íë barrier() ê° ìë¯¸íë ë°ë¥¼ ì§í¤ë©´ìë ì»¨í¸ë¡¤ ìì¡´ì±ì ìììí¬<br>      ì ìê¸° ëë¬¸ì´ë¼ë ì ì ë¶ë ììëìê¸° ë°ëëë¤.</p>
+<p>  (*) ì»¨í¸ë¡¤ ìì¡´ì±ì ìì ë¡ëì ë¤ì ì¤í ì´ ì¬ì´ì ìµì íëì, ì¤í<br>      ìì ììì ì¡°ê±´ê´ê³ë¥¼ íìë¡ íë©°, ì´ ì¡°ê±´ê´ê³ë ìì ë¡ëì ê´ê³ëì´ì¼<br>      í©ëë¤.  ë§ì½ ì»´íì¼ë¬ê° ì¡°ê±´ ê´ê³ë¥¼ ìµì íë¡ ìì¨ì ìë¤ë©´, ììë<br>      ìµì íë¡ ìì ë²ë ¸ì ê²ëë¤.  READ_ONCE() ì WRITE_ONCE() ì ì£¼ì ê¹ì<br>      ì¬ì©ì ì£¼ì´ì§ ì¡°ê±´ ê´ê³ë¥¼ ì ì§íëë° ëìì´ ë  ì ììµëë¤.</p>
+<p>  (*) ì»¨í¸ë¡¤ ìì¡´ì±ì ìí´ì  ì»´íì¼ë¬ê° ì¡°ê±´ê´ê³ë¥¼ ìì ë²ë¦¬ë ê²ì ë§ìì¼<br>      í©ëë¤.  ì£¼ì ê¹ì READ_ONCE() ë atomic{,64}_read() ì ì¬ì©ì´ ì»¨í¸ë¡¤<br>      ìì¡´ì±ì´ ì¬ë¼ì§ì§ ìê² íëë° ëìì ì¤ ì ììµëë¤.  ë ë§ì ì ë³´ë¥¼<br>      ìí´ì  “ì»´íì¼ë¬ ë°°ë¦¬ì´” ì¹ìì ì°¸ê³ íìê¸° ë°ëëë¤.</p>
+<p>  (*) ì»¨í¸ë¡¤ ìì¡´ì±ì ì»¨í¸ë¡¤ ìì¡´ì±ì ê°ë if ë¬¸ì then ì ê³¼ else ì ê³¼ ì´ ë ì <br>      ë´ìì í¸ì¶ëë í¨ìë¤ìë§ ì ì©ë©ëë¤.  ì»¨í¸ë¡¤ ìì¡´ì±ì ì»¨í¸ë¡¤ ìì¡´ì±ì<br>      ê°ë if ë¬¸ì ë¤ë°ë¥´ë ì½ëìë ì ì©ëì§ -ììµëë¤-.</p>
+<p>  (*) ì»¨í¸ë¡¤ ìì¡´ì±ì ë³´íµ ë¤ë¥¸ íìì ë°°ë¦¬ì´ë¤ê³¼ ì§ì ë§ì¶° ì¬ì©ë©ëë¤.</p>
+<p>  (*) ì»¨í¸ë¡¤ ìì¡´ì±ì multicopy ììì±ì ì ê³µíì§ -ììµëë¤-.  ëª¨ë  CPU ë¤ì´<br>      í¹ì  ì¤í ì´ë¥¼ ëìì ë³´ê¸¸ ìíë¤ë©´, smp_mb() ë¥¼ ì¬ì©íì¸ì.</p>
+<p>  (*) ì»´íì¼ë¬ë ì»¨í¸ë¡¤ ìì¡´ì±ì ì´í´íê³  ìì§ ììµëë¤.  ë°ë¼ì ì»´íì¼ë¬ê°<br>      ì¬ë¬ë¶ì ì½ëë¥¼ ë§ê°ë¨ë¦¬ì§ ìëë¡ íëê±´ ì¬ë¬ë¶ì´ í´ì¼ íë ì¼ìëë¤.</p>
+<h2 id="SMP-e°°e¦¬i´-i§e§i¶e¸°"><a href="#SMP-e°°e¦¬i´-i§e§i¶e¸°" class="headerlink" title="SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°"></a>SMP ë°°ë¦¬ì´ ì§ë§ì¶ê¸°</h2><p>CPU ê° ìí¸ìì©ì ë¤ë£° ëì ì¼ë¶ íìì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë í­ì ì§ì ë§ì¶°<br>ì¬ì©ëì´ì¼ í©ëë¤.  ì ì íê² ì§ì ë§ì¶ì§ ìì ì½ëë ì¬ì¤ì ìë¬ì ê°ê¹ìµëë¤.</p>
+<p>ë²ì© ë°°ë¦¬ì´ë¤ì ë²ì© ë°°ë¦¬ì´ë¼ë¦¬ë ì§ì ë§ì¶ì§ë§ multicopy ììì±ì´ ìë<br>ëë¶ë¶ì ë¤ë¥¸ íìì ë°°ë¦¬ì´ë¤ê³¼ë ì§ì ë§ì¶¥ëë¤.  ACQUIRE ë°°ë¦¬ì´ë RELEASE<br>ë°°ë¦¬ì´ì ì§ì ë§ì¶¥ëë¤ë§, ë ë¤ ë²ì© ë°°ë¦¬ì´ë¥¼ í¬í¨í´ ë¤ë¥¸ ë°°ë¦¬ì´ë¤ê³¼ë ì§ì<br>ë§ì¶ ì ììµëë¤.  ì°ê¸° ë°°ë¦¬ì´ë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ì»¨í¸ë¡¤ ìì¡´ì±, ACQUIRE<br>ë°°ë¦¬ì´, RELEASE ë°°ë¦¬ì´, ì½ê¸° ë°°ë¦¬ì´, ëë ë²ì© ë°°ë¦¬ì´ì ì§ì ë§ì¶¥ëë¤.<br>ë¹ì·íê² ì½ê¸° ë°°ë¦¬ì´ë ì»¨í¸ë¡¤ ìì¡´ì±, ëë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ì°ê¸° ë°°ë¦¬ì´ë<br>ACQUIRE ë°°ë¦¬ì´, RELEASE ë°°ë¦¬ì´, ëë ë²ì© ë°°ë¦¬ì´ì ì§ì ë§ì¶ëë°, ë¤ìê³¼<br>ê°ìµëë¤:</p>
+<pre><code>CPU 1              CPU 2
+===============          ===============
+WRITE_ONCE(a, 1);
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+WRITE_ONCE(b, 2);     x = READ_ONCE(b);
+              &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+              y = READ_ONCE(a);
+</code></pre>
+<p>ëë:</p>
+<pre><code>CPU 1              CPU 2
+===============          ===============================
+a = 1;
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+WRITE_ONCE(b, &amp;a);    x = READ_ONCE(b);
+              &lt;ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´&gt;
+              y = *x;
+</code></pre>
+<p>ëë:</p>
+<pre><code>CPU 1              CPU 2
+===============          ===============================
+r1 = READ_ONCE(y);
+&lt;ë²ì© ë°°ë¦¬ì´&gt;
+WRITE_ONCE(x, 1);     if (r2 = READ_ONCE(x)) &#123;
+                 &lt;ë¬µìì  ì»¨í¸ë¡¤ ìì¡´ì±&gt;
+                 WRITE_ONCE(y, 1);
+              &#125;
+
+assert(r1 == 0 || r2 == 0);
+</code></pre>
+<p>ê¸°ë³¸ì ì¼ë¡, ì¬ê¸°ìì ì½ê¸° ë°°ë¦¬ì´ë “ë ìíë” íìì¼ ì ìì´ë í­ì ì¡´ì¬í´ì¼<br>í©ëë¤.</p>
+<p>[!] ì°ê¸° ë°°ë¦¬ì´ ìì ì¤í ì´ ì¤í¼ë ì´ìì ì¼ë°ì ì¼ë¡ ì½ê¸° ë°°ë¦¬ì´ë ë°ì´í°<br>ìì¡´ì± ë°°ë¦¬ì´ ë¤ì ë¡ë ì¤í¼ë ì´ìê³¼ ë§¤ì¹ë  ê²ì´ê³ , ë°ëë ë§ì°¬ê°ì§ìëë¤:</p>
+<pre><code>CPU 1                               CPU 2
+===================                 ===================
+WRITE_ONCE(a, 1);    &#125;----   ---&gt;&#123;  v = READ_ONCE(c);
+WRITE_ONCE(b, 2);    &#125;    \ /    &#123;  w = READ_ONCE(d);
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;              \        &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+WRITE_ONCE(c, 3);    &#125;    / \    &#123;  x = READ_ONCE(a);
+WRITE_ONCE(d, 4);    &#125;----   ---&gt;&#123;  y = READ_ONCE(b);
+</code></pre>
+<h2 id="e©eª¨e¦¬-e°°e¦¬i´-ioeii¤i-i"><a href="#e©eª¨e¦¬-e°°e¦¬i´-ioeii¤i-i" class="headerlink" title="ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ìíì¤ì ì"></a>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ìíì¤ì ì</h2><p>ì²«ì§¸, ì°ê¸° ë°°ë¦¬ì´ë ì¤í ì´ ì¤í¼ë ì´ìë¤ì ë¶ë¶ì  ìì ì¸ì°ê¸°ë¡ ëìí©ëë¤.<br>ìëì ì´ë²¤í¸ ìíì¤ë¥¼ ë³´ì¸ì:</p>
+<pre><code>CPU 1
+=======================
+STORE A = 1
+STORE B = 2
+STORE C = 3
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+STORE D = 4
+STORE E = 5
+</code></pre>
+<p>ì´ ì´ë²¤í¸ ìíì¤ë ë©ëª¨ë¦¬ ì¼ê´ì± ìì¤íì ììë¼ë¦¬ì ììê° ì¡´ì¬íì§ ìë ì§í©<br>{ STORE A, STORE B, STORE C } ê° ì­ì ììë¼ë¦¬ì ììê° ì¡´ì¬íì§ ìë ì§í©<br>{ STORE D, STORE E } ë³´ë¤ ë¨¼ì  ì¼ì´ë ê²ì¼ë¡ ìì¤íì ëë¨¸ì§ ììë¤ì ë³´ì´ëë¡<br>ì ë¬ë©ëë¤:</p>
+<pre><code>+-------+       :      :
+|       |       +------+
+|       |------&gt;| C=3  |     &#125;     /\
+|       |  :    +------+     &#125;-----  \  -----&gt; ìì¤íì ëë¨¸ì§ ììì
+|       |  :    | A=1  |     &#125;        \/       ë³´ì¬ì§ ì ìë ì´ë²¤í¸ë¤
+|       |  :    +------+     &#125;
+| CPU 1 |  :    | B=2  |     &#125;
+|       |       +------+     &#125;
+|       |   wwwwwwwwwwwwwwww &#125;   &lt;--- ì¬ê¸°ì ì°ê¸° ë°°ë¦¬ì´ë ë°°ë¦¬ì´ ìì
+|       |       +------+     &#125;        ëª¨ë  ì¤í ì´ê° ë°°ë¦¬ì´ ë¤ì ì¤í ì´
+|       |  :    | E=5  |     &#125;        ì ì ë©ëª¨ë¦¬ ìì¤íì ì ë¬ëëë¡
+|       |  :    +------+     &#125;        í©ëë¤
+|       |------&gt;| D=4  |     &#125;
+|       |       +------+
++-------+       :      :
+                   |
+                   | CPU 1 ì ìí´ ë©ëª¨ë¦¬ ìì¤íì ì ë¬ëë
+                   | ì¼ë ¨ì ì¤í ì´ ì¤í¼ë ì´ìë¤
+                   V
+</code></pre>
+<p>ëì§¸, ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ë°ì´í° ìì¡´ì  ë¡ë ì¤í¼ë ì´ìë¤ì ë¶ë¶ì  ìì<br>ì¸ì°ê¸°ë¡ ëìí©ëë¤.  ë¤ì ì¼ë ¨ì ì´ë²¤í¸ë¤ì ë³´ì¸ì:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+    &#123; B = 7; X = 9; Y = 8; C = &amp;Y &#125;
+STORE A = 1
+STORE B = 2
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+STORE C = &amp;B        LOAD X
+STORE D = 4        LOAD C (gets &amp;B)
+            LOAD *C (reads B)
+</code></pre>
+<p>ì¬ê¸°ì ë³ë¤ë¥¸ ê°ìì´ ìë¤ë©´, CPU 1 ì ì°ê¸° ë°°ë¦¬ì´ìë ë¶êµ¬íê³  CPU 2 ë CPU 1<br>ì ì´ë²¤í¸ë¤ì ìì í ë¬´ììì  ììë¡ ì¸ì§íê² ë©ëë¤:</p>
+<pre><code>+-------+       :      :                :       :
+|       |       +------+                +-------+  | CPU 2 ì ì¸ì§ëë
+|       |------&gt;| B=2  |-----       ---&gt;| Y-&gt;8  |  | ìë°ì´í¸ ì´ë²¤í¸
+|       |  :    +------+     \          +-------+  | ìíì¤
+| CPU 1 |  :    | A=1  |      \     ---&gt;| C-&gt;&amp;Y |  V
+|       |       +------+       |        +-------+
+|       |   wwwwwwwwwwwwwwww   |        :       :
+|       |       +------+       |        :       :
+|       |  :    | C=&amp;B |---    |        :       :       +-------+
+|       |  :    +------+   \   |        +-------+       |       |
+|       |------&gt;| D=4  |    -----------&gt;| C-&gt;&amp;B |------&gt;|       |
+|       |       +------+       |        +-------+       |       |
++-------+       :      :       |        :       :       |       |
+                               |        :       :       |       |
+                               |        :       :       | CPU 2 |
+                               |        +-------+       |       |
+    ë¶ëªí ìëª»ë        ---&gt;  |        | B-&gt;7  |------&gt;|       |
+    B ì ê° ì¸ì§ (!)           |        +-------+       |       |
+                               |        :       :       |       |
+                               |        +-------+       |       |
+    X ì ë¡ëê° B ì    ---&gt;    \       | X-&gt;9  |------&gt;|       |
+    ì¼ê´ì± ì ì§ë¥¼                \      +-------+       |       |
+    ì§ì°ìí´                      -----&gt;| B-&gt;2  |       +-------+
+                                        +-------+
+                                        :       :
+</code></pre>
+<p>ìì ììì, CPU 2 ë (B ì ê°ì´ ë ) *C ì ê° ì½ê¸°ê° C ì LOAD ë¤ì ì´ì´ì§ìë<br>B ê° 7 ì´ë¼ë ê²°ê³¼ë¥¼ ì»ìµëë¤.</p>
+<p>íì§ë§, ë§ì½ ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ê° C ì ë¡ëì *C (ì¦, B) ì ë¡ë ì¬ì´ì<br>ììë¤ë©´:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+    &#123; B = 7; X = 9; Y = 8; C = &amp;Y &#125;
+STORE A = 1
+STORE B = 2
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+STORE C = &amp;B        LOAD X
+STORE D = 4        LOAD C (gets &amp;B)
+            &lt;ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´&gt;
+            LOAD *C (reads B)
+</code></pre>
+<p>ë¤ìê³¼ ê°ì´ ë©ëë¤:</p>
+<pre><code>+-------+       :      :                :       :
+|       |       +------+                +-------+
+|       |------&gt;| B=2  |-----       ---&gt;| Y-&gt;8  |
+|       |  :    +------+     \          +-------+
+| CPU 1 |  :    | A=1  |      \     ---&gt;| C-&gt;&amp;Y |
+|       |       +------+       |        +-------+
+|       |   wwwwwwwwwwwwwwww   |        :       :
+|       |       +------+       |        :       :
+|       |  :    | C=&amp;B |---    |        :       :       +-------+
+|       |  :    +------+   \   |        +-------+       |       |
+|       |------&gt;| D=4  |    -----------&gt;| C-&gt;&amp;B |------&gt;|       |
+|       |       +------+       |        +-------+       |       |
++-------+       :      :       |        :       :       |       |
+                               |        :       :       |       |
+                               |        :       :       | CPU 2 |
+                               |        +-------+       |       |
+                               |        | X-&gt;9  |------&gt;|       |
+                               |        +-------+       |       |
+  C ë¡ì ì¤í ì´ ìì     ---&gt;   \   ddddddddddddddddd   |       |
+  ëª¨ë  ì´ë²¤í¸ ê²°ê³¼ê°             \      +-------+       |       |
+  ë¤ì ë¡ëìê²                   -----&gt;| B-&gt;2  |------&gt;|       |
+  ë³´ì´ê² ê°ì íë¤                       +-------+       |       |
+                                        :       :       +-------+
+</code></pre>
+<p>ìì§¸, ì½ê¸° ë°°ë¦¬ì´ë ë¡ë ì¤í¼ë ì´ìë¤ìì ë¶ë¶ì  ìì ì¸ì°ê¸°ë¡ ëìí©ëë¤.<br>ìëì ì¼ë ¨ì ì´ë²¤í¸ë¥¼ ë´ìë¤:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+    &#123; A = 0, B = 9 &#125;
+STORE A=1
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+STORE B=2
+            LOAD B
+            LOAD A
+</code></pre>
+<p>CPU 1 ì ì°ê¸° ë°°ë¦¬ì´ë¥¼ ì³¤ì§ë§, ë³ë¤ë¥¸ ê°ìì´ ìë¤ë©´ CPU 2 ë CPU 1 ìì íí´ì§<br>ì´ë²¤í¸ì ê²°ê³¼ë¥¼ ë¬´ììì  ììë¡ ì¸ì§íê² ë©ëë¤.</p>
+<pre><code>+-------+       :      :                :       :
+|       |       +------+                +-------+
+|       |------&gt;| A=1  |------      ---&gt;| A-&gt;0  |
+|       |       +------+      \         +-------+
+| CPU 1 |   wwwwwwwwwwwwwwww   \    ---&gt;| B-&gt;9  |
+|       |       +------+        |       +-------+
+|       |------&gt;| B=2  |---     |       :       :
+|       |       +------+   \    |       :       :       +-------+
++-------+       :      :    \   |       +-------+       |       |
+                             ----------&gt;| B-&gt;2  |------&gt;|       |
+                                |       +-------+       | CPU 2 |
+                                |       | A-&gt;0  |------&gt;|       |
+                                |       +-------+       |       |
+                                |       :       :       +-------+
+                                 \      :       :
+                                  \     +-------+
+                                   ----&gt;| A-&gt;1  |
+                                        +-------+
+                                        :       :
+</code></pre>
+<p>íì§ë§, ë§ì½ ì½ê¸° ë°°ë¦¬ì´ê° B ì ë¡ëì A ì ë¡ë ì¬ì´ì ì¡´ì¬íë¤ë©´:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+    &#123; A = 0, B = 9 &#125;
+STORE A=1
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+STORE B=2
+            LOAD B
+            &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+            LOAD A
+</code></pre>
+<p>CPU 1 ì ìí´ ë§ë¤ì´ì§ ë¶ë¶ì  ììê° CPU 2 ìë ê·¸ëë¡ ì¸ì§ë©ëë¤:</p>
+<pre><code>+-------+       :      :                :       :
+|       |       +------+                +-------+
+|       |------&gt;| A=1  |------      ---&gt;| A-&gt;0  |
+|       |       +------+      \         +-------+
+| CPU 1 |   wwwwwwwwwwwwwwww   \    ---&gt;| B-&gt;9  |
+|       |       +------+        |       +-------+
+|       |------&gt;| B=2  |---     |       :       :
+|       |       +------+   \    |       :       :       +-------+
++-------+       :      :    \   |       +-------+       |       |
+                             ----------&gt;| B-&gt;2  |------&gt;|       |
+                                |       +-------+       | CPU 2 |
+                                |       :       :       |       |
+                                |       :       :       |       |
+  ì¬ê¸°ì ì½ê¸° ë°°ë¦¬ì´ë   ----&gt;   \  rrrrrrrrrrrrrrrrr   |       |
+  B ë¡ì ì¤í ì´ ì ì              \     +-------+       |       |
+  ëª¨ë  ê²°ê³¼ë¥¼ CPU 2 ì             ----&gt;| A-&gt;1  |------&gt;|       |
+  ë³´ì´ëë¡ íë¤                         +-------+       |       |
+                                        :       :       +-------+
+</code></pre>
+<p>ë ìë²½í ì¤ëªì ìí´, A ì ë¡ëê° ì½ê¸° ë°°ë¦¬ì´ ìê³¼ ë¤ì ìì¼ë©´ ì´ë»ê² ë ì§<br>ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+    &#123; A = 0, B = 9 &#125;
+STORE A=1
+&lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+STORE B=2
+            LOAD B
+            LOAD A [first load of A]
+            &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+            LOAD A [second load of A]
+</code></pre>
+<p>A ì ë¡ë ëê°ê° ëª¨ë B ì ë¡ë ë¤ì ìì§ë§, ìë¡ ë¤ë¥¸ ê°ì ì»ì´ì¬ ì<br>ììµëë¤:</p>
+<pre><code>+-------+       :      :                :       :
+|       |       +------+                +-------+
+|       |------&gt;| A=1  |------      ---&gt;| A-&gt;0  |
+|       |       +------+      \         +-------+
+| CPU 1 |   wwwwwwwwwwwwwwww   \    ---&gt;| B-&gt;9  |
+|       |       +------+        |       +-------+
+|       |------&gt;| B=2  |---     |       :       :
+|       |       +------+   \    |       :       :       +-------+
++-------+       :      :    \   |       +-------+       |       |
+                             ----------&gt;| B-&gt;2  |------&gt;|       |
+                                |       +-------+       | CPU 2 |
+                                |       :       :       |       |
+                                |       :       :       |       |
+                                |       +-------+       |       |
+                                |       | A-&gt;0  |------&gt;| 1st   |
+                                |       +-------+       |       |
+  ì¬ê¸°ì ì½ê¸° ë°°ë¦¬ì´ë   ----&gt;   \  rrrrrrrrrrrrrrrrr   |       |
+  B ë¡ì ì¤í ì´ ì ì              \     +-------+       |       |
+  ëª¨ë  ê²°ê³¼ë¥¼ CPU 2 ì             ----&gt;| A-&gt;1  |------&gt;| 2nd   |
+  ë³´ì´ëë¡ íë¤                         +-------+       |       |
+                                        :       :       +-------+
+</code></pre>
+<p>íì§ë§ CPU 1 ììì A ìë°ì´í¸ë ì½ê¸° ë°°ë¦¬ì´ê° ìë£ëê¸° ì ìë ë³´ì¼ ìë<br>ìê¸´ í©ëë¤:</p>
+<pre><code>+-------+       :      :                :       :
+|       |       +------+                +-------+
+|       |------&gt;| A=1  |------      ---&gt;| A-&gt;0  |
+|       |       +------+      \         +-------+
+| CPU 1 |   wwwwwwwwwwwwwwww   \    ---&gt;| B-&gt;9  |
+|       |       +------+        |       +-------+
+|       |------&gt;| B=2  |---     |       :       :
+|       |       +------+   \    |       :       :       +-------+
++-------+       :      :    \   |       +-------+       |       |
+                             ----------&gt;| B-&gt;2  |------&gt;|       |
+                                |       +-------+       | CPU 2 |
+                                |       :       :       |       |
+                                 \      :       :       |       |
+                                  \     +-------+       |       |
+                                   ----&gt;| A-&gt;1  |------&gt;| 1st   |
+                                        +-------+       |       |
+                                    rrrrrrrrrrrrrrrrr   |       |
+                                        +-------+       |       |
+                                        | A-&gt;1  |------&gt;| 2nd   |
+                                        +-------+       |       |
+                                        :       :       +-------+
+</code></pre>
+<p>ì¬ê¸°ì ë³´ì¥ëë ê±´, ë§ì½ B ì ë¡ëê° B == 2 ë¼ë ê²°ê³¼ë¥¼ ë´¤ë¤ë©´, A ìì ëë²ì§¸<br>ë¡ëë í­ì A == 1 ì ë³´ê² ë  ê²ì´ë¼ë ê²ëë¤.  A ìì ì²«ë²ì§¸ ë¡ëìë ê·¸ë°<br>ë³´ì¥ì´ ììµëë¤; A == 0 ì´ê±°ë A == 1 ì´ê±°ë ë ì¤ íëì ê²°ê³¼ë¥¼ ë³´ê² ë ê²ëë¤.</p>
+<h2 id="i½e¸°-e©eª¨e¦¬-e°°e¦¬i´-VS-e¡oeeoe-ii¸¡"><a href="#i½e¸°-e©eª¨e¦¬-e°°e¦¬i´-VS-e¡oeeoe-ii¸¡" class="headerlink" title="ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ VS ë¡ë ìì¸¡"></a>ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ VS ë¡ë ìì¸¡</h2><p>ë§ì CPUë¤ì´ ë¡ëë¥¼ ìì¸¡ì ì¼ë¡ (speculatively) í©ëë¤: ì´ë¤ ë°ì´í°ë¥¼ ë©ëª¨ë¦¬ìì<br>ë¡ëí´ì¼ íê² ë ì§ ìì¸¡ì íë¤ë©´, í´ë¹ ë°ì´í°ë¥¼ ë¡ëíë ì¸ì¤í¸ë­ìì ì¤ì ë¡ë<br>ìì§ ë§ëì§ ììëë¼ë ë¤ë¥¸ ë¡ë ììì´ ìì´ ë²ì¤ (bus) ê° ìë¬´ ì¼ë íê³  ìì§<br>ìë¤ë©´, ê·¸ ë°ì´í°ë¥¼ ë¡ëí©ëë¤.  ì´íì ì¤ì  ë¡ë ì¸ì¤í¸ë­ìì´ ì¤íëë©´ CPU ê°<br>ì´ë¯¸ ê·¸ ê°ì ê°ì§ê³  ìê¸° ëë¬¸ì ê·¸ ë¡ë ì¸ì¤í¸ë­ìì ì¦ì ìë£ë©ëë¤.</p>
+<p>í´ë¹ CPU ë ì¤ì ë¡ë ê·¸ ê°ì´ íìì¹ ììë¤ë ì¬ì¤ì´ ëì¤ì ëë¬ë  ìë ìëë° -<br>í´ë¹ ë¡ë ì¸ì¤í¸ë­ìì´ ë¸ëì¹ë¡ ì°íëê±°ë íì ì ìê² ì£  - , ê·¸ë ê² ëë©´ ìì<br>ì½ì´ë ê°ì ë²ë¦¬ê±°ë ëì¤ì ì¬ì©ì ìí´ ìºìì ë£ì´ë ì ììµëë¤.</p>
+<p>ë¤ìì ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+            LOAD B
+            DIVIDE        &#125; ëëê¸° ëªë ¹ì ì¼ë°ì ì¼ë¡
+            DIVIDE        &#125; ê¸´ ìê°ì íìë¡ í©ëë¤
+            LOAD A
+</code></pre>
+<p>ë ì´ë ê² ë  ì ììµëë¤:</p>
+<pre><code>                                        :       :       +-------+
+                                        +-------+       |       |
+                                    ---&gt;| B-&gt;2  |------&gt;|       |
+                                        +-------+       | CPU 2 |
+                                        :       :DIVIDE |       |
+                                        +-------+       |       |
+ëëê¸° íëë¼ ë°ì       ---&gt;       ---&gt;| A-&gt;0  |~~~~   |       |
+CPU ë A ì LOAD ë¥¼                     +-------+   ~   |       |
+ìì¸¡í´ì ìííë¤                       :       :   ~   |       |
+                                        :       :DIVIDE |       |
+                                        :       :   ~   |       |
+ëëê¸°ê° ëëë©´       ---&gt;     ---&gt;     :       :   ~--&gt;|       |
+CPU ë í´ë¹ LOAD ë¥¼                     :       :       |       |
+ì¦ê° ìë£íë¤                           :       :       +-------+
+</code></pre>
+<p>ì½ê¸° ë°°ë¦¬ì´ë ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë¥¼ ëë²ì§¸ ë¡ë ì§ì ì ëëë¤ë©´:</p>
+<pre><code>CPU 1            CPU 2
+=======================    =======================
+            LOAD B
+            DIVIDE
+            DIVIDE
+            &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+            LOAD A
+</code></pre>
+<p>ìì¸¡ì¼ë¡ ì»ì´ì§ ê°ì ì¬ì©ë ë°°ë¦¬ì´ì íìì ë°ë¼ì í´ë¹ ê°ì´ ì³ìì§ ê²í ëê²<br>ë©ëë¤.  ë§ì½ í´ë¹ ë©ëª¨ë¦¬ ìì­ì ë³íê° ììë¤ë©´, ìì¸¡ì¼ë¡ ì»ì´ëìë ê°ì´<br>ì¬ì©ë©ëë¤:</p>
+<pre><code>                                        :       :       +-------+
+                                        +-------+       |       |
+                                    ---&gt;| B-&gt;2  |------&gt;|       |
+                                        +-------+       | CPU 2 |
+                                        :       :DIVIDE |       |
+                                        +-------+       |       |
+ëëê¸° íëë¼ ë°ì       ---&gt;       ---&gt;| A-&gt;0  |~~~~   |       |
+CPU ë A ì LOAD ë¥¼                     +-------+   ~   |       |
+ìì¸¡íë¤                                :       :   ~   |       |
+                                        :       :DIVIDE |       |
+                                        :       :   ~   |       |
+                                        :       :   ~   |       |
+                                    rrrrrrrrrrrrrrrr~   |       |
+                                        :       :   ~   |       |
+                                        :       :   ~--&gt;|       |
+                                        :       :       |       |
+                                        :       :       +-------+
+</code></pre>
+<p>íì§ë§ ë¤ë¥¸ CPU ìì ìë°ì´í¸ë ë¬´í¨íê° ììë¤ë©´, ê·¸ ìì¸¡ì ë¬´í¨íëê³  ê·¸ ê°ì<br>ë¤ì ì½íì§ëë¤:</p>
+<pre><code>                                        :       :       +-------+
+                                        +-------+       |       |
+                                    ---&gt;| B-&gt;2  |------&gt;|       |
+                                        +-------+       | CPU 2 |
+                                        :       :DIVIDE |       |
+                                        +-------+       |       |
+ëëê¸° íëë¼ ë°ì       ---&gt;       ---&gt;| A-&gt;0  |~~~~   |       |
+CPU ë A ì LOAD ë¥¼                     +-------+   ~   |       |
+ìì¸¡íë¤                                :       :   ~   |       |
+                                        :       :DIVIDE |       |
+                                        :       :   ~   |       |
+                                        :       :   ~   |       |
+                                    rrrrrrrrrrrrrrrrr   |       |
+                                        +-------+       |       |
+ìì¸¡ì± ëìì ë¬´í¨í ëê³     ---&gt;   ---&gt;| A-&gt;1  |------&gt;|       |
+ìë°ì´í¸ë ê°ì´ ë¤ì ì½íì§ë¤           +-------+       |       |
+                                        :       :       +-------+
+</code></pre>
+<h2 id="MULTICOPY-iii±"><a href="#MULTICOPY-iii±" class="headerlink" title="MULTICOPY ììì±"></a>MULTICOPY ììì±</h2><p>Multicopy ììì±ì ì¤ì ì ì»´í¨í° ìì¤íìì í­ì ì ê³µëì§ë ìë, ìì ë§ì¶ê¸°ì<br>ëí ìë¹í ì§ê´ì ì¸ ê°ëì¼ë¡, í¹ì  ì¤í ì´ê° ëª¨ë  CPU ë¤ìê² ëìì ë³´ì¬ì§ê²<br>ë¨ì, ë¬ë¦¬ ë§íìë©´ ëª¨ë  CPU ë¤ì´ ëª¨ë  ì¤í ì´ë¤ì´ ë³´ì¬ì§ë ììë¥¼ ëìíê² ëë<br>ê²ìëë¤.  íì§ë§, ìì í multicopy ììì±ì ì¬ì©ì ê°ì¹ìë íëì¨ì´<br>ìµì íë¤ì ë¬´ë¥íê² ë§ë¤ì´ë²ë¦´ ì ìì´ì, ë³´ë¤ ìíë ííì <code>ë¤ë¥¸ multicopy ììì±&#39;&#39; ë¼ë ì´ë¦ì, í¹ì  ì¤í ì´ê° ëª¨ë  -ë¤ë¥¸- CPU ë¤ìê²ë ëìì ë³´ì¬ì§ê² íë ë³´ì¥ì ëì  ì ê³µí©ëë¤.  ì´ ë¬¸ìì ë·ë¶ë¶ë¤ì ì´ ìíë ííì ëí´ ë¼íê² ë©ëë¤ë§, ë¨ìí </code>multicopy ììì±’’ ì´ë¼ê³  ë¶ë¥´ê² ìµëë¤.</p>
+<p>ë¤ìì ìê° multicopy ììì±ì ë³´ìëë¤:</p>
+<pre><code>CPU 1            CPU 2            CPU 3
+=======================    =======================    =======================
+    &#123; X = 0, Y = 0 &#125;
+STORE X=1        r1=LOAD X (reads 1)    LOAD Y (reads 1)
+            &lt;ë²ì© ë°°ë¦¬ì´&gt;        &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+            STORE Y=r1        LOAD X
+</code></pre>
+<p>CPU 2 ì Y ë¡ì ì¤í ì´ì ì¬ì©ëë X ë¡ëì ê²°ê³¼ê° 1 ì´ìê³  CPU 3 ì Y ë¡ëê°<br>1ì ë¦¬í´íë¤ê³  í´ë´ìë¤.  ì´ë CPU 1 ì X ë¡ì ì¤í ì´ê° CPU 2 ì X ë¡ë¶í°ì<br>ë¡ëë¥¼ ììê³  CPU 2 ì Y ë¡ì ì¤í ì´ê° CPU 3 ì Y ë¡ë¶í°ì ë¡ëë¥¼ ìì¬ì<br>ìë¯¸í©ëë¤.  ëí, ì¬ê¸°ìì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì CPU 2 ê° ìì ì ë¡ëë¥¼ ìì ì<br>ì¤í ì´ ì ì ìííê³ , CPU 3 ê° Y ë¡ë¶í°ì ë¡ëë¥¼ X ë¡ë¶í°ì ë¡ë ì ì ìíí¨ì<br>ë³´ì¥í©ëë¤.  ê·¸ë¼ “CPU 3 ì X ë¡ë¶í°ì ë¡ëë 0 ì ë¦¬í´í  ì ììê¹ì?”</p>
+<p>CPU 3 ì X ë¡ëê° CPU 2 ì ë¡ëë³´ë¤ ë¤ì ì´ë£¨ì´ì¡ì¼ë¯ë¡, CPU 3 ì X ë¡ë¶í°ì<br>ë¡ëë 1 ì ë¦¬í´íë¤ê³  ììíëê² ë¹ì°í©ëë¤.  ì´ë° ììì multicopy<br>ììì±ì¼ë¡ë¶í° ëìµëë¤: CPU B ìì ìíë ë¡ëê° CPU A ì ê°ì ë³ìë¡ë¶í°ì<br>ë¡ëë¥¼ ë¤ë°ë¥¸ë¤ë©´ (ê·¸ë¦¬ê³  CPU A ê° ìì ì´ ì½ì ê°ì¼ë¡ ë¨¼ì  í´ë¹ ë³ìì ì¤í ì´<br>íì§ ììë¤ë©´) multicopy ììì±ì ì ê³µíë ìì¤íììë, CPU B ì ë¡ëê° CPU A<br>ì ë¡ëì ê°ì ê° ëë ê·¸ ëì¤ ê°ì ë¦¬í´í´ì¼ë§ í©ëë¤.  íì§ë§, ë¦¬ëì¤ ì»¤ëì<br>ìì¤íë¤ì´ multicopy ììì±ì ì ê³µí  ê²ì ìêµ¬íì§ ììµëë¤.</p>
+<p>ìì ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ì ì¬ì©ì ëª¨ë  multicopy ììì±ì ë¶ì¡±ì ë³´ìí´ì¤ëë¤.<br>ìì ììì, CPU 2 ì X ë¡ë¶í°ì ë¡ëê° 1 ì ë¦¬í´íê³  CPU 3 ì Y ë¡ë¶í°ì<br>ë¡ëê° 1 ì ë¦¬í´íë¤ë©´, CPU 3 ì X ë¡ë¶í°ì ë¡ëë 1ì ë¦¬í´í´ì¼ë§ í©ëë¤.</p>
+<p>íì§ë§, ìì¡´ì±, ì½ê¸° ë°°ë¦¬ì´, ì°ê¸° ë°°ë¦¬ì´ë í­ì non-multicopy ììì±ì ë³´ìí´<br>ì£¼ì§ë ììµëë¤.  ìë¥¼ ë¤ì´, CPU 2 ì ë²ì© ë°°ë¦¬ì´ê° ìì ììì ì¬ë¼ì ¸ì<br>ìëì²ë¼ ë°ì´í° ìì¡´ì±ë§ ë¨ê² ëìë¤ê³  í´ë´ìë¤:</p>
+<pre><code>CPU 1            CPU 2            CPU 3
+=======================    =======================    =======================
+    &#123; X = 0, Y = 0 &#125;
+STORE X=1        r1=LOAD X (reads 1)    LOAD Y (reads 1)
+            &lt;ë°ì´í° ìì¡´ì±&gt;        &lt;ì½ê¸° ë°°ë¦¬ì´&gt;
+            STORE Y=r1        LOAD X (reads 0)
+</code></pre>
+<p>ì´ ë³íë non-multicopy ììì±ì´ ë§ì°íê² í©ëë¤: ì´ ììì, CPU 2 ì X<br>ë¡ë¶í°ì ë¡ëê° 1ì ë¦¬í´íê³ , CPU 3 ì Y ë¡ë¶í°ì ë¡ëê° 1 ì ë¦¬í´íëë°, CPU 3<br>ì X ë¡ë¶í°ì ë¡ëê° 0 ì ë¦¬í´íëê² ìì í í©ë²ì ìëë¤.</p>
+<p>íµì¬ì, CPU 2 ì ë°ì´í° ìì¡´ì±ì´ ìì ì ë¡ëì ì¤í ì´ë¥¼ ììì§ì§ë§, CPU 1 ì<br>ì¤í ì´ì ëí ììë ë³´ì¥íì§ ìëë¤ë ê²ìëë¤.  ë°ë¼ì, ì´ ìì ê° CPU 1 ê³¼<br>CPU 2 ê° ì¤í ì´ ë²í¼ë í ìì¤ì ìºìë¥¼ ê³µì íë, multicopy ììì±ì ì ê³µíì§<br>ìë ìì¤íìì ìíëë¤ë©´ CPU 2 ë CPU 1 ì ì°ê¸°ì ì´ë¥¸ ì ê·¼ì í  ìë<br>ììµëë¤.  ë°ë¼ì, ëª¨ë  CPU ë¤ì´ ì¬ë¬ ì ê·¼ë¤ì ì¡°í©ë ììì ëí´ì ëìíê²<br>íê¸° ìí´ìë ë²ì© ë°°ë¦¬ì´ê° íìí©ëë¤.</p>
+<p>ë²ì© ë°°ë¦¬ì´ë non-multicopy ììì±ë§ ë³´ìí  ì ìëê² ìëë¼, -ëª¨ë - CPU ë¤ì´<br>-ëª¨ë - ì¤í¼ë ì´ìë¤ì ììë¥¼ ëì¼íê² ì¸ìíê² íë ì¶ê°ì ì¸ ìì ë³´ì¥ì<br>ë§ë¤ì´ëëë¤.  ë°ëë¡, release-acquire ì§ì ì°ê²°ì ì´ë° ì¶ê°ì ì¸ ììë<br>ì ê³µíì§ ìëë°, í´ë¹ ì°ê²°ì ë¤ì´ìë CPU ë¤ë§ì´ ë©ëª¨ë¦¬ ì ê·¼ì ì¡°í©ë ììì<br>ëí´ ëìí  ê²ì¼ë¡ ë³´ì¥ë¨ì ìë¯¸í©ëë¤.  ìë¥¼ ë¤ì´, ì¡´ê²½ì¤ë° Herman Hollerith<br>ì ì½ëë¥¼ C ì½ëë¡ ë³ííë©´:</p>
+<pre><code>int u, v, x, y, z;
+
+void cpu0(void)
+&#123;
+    r0 = smp_load_acquire(&amp;x);
+    WRITE_ONCE(u, 1);
+    smp_store_release(&amp;y, 1);
+&#125;
+
+void cpu1(void)
+&#123;
+    r1 = smp_load_acquire(&amp;y);
+    r4 = READ_ONCE(v);
+    r5 = READ_ONCE(u);
+    smp_store_release(&amp;z, 1);
+&#125;
+
+void cpu2(void)
+&#123;
+    r2 = smp_load_acquire(&amp;z);
+    smp_store_release(&amp;x, 1);
+&#125;
+
+void cpu3(void)
+&#123;
+    WRITE_ONCE(v, 1);
+    smp_mb();
+    r3 = READ_ONCE(u);
+&#125;
+</code></pre>
+<p>cpu0(), cpu1(), ê·¸ë¦¬ê³  cpu2() ë smp_store_release()/smp_load_acquire() ìì<br>ì°ê²°ì ì°¸ì¬ëì´ ìì¼ë¯ë¡, ë¤ìê³¼ ê°ì ê²°ê³¼ë ëì¤ì§ ìì ê²ëë¤:</p>
+<pre><code>r0 == 1 &amp;&amp; r1 == 1 &amp;&amp; r2 == 1
+</code></pre>
+<p>ë ëìê°ì, cpu0() ì cpu1() ì¬ì´ì release-acquire ê´ê³ë¡ ì¸í´, cpu1() ì<br>cpu0() ì ì°ê¸°ë¥¼ ë´ì¼ë§ íë¯ë¡, ë¤ìê³¼ ê°ì ê²°ê³¼ë ìì ê²ëë¤:</p>
+<pre><code>r1 == 1 &amp;&amp; r5 == 0
+</code></pre>
+<p>íì§ë§, release-acquire ì ìí´ ì ê³µëë ììë í´ë¹ ì°ê²°ì ëì°¸í CPU ë¤ìë§<br>ì ì©ëë¯ë¡ cpu3() ì, ì ì´ë ì¤í ì´ë¤ ì¸ìë ì ì©ëì§ ììµëë¤.  ë°ë¼ì, ë¤ìê³¼<br>ê°ì ê²°ê³¼ê° ê°ë¥í©ëë¤:</p>
+<pre><code>r0 == 0 &amp;&amp; r1 == 1 &amp;&amp; r2 == 1 &amp;&amp; r3 == 0 &amp;&amp; r4 == 0
+</code></pre>
+<p>ë¹ì·íê², ë¤ìê³¼ ê°ì ê²°ê³¼ë ê°ë¥í©ëë¤:</p>
+<pre><code>r0 == 0 &amp;&amp; r1 == 1 &amp;&amp; r2 == 1 &amp;&amp; r3 == 0 &amp;&amp; r4 == 0 &amp;&amp; r5 == 1
+</code></pre>
+<p>cpu0(), cpu1(), ê·¸ë¦¬ê³  cpu2() ë ê·¸ë¤ì ì½ê¸°ì ì°ê¸°ë¥¼ ììëë¡ ë³´ê² ëì§ë§,<br>release-acquire ì²´ì¸ì ê´ì¬ëì§ ìì CPU ë¤ì ê·¸ ììì ì´ê²¬ì ê°ì§ ì<br>ììµëë¤.  ì´ë° ì´ê²¬ì smp_load_acquire() ì smp_store_release() ì êµ¬íì<br>ì¬ì©ëë ìíë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ì¸ì¤í¸ë­ìë¤ì í­ì ë°°ë¦¬ì´ ìì ì¤í ì´ë¤ì ë¤ì<br>ë¡ëë¤ì ìì¸ì¸ íìë ìë¤ë ì¬ì¤ìì ê¸°ì¸í©ëë¤.  ì´ ë§ì cpu3() ë cpu0() ì<br>u ë¡ì ì¤í ì´ë¥¼ cpu1() ì v ë¡ë¶í°ì ë¡ë ë¤ì ì¼ì´ë ê²ì¼ë¡ ë³¼ ì ìë¤ë<br>ë»ìëë¤, cpu0() ì cpu1() ì ì´ ë ì¤í¼ë ì´ìì´ ìëë ììëë¡ ì¼ì´ë¬ìì<br>ëª¨ë ëìíëë°ë ë§ìëë¤.</p>
+<p>íì§ë§, smp_load_acquire() ë ë§ì ì´ ìëì ëªì¬íìê¸° ë°ëëë¤.  êµ¬ì²´ì ì¼ë¡,<br>ì´ í¨ìë ë¨ìí ìì ê·ì¹ì ì§í¤ë©° ì¸ìë¡ë¶í°ì ì½ê¸°ë¥¼ ìíí©ëë¤.  ì´ê²ì<br>ì´ë¤ í¹ì í ê°ì´ ì½í ê²ì¸ì§ë ë³´ì¥íì§ -ììµëë¤-.  ë°ë¼ì, ë¤ìê³¼ ê°ì ê²°ê³¼ë<br>ê°ë¥í©ëë¤:</p>
+<pre><code>r0 == 0 &amp;&amp; r1 == 0 &amp;&amp; r2 == 0 &amp;&amp; r5 == 0
+</code></pre>
+<p>ì´ë° ê²°ê³¼ë ì´ë¤ ê²ë ì¬ë°°ì¹ ëì§ ìë, ìì°¨ì  ì¼ê´ì±ì ê°ì§ ê°ìì<br>ìì¤íììë ì¼ì´ë  ì ììì ê¸°ìµí´ ëìê¸° ë°ëëë¤.</p>
+<p>ë¤ì ë§íì§ë§, ë¹ì ì ì½ëê° ëª¨ë  ì¤í¼ë ì´ìë¤ì ìì í ììë¥¼ íìë¡ íë¤ë©´,<br>ë²ì© ë°°ë¦¬ì´ë¥¼ ì¬ì©íì­ìì¤.</p>
+<p>==================<br>ëªìì  ì»¤ë ë°°ë¦¬ì´<br>==================</p>
+<p>ë¦¬ëì¤ ì»¤ëì ìë¡ ë¤ë¥¸ ë¨ê³ìì ëìíë ë¤ìí ë°°ë¦¬ì´ë¤ì ê°ì§ê³  ììµëë¤:</p>
+<p>  (*) ì»´íì¼ë¬ ë°°ë¦¬ì´.</p>
+<p>  (*) CPU ë©ëª¨ë¦¬ ë°°ë¦¬ì´.</p>
+<p>  (*) MMIO ì°ê¸° ë°°ë¦¬ì´.</p>
+<h2 id="i»´iOEOEi¼e¬-e°°e¦¬i´"><a href="#i»´iOEOEi¼e¬-e°°e¦¬i´" class="headerlink" title="ì»´íì¼ë¬ ë°°ë¦¬ì´"></a>ì»´íì¼ë¬ ë°°ë¦¬ì´</h2><p>ë¦¬ëì¤ ì»¤ëì ì»´íì¼ë¬ê° ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¥¼ ì¬ë°°ì¹ íë ê²ì ë§ìì£¼ë ëªìì ì¸<br>ì»´íì¼ë¬ ë°°ë¦¬ì´ë¥¼ ê°ì§ê³  ììµëë¤:</p>
+<pre><code>barrier();
+</code></pre>
+<p>ì´ê±´ ë²ì© ë°°ë¦¬ì´ìëë¤ – barrier() ì ì½ê¸°-ì½ê¸° ë ì°ê¸°-ì°ê¸° ë³ì¢ì ììµëë¤.<br>íì§ë§, READ_ONCE() ì WRITE_ONCE() ë í¹ì  ì¡ì¸ì¤ë¤ì ëí´ìë§ ëìíë<br>barrier() ì ìíë ííë¡ ë³¼ ì ììµëë¤.</p>
+<p>barrier() í¨ìë ë¤ìê³¼ ê°ì í¨ê³¼ë¥¼ ê°ìµëë¤:</p>
+<p> (*) ì»´íì¼ë¬ê° barrier() ë¤ì ì¡ì¸ì¤ë¤ì´ barrier() ìì ì¡ì¸ì¤ë³´ë¤ ìì¼ë¡<br>     ì¬ë°°ì¹ëì§ ëª»íê² í©ëë¤.  ìë¥¼ ë¤ì´, ì¸í°ë½í¸ í¸ë¤ë¬ ì½ëì ì¸í°ë½í¸ ë¹í<br>     ì½ë ì¬ì´ì íµì ì ì ì¤í íê¸° ìí´ ì¬ì©ë  ì ììµëë¤.</p>
+<p> (*) ë£¨íìì, ì»´íì¼ë¬ê° ë£¨í ì¡°ê±´ì ì¬ì©ë ë³ìë¥¼ ë§¤ ì´í°ë ì´ìë§ë¤<br>     ë©ëª¨ë¦¬ìì ë¡ëíì§ ììë ëëë¡ ìµì í íëê±¸ ë°©ì§í©ëë¤.</p>
+<p>READ_ONCE() ì WRITE_ONCE() í¨ìë ì±ê¸ ì°ë ë ì½ëììë ë¬¸ì  ìì§ë§ ëìì±ì´<br>ìë ì½ëììë ë¬¸ì ê° ë  ì ìë ëª¨ë  ìµì íë¥¼ ë§ìµëë¤.  ì´ë° ë¥ì ìµì íì<br>ëí ìë¥¼ ëªê°ì§ ë¤ì´ë³´ë©´ ë¤ìê³¼ ê°ìµëë¤:</p>
+<p> (*) ì»´íì¼ë¬ë ê°ì ë³ìì ëí ë¡ëì ì¤í ì´ë¥¼ ì¬ë°°ì¹ í  ì ìê³ , ì´ë¤<br>     ê²½ì°ìë CPUê° ê°ì ë³ìë¡ë¶í°ì ë¡ëë¤ì ì¬ë°°ì¹í  ìë ììµëë¤.  ì´ë<br>     ë¤ìì ì½ëê°:</p>
+<pre><code>a[0] = x;
+a[1] = x;
+
+ x ì ìì  ê°ì´ a[1] ì, ì ê°ì´ a[0] ì ìê² í  ì ìë¤ë ë»ìëë¤.
+ ì»´íì¼ë¬ì CPUê° ì´ë° ì¼ì ëª»íê² íë ¤ë©´ ë¤ìê³¼ ê°ì´ í´ì¼ í©ëë¤:
+
+a[0] = READ_ONCE(x);
+a[1] = READ_ONCE(x);
+
+ ì¦, READ_ONCE() ì WRITE_ONCE() ë ì¬ë¬ CPU ìì íëì ë³ìì ê°í´ì§ë
+ ì¡ì¸ì¤ë¤ì ìºì ì¼ê´ì±ì ì ê³µí©ëë¤.
+</code></pre>
+<p> (*) ì»´íì¼ë¬ë ê°ì ë³ìì ëí ì°ìì ì¸ ë¡ëë¤ì ë³í©í  ì ììµëë¤.  ê·¸ë°<br>     ë³í© ììì¼ë¡ ì»´íì¼ë¬ë ë¤ìì ì½ëë¥¼:</p>
+<pre><code>while (tmp = a)
+    do_something_with(tmp);
+
+ ë¤ìê³¼ ê°ì´, ì±ê¸ ì°ë ë ì½ëììë ë§ì´ ëì§ë§ ê°ë°ìì ìëì ì í ë§ì§
+ ìë ë°©í¥ì¼ë¡ &quot;ìµì í&quot; í  ì ììµëë¤:
+
+if (tmp = a)
+    for (;;)
+        do_something_with(tmp);
+
+ ì»´íì¼ë¬ê° ì´ë° ì§ì íì§ ëª»íê² íë ¤ë©´ READ_ONCE() ë¥¼ ì¬ì©íì¸ì:
+
+while (tmp = READ_ONCE(a))
+    do_something_with(tmp);
+</code></pre>
+<p> (*) ìì»¨ë ë ì§ì¤í° ì¬ì©ëì´ ë§ì ì»´íì¼ë¬ê° ëª¨ë  ë°ì´í°ë¥¼ ë ì§ì¤í°ì ë´ì ì<br>     ìë ê²½ì°, ì»´íì¼ë¬ë ë³ìë¥¼ ë¤ì ë¡ëí  ì ììµëë¤.  ë°ë¼ì ì»´íì¼ë¬ë<br>     ìì ììì ë³ì ‘tmp’ ì¬ì©ì ìµì íë¡ ìì ë²ë¦´ ì ììµëë¤:</p>
+<pre><code>while (tmp = a)
+    do_something_with(tmp);
+
+ ì´ ì½ëë ë¤ìê³¼ ê°ì´ ì±ê¸ ì°ë ëììë ìë²½íì§ë§ ëìì±ì´ ì¡´ì¬íë
+ ê²½ì°ì ì¹ëªì ì¸ ì½ëë¡ ë°ë ì ììµëë¤:
+
+while (a)
+    do_something_with(a);
+
+ ìë¥¼ ë¤ì´, ìµì íë ì´ ì½ëë ë³ì a ê° ë¤ë¥¸ CPU ì ìí´ &quot;while&quot; ë¬¸ê³¼
+ do_something_with() í¸ì¶ ì¬ì´ì ë°ëì´ do_something_with() ì 0ì ëê¸¸
+ ìë ììµëë¤.
+
+ ì´ë²ìë, ì»´íì¼ë¬ê° ê·¸ë° ì§ì íëê±¸ ë§ê¸° ìí´ READ_ONCE() ë¥¼ ì¬ì©íì¸ì:
+
+while (tmp = READ_ONCE(a))
+    do_something_with(tmp);
+
+ ë ì§ì¤í°ê° ë¶ì¡±í ìí©ì ê²ªë ê²½ì°, ì»´íì¼ë¬ë tmp ë¥¼ ì¤íì ì ì¥í´ë ìë
+ ììµëë¤.  ì»´íì¼ë¬ê° ë³ìë¥¼ ë¤ì ì½ì´ë¤ì´ëê±´ ì´ë ê² ì ì¥í´ëê³  íì ë¤ì
+ ì½ì´ë¤ì´ëë° ëë ì¤ë²í¤ë ëë¬¸ìëë¤.  ê·¸ë ê² íëê² ì±ê¸ ì°ë ë
+ ì½ëììë ìì íë¯ë¡, ìì íì§ ìì ê²½ì°ìë ì»´íì¼ë¬ìê² ì§ì  ìë ¤ì¤ì¼
+ í©ëë¤.
+</code></pre>
+<p> (*) ì»´íì¼ë¬ë ê·¸ ê°ì´ ë¬´ìì¼ì§ ìê³  ìë¤ë©´ ë¡ëë¥¼ ìì ìí  ìë ììµëë¤.<br>     ìë¥¼ ë¤ì´, ë¤ìì ì½ëë ë³ì ‘a’ ì ê°ì´ í­ì 0ìì ì¦ëªí  ì ìë¤ë©´:</p>
+<pre><code>while (tmp = a)
+    do_something_with(tmp);
+
+ ì´ë ê² ìµì í ëì´ë²ë¦´ ì ììµëë¤:
+
+do &#123; &#125; while (0);
+
+ ì´ ë³íì ì±ê¸ ì°ë ë ì½ëììë ëìì´ ëëë° ë¡ëì ë¸ëì¹ë¥¼ ì ê±°íê¸°
+ ëë¬¸ìëë¤.  ë¬¸ì ë ì»´íì¼ë¬ê° &#39;a&#39; ì ê°ì ìë°ì´í¸ íëê±´ íì¬ì CPU íë
+ ë¿ì´ë¼ë ê°ì  ììì ì¦ëªì íë¤ëë° ììµëë¤.  ë§ì½ ë³ì &#39;a&#39; ê° ê³µì ëì´
+ ìë¤ë©´, ì»´íì¼ë¬ì ì¦ëªì íë¦° ê²ì´ ë ê²ëë¤.  ì»´íì¼ë¬ë ê·¸ ìì ì´
+ ìê°íë ê²ë§í¼ ë§ì ê²ì ìê³  ìì§ ëª»í¨ì ì»´íì¼ë¬ìê² ìë¦¬ê¸° ìí´
+ READ_ONCE() ë¥¼ ì¬ì©íì¸ì:
+
+while (tmp = READ_ONCE(a))
+    do_something_with(tmp);
+
+ íì§ë§ ì»´íì¼ë¬ë READ_ONCE() ë¤ì ëì¤ë ê°ì ëí´ìë ëê¸¸ì ëê³  ììì
+ ê¸°ìµíì¸ì.  ìë¥¼ ë¤ì´, ë¤ìì ì½ëìì MAX ë ì ì²ë¦¬ê¸° ë§¤í¬ë¡ë¡, 1ì ê°ì
+ ê°ëë¤ê³  í´ë´ìë¤:
+
+while ((tmp = READ_ONCE(a)) % MAX)
+    do_something_with(tmp);
+
+ ì´ë ê² ëë©´ ì»´íì¼ë¬ë MAX ë¥¼ ê°ì§ê³  ìíëë &quot;%&quot; ì¤í¼ë ì´í°ì ê²°ê³¼ê° í­ì
+ 0ì´ë¼ë ê²ì ìê² ëê³ , ì»´íì¼ë¬ê° ì½ëë¥¼ ì¤ì§ì ì¼ë¡ë ì¡´ì¬íì§ ìë
+ ê²ì²ë¼ ìµì í íë ê²ì´ íì©ëì´ ë²ë¦½ëë¤.  (&#39;a&#39; ë³ìì ë¡ëë ì¬ì í
+ íí´ì§ ê²ëë¤.)
+</code></pre>
+<p> (*) ë¹ì·íê², ì»´íì¼ë¬ë ë³ìê° ì ì¥íë ¤ íë ê°ì ì´ë¯¸ ê°ì§ê³  ìë¤ë ê²ì<br>     ìë©´ ì¤í ì´ ìì²´ë¥¼ ì ê±°í  ì ììµëë¤.  ì´ë²ìë, ì»´íì¼ë¬ë íì¬ì CPU<br>     ë§ì´ ê·¸ ë³ìì ê°ì ì°ë ì¤ë¡ì§ íëì ì¡´ì¬ë¼ê³  ìê°íì¬ ê³µì ë ë³ìì<br>     ëí´ìë ìëª»ë ì¼ì íê² ë©ëë¤.  ìë¥¼ ë¤ì´, ë¤ìê³¼ ê°ì ê²½ì°ê° ìì ì<br>     ììµëë¤:</p>
+<pre><code>a = 0;
+... ë³ì a ì ì¤í ì´ë¥¼ íì§ ìë ì½ë ...
+a = 0;
+
+ ì»´íì¼ë¬ë ë³ì &#39;a&#39; ì ê°ì ì´ë¯¸ 0ì´ë¼ë ê²ì ìê³ , ë°ë¼ì ëë²ì§¸ ì¤í ì´ë¥¼
+ ì­ì í  ê²ëë¤.  ë§ì½ ë¤ë¥¸ CPU ê° ê·¸ ì¬ì´ ë³ì &#39;a&#39; ì ë¤ë¥¸ ê°ì ì¼ë¤ë©´
+ í©ë¹í ê²°ê³¼ê° ëì¬ ê²ëë¤.
+
+ ì»´íì¼ë¬ê° ê·¸ë° ìëª»ë ì¶ì¸¡ì íì§ ìëë¡ WRITE_ONCE() ë¥¼ ì¬ì©íì¸ì:
+
+WRITE_ONCE(a, 0);
+... ë³ì a ì ì¤í ì´ë¥¼ íì§ ìë ì½ë ...
+WRITE_ONCE(a, 0);
+</code></pre>
+<p> (*) ì»´íì¼ë¬ë íì§ ë§ë¼ê³  íì§ ìì¼ë©´ ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì ì¬ë°°ì¹ í  ì<br>     ììµëë¤.  ìë¥¼ ë¤ì´, ë¤ìì íë¡ì¸ì¤ ë ë²¨ ì½ëì ì¸í°ë½í¸ í¸ë¤ë¬ ì¬ì´ì<br>     ìí¸ìì©ì ìê°í´ ë´ìë¤:</p>
+<pre><code>void process_level(void)
+&#123;
+    msg = get_message();
+    flag = true;
+&#125;
+
+void interrupt_handler(void)
+&#123;
+    if (flag)
+        process_message(msg);
+&#125;
+
+ ì´ ì½ëìë ì»´íì¼ë¬ê° process_level() ì ë¤ìê³¼ ê°ì´ ë³ííë ê²ì ë§ì
+ ìë¨ì´ ìê³ , ì´ë° ë³íì ì±ê¸ì°ë ëììë¼ë©´ ì¤ì ë¡ íë¥­í ì íì¼ ì
+ ììµëë¤:
+
+void process_level(void)
+&#123;
+    flag = true;
+    msg = get_message();
+&#125;
+
+ ì´ ëê°ì ë¬¸ì¥ ì¬ì´ì ì¸í°ë½í¸ê° ë°ìíë¤ë©´, interrupt_handler() ë ìë¯¸ë¥¼
+ ì ì ìë ë©ì¸ì§ë¥¼ ë°ì ìë ììµëë¤.  ì´ê±¸ ë§ê¸° ìí´ ë¤ìê³¼ ê°ì´
+ WRITE_ONCE() ë¥¼ ì¬ì©íì¸ì:
+
+void process_level(void)
+&#123;
+    WRITE_ONCE(msg, get_message());
+    WRITE_ONCE(flag, true);
+&#125;
+
+void interrupt_handler(void)
+&#123;
+    if (READ_ONCE(flag))
+        process_message(READ_ONCE(msg));
+&#125;
+
+ interrupt_handler() ìììë ì¤ì²©ë ì¸í°ë½í¸ë NMI ì ê°ì´ ì¸í°ë½í¸ í¸ë¤ë¬
+ ì­ì &#39;flag&#39; ì &#39;msg&#39; ì ì ê·¼íë ëë¤ë¥¸ ë¬´ì¸ê°ì ì¸í°ë½í¸ ë  ì ìë¤ë©´
+ READ_ONCE() ì WRITE_ONCE() ë¥¼ ì¬ì©í´ì¼ í¨ì ê¸°ìµí´ ëì¸ì.  ë§ì½ ê·¸ë°
+ ê°ë¥ì±ì´ ìë¤ë©´, interrupt_handler() ìììë ë¬¸ìí ëª©ì ì´ ìëë¼ë©´
+ READ_ONCE() ì WRITE_ONCE() ë íìì¹ ììµëë¤.  (ê·¼ëì ë¦¬ëì¤ ì»¤ëìì
+ ì¤ì²©ë ì¸í°ë½í¸ë ë³´íµ ì ì¼ì´ëì§ ììë ê¸°ìµí´ ëì¸ì, ì¤ì ë¡, ì´ë¤
+ ì¸í°ë½í¸ í¸ë¤ë¬ê° ì¸í°ë½í¸ê° íì±íë ì±ë¡ ë¦¬í´íë©´ WARN_ONCE() ê°
+ ì¤íë©ëë¤.)
+
+ ì»´íì¼ë¬ë READ_ONCE() ì WRITE_ONCE() ë¤ì READ_ONCE() ë WRITE_ONCE(),
+ barrier(), ëë ë¹ì·í ê²ë¤ì ë´ê³  ìì§ ìì ì½ëë¥¼ ìì§ì¼ ì ìì ê²ì¼ë¡
+ ê°ì ëì´ì¼ í©ëë¤.
+
+ ì´ í¨ê³¼ë barrier() ë¥¼ íµí´ìë ë§ë¤ ì ìì§ë§, READ_ONCE() ì
+ WRITE_ONCE() ê° ì¢ ë ìëª© ëì ì íìëë¤: READ_ONCE() ì WRITE_ONCE()ë
+ ì»´íì¼ë¬ì ì£¼ì´ì§ ë©ëª¨ë¦¬ ìì­ì ëí´ìë§ ìµì í ê°ë¥ì±ì í¬ê¸°íëë¡
+ íì§ë§, barrier() ë ì»´íì¼ë¬ê° ì§ê¸ê¹ì§ ê¸°ê³ì ë ì§ì¤í°ì ìºìí´ ëì
+ ëª¨ë  ë©ëª¨ë¦¬ ìì­ì ê°ì ë²ë ¤ì¼ íê² íê¸° ëë¬¸ìëë¤.  ë¬¼ë¡ , ì»´íì¼ë¬ë
+ READ_ONCE() ì WRITE_ONCE() ê° ì¼ì´ë ììë ì§ì¼ì¤ëë¤, CPU ë ë¹ì°í
+ ê·¸ ììë¥¼ ì§í¬ ìë¬´ê° ìì§ë§ì.
+</code></pre>
+<p> (*) ì»´íì¼ë¬ë ë¤ìì ìììì ê°ì´ ë³ììì ì¤í ì´ë¥¼ ë ì¡°í´ë¼ ìë ììµëë¤:</p>
+<pre><code>if (a)
+    b = a;
+else
+    b = 42;
+
+ ì»´íì¼ë¬ë ìëì ê°ì ìµì íë¡ ë¸ëì¹ë¥¼ ì¤ì¼ ê²ëë¤:
+
+b = 42;
+if (a)
+    b = a;
+
+ ì±ê¸ ì°ë ë ì½ëìì ì´ ìµì íë ìì í  ë¿ ìëë¼ ë¸ëì¹ ê°¯ìë¥¼
+ ì¤ì¬ì¤ëë¤.  íì§ë§ ìíê¹ê²ë, ëìì±ì´ ìë ì½ëììë ì´ ìµì íë ë¤ë¥¸
+ CPU ê° &#39;b&#39; ë¥¼ ë¡ëí  ë, -- &#39;a&#39; ê° 0ì´ ìëë°ë -- ê°ì§ì¸ ê°, 42ë¥¼ ë³´ê²
+ ëë ê²½ì°ë¥¼ ê°ë¥íê² í©ëë¤.  ì´ê±¸ ë°©ì§íê¸° ìí´ WRITE_ONCE() ë¥¼
+ ì¬ì©íì¸ì:
+
+if (a)
+    WRITE_ONCE(b, a);
+else
+    WRITE_ONCE(b, 42);
+
+ ì»´íì¼ë¬ë ë¡ëë¥¼ ë§ë¤ì´ë¼ ìë ììµëë¤.  ì¼ë°ì ì¼ë¡ë ë¬¸ì ë¥¼ ì¼ì¼í¤ì§
+ ìì§ë§, ìºì ë¼ì¸ ë°ì´ì±ì ì¼ì¼ì¼ ì±ë¥ê³¼ íì¥ì±ì ë¨ì´ë¨ë¦´ ì ììµëë¤.
+ ë ì¡°ë ë¡ëë¥¼ ë§ê¸° ìí´ì  READ_ONCE() ë¥¼ ì¬ì©íì¸ì.
+</code></pre>
+<p> (*) ì ë ¬ë ë©ëª¨ë¦¬ ì£¼ìì ìì¹í, íë²ì ë©ëª¨ë¦¬ ì°¸ì¡° ì¸ì¤í¸ë­ìì¼ë¡ ì¡ì¸ì¤<br>     ê°ë¥í í¬ê¸°ì ë°ì´í°ë íëì í° ì¡ì¸ì¤ê° ì¬ë¬ê°ì ìì ì¡ì¸ì¤ë¤ë¡<br>     ëì²´ëë “ë¡ë í°ì´ë§(load tearing)” ê³¼ “ì¤í ì´ í°ì´ë§(store tearing)” ì<br>     ë°©ì§í©ëë¤.  ìë¥¼ ë¤ì´, ì£¼ì´ì§ ìí¤íì³ê° 7-bit imeediate field ë¥¼ ê°ë<br>     16-bit ì¤í ì´ ì¸ì¤í¸ë­ìì ì ê³µíë¤ë©´, ì»´íì¼ë¬ë ë¤ìì 32-bit ì¤í ì´ë¥¼<br>     êµ¬ííëë°ì ëê°ì 16-bit store-immediate ëªë ¹ì ì¬ì©íë ¤ í ê²ëë¤:</p>
+<pre><code>p = 0x00010002;
+
+ ì¤í ì´ í  ììë¥¼ ë§ë¤ê³  ê·¸ ê°ì ì¤í ì´ íê¸° ìí´ ëê°ê° ëë ì¸ì¤í¸ë­ìì
+ ì¬ì©íê² ëë, ì´ë° ì¢ë¥ì ìµì íë¥¼ GCC ë ì¤ì ë¡ í¨ì ë¶ë ìì ëì­ìì¤.
+ ì´ ìµì íë ì±ê¸ ì°ë ë ì½ëììë ì±ê³µì ì¸ ìµì í ìëë¤.  ì¤ì ë¡, ê·¼ëì
+ ë°ìí (ê·¸ë¦¬ê³  ê³ ì³ì§) ë²ê·¸ë GCC ê° volatile ì¤í ì´ì ë¹ì ìì ì¼ë¡ ì´
+ ìµì íë¥¼ ì¬ì©íê² íìµëë¤.  ê·¸ë° ë²ê·¸ê° ìë¤ë©´, ë¤ìì ììì
+ WRITE_ONCE() ì ì¬ì©ì ì¤í ì´ í°ì´ë§ì ë°©ì§í©ëë¤:
+
+WRITE_ONCE(p, 0x00010002);
+
+ Packed êµ¬ì¡°ì²´ì ì¬ì© ì­ì ë¤ìì ìì²ë¼  ë¡ë / ì¤í ì´ í°ì´ë§ì ì ë°í  ì
+ ììµëë¤:
+
+struct __attribute__((__packed__)) foo &#123;
+    short a;
+    int b;
+    short c;
+&#125;;
+struct foo foo1, foo2;
+...
+
+foo2.a = foo1.a;
+foo2.b = foo1.b;
+foo2.c = foo1.c;
+
+ READ_ONCE() ë WRITE_ONCE() ë ìê³  volatile ë§í¹ë ìê¸° ëë¬¸ì,
+ ì»´íì¼ë¬ë ì´ ì¸ê°ì ëìë¬¸ì ëê°ì 32-bit ë¡ëì ëê°ì 32-bit ì¤í ì´ë¡
+ ë³íí  ì ììµëë¤.  ì´ë &#39;foo1.b&#39; ì ê°ì ë¡ë í°ì´ë§ê³¼ &#39;foo2.b&#39; ì
+ ì¤í ì´ í°ì´ë§ì ì´ëí  ê²ëë¤.  ì´ ìììë READ_ONCE() ì WRITE_ONCE()
+ ê° í°ì´ë§ì ë§ì ì ììµëë¤:
+
+foo2.a = foo1.a;
+WRITE_ONCE(foo2.b, READ_ONCE(foo1.b));
+foo2.c = foo1.c;
+</code></pre>
+<p>ê·¸ë ì§ë§, volatile ë¡ ë§í¬ë ë³ìì ëí´ìë READ_ONCE() ì WRITE_ONCE() ê°<br>íìì¹ ììµëë¤.  ìë¥¼ ë¤ì´, ‘jiffies’ ë volatile ë¡ ë§í¬ëì´ ìê¸° ëë¬¸ì,<br>READ_ONCE(jiffies) ë¼ê³  í  íìê° ììµëë¤.  READ_ONCE() ì WRITE_ONCE() ê°<br>ì¤ì volatile ìºì¤íì¼ë¡ êµ¬íëì´ ìì´ì ì¸ìê° ì´ë¯¸ volatile ë¡ ë§í¬ëì´<br>ìë¤ë©´ ëë¤ë¥¸ í¨ê³¼ë¥¼ ë´ì§ë ìê¸° ëë¬¸ìëë¤.</p>
+<p>ì´ ì»´íì¼ë¬ ë°°ë¦¬ì´ë¤ì CPU ìë ì§ì ì  í¨ê³¼ë¥¼ ì í ë§ë¤ì§ ìê¸° ëë¬¸ì, ê²°êµ­ì<br>ì¬ë°°ì¹ê° ì¼ì´ë  ìë ììì ë¶ë ê¸°ìµí´ ëì­ìì¤.</p>
+<h2 id="CPU-e©eª¨e¦¬-e°°e¦¬i´"><a href="#CPU-e©eª¨e¦¬-e°°e¦¬i´" class="headerlink" title="CPU ë©ëª¨ë¦¬ ë°°ë¦¬ì´"></a>CPU ë©ëª¨ë¦¬ ë°°ë¦¬ì´</h2><p>ë¦¬ëì¤ ì»¤ëì ë¤ìì ì¬ëê° ê¸°ë³¸ CPU ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ê°ì§ê³  ììµëë¤:</p>
+<pre><code>TYPE        MANDATORY        SMP CONDITIONAL
+===============    =======================    ===========================
+ë²ì©        mb()            smp_mb()
+ì°ê¸°        wmb()            smp_wmb()
+ì½ê¸°        rmb()            smp_rmb()
+ë°ì´í° ìì¡´ì±                READ_ONCE()
+</code></pre>
+<p>ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë¥¼ ì ì¸í ëª¨ë  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ì»´íì¼ë¬ ë°°ë¦¬ì´ë¥¼<br>í¬í¨í©ëë¤.  ë°ì´í° ìì¡´ì±ì ì»´íì¼ë¬ìì ì¶ê°ì ì¸ ìì ë³´ì¥ì í¬í¨íì§<br>ììµëë¤.</p>
+<p>ë°©ë°±: ë°ì´í° ìì¡´ì±ì´ ìë ê²½ì°, ì»´íì¼ë¬ë í´ë¹ ë¡ëë¥¼ ì¬ë°ë¥¸ ììë¡ ì¼ì¼í¬<br>ê²ì¼ë¡ (ì: <code>a[b]</code> ë a[b] ë¥¼ ë¡ë íê¸° ì ì b ì ê°ì ë¨¼ì  ë¡ëíë¤)<br>ê¸°ëëì§ë§, C ì¸ì´ ì¬ììë ì»´íì¼ë¬ê° b ì ê°ì ì¶ì¸¡ (ì: 1 ê³¼ ê°ì) í´ì<br>b  ë¡ë ì ì a ë¡ëë¥¼ íë ì½ë (ì: tmp = a[1]; if (b != 1) tmp = a[b]; ) ë¥¼<br>ë§ë¤ì§ ììì¼ íë¤ë ë´ì© ê°ì ê±´ ììµëë¤.  ëí ì»´íì¼ë¬ë a[b] ë¥¼ ë¡ëí<br>íì b ë¥¼ ëë¤ì ë¡ëí  ìë ìì´ì, a[b] ë³´ë¤ ìµì  ë²ì ì b ê°ì ê°ì§ ìë<br>ììµëë¤.  ì´ë° ë¬¸ì ë¤ì í´ê²°ì±ì ëí ìê²¬ ì¼ì¹ë ìì§ ììµëë¤ë§, ì¼ë¨<br>READ_ONCE() ë§¤í¬ë¡ë¶í° ë³´ê¸° ììíëê² ì¢ì ììì´ ë ê²ëë¤.</p>
+<p>SMP ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì ì ëíë¡ì¸ìë¡ ì»´íì¼ë ìì¤íììë ì»´íì¼ë¬ ë°°ë¦¬ì´ë¡<br>ë°ëëë°, íëì CPU ë ì¤ì¤ë¡ ì¼ê´ì±ì ì ì§íê³ , ê²¹ì¹ë ì¡ì¸ì¤ë¤ ì­ì ì¬ë°ë¥¸<br>ììë¡ íí´ì§ ê²ì¼ë¡ ìê°ëê¸° ëë¬¸ìëë¤.  íì§ë§, ìëì “Virtual Machine<br>Guests” ìë¸ì¹ìì ì°¸ê³ íì­ìì¤.</p>
+<p>[!] SMP ìì¤íìì ê³µì ë©ëª¨ë¦¬ë¡ì ì ê·¼ë¤ì ìì ì¸ìì¼ í  ë, SMP ë©ëª¨ë¦¬<br>ë°°ë¦¬ì´ë <em>ë°ëì</em> ì¬ì©ëì´ì¼ í¨ì ê¸°ìµíì¸ì, ê·¸ëì  ë½ì ì¬ì©íë ê²ì¼ë¡ë<br>ì¶©ë¶íê¸´ íì§ë§ ë§ì´ì£ .</p>
+<p>Mandatory ë°°ë¦¬ì´ë¤ì SMP ìì¤íììë UP ìì¤íììë SMP í¨ê³¼ë§ íµì íê¸°ìë<br>ë¶íìí ì¤ë²í¤ëë¥¼ ê°ê¸° ëë¬¸ì SMP í¨ê³¼ë§ íµì íë©´ ëë ê³³ìë ì¬ì©ëì§ ììì¼<br>í©ëë¤.  íì§ë§, ëì¨í ìì ê·ì¹ì ë©ëª¨ë¦¬ I/O ìëì°ë¥¼ íµí MMIO ì í¨ê³¼ë¥¼<br>íµì í  ëìë mandatory ë°°ë¦¬ì´ë¤ì´ ì¬ì©ë  ì ììµëë¤.  ì´ ë°°ë¦¬ì´ë¤ì<br>ì»´íì¼ë¬ì CPU ëª¨ë ì¬ë°°ì¹ë¥¼ ëª»íëë¡ í¨ì¼ë¡ì¨ ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì´ ëë°ì´ì¤ì<br>ë³´ì¬ì§ë ìììë ìí¥ì ì£¼ê¸° ëë¬¸ì, SMP ê° ìë ìì¤íì´ë¼ í ì§ë¼ë íìí  ì<br>ììµëë¤.</p>
+<p>ì¼ë¶ ê³ ê¸ ë°°ë¦¬ì´ í¨ìë¤ë ììµëë¤:</p>
+<p> (*) smp_store_mb(var, value)</p>
+<pre><code> ì´ í¨ìë í¹ì  ë³ìì í¹ì  ê°ì ëìíê³  ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì¹©ëë¤.
+ UP ì»´íì¼ììë ì»´íì¼ë¬ ë°°ë¦¬ì´ë³´ë¤ ëí ê²ì ì¹ë¤ê³ ë ë³´ì¥ëì§ ììµëë¤.
+</code></pre>
+<p> (<em>) smp_mb__before_atomic();<br> (</em>) smp_mb__after_atomic();</p>
+<pre><code> ì´ê²ë¤ì ê°ì ë¦¬í´íì§ ìë (ëíê¸°, ë¹¼ê¸°, ì¦ê°, ê°ìì ê°ì) ì´í ë¯¹
+ í¨ìë¤ì ìí, í¹í ê·¸ê²ë¤ì´ ë í¼ë°ì¤ ì¹´ì´íì ì¬ì©ë  ëë¥¼ ìí
+ í¨ìë¤ìëë¤.  ì´ í¨ìë¤ì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ë´í¬íê³  ìì§ë ììµëë¤.
+
+ ì´ê²ë¤ì ê°ì ë¦¬í´íì§ ìì¼ë©° ì´í ë¯¹í (set_bit ê³¼ clear_bit ê°ì) ë¹í¸
+ ì°ì°ìë ì¬ì©ë  ì ììµëë¤.
+
+ í ìë¡, ê°ì²´ íëë¥¼ ë¬´í¨í ê²ì¼ë¡ íìíê³  ê·¸ ê°ì²´ì ë í¼ë°ì¤ ì¹´ì´í¸ë¥¼
+ ê°ììí¤ë ë¤ì ì½ëë¥¼ ë³´ì¸ì:
+
+obj-&gt;dead = 1;
+smp_mb__before_atomic();
+atomic_dec(&amp;obj-&gt;ref_count);
+
+ ì´ ì½ëë ê°ì²´ì ìë°ì´í¸ë death ë§í¬ê° ë í¼ë°ì¤ ì¹´ì´í° ê°ì ëì
+ *ì ì* ë³´ì¼ ê²ì ë³´ì¥í©ëë¤.
+
+ ë ë§ì ì ë³´ë¥¼ ìí´ì  Documentation/atomic_&#123;t,bitops&#125;.txt ë¬¸ìë¥¼
+ ì°¸ê³ íì¸ì.
+</code></pre>
+<p> (<em>) dma_wmb();<br> (</em>) dma_rmb();</p>
+<pre><code> ì´ê²ë¤ì CPU ì DMA ê°ë¥í ëë°ì´ì¤ìì ëª¨ë ì¡ì¸ì¤ ê°ë¥í ê³µì  ë©ëª¨ë¦¬ì
+ ì½ê¸°, ì°ê¸° ììë¤ì ììë¥¼ ë³´ì¥íê¸° ìí´ consistent memory ìì ì¬ì©íê¸°
+ ìí ê²ë¤ìëë¤.
+
+ ìë¥¼ ë¤ì´, ëë°ì´ì¤ì ë©ëª¨ë¦¬ë¥¼ ê³µì íë©°, ëì¤í¬ë¦½í° ìí ê°ì ì¬ì©í´
+ ëì¤í¬ë¦½í°ê° ëë°ì´ì¤ì ìí´ ìëì§ ìëë©´ CPU ì ìí´ ìëì§ íìíê³ ,
+ ê³µì§ì© ì´ì¸ì¢(doorbell) ì ì¬ì©í´ ìë°ì´í¸ë ëì¤í¬ë¦½í°ê° ëë°ì´ì¤ì ì¬ì©
+ ê°ë¥í´ì¡ìì ê³µì§íë ëë°ì´ì¤ ëë¼ì´ë²ë¥¼ ìê°í´ ë´ìë¤:
+
+if (desc-&gt;status != DEVICE_OWN) &#123;
+    /* ëì¤í¬ë¦½í°ë¥¼ ìì íê¸° ì ìë ë°ì´í°ë¥¼ ì½ì§ ìì */
+    dma_rmb();
+
+    /* ë°ì´í°ë¥¼ ì½ê³  ì */
+    read_data = desc-&gt;data;
+    desc-&gt;data = write_data;
+
+    /* ìí ìë°ì´í¸ ì  ìì ì¬í­ì ë°ì */
+    dma_wmb();
+
+    /* ìì ê¶ì ìì  */
+    desc-&gt;status = DEVICE_OWN;
+
+    /* MMIO ë¥¼ íµí´ ëë°ì´ì¤ì ê³µì§ë¥¼ íê¸° ì ì ë©ëª¨ë¦¬ë¥¼ ëê¸°í */
+    wmb();
+
+    /* ìë°ì´í¸ë ëì¤í¬ë¦½í°ì ëë°ì´ì¤ì ê³µì§ */
+    writel(DESC_NOTIFY, doorbell);
+&#125;
+
+ dma_rmb() ë ëì¤í¬ë¦½í°ë¡ë¶í° ë°ì´í°ë¥¼ ì½ì´ì¤ê¸° ì ì ëë°ì´ì¤ê° ìì ê¶ì
+ ë´ëììì ë³´ì¥íê² íê³ , dma_wmb() ë ëë°ì´ì¤ê° ìì ì´ ìì ê¶ì ë¤ì
+ ê°ì¡ìì ë³´ê¸° ì ì ëì¤í¬ë¦½í°ì ë°ì´í°ê° ì°ììì ë³´ì¥í©ëë¤.  wmb() ë
+ ìºì ì¼ê´ì±ì´ ìë (cache incoherent) MMIO ìì­ì ì°ê¸°ë¥¼ ìëíê¸° ì ì
+ ìºì ì¼ê´ì±ì´ ìë ë©ëª¨ë¦¬ (cache coherent memory) ì°ê¸°ê° ìë£ëììì
+ ë³´ì¥í´ì£¼ê¸° ìí´ íìí©ëë¤.
+
+ consistent memory ì ëí ìì¸í ë´ì©ì ìí´ì  Documentation/DMA-API.txt
+ ë¬¸ìë¥¼ ì°¸ê³ íì¸ì.
+</code></pre>
+<h2 id="MMIO-i°e¸°-e°°e¦¬i´"><a href="#MMIO-i°e¸°-e°°e¦¬i´" class="headerlink" title="MMIO ì°ê¸° ë°°ë¦¬ì´"></a>MMIO ì°ê¸° ë°°ë¦¬ì´</h2><p>ë¦¬ëì¤ ì»¤ëì ëí memory-mapped I/O ì°ê¸°ë¥¼ ìí í¹ë³í ë°°ë¦¬ì´ë ê°ì§ê³ <br>ììµëë¤:</p>
+<pre><code>mmiowb();
+</code></pre>
+<p>ì´ê²ì mandatory ì°ê¸° ë°°ë¦¬ì´ì ë³ì¢ì¼ë¡, ìíë ìì ê·ì¹ì I/O ìì­ìì¼ë¡ì<br>ì°ê¸°ê° ë¶ë¶ì ì¼ë¡ ììë¥¼ ë§ì¶ëë¡ í´ì¤ëë¤.  ì´ í¨ìë CPU-&gt;íëì¨ì´ ì¬ì´ë¥¼<br>ëì´ì ì¤ì  íëì¨ì´ìê¹ì§ ì¼ë¶ ìì¤ì ìí¥ì ë¼ì¹©ëë¤.</p>
+<p>ë ë§ì ì ë³´ë¥¼ ìí´ì  “Acquire vs I/O ì¡ì¸ì¤” ìë¸ì¹ìì ì°¸ê³ íì¸ì.</p>
+<p>=========================<br>ìë¬µì  ì»¤ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´<br>=========================</p>
+<p>ë¦¬ëì¤ ì»¤ëì ì¼ë¶ í¨ìë¤ì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ë´ì¥íê³  ìëë°, ë½(lock)ê³¼<br>ì¤ì¼ì¥´ë§ ê´ë ¨ í¨ìë¤ì´ ëë¶ë¶ìëë¤.</p>
+<p>ì¬ê¸°ì  <em>ìµìíì</em> ë³´ì¥ì ì¤ëªí©ëë¤; í¹ì  ìí¤íì³ììë ì´ ì¤ëªë³´ë¤ ë ë§ì<br>ë³´ì¥ì ì ê³µí  ìë ììµëë¤ë§ í´ë¹ ìí¤íì³ì ì¢ìì ì¸ ì½ë ì¸ì ë¶ë¶ììë<br>ê·¸ë° ë³´ì¥ì ê¸°ëí´ì  ìë ê²ëë¤.</p>
+<h2 id="e½-ACQUISITION-i¨i"><a href="#e½-ACQUISITION-i¨i" class="headerlink" title="ë½ ACQUISITION í¨ì"></a>ë½ ACQUISITION í¨ì</h2><p>ë¦¬ëì¤ ì»¤ëì ë¤ìí ë½ êµ¬ì±ì²´ë¥¼ ê°ì§ê³  ììµëë¤:</p>
+<p> (<em>) ì¤í ë½<br> (</em>) R/W ì¤í ë½<br> (<em>) ë®¤íì¤<br> (</em>) ì¸ë§í¬ì´<br> (*) R/W ì¸ë§í¬ì´</p>
+<p>ê° êµ¬ì±ì²´ë§ë¤ ëª¨ë  ê²½ì°ì “ACQUIRE” ì¤í¼ë ì´ìê³¼ “RELEASE” ì¤í¼ë ì´ìì ë³ì¢ì´<br>ì¡´ì¬í©ëë¤.  ì´ ì¤í¼ë ì´ìë¤ì ëª¨ë ì ì í ë°°ë¦¬ì´ë¥¼ ë´í¬íê³  ììµëë¤:</p>
+<p> (1) ACQUIRE ì¤í¼ë ì´ìì ìí¥:</p>
+<pre><code> ACQUIRE ë¤ìì ìì²­ë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìì ACQUIRE ì¤í¼ë ì´ìì´ ìë£ë
+ ë¤ì ìë£ë©ëë¤.
+
+ ACQUIRE ììì ìì²­ë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìì ACQUIRE ì¤í¼ë ì´ìì´ ìë£ë íì
+ ìë£ë  ì ììµëë¤.
+</code></pre>
+<p> (2) RELEASE ì¤í¼ë ì´ìì ìí¥:</p>
+<pre><code> RELEASE ììì ìì²­ë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìì RELEASE ì¤í¼ë ì´ìì´ ìë£ëê¸°
+ ì ì ìë£ë©ëë¤.
+
+ RELEASE ë¤ìì ìì²­ë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìì RELEASE ì¤í¼ë ì´ì ìë£ ì ì
+ ìë£ë  ì ììµëë¤.
+</code></pre>
+<p> (3) ACQUIRE vs ACQUIRE ìí¥:</p>
+<pre><code> ì´ë¤ ACQUIRE ì¤í¼ë ì´ìë³´ë¤ ììì ìì²­ë ëª¨ë  ACQUIRE ì¤í¼ë ì´ìì ê·¸
+ ACQUIRE ì¤í¼ë ì´ì ì ì ìë£ë©ëë¤.
+</code></pre>
+<p> (4) ACQUIRE vs RELEASE implication:</p>
+<pre><code> ì´ë¤ RELEASE ì¤í¼ë ì´ìë³´ë¤ ìì ìì²­ë ACQUIRE ì¤í¼ë ì´ìì ê·¸ RELEASE
+ ì¤í¼ë ì´ìë³´ë¤ ë¨¼ì  ìë£ë©ëë¤.
+</code></pre>
+<p> (5) ì¤í¨í ì¡°ê±´ì  ACQUIRE ìí¥:</p>
+<pre><code> ACQUIRE ì¤í¼ë ì´ìì ì¼ë¶ ë½(lock) ë³ì¢ì ë½ì´ ê³§ë°ë¡ íëíê¸°ìë
+ ë¶ê°ë¥í ìíì´ê±°ë ë½ì´ íë ê°ë¥í´ì§ëë¡ ê¸°ë¤ë¦¬ë ëì¤ ìê·¸ëì ë°ê±°ë
+ í´ì ì¤í¨í  ì ììµëë¤.  ì¤í¨í ë½ì ì´ë¤ ë°°ë¦¬ì´ë ë´í¬íì§ ììµëë¤.
+</code></pre>
+<p>[!] ì°¸ê³ : ë½ ACQUIRE ì RELEASE ê° ë¨ë°©í¥ ë°°ë¦¬ì´ì¬ì ëíëë íì ì¤ íëë<br>í¬ë¦¬í°ì»¬ ì¹ì ë°ê¹¥ì ì¸ì¤í¸ë­ìì ìí¥ì´ í¬ë¦¬í°ì»¬ ì¹ì ë´ë¶ë¡ë ë¤ì´ì¬ ì<br>ìë¤ë ê²ìëë¤.</p>
+<p>RELEASE íì ìì²­ëë ACQUIRE ë ì ì²´ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¼ ì¬ê²¨ì§ë©´ ìëëë°,<br>ACQUIRE ìì ì¡ì¸ì¤ê° ACQUIRE íì ìíë  ì ìê³ , RELEASE íì ì¡ì¸ì¤ê°<br>RELEASE ì ì ìíë  ìë ìì¼ë©°, ê·¸ ëê°ì ì¡ì¸ì¤ê° ìë¡ë¥¼ ì§ëì¹  ìë ìê¸°<br>ëë¬¸ìëë¤:</p>
+<pre><code>*A = a;
+ACQUIRE M
+RELEASE M
+*B = b;
+</code></pre>
+<p>ë ë¤ìê³¼ ê°ì´ ë  ìë ììµëë¤:</p>
+<pre><code>ACQUIRE M, STORE *B, STORE *A, RELEASE M
+</code></pre>
+<p>ACQUIRE ì RELEASE ê° ë½ íëê³¼ í´ì ë¼ë©´, ê·¸ë¦¬ê³  ë½ì ACQUIRE ì RELEASE ê°<br>ê°ì ë½ ë³ìì ëí ê²ì´ë¼ë©´, í´ë¹ ë½ì ì¥ê³  ìì§ ìì ë¤ë¥¸ CPU ì ìì¼ìë<br>ì´ì ê°ì ì¬ë°°ì¹ê° ì¼ì´ëë ê²ì¼ë¡ ë³´ì¼ ì ììµëë¤.  ìì½íìë©´, ACQUIRE ì<br>ì´ì´ RELEASE ì¤í¼ë ì´ìì ìì°¨ì ì¼ë¡ ì¤ííë íìê° ì ì²´ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¡<br>ìê°ëì´ì  -ìë©ëë¤-.</p>
+<p>ë¹ì·íê², ìì ë°ë ì¼ì´ì¤ì¸ RELEASE ì ACQUIRE ëê° ì¤í¼ë ì´ìì ìì°¨ì  ì¤í<br>ì­ì ì ì²´ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ë´í¬íì§ ììµëë¤.  ë°ë¼ì, RELEASE, ACQUIRE ë¡<br>ê·ì ëë í¬ë¦¬í°ì»¬ ì¹ìì CPU ìíì RELEASE ì ACQUIRE ë¥¼ ê°ë¡ì§ë¥¼ ì ìì¼ë¯ë¡,<br>ë¤ìê³¼ ê°ì ì½ëë:</p>
+<pre><code>*A = a;
+RELEASE M
+ACQUIRE N
+*B = b;
+</code></pre>
+<p>ë¤ìê³¼ ê°ì´ ìíë  ì ììµëë¤:</p>
+<pre><code>ACQUIRE N, STORE *B, STORE *A, RELEASE M
+</code></pre>
+<p>ì´ë° ì¬ë°°ì¹ë ë°ëë½ì ì¼ì¼í¬ ìë ìì ê²ì²ë¼ ë³´ì¼ ì ììµëë¤.  íì§ë§, ê·¸ë°<br>ë°ëë½ì ì¡°ì§ì´ ìë¤ë©´ RELEASE ë ë¨ìí ìë£ë  ê²ì´ë¯ë¡ ë°ëë½ì ì¡´ì¬í  ì<br>ììµëë¤.</p>
+<pre><code>ì´ê² ì´ë»ê² ì¬ë°ë¥¸ ëìì í  ì ììê¹ì?
+
+ì°ë¦¬ê° ì´ì¼ê¸° íê³  ìëê±´ ì¬ë°°ì¹ë¥¼ íë CPU ì ëí ì´ì¼ê¸°ì´ì§,
+ì»´íì¼ë¬ì ëí ê²ì´ ìëë ì ì´ íµì¬ìëë¤.  ì»´íì¼ë¬ (ëë, ê°ë°ì)
+ê° ì¤í¼ë ì´ìë¤ì ì´ë ê² ì¬ë°°ì¹íë©´, ë°ëë½ì´ ì¼ì´ë  ì -ììµ-ëë¤.
+
+íì§ë§ CPU ê° ì¤í¼ë ì´ìë¤ì ì¬ë°°ì¹ íë¤ëê±¸ ìê°í´ ë³´ì¸ì.  ì´ ììì,
+ì´ìë¸ë¦¬ ì½ë ìì¼ë¡ë ì¸ë½ì´ ë½ì ììê² ëì´ ììµëë¤.  CPU ê° ì´ë¥¼
+ì¬ë°°ì¹í´ì ë¤ì ë½ ì¤í¼ë ì´ìì ë¨¼ì  ì¤ííê² ë©ëë¤.  ë§ì½ ë°ëë½ì´
+ì¡´ì¬íë¤ë©´, ì´ ë½ ì¤í¼ë ì´ìì ê·¸ì  ì¤íì íë©° ê³ìí´ì ë½ì
+ìëí©ëë¤ (ëë, íì°¸ íìê² ì§ë§, ì ë­ëë¤).  CPU ë ì¸ì  ê°ë
+(ì´ìë¸ë¦¬ ì½ëììë ë½ì ììë) ì¸ë½ ì¤í¼ë ì´ìì ì¤ííëë°, ì´ ì¸ë½
+ì¤í¼ë ì´ìì´ ì ì¬ì  ë°ëë½ì í´ê²°íê³ , ë½ ì¤í¼ë ì´ìë ë¤ì´ì´ ì±ê³µíê²
+ë©ëë¤.
+
+íì§ë§ ë§ì½ ë½ì´ ì ì ìë íìì´ìë¤ë©´ì?  ê·¸ë° ê²½ì°ì ì½ëë
+ì¤ì¼ì¥´ë¬ë¡ ë¤ì´ê°ë ¤ í  ê±°ê³ , ì¬ê¸°ì ê²°êµ­ì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ë§ëê²
+ëëë°, ì´ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ìì ì¸ë½ ì¤í¼ë ì´ìì´ ìë£ëëë¡ ë§ë¤ê³ ,
+ë°ëë½ì ì´ë²ìë í´ê²°ë©ëë¤.  ì ì ìë íìì ì¸ë½ ì¬ì´ì ê²½ì£¼ ìí©
+(race) ë ìì ì ìê² ìµëë¤ë§, ë½ ê´ë ¨ ê¸°ë¥ë¤ì ê·¸ë° ê²½ì£¼ ìí©ì ëª¨ë 
+ê²½ì°ì ì ëë¡ í´ê²°í  ì ìì´ì¼ í©ëë¤.
+</code></pre>
+<p>ë½ê³¼ ì¸ë§í¬ì´ë UP ì»´íì¼ë ìì¤íììì ììì ëí´ ë³´ì¥ì íì§ ìê¸° ëë¬¸ì,<br>ê·¸ë° ìí©ìì ì¸í°ë½í¸ ë¹íì±í ì¤í¼ë ì´ìê³¼ í¨ê»ê° ìëë¼ë©´ ì´ë¤ ì¼ìë - í¹í<br>I/O ì¡ì¸ì¤ì ê´ë ¨í´ìë - ì ëë¡ ì¬ì©ë  ì ìì ê²ëë¤.</p>
+<p>“CPU ê° ACQUIRING ë°°ë¦¬ì´ í¨ê³¼” ì¹ìë ì°¸ê³ íìê¸° ë°ëëë¤.</p>
+<p>ìë¥¼ ë¤ì´, ë¤ìê³¼ ê°ì ì½ëë¥¼ ìê°í´ ë´ìë¤:</p>
+<pre><code>*A = a;
+*B = b;
+ACQUIRE
+*C = c;
+*D = d;
+RELEASE
+*E = e;
+*F = f;
+</code></pre>
+<p>ì¬ê¸°ì  ë¤ìì ì´ë²¤í¸ ìíì¤ê° ìê¸¸ ì ììµëë¤:</p>
+<pre><code>ACQUIRE, &#123;*F,*A&#125;, *E, &#123;*C,*D&#125;, *B, RELEASE
+
+[+] &#123;*F,*A&#125; ë ì¡°í©ë ì¡ì¸ì¤ë¥¼ ìë¯¸í©ëë¤.
+</code></pre>
+<p>íì§ë§ ë¤ìê³¼ ê°ì ê±´ ë¶ê°ë¥íì£ :</p>
+<pre><code>&#123;*F,*A&#125;, *B,    ACQUIRE, *C, *D,    RELEASE, *E
+*A, *B, *C,    ACQUIRE, *D,        RELEASE, *E, *F
+*A, *B,        ACQUIRE, *C,        RELEASE, *D, *E, *F
+*B,        ACQUIRE, *C, *D,    RELEASE, &#123;*F,*A&#125;, *E
+</code></pre>
+<h2 id="i¸i°e½i¸-e¹ioei±i-i¨i"><a href="#i¸i°e½i¸-e¹ioei±i-i¨i" class="headerlink" title="ì¸í°ë½í¸ ë¹íì±í í¨ì"></a>ì¸í°ë½í¸ ë¹íì±í í¨ì</h2><p>ì¸í°ë½í¸ë¥¼ ë¹íì±í íë í¨ì (ACQUIRE ì ëì¼) ì ì¸í°ë½í¸ë¥¼ íì±í íë í¨ì<br>(RELEASE ì ëì¼) ë ì»´íì¼ë¬ ë°°ë¦¬ì´ì²ë¼ë§ ëìí©ëë¤.  ë°ë¼ì, ë³ëì ë©ëª¨ë¦¬<br>ë°°ë¦¬ì´ë I/O ë°°ë¦¬ì´ê° íìí ìí©ì´ë¼ë©´ ê·¸ ë°°ë¦¬ì´ë¤ì ì¸í°ë½í¸ ë¹íì±í í¨ì<br>ì¸ì ë°©ë²ì¼ë¡ ì ê³µëì´ì¼ë§ í©ëë¤.</p>
+<h2 id="i¬e¦½e³¼-i¨i´i¬i-i¨i"><a href="#i¬e¦½e³¼-i¨i´i¬i-i¨i" class="headerlink" title="ì¬ë¦½ê³¼ ì¨ì´í¬ì í¨ì"></a>ì¬ë¦½ê³¼ ì¨ì´í¬ì í¨ì</h2><p>ê¸ë¡ë² ë°ì´í°ì íìë ì´ë²¤í¸ì ìí´ íë¡ì¸ì¤ë¥¼ ì ì ë¹ í¸ë¦¬ë ê²ê³¼ ê¹¨ì°ë ê²ì<br>í´ë¹ ì´ë²¤í¸ë¥¼ ê¸°ë¤ë¦¬ë íì¤í¬ì íì¤í¬ ìíì ê·¸ ì´ë²¤í¸ë¥¼ ìë¦¬ê¸° ìí´ ì¬ì©ëë<br>ê¸ë¡ë² ë°ì´í°, ë ë°ì´í°ê°ì ìí¸ìì©ì¼ë¡ ë³¼ ì ììµëë¤.  ì´ê²ì´ ì³ì ììëë¡<br>ì¼ì´ë¨ì ë¶ëªí íê¸° ìí´, íë¡ì¸ì¤ë¥¼ ì ì ë¤ê² íë ê¸°ë¥ê³¼ ê¹¨ì°ë ê¸°ë¥ì<br>ëªê°ì§ ë°°ë¦¬ì´ë¥¼ ë´í¬í©ëë¤.</p>
+<p>ë¨¼ì , ì ì ì¬ì°ë ìª½ì ì¼ë°ì ì¼ë¡ ë¤ìê³¼ ê°ì ì´ë²¤í¸ ìíì¤ë¥¼ ë°ë¦ëë¤:</p>
+<pre><code>for (;;) &#123;
+    set_current_state(TASK_UNINTERRUPTIBLE);
+    if (event_indicated)
+        break;
+    schedule();
+&#125;
+</code></pre>
+<p>set_current_state() ì ìí´, íì¤í¬ ìíê° ë°ë í ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê°<br>ìëì¼ë¡ ì½ìë©ëë¤:</p>
+<pre><code>CPU 1
+===============================
+set_current_state();
+  smp_store_mb();
+    STORE current-&gt;state
+    &lt;ë²ì© ë°°ë¦¬ì´&gt;
+LOAD event_indicated
+</code></pre>
+<p>set_current_state() ë ë¤ìì ê²ë¤ë¡ ê°ì¸ì§ ìë ììµëë¤:</p>
+<pre><code>prepare_to_wait();
+prepare_to_wait_exclusive();
+</code></pre>
+<p>ì´ê²ë¤ ì­ì ìíë¥¼ ì¤ì í í ë²ì© ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì½ìí©ëë¤.<br>ìì ì ì²´ ìíì¤ë ë¤ìê³¼ ê°ì í¨ìë¤ë¡ íë²ì ìí ê°ë¥íë°, ì´ê²ë¤ì ëª¨ë<br>ì¬ë°ë¥¸ ì¥ìì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì½ìí©ëë¤:</p>
+<pre><code>wait_event();
+wait_event_interruptible();
+wait_event_interruptible_exclusive();
+wait_event_interruptible_timeout();
+wait_event_killable();
+wait_event_timeout();
+wait_on_bit();
+wait_on_bit_lock();
+</code></pre>
+<p>ëë²ì§¸ë¡, ê¹¨ì°ê¸°ë¥¼ ìííë ì½ëë ì¼ë°ì ì¼ë¡ ë¤ìê³¼ ê°ì ê²ëë¤:</p>
+<pre><code>event_indicated = 1;
+wake_up(&amp;event_wait_queue);
+</code></pre>
+<p>ëë:</p>
+<pre><code>event_indicated = 1;
+wake_up_process(event_daemon);
+</code></pre>
+<p>wake_up() ë¥ì ìí´ ì°ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° ë´í¬ë©ëë¤.  ë§ì½ ê·¸ê²ë¤ì´ ë­ê°ë¥¼<br>ê¹¨ì´ë¤ë©´ì.  ì´ ë°°ë¦¬ì´ë íì¤í¬ ìíê° ì§ìì§ê¸° ì ì ìíëë¯ë¡, ì´ë²¤í¸ë¥¼<br>ìë¦¬ê¸° ìí STORE ì íì¤í¬ ìíë¥¼ TASK_RUNNING ì¼ë¡ ì¤ì íë STORE ì¬ì´ì<br>ìì¹íê² ë©ëë¤.</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+set_current_state();        STORE event_indicated
+  smp_store_mb();        wake_up();
+    STORE current-&gt;state      &lt;ì°ê¸° ë°°ë¦¬ì´&gt;
+    &lt;ë²ì© ë°°ë¦¬ì´&gt;          STORE current-&gt;state
+LOAD event_indicated
+</code></pre>
+<p>íë²ë ë§í©ëë¤ë§, ì´ ì°ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ì´ ì½ëê° ì ë§ë¡ ë­ê°ë¥¼ ê¹¨ì¸ ëìë§<br>ì¤íë©ëë¤.  ì´ê±¸ ì¤ëªíê¸° ìí´, X ì Y ë ëª¨ë 0 ì¼ë¡ ì´ê¸°í ëì´ ìë¤ë ê°ì <br>íì ìëì ì´ë²¤í¸ ìíì¤ë¥¼ ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+X = 1;                STORE event_indicated
+smp_mb();            wake_up();
+Y = 1;                wait_event(wq, Y == 1);
+wake_up();              load from Y sees 1, no memory barrier
+                load from X might see 0
+</code></pre>
+<p>ì ìì ììì ê²½ì°ì ë¬ë¦¬ ê¹¨ì°ê¸°ê° ì ë§ë¡ íí´ì¡ë¤ë©´, CPU 2 ì X ë¡ëë 1 ì<br>ë³¸ë¤ê³  ë³´ì¥ë  ì ìì ê²ëë¤.</p>
+<p>ì¬ì© ê°ë¥í ê¹¨ì°ê¸°ë¥ í¨ìë¤ë¡ ë¤ìê³¼ ê°ì ê²ë¤ì´ ììµëë¤:</p>
+<pre><code>complete();
+wake_up();
+wake_up_all();
+wake_up_bit();
+wake_up_interruptible();
+wake_up_interruptible_all();
+wake_up_interruptible_nr();
+wake_up_interruptible_poll();
+wake_up_interruptible_sync();
+wake_up_interruptible_sync_poll();
+wake_up_locked();
+wake_up_locked_poll();
+wake_up_nr();
+wake_up_poll();
+wake_up_process();
+</code></pre>
+<p>[!] ì ì¬ì°ë ì½ëì ê¹¨ì°ë ì½ëì ë´í¬ëë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¤ì ê¹¨ì°ê¸° ì ì<br>ì´ë£¨ì´ì§ ì¤í ì´ë¥¼ ì ì¬ì°ë ì½ëê° set_current_state() ë¥¼ í¸ì¶í íì ííë<br>ë¡ëì ëí´ ììë¥¼ ë§ì¶ì§ <em>ìëë¤ë</em> ì ì ê¸°ìµíì¸ì.  ìë¥¼ ë¤ì´, ì ì¬ì°ë<br>ì½ëê° ë¤ìê³¼ ê°ê³ :</p>
+<pre><code>set_current_state(TASK_INTERRUPTIBLE);
+if (event_indicated)
+    break;
+__set_current_state(TASK_RUNNING);
+do_something(my_data);
+</code></pre>
+<p>ê¹¨ì°ë ì½ëë ë¤ìê³¼ ê°ë¤ë©´:</p>
+<pre><code>my_data = value;
+event_indicated = 1;
+wake_up(&amp;event_wait_queue);
+</code></pre>
+<p>event_indecated ìì ë³ê²½ì´ ì ì¬ì°ë ì½ëìê² my_data ìì ë³ê²½ íì ì´ë£¨ì´ì§<br>ê²ì¼ë¡ ì¸ì§ë  ê²ì´ë¼ë ë³´ì¥ì´ ììµëë¤.  ì´ë° ê²½ì°ìë ììª½ ì½ë ëª¨ë ê°ê°ì<br>ë°ì´í° ì¡ì¸ì¤ ì¬ì´ì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì§ì  ì³ì¼ í©ëë¤.  ë°ë¼ì ìì ì¬ì°ë<br>ì½ëë ë¤ìê³¼ ê°ì´:</p>
+<pre><code>set_current_state(TASK_INTERRUPTIBLE);
+if (event_indicated) &#123;
+    smp_rmb();
+    do_something(my_data);
+&#125;
+</code></pre>
+<p>ê·¸ë¦¬ê³  ê¹¨ì°ë ì½ëë ë¤ìê³¼ ê°ì´ ëì´ì¼ í©ëë¤:</p>
+<pre><code>my_data = value;
+smp_wmb();
+event_indicated = 1;
+wake_up(&amp;event_wait_queue);
+</code></pre>
+<h2 id="e·¸i¸i-i¨ie¤"><a href="#e·¸i¸i-i¨ie¤" class="headerlink" title="ê·¸ì¸ì í¨ìë¤"></a>ê·¸ì¸ì í¨ìë¤</h2><p>ê·¸ì¸ì ë°°ë¦¬ì´ë¥¼ ë´í¬íë í¨ìë¤ì ë¤ìê³¼ ê°ìµëë¤:</p>
+<p> (*) schedule() ê³¼ ê·¸ ì ì¬í ê²ë¤ì´ ìì í ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ë´í¬í©ëë¤.</p>
+<p>==============================<br>CPU ê° ACQUIRING ë°°ë¦¬ì´ì í¨ê³¼<br>==============================</p>
+<p>SMP ìì¤íììì ë½ ê¸°ë¥ë¤ì ëì± ê°ë ¥í ííì ë°°ë¦¬ì´ë¥¼ ì ê³µí©ëë¤: ì´<br>ë°°ë¦¬ì´ë ëì¼í ë½ì ì¬ì©íë ë¤ë¥¸ CPU ë¤ì ë©ëª¨ë¦¬ ì¡ì¸ì¤ ìììë ìí¥ì<br>ë¼ì¹©ëë¤.</p>
+<h2 id="ACQUIRE-VS-e©eª¨e¦¬-i¡i¸i¤"><a href="#ACQUIRE-VS-e©eª¨e¦¬-i¡i¸i¤" class="headerlink" title="ACQUIRE VS ë©ëª¨ë¦¬ ì¡ì¸ì¤"></a>ACQUIRE VS ë©ëª¨ë¦¬ ì¡ì¸ì¤</h2><p>ë¤ìì ìë¥¼ ìê°í´ ë´ìë¤: ìì¤íì ëê°ì ì¤íë½ (M) ê³¼ (Q), ê·¸ë¦¬ê³  ì¸ê°ì CPU<br>ë¥¼ ê°ì§ê³  ììµëë¤; ì¬ê¸°ì ë¤ìì ì´ë²¤í¸ ìíì¤ê° ë°ìí©ëë¤:</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+WRITE_ONCE(*A, a);        WRITE_ONCE(*E, e);
+ACQUIRE M            ACQUIRE Q
+WRITE_ONCE(*B, b);        WRITE_ONCE(*F, f);
+WRITE_ONCE(*C, c);        WRITE_ONCE(*G, g);
+RELEASE M            RELEASE Q
+WRITE_ONCE(*D, d);        WRITE_ONCE(*H, h);
+</code></pre>
+<p>*A ë¡ì ì¡ì¸ì¤ë¶í° *H ë¡ì ì¡ì¸ì¤ê¹ì§ê° ì´ë¤ ììë¡ CPU 3 ìê² ë³´ì¬ì§ì§ì<br>ëí´ìë ê° CPU ììì ë½ ì¬ì©ì ìí´ ë´í¬ëì´ ìë ì ì½ì ì ì¸íê³ ë ì´ë¤<br>ë³´ì¥ë ì¡´ì¬íì§ ììµëë¤.  ìë¥¼ ë¤ì´, CPU 3 ìê² ë¤ìê³¼ ê°ì ììë¡ ë³´ì¬ì§ë<br>ê²ì´ ê°ë¥í©ëë¤:</p>
+<pre><code>*E, ACQUIRE M, ACQUIRE Q, *G, *C, *F, *A, *B, RELEASE Q, *D, *H, RELEASE M
+</code></pre>
+<p>íì§ë§ ë¤ìê³¼ ê°ì´ ë³´ì´ì§ë ìì ê²ëë¤:</p>
+<pre><code>*B, *C or *D preceding ACQUIRE M
+*A, *B or *C following RELEASE M
+*F, *G or *H preceding ACQUIRE Q
+*E, *F or *G following RELEASE Q
+</code></pre>
+<h2 id="ACQUIRE-VS-I-O-i¡i¸i¤"><a href="#ACQUIRE-VS-I-O-i¡i¸i¤" class="headerlink" title="ACQUIRE VS I/O ì¡ì¸ì¤"></a>ACQUIRE VS I/O ì¡ì¸ì¤</h2><p>í¹ì í (í¹í NUMA ê° ê´ë ¨ë) íê²½ íìì ëê°ì CPU ìì ëì¼í ì¤íë½ì¼ë¡<br>ë³´í¸ëë ëê°ì í¬ë¦¬í°ì»¬ ì¹ì ìì I/O ì¡ì¸ì¤ë PCI ë¸ë¦¿ì§ì ê²¹ì³ì§ I/O<br>ì¡ì¸ì¤ë¡ ë³´ì¼ ì ìëë°, PCI ë¸ë¦¿ì§ë ìºì ì¼ê´ì± íë¡í ì½ê³¼ í©ì ë§ì¶°ì¼ í <br>ìë¬´ê° ìì¼ë¯ë¡, íìí ì½ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° ìì²­ëì§ ìê¸° ëë¬¸ìëë¤.</p>
+<p>ìë¥¼ ë¤ì´ì:</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+spin_lock(Q)
+writel(0, ADDR)
+writel(1, DATA);
+spin_unlock(Q);
+                spin_lock(Q);
+                writel(4, ADDR);
+                writel(5, DATA);
+                spin_unlock(Q);
+</code></pre>
+<p>ë PCI ë¸ë¦¿ì§ì ë¤ìê³¼ ê°ì´ ë³´ì¼ ì ììµëë¤:</p>
+<pre><code>STORE *ADDR = 0, STORE *ADDR = 4, STORE *DATA = 1, STORE *DATA = 5
+</code></pre>
+<p>ì´ë ê² ëë©´ íëì¨ì´ì ì¤ëìì ì¼ì¼í¬ ì ììµëë¤.</p>
+<p>ì´ë° ê²½ì°ì ì¡ìë ì¤íë½ì ë´ë ¤ëê¸° ì ì mmiowb() ë¥¼ ìíí´ì¼ íëë°, ìë¥¼<br>ë¤ë©´ ë¤ìê³¼ ê°ìµëë¤:</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+spin_lock(Q)
+writel(0, ADDR)
+writel(1, DATA);
+mmiowb();
+spin_unlock(Q);
+                spin_lock(Q);
+                writel(4, ADDR);
+                writel(5, DATA);
+                mmiowb();
+                spin_unlock(Q);
+</code></pre>
+<p>ì´ ì½ëë CPU 1 ìì ìì²­ë ëê°ì ì¤í ì´ê° PCI ë¸ë¦¿ì§ì CPU 2 ìì ìì²­ë<br>ì¤í ì´ë¤ë³´ë¤ ë¨¼ì  ë³´ì¬ì§ì ë³´ì¥í©ëë¤.</p>
+<p>ëí, ê°ì ëë°ì´ì¤ìì ì¤í ì´ë¥¼ ì´ì´ ë¡ëê° ìíëë©´ ì´ ë¡ëë ë¡ëê° ìíëê¸°<br>ì ì ì¤í ì´ê° ìë£ëê¸°ë¥¼ ê°ì íë¯ë¡ mmiowb() ì íìê° ìì´ì§ëë¤:</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+spin_lock(Q)
+writel(0, ADDR)
+a = readl(DATA);
+spin_unlock(Q);
+                spin_lock(Q);
+                writel(4, ADDR);
+                b = readl(DATA);
+                spin_unlock(Q);
+</code></pre>
+<p>ë ë§ì ì ë³´ë¥¼ ìí´ì  Documentation/driver-api/device-io.rst ë¥¼ ì°¸ê³ íì¸ì.</p>
+<p>=========================<br>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° íìí ê³³<br>=========================</p>
+<p>ì¤ë ¹ SMP ì»¤ëì ì¬ì©íëë¼ë ì±ê¸ ì°ë ëë¡ ëìíë ì½ëë ì¬ë°ë¥´ê² ëìíë<br>ê²ì¼ë¡ ë³´ì¬ì§ ê²ì´ê¸° ëë¬¸ì, íë²í ìì¤í ì´ìì¤ì ë©ëª¨ë¦¬ ì¤í¼ë ì´ì ì¬ë°°ì¹ë<br>ì¼ë°ì ì¼ë¡ ë¬¸ì ê° ëì§ ììµëë¤.  íì§ë§, ì¬ë°°ì¹ê° ë¬¸ì ê° <em>ë  ì ìë</em> ë¤ê°ì§<br>íê²½ì´ ììµëë¤:</p>
+<p> (*) íë¡ì¸ìê° ìí¸ ìì©.</p>
+<p> (*) ì´í ë¯¹ ì¤í¼ë ì´ì.</p>
+<p> (*) ëë°ì´ì¤ ì¡ì¸ì¤.</p>
+<p> (*) ì¸í°ë½í¸.</p>
+<h2 id="ie¡oei¸ioee°-ii¸-ii©"><a href="#ie¡oei¸ioee°-ii¸-ii©" class="headerlink" title="íë¡ì¸ìê° ìí¸ ìì©"></a>íë¡ì¸ìê° ìí¸ ìì©</h2><p>ëê° ì´ìì íë¡ì¸ìë¥¼ ê°ì§ ìì¤íì´ ìë¤ë©´, ìì¤íì ëê° ì´ìì CPU ë ëìì<br>ê°ì ë°ì´í°ì ëí ììì í  ì ììµëë¤.  ì´ë ëê¸°í ë¬¸ì ë¥¼ ì¼ì¼í¬ ì ìê³ ,<br>ì´ ë¬¸ì ë¥¼ í´ê²°íë ì¼ë°ì  ë°©ë²ì ë½ì ì¬ì©íë ê²ìëë¤.  íì§ë§, ë½ì ìë¹í<br>ë¹ì©ì´ ë¹ì¸ì ê°ë¥íë©´ ë½ì ì¬ì©íì§ ìê³  ì¼ì ì²ë¦¬íë ê²ì´ ë«ìµëë¤.  ì´ë°<br>ê²½ì°, ë CPU ëª¨ëì ìí¥ì ë¼ì¹ë ì¤í¼ë ì´ìë¤ì ì¤ëìì ë§ê¸° ìí´ ì ì¤íê²<br>ììê° ë§ì¶°ì ¸ì¼ í©ëë¤.</p>
+<p>ìë¥¼ ë¤ì´, R/W ì¸ë§í¬ì´ì ëë¦° ìíê²½ë¡ (slow path) ë¥¼ ìê°í´ ë´ìë¤.<br>ì¸ë§í¬ì´ë¥¼ ìí´ ëê¸°ë¥¼ íë íëì íë¡ì¸ì¤ê° ìì ì ì¤í ì¤ ì¼ë¶ë¥¼ ì´<br>ì¸ë§í¬ì´ì ëê¸° íë¡ì¸ì¤ ë¦¬ì¤í¸ì ë§í¬í ì±ë¡ ììµëë¤:</p>
+<pre><code>struct rw_semaphore &#123;
+    ...
+    spinlock_t lock;
+    struct list_head waiters;
+&#125;;
+
+struct rwsem_waiter &#123;
+    struct list_head list;
+    struct task_struct *task;
+&#125;;
+</code></pre>
+<p>í¹ì  ëê¸° ìí íë¡ì¸ì¤ë¥¼ ê¹¨ì°ê¸° ìí´, up_read() ë up_write() í¨ìë ë¤ìê³¼<br>ê°ì ì¼ì í©ëë¤:</p>
+<p> (1) ë¤ì ëê¸° ìí íë¡ì¸ì¤ ë ì½ëë ì´ëìëì§ ìê¸° ìí´ ì´ ëê¸° ìí<br>     íë¡ì¸ì¤ ë ì½ëì next í¬ì¸í°ë¥¼ ì½ìµëë¤;</p>
+<p> (2) ì´ ëê¸° ìí íë¡ì¸ì¤ì task êµ¬ì¡°ì²´ë¡ì í¬ì¸í°ë¥¼ ì½ìµëë¤;</p>
+<p> (3) ì´ ëê¸° ìí íë¡ì¸ì¤ê° ì¸ë§í¬ì´ë¥¼ íëíìì ìë¦¬ê¸° ìí´ task<br>     í¬ì¸í°ë¥¼ ì´ê¸°í í©ëë¤;</p>
+<p> (4) í´ë¹ íì¤í¬ì ëí´ wake_up_process() ë¥¼ í¸ì¶í©ëë¤; ê·¸ë¦¬ê³ </p>
+<p> (5) í´ë¹ ëê¸° ìí íë¡ì¸ì¤ì task êµ¬ì¡°ì²´ë¥¼ ì¡ê³  ìë ë í¼ë°ì¤ë¥¼ í´ì í©ëë¤.</p>
+<p>ë¬ë¦¬ ë§íìë©´, ë¤ì ì´ë²¤í¸ ìíì¤ë¥¼ ìíí´ì¼ í©ëë¤:</p>
+<pre><code>LOAD waiter-&gt;list.next;
+LOAD waiter-&gt;task;
+STORE waiter-&gt;task;
+CALL wakeup
+RELEASE task
+</code></pre>
+<p>ê·¸ë¦¬ê³  ì´ ì´ë²¤í¸ë¤ì´ ë¤ë¥¸ ììë¡ ìíëë¤ë©´, ì¤ëìì´ ì¼ì´ë  ì ììµëë¤.</p>
+<p>íë² ì¸ë§í¬ì´ì ëê¸°ì¤ì ë¤ì´ê°ê³  ì¸ë§í¬ì´ ë½ì ëìë¤ë©´, í´ë¹ ëê¸° íë¡ì¸ì¤ë<br>ë½ì ë¤ìë ì¡ì§ ììµëë¤; ëì  ìì ì task í¬ì¸í°ê° ì´ê¸°í ëê¸¸ ê¸°ë¤ë¦½ëë¤.<br>ê·¸ ë ì½ëë ëê¸° íë¡ì¸ì¤ì ì¤íì ìê¸° ëë¬¸ì, ë¦¬ì¤í¸ì next í¬ì¸í°ê° ì½íì§ê¸°<br><em>ì ì</em> task í¬ì¸í°ê° ì§ìì§ë¤ë©´, ë¤ë¥¸ CPU ë í´ë¹ ëê¸° íë¡ì¸ì¤ë¥¼ ììí´ ë²ë¦¬ê³ <br>up*() í¨ìê° next í¬ì¸í°ë¥¼ ì½ê¸° ì ì ëê¸° íë¡ì¸ì¤ì ì¤íì ë§êµ¬ ê±´ëë¦´ ì<br>ììµëë¤.</p>
+<p>ê·¸ë ê² ëë©´ ìì ì´ë²¤í¸ ìíì¤ì ì´ë¤ ì¼ì´ ì¼ì´ëëì§ ìê°í´ ë³´ì£ :</p>
+<pre><code>CPU 1                CPU 2
+===============================    ===============================
+                down_xxx()
+                Queue waiter
+                Sleep
+up_yyy()
+LOAD waiter-&gt;task;
+STORE waiter-&gt;task;
+                Woken up by other event
+&lt;preempt&gt;
+                Resume processing
+                down_xxx() returns
+                call foo()
+                foo() clobbers *waiter
+&lt;/preempt&gt;
+LOAD waiter-&gt;list.next;
+--- OOPS ---
+</code></pre>
+<p>ì´ ë¬¸ì ë ì¸ë§í¬ì´ ë½ì ì¬ì©ì¼ë¡ í´ê²°ë  ìë ìê² ì§ë§, ê·¸ë ê² ëë©´ ê¹¨ì´ë íì<br>down_xxx() í¨ìê° ë¶íìíê² ì¤íë½ì ëë¤ì ì»ì´ì¼ë§ í©ëë¤.</p>
+<p>ì´ ë¬¸ì ë¥¼ í´ê²°íë ë°©ë²ì ë²ì© SMP ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì¶ê°íë ê²ëë¤:</p>
+<pre><code>LOAD waiter-&gt;list.next;
+LOAD waiter-&gt;task;
+smp_mb();
+STORE waiter-&gt;task;
+CALL wakeup
+RELEASE task
+</code></pre>
+<p>ì´ ê²½ì°ì, ë°°ë¦¬ì´ë ìì¤íì ëë¨¸ì§ CPU ë¤ìê² ëª¨ë  ë°°ë¦¬ì´ ìì ë©ëª¨ë¦¬ ì¡ì¸ì¤ê°<br>ë°°ë¦¬ì´ ë¤ì ë©ëª¨ë¦¬ ì¡ì¸ì¤ë³´ë¤ ìì ì¼ì´ë ê²ì¼ë¡ ë³´ì´ê² ë§ë­ëë¤.  ë°°ë¦¬ì´ ìì<br>ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¤ì´ ë°°ë¦¬ì´ ëªë ¹ ìì²´ê° ìë£ëë ìì ê¹ì§ ìë£ëë¤ê³ ë ë³´ì¥íì§<br><em>ììµëë¤</em>.</p>
+<p>(ì´ê² ë¬¸ì ê° ëì§ ìì) ë¨ì¼ íë¡ì¸ì ìì¤íìì smp_mb() ë ì¤ì ë¡ë ê·¸ì <br>ì»´íì¼ë¬ê° CPU ìììì ììë¥¼ ë°ê¾¸ê±°ë íì§ ìê³  ì£¼ì´ì§ ììëë¡ ëªë ¹ì<br>ë´ë¦¬ëë¡ íë ì»´íì¼ë¬ ë°°ë¦¬ì´ì¼ ë¿ìëë¤.  ì¤ì§ íëì CPU ë§ ìì¼ë, CPU ì<br>ìì¡´ì± ìì ë¡ì§ì´ ê·¸ ì¸ì ëª¨ë ê²ì ììì ì²ë¦¬í  ê²ëë¤.</p>
+<h2 id="i´i-e¯¹-i¤i¼e-i´i"><a href="#i´i-e¯¹-i¤i¼e-i´i" class="headerlink" title="ì´í ë¯¹ ì¤í¼ë ì´ì"></a>ì´í ë¯¹ ì¤í¼ë ì´ì</h2><p>ì´í ë¯¹ ì¤í¼ë ì´ìì ê¸°ì ì ì¼ë¡ íë¡ì¸ìê° ìí¸ìì©ì¼ë¡ ë¶ë¥ëë©° ê·¸ ì¤ ì¼ë¶ë<br>ì ì²´ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ë´í¬íê³  ë ì¼ë¶ë ë´í¬íì§ ìì§ë§, ì»¤ëìì ìë¹í<br>ìì¡´ì ì¼ë¡ ì¬ì©íë ê¸°ë¥ ì¤ íëìëë¤.</p>
+<p>ë ë§ì ë´ì©ì ìí´ì  Documentation/atomic_t.txt ë¥¼ ì°¸ê³ íì¸ì.</p>
+<h2 id="ee°i´i¤-i¡i¸i¤"><a href="#ee°i´i¤-i¡i¸i¤" class="headerlink" title="ëë°ì´ì¤ ì¡ì¸ì¤"></a>ëë°ì´ì¤ ì¡ì¸ì¤</h2><p>ë§ì ëë°ì´ì¤ê° ë©ëª¨ë¦¬ ë§¤í ê¸°ë²ì¼ë¡ ì ì´ë  ì ìëë°, ê·¸ë ê² ì ì´ëë<br>ëë°ì´ì¤ë CPU ìë ë¨ì§ í¹ì  ë©ëª¨ë¦¬ ìì­ì ì§í©ì²ë¼ ë³´ì´ê² ë©ëë¤.  ëë¼ì´ë²ë<br>ê·¸ë° ëë°ì´ì¤ë¥¼ ì ì´íê¸° ìí´ ì íí ì¬ë°ë¥¸ ììë¡ ì¬ë°ë¥¸ ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¥¼<br>ë§ë¤ì´ì¼ í©ëë¤.</p>
+<p>íì§ë§, ì¡ì¸ì¤ë¤ì ì¬ë°°ì¹ íê±°ë ì¡°í©íê±°ë ë³í©íëê² ë í¨ì¨ì ì´ë¼ íë¨íë<br>ìë¦¬í CPU ë ì»´íì¼ë¬ë¤ì ì¬ì©íë©´ ëë¼ì´ë² ì½ëì ì¡°ì¬ì¤ë½ê² ìì ë§ì¶°ì§<br>ì¡ì¸ì¤ë¤ì´ ëë°ì´ì¤ìë ìì²­ë ììëë¡ ëì°©íì§ ëª»íê² í  ì ìë - ëë°ì´ì¤ê°<br>ì¤ëìì íê² í  - ì ì¬ì  ë¬¸ì ê° ìê¸¸ ì ììµëë¤.</p>
+<p>ë¦¬ëì¤ ì»¤ë ë´ë¶ìì, I/O ë ì´ë»ê² ì¡ì¸ì¤ë¤ì ì ì í ìì°¨ì ì´ê² ë§ë¤ ì ìëì§<br>ìê³  ìë, - inb() ë writel() ê³¼ ê°ì - ì ì í ì¡ì¸ì¤ ë£¨í´ì íµí´ ì´ë£¨ì´ì ¸ì¼ë§<br>í©ëë¤.  ì´ê²ë¤ì ëë¶ë¶ì ê²½ì°ìë ëªìì  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ì í¨ê» ì¬ì©ë  íìê°<br>ììµëë¤ë§, ë¤ìì ëê°ì§ ìí©ììë ëªìì  ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° íìí  ì ììµëë¤:</p>
+<p> (1) ì¼ë¶ ìì¤íìì I/O ì¤í ì´ë ëª¨ë  CPU ì ì¼ê´ëê² ìì ë§ì¶°ì§ì§ ìëë°,<br>     ë°ë¼ì _ëª¨ë _ ì¼ë°ì ì¸ ëë¼ì´ë²ë¤ì ë½ì´ ì¬ì©ëì´ì¼ë§ íê³  ì´ í¬ë¦¬í°ì»¬<br>     ì¹ìì ë¹ ì ¸ëì¤ê¸° ì ì mmiowb() ê° ê¼­ í¸ì¶ëì´ì¼ í©ëë¤.</p>
+<p> (2) ë§ì½ ì¡ì¸ì¤ í¨ìë¤ì´ ìíë ë©ëª¨ë¦¬ ì¡ì¸ì¤ ìì±ì ê°ë I/O ë©ëª¨ë¦¬ ìëì°ë¥¼<br>     ì¬ì©íë¤ë©´, ììë¥¼ ê°ì íê¸° ìí´ì  <em>mandatory</em> ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° íìí©ëë¤.</p>
+<p>ë ë§ì ì ë³´ë¥¼ ìí´ì  Documentation/driver-api/device-io.rst ë¥¼ ì°¸ê³ íì­ìì¤.</p>
+<h2 id="i¸i°e½i¸"><a href="#i¸i°e½i¸" class="headerlink" title="ì¸í°ë½í¸"></a>ì¸í°ë½í¸</h2><p>ëë¼ì´ë²ë ìì ì ì¸í°ë½í¸ ìë¹ì¤ ë£¨í´ì ìí´ ì¸í°ë½í¸ ë¹í  ì ìê¸° ëë¬¸ì<br>ëë¼ì´ë²ì ì´ ë ë¶ë¶ì ìë¡ì ëë°ì´ì¤ ì ì´ ëë ì¡ì¸ì¤ ë¶ë¶ê³¼ ìí¸ ê°ì­í  ì<br>ììµëë¤.</p>
+<p>ì¤ì¤ë¡ìê² ì¸í°ë½í¸ ë¹íë ê±¸ ë¶ê°ë¥íê² íê³ , ëë¼ì´ë²ì í¬ë¦¬í°ì»¬í<br>ì¤í¼ë ì´ìë¤ì ëª¨ë ì¸í°ë½í¸ê° ë¶ê°ë¥íê² ë ìì­ì ì§ì´ë£ê±°ë íë ë°©ë² (ë½ì<br>í íí) ì¼ë¡ ì´ë° ìí¸ ê°ì­ì - ìµìí ë¶ë¶ì ì¼ë¡ë¼ë - ì¤ì¼ ì ììµëë¤.<br>ëë¼ì´ë²ì ì¸í°ë½í¸ ë£¨í´ì´ ì¤í ì¤ì¸ ëì, í´ë¹ ëë¼ì´ë²ì ì½ì´ë ê°ì CPU ìì<br>ìíëì§ ìì ê²ì´ë©°, íì¬ì ì¸í°ë½í¸ê° ì²ë¦¬ëë ì¤ìë ëë¤ì ì¸í°ë½í¸ê°<br>ì¼ì´ëì§ ëª»íëë¡ ëì´ ìì¼ë ì¸í°ë½í¸ í¸ë¤ë¬ë ê·¸ì ëí´ìë ë½ì ì¡ì§ ììë<br>ë©ëë¤.</p>
+<p>íì§ë§, ì´ëë ì¤ ë ì§ì¤í°ì ë°ì´í° ë ì§ì¤í°ë¥¼ ê°ë ì´ëë· ì¹´ëë¥¼ ë¤ë£¨ë<br>ëë¼ì´ë²ë¥¼ ìê°í´ ë´ìë¤.  ë§ì½ ì´ ëë¼ì´ë²ì ì½ì´ê° ì¸í°ë½í¸ë¥¼ ë¹íì±íìí¨<br>ì±ë¡ ì´ëë· ì¹´ëì ëííê³  ëë¼ì´ë²ì ì¸í°ë½í¸ í¸ë¤ë¬ê° í¸ì¶ëìë¤ë©´:</p>
+<pre><code>LOCAL IRQ DISABLE
+writew(ADDR, 3);
+writew(DATA, y);
+LOCAL IRQ ENABLE
+&lt;interrupt&gt;
+writew(ADDR, 4);
+q = readw(DATA);
+&lt;/interrupt&gt;
+</code></pre>
+<p>ë§ì½ ìì ê·ì¹ì´ ì¶©ë¶í ìíëì´ ìë¤ë©´ ë°ì´í° ë ì§ì¤í°ìì ì¤í ì´ë ì´ëë ì¤<br>ë ì§ì¤í°ì ëë²ì§¸ë¡ íí´ì§ë ì¤í ì´ ë¤ì ì¼ì´ë  ìë ììµëë¤:</p>
+<pre><code>STORE *ADDR = 3, STORE *ADDR = 4, STORE *DATA = y, q = LOAD *DATA
+</code></pre>
+<p>ë§ì½ ìì ê·ì¹ì´ ì¶©ë¶í ìíëì´ ìê³  ë¬µìì ì¼ë¡ë  ëªìì ì¼ë¡ë  ë°°ë¦¬ì´ê°<br>ì¬ì©ëì§ ììë¤ë©´ ì¸í°ë½í¸ ë¹íì±í ì¹ììì ì¼ì´ë ì¡ì¸ì¤ê° ë°ê¹¥ì¼ë¡ ìì´ì<br>ì¸í°ë½í¸ ë´ìì ì¼ì´ë ì¡ì¸ì¤ì ìì¼ ì ìë¤ê³  - ê·¸ë¦¬ê³  ê·¸ ë°ëë - ê°ì í´ì¼ë§<br>í©ëë¤.</p>
+<p>ê·¸ë° ìì­ ììì ì¼ì´ëë I/O ì¡ì¸ì¤ë¤ì ìê²©í ìì ê·ì¹ì I/O ë ì§ì¤í°ì<br>ë¬µìì  I/O ë°°ë¦¬ì´ë¥¼ íì±íë ëê¸°ì  (synchronous) ë¡ë ì¤í¼ë ì´ìì í¬í¨íê¸°<br>ëë¬¸ì ì¼ë°ì ì¼ë¡ë ì´ë°ê² ë¬¸ì ê° ëì§ ììµëë¤.  ë§ì½ ì´ê±¸ë¡ë ì¶©ë¶ì¹ ìë¤ë©´<br>mmiowb() ê° ëªìì ì¼ë¡ ì¬ì©ë  íìê° ììµëë¤.</p>
+<p>íëì ì¸í°ë½í¸ ë£¨í´ê³¼ ë³ëì CPU ìì ìíì¤ì´ë©° ìë¡ íµì ì íë ë ë£¨í´<br>ì¬ì´ìë ë¹ì·í ìí©ì´ ì¼ì´ë  ì ììµëë¤.  ë§ì½ ê·¸ë° ê²½ì°ê° ë°ìí  ê°ë¥ì±ì´<br>ìë¤ë©´, ììë¥¼ ë³´ì¥íê¸° ìí´ ì¸í°ë½í¸ ë¹íì±í ë½ì´ ì¬ì©ëì´ì ¸ì¼ë§ í©ëë¤.</p>
+<p>======================<br>ì»¤ë I/O ë°°ë¦¬ì´ì í¨ê³¼<br>======================</p>
+<p>I/O ë©ëª¨ë¦¬ì ì¡ì¸ì¤í  ë, ëë¼ì´ë²ë ì ì í ì¡ì¸ì¤ í¨ìë¥¼ ì¬ì©í´ì¼ í©ëë¤:</p>
+<p> (*) inX(), outX():</p>
+<pre><code> ì´ê²ë¤ì ë©ëª¨ë¦¬ ê³µê°ë³´ë¤ë I/O ê³µê°ì ì´ì¼ê¸°ë¥¼ íë ¤ë ìëë¡
+ ë§ë¤ì´ì¡ìµëë¤ë§, ê·¸ê±´ ê¸°ë³¸ì ì¼ë¡ CPU ë§ë¤ ë¤ë¥¸ ì»¨ììëë¤.  i386 ê³¼
+ x86_64 íë¡ì¸ìë¤ì í¹ë³í I/O ê³µê° ì¡ì¸ì¤ ì¬ì´í´ê³¼ ëªë ¹ì´ë¥¼ ì¤ì ë¡ ê°ì§ê³ 
+ ìì§ë§, ë¤ë¥¸ ë§ì CPU ë¤ìë ê·¸ë° ì»¨ìì´ ì¡´ì¬íì§ ììµëë¤.
+
+ ë¤ë¥¸ ê²ë¤ ì¤ììë PCI ë²ì¤ê° I/O ê³µê° ì»¨ìì ì ìíëë°, ì´ë - i386 ê³¼
+ x86_64 ê°ì CPU ìì - CPU ì I/O ê³µê° ì»¨ìì¼ë¡ ì½ê² ë§¤ì¹ë©ëë¤.  íì§ë§,
+ ëì²´í  I/O ê³µê°ì´ ìë CPU ììë CPU ì ë©ëª¨ë¦¬ ë§µì ê°ì I/O ê³µê°ì¼ë¡
+ ë§¤íë  ìë ììµëë¤.
+
+ ì´ ê³µê°ì¼ë¡ì ì¡ì¸ì¤ë (i386 ë±ììë) ìì íê² ëê¸°í ë©ëë¤ë§, ì¤ê°ì
+ (PCI í¸ì¤í¸ ë¸ë¦¬ì§ì ê°ì) ë¸ë¦¬ì§ë¤ì ì´ë¥¼ ìì í ë³´ì¥íì§ ìììë
+ ììµëë¤.
+
+ ì´ê²ë¤ì ìí¸ê°ì ììë ìì íê² ë³´ì¥ë©ëë¤.
+
+ ë¤ë¥¸ íìì ë©ëª¨ë¦¬ ì¤í¼ë ì´ì, I/O ì¤í¼ë ì´ìì ëí ììë ìì íê²
+ ë³´ì¥ëì§ë ììµëë¤.
+</code></pre>
+<p> (*) readX(), writeX():</p>
+<pre><code> ì´ê²ë¤ì´ ìí ìì²­ëë CPU ìì ìë¡ìê² ìì í ììê° ë§ì¶°ì§ê³  ëë¦½ì ì¼ë¡
+ ìíëëì§ì ëí ë³´ì¥ ì¬ë¶ë ì´ë¤ì´ ì¡ì¸ì¤ íë ë©ëª¨ë¦¬ ìëì°ì ì ìë
+ í¹ì±ì ìí´ ê²°ì ë©ëë¤.  ìë¥¼ ë¤ì´, ìµì ì i386 ìí¤íì³ ë¨¸ì ììë MTRR
+ ë ì§ì¤í°ë¡ ì´ í¹ì±ì´ ì¡°ì ë©ëë¤.
+
+ ì¼ë°ì ì¼ë¡ë, íë¦¬íì¹ (prefetch) ê°ë¥í ëë°ì´ì¤ë¥¼ ì¡ì¸ì¤ íëê²
+ ìëë¼ë©´, ì´ê²ë¤ì ìì í ììê° ë§ì¶°ì§ê³  ê²°í©ëì§ ìê² ë³´ì¥ë  ê²ëë¤.
+
+ íì§ë§, (PCI ë¸ë¦¬ì§ì ê°ì) ì¤ê°ì íëì¨ì´ë ìì ì´ ìíë¤ë©´ ì§íì
+ ì°ê¸°ìí¬ ì ììµëë¤; ì¤í ì´ ëªë ¹ì ì¤ì ë¡ íëì¨ì´ë¡ ë´ë ¤ë³´ë´ê¸°(flush)
+ ìí´ìë ê°ì ìì¹ë¡ë¶í° ë¡ëë¥¼ íë ë°©ë²ì´ ììµëë¤ë§[*], PCI ì ê²½ì°ë
+ ê°ì ëë°ì´ì¤ë íê²½ êµ¬ì± ìì­ììì ë¡ëë§ì¼ë¡ë ì¶©ë¶í  ê²ëë¤.
+
+ [*] ì£¼ì! ì°ì¬ì§ ê²ê³¼ ê°ì ìì¹ë¡ë¶í°ì ë¡ëë¥¼ ìëíë ê²ì ì¤ëìì
+ ì¼ì¼í¬ ìë ììµëë¤ - ìë¡ 16650 Rx/Tx ìë¦¬ì¼ ë ì§ì¤í°ë¥¼ ìê°í´
+ ë³´ì¸ì.
+
+ íë¦¬íì¹ ê°ë¥í I/O ë©ëª¨ë¦¬ê° ì¬ì©ëë©´, ì¤í ì´ ëªë ¹ë¤ì´ ììë¥¼ ì§í¤ëë¡
+ íê¸° ìí´ mmiowb() ë°°ë¦¬ì´ê° íìí  ì ììµëë¤.
+
+ PCI í¸ëì­ì ì¬ì´ì ìí¸ìì©ì ëí´ ë ë§ì ì ë³´ë¥¼ ìí´ì  PCI ëªì¸ìë¥¼
+ ì°¸ê³ íìê¸° ë°ëëë¤.
+</code></pre>
+<p> (*) readX_relaxed(), writeX_relaxed()</p>
+<pre><code> ì´ê²ë¤ì readX() ì writeX() ë ë¹ì·íì§ë§, ë ìíë ë©ëª¨ë¦¬ ìì ë³´ì¥ì
+ ì ê³µí©ëë¤.  êµ¬ì²´ì ì¼ë¡, ì´ê²ë¤ì ì¼ë°ì  ë©ëª¨ë¦¬ ì¡ì¸ì¤ (ì: DMA ë²í¼) ìë
+ LOCK ì´ë UNLOCK ì¤í¼ë ì´ìë¤ìë ììë¥¼ ë³´ì¥íì§ ììµëë¤.  LOCK ì´ë
+ UNLOCK ì¤í¼ë ì´ìë¤ì ë§ì¶°ì§ë ììê° íìíë¤ë©´, mmiowb() ë°°ë¦¬ì´ê° ì¬ì©ë 
+ ì ììµëë¤.  ê°ì ì£¼ë³ ì¥ì¹ìì ìíë ì¡ì¸ì¤ë¼ë¦¬ë ììê° ì§ì¼ì§ì ìì
+ ëìê¸° ë°ëëë¤.
+</code></pre>
+<p> (*) ioreadX(), iowriteX()</p>
+<pre><code> ì´ê²ë¤ì inX()/outX() ë readX()/writeX() ì²ë¼ ì¤ì ë¡ ìííë ì¡ì¸ì¤ì
+ ì¢ë¥ì ë°ë¼ ì ì íê² ìíë  ê²ìëë¤.
+</code></pre>
+<p>===================================<br>ê°ì ëë ê°ì¥ ìíë ì¤í ìì ëª¨ë¸<br>===================================</p>
+<p>ì»¨ìì ì¼ë¡ CPU ë ì£¼ì´ì§ íë¡ê·¸ë¨ì ëí´ íë¡ê·¸ë¨ ê·¸ ìì²´ìë ì¸ê³¼ì± (program<br>causality) ì ì§í¤ë ê²ì²ë¼ ë³´ì´ê² íì§ë§ ì¼ë°ì ì¼ë¡ë ììë¥¼ ê±°ì ì§ì¼ì£¼ì§<br>ìëë¤ê³  ê°ì ëì´ì¼ë§ í©ëë¤.  (i386 ì´ë x86_64 ê°ì) ì¼ë¶ CPU ë¤ì ì½ë<br>ì¬ë°°ì¹ì (powerpc ë frv ì ê°ì) ë¤ë¥¸ ê²ë¤ì ë¹í´ ê°í ì ì½ì ê°ì§ë§, ìí¤íì³<br>ì¢ìì  ì½ë ì´ì¸ì ì½ëììë ììì ëí ì ì½ì´ ê°ì¥ ìíë ê²½ì° (DEC Alpha)<br>ë¥¼ ê°ì í´ì¼ í©ëë¤.</p>
+<p>ì´ ë§ì, CPU ìê² ì£¼ì´ì§ë ì¸ì¤í¸ë­ì ì¤í¸ë¦¼ ë´ì í ì¸ì¤í¸ë­ìì´ ìì<br>ì¸ì¤í¸ë­ìì ì¢ìì ì´ë¼ë©´ ìì ì¸ì¤í¸ë­ìì ë¤ì ì¢ìì  ì¸ì¤í¸ë­ìì´ ì¤íëê¸°<br>ì ì ìë£[*]ë  ì ìì´ì¼ íë¤ë ì ì½ (ë¬ë¦¬ ë§í´ì, ì¸ê³¼ì±ì´ ì§ì¼ì§ë ê²ì¼ë¡<br>ë³´ì´ê² í¨) ì¸ìë ìì ì´ ìíë ììëë¡ - ì¬ì§ì´ ë³ë ¬ì ì¼ë¡ë - ê·¸ ì¤í¸ë¦¼ì<br>ì¤íí  ì ììì ìë¯¸í©ëë¤</p>
+<p> [*] ì¼ë¶ ì¸ì¤í¸ë­ìì íë ì´ìì ìí¥ - ì¡°ê±´ ì½ëë¥¼ ë°ê¾¼ë¤ëì§, ë ì§ì¤í°ë<br>     ë©ëª¨ë¦¬ë¥¼ ë°ê¾¼ë¤ëì§ - ì ë§ë¤ì´ë´ë©°, ë¤ë¥¸ ì¸ì¤í¸ë­ìì ë¤ë¥¸ í¨ê³¼ì<br>     ì¢ìì ì¼ ì ììµëë¤.</p>
+<p>CPU ë ìµì¢ì ì¼ë¡ ìë¬´ í¨ê³¼ë ë§ë¤ì§ ìë ì¸ì¤í¸ë­ì ìíì¤ë ìì ë²ë¦´ ìë<br>ììµëë¤.  ìë¥¼ ë¤ì´, ë§ì½ ëê°ì ì°ìëë ì¸ì¤í¸ë­ìì´ ë ë¤ ê°ì ë ì§ì¤í°ì<br>ì§ì ì ì¸ ê° (immediate value) ì ì§ì´ë£ëë¤ë©´, ì²«ë²ì§¸ ì¸ì¤í¸ë­ìì ë²ë ¤ì§ ìë<br>ììµëë¤.</p>
+<p>ë¹ì·íê², ì»´íì¼ë¬ ì­ì íë¡ê·¸ë¨ì ì¸ê³¼ì±ë§ ì§ì¼ì¤ë¤ë©´ ì¸ì¤í¸ë­ì ì¤í¸ë¦¼ì<br>ìì ì´ ë³´ê¸°ì ì¬ë°ë¥´ë¤ ìê°ëëëë¡ ì¬ë°°ì¹ í  ì ììµëë¤.</p>
+<p>===============<br>CPU ìºìì ìí¥<br>===============</p>
+<p>ìºìë ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì´ ìì¤í ì ì²´ì ì´ë»ê² ì¸ì§ëëì§ë CPU ì ë©ëª¨ë¦¬<br>ì¬ì´ì ì¡´ì¬íë ìºìë¤, ê·¸ë¦¬ê³  ìì¤í ìíì ì¼ê´ì±ì ê´ë¦¬íë ë©ëª¨ë¦¬ ì¼ê´ì±<br>ìì¤íì ìë¹ ë¶ë¶ ìí¥ì ë°ìµëë¤.</p>
+<p>í CPU ê° ìì¤íì ë¤ë¥¸ ë¶ë¶ë¤ê³¼ ìºìë¥¼ íµí´ ìí¸ìì©íë¤ë©´, ë©ëª¨ë¦¬ ìì¤íì<br>CPU ì ìºìë¤ì í¬í¨í´ì¼ íë©°, CPU ì CPU ìì ì ìºì ì¬ì´ììì ëìì ìí<br>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ê°ì ¸ì¼ í©ëë¤. (ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ë¼ë¦¬ì ì¼ë¡ë ë¤ì ê·¸ë¦¼ì<br>ì ì ìì ëìí©ëë¤):</p>
+<pre><code>    &lt;--- CPU ---&gt;         :       &lt;----------- Memory -----------&gt;
+                          :
++--------+    +--------+  :   +--------+    +-----------+
+|        |    |        |  :   |        |    |           |    +--------+
+|  CPU   |    | Memory |  :   | CPU    |    |           |    |        |
+|  Core  |---&gt;| Access |-----&gt;| Cache  |&lt;--&gt;|           |    |        |
+|        |    | Queue  |  :   |        |    |           |---&gt;| Memory |
+|        |    |        |  :   |        |    |           |    |        |
++--------+    +--------+  :   +--------+    |           |    |        |
+                          :                 | Cache     |    +--------+
+                          :                 | Coherency |
+                          :                 | Mechanism |    +--------+
++--------+    +--------+  :   +--------+    |           |    |          |
+|        |    |        |  :   |        |    |           |    |        |
+|  CPU   |    | Memory |  :   | CPU    |    |           |---&gt;| Device |
+|  Core  |---&gt;| Access |-----&gt;| Cache  |&lt;--&gt;|           |    |        |
+|        |    | Queue  |  :   |        |    |           |    |        |
+|        |    |        |  :   |        |    |           |    +--------+
++--------+    +--------+  :   +--------+    +-----------+
+                          :
+                          :
+</code></pre>
+<p>í¹ì  ë¡ëë ì¤í ì´ë í´ë¹ ì¤í¼ë ì´ìì ìì²­í CPU ì ìºì ë´ìì ëìì ìë£í <br>ìë ìê¸° ëë¬¸ì í´ë¹ CPU ì ë°ê¹¥ìë ë³´ì´ì§ ìì ì ìì§ë§, ë¤ë¥¸ CPU ê° ê´ì¬ì<br>ê°ëë¤ë©´ ìºì ì¼ê´ì± ë©ì»¤ëì¦ì´ í´ë¹ ìºìë¼ì¸ì í´ë¹ CPU ìê² ì ë¬íê³ , í´ë¹<br>ë©ëª¨ë¦¬ ìì­ì ëí ì¤í¼ë ì´ìì´ ë°ìí  ëë§ë¤ ê·¸ ìí¥ì ì íìí¤ê¸° ëë¬¸ì, í´ë¹<br>ì¤í¼ë ì´ìì ë©ëª¨ë¦¬ì ì¤ì ë¡ ì¡ì¸ì¤ë¥¼ íê²ì²ë¼ ëíë  ê²ìëë¤.</p>
+<p>CPU ì½ì´ë íë¡ê·¸ë¨ì ì¸ê³¼ì±ì´ ì ì§ëë¤ê³ ë§ ì¬ê²¨ì§ë¤ë©´ ì¸ì¤í¸ë­ìë¤ì ì´ë¤<br>ììë¡ë  ì¬ë°°ì¹í´ì ìíí  ì ììµëë¤.  ì¼ë¶ ì¸ì¤í¸ë­ìë¤ì ë¡ëë ì¤í ì´<br>ì¤í¼ë ì´ìì ë§ëëë° ì´ ì¤í¼ë ì´ìë¤ì ì´í ìíë  ë©ëª¨ë¦¬ ì¡ì¸ì¤ íì ë¤ì´ê°ê²<br>ë©ëë¤.  ì½ì´ë ì´ ì¤í¼ë ì´ìë¤ì í´ë¹ íì ì´ë¤ ììë¡ë  ìíëëë¡ ë£ì ì<br>ìê³ , ë¤ë¥¸ ì¸ì¤í¸ë­ìì ìë£ë¥¼ ê¸°ë¤ë¦¬ëë¡ ê°ì ëê¸° ì ê¹ì§ë ìíì ê³ìí©ëë¤.</p>
+<p>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° íë ì¼ì CPU ìª½ìì ë©ëª¨ë¦¬ ìª½ì¼ë¡ ëì´ê°ë ì¡ì¸ì¤ë¤ì ìì,<br>ê·¸ë¦¬ê³  ê·¸ ì¡ì¸ì¤ì ê²°ê³¼ê° ìì¤íì ë¤ë¥¸ ê´ì°°ìë¤ìê² ì¸ì§ëë ììë¥¼ ì ì´íë<br>ê²ìëë¤.</p>
+<p>[!] CPU ë¤ì í­ì ê·¸ë¤ ìì ì ë¡ëì ì¤í ì´ë íë¡ê·¸ë¨ ììëë¡ ì¼ì´ë ê²ì¼ë¡<br>ë³´ê¸° ëë¬¸ì, ì£¼ì´ì§ CPU ë´ììë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë¥¼ ì¬ì©í  íìê° <em>ììµëë¤</em>.</p>
+<p>[!] MMIO ë ë¤ë¥¸ ëë°ì´ì¤ ì¡ì¸ì¤ë¤ì ìºì ìì¤íì ì°íí  ìë ììµëë¤.  ì°í<br>ì¬ë¶ë ëë°ì´ì¤ê° ì¡ì¸ì¤ ëë ë©ëª¨ë¦¬ ìëì°ì í¹ì±ì ìí´ ê²°ì ë  ìë ìê³ , CPU<br>ê° ê°ì§ê³  ìì ì ìë í¹ìí ëë°ì´ì¤ íµì  ì¸ì¤í¸ë­ìì ì¬ì©ì ìí´ì ê²°ì ë <br>ìë ììµëë¤.</p>
+<h2 id="iºioe-i¼e´i±"><a href="#iºioe-i¼e´i±" class="headerlink" title="ìºì ì¼ê´ì±"></a>ìºì ì¼ê´ì±</h2><p>íì§ë§ ì¶ì ììì ì´ì¼ê¸°í ê²ì²ë¼ ë¨ìíì§ ììµëë¤: ìºìë¤ì ì¼ê´ì ì¼ ê²ì¼ë¡<br>ê¸°ëëì§ë§, ê·¸ ì¼ê´ì±ì´ ìììë ì ì©ë  ê±°ë¼ë ë³´ì¥ì ììµëë¤.  í CPU ìì<br>ë§ë¤ì´ì§ ë³ê²½ ì¬í­ì ìµì¢ì ì¼ë¡ë ìì¤íì ëª¨ë  CPU ìê² ë³´ì¬ì§ê² ëì§ë§, ë¤ë¥¸<br>CPU ë¤ìê²ë ê°ì ììë¡ ë³´ì´ê² ë  ê±°ë¼ë ë³´ì¥ì ìë¤ë ë»ìëë¤.</p>
+<p>ëê°ì CPU (1 &amp; 2) ê° ë¬ë ¤ ìê³ , ê° CPU ì ëê°ì ë°ì´í° ìºì(CPU 1 ì A/B ë¥¼,<br>CPU 2 ë C/D ë¥¼ ê°ìµëë¤)ê° ë³ë ¬ë¡ ì°ê²°ëì´ ìë ìì¤íì ë¤ë£¬ë¤ê³  ìê°í´<br>ë´ìë¤:</p>
+<pre><code>            :
+            :                          +--------+
+            :      +---------+         |        |
++--------+  : +---&gt;| Cache A |&lt;-------&gt;|        |
+|        |  : |    +---------+         |        |
+|  CPU 1 |&lt;---+                        |        |
+|        |  : |    +---------+         |        |
++--------+  : +---&gt;| Cache B |&lt;-------&gt;|        |
+            :      +---------+         |        |
+            :                          | Memory |
+            :      +---------+         | System |
++--------+  : +---&gt;| Cache C |&lt;-------&gt;|        |
+|        |  : |    +---------+         |        |
+|  CPU 2 |&lt;---+                        |        |
+|        |  : |    +---------+         |        |
++--------+  : +---&gt;| Cache D |&lt;-------&gt;|        |
+            :      +---------+         |        |
+            :                          +--------+
+            :
+</code></pre>
+<p>ì´ ìì¤íì´ ë¤ìê³¼ ê°ì í¹ì±ì ê°ëë¤ ìê°í´ ë´ìë¤:</p>
+<p> (*) íìë² ìºìë¼ì¸ì ìºì A, ìºì C ëë ë©ëª¨ë¦¬ì ìì¹í  ì ìì;</p>
+<p> (*) ì§ìë² ìºìë¼ì¸ì ìºì B, ìºì D ëë ë©ëª¨ë¦¬ì ìì¹í  ì ìì;</p>
+<p> (*) CPU ì½ì´ê° íê°ì ìºìì ì ê·¼íë ëì, ë¤ë¥¸ ìºìë - ëí° ìºìë¼ì¸ì<br>     ë©ëª¨ë¦¬ì ë´ë¦¬ê±°ë ì¶ì¸¡ì± ë¡ëë¥¼ íê±°ë íê¸° ìí´ - ìì¤íì ë¤ë¥¸ ë¶ë¶ì<br>     ì¡ì¸ì¤ íê¸° ìí´ ë²ì¤ë¥¼ ì¬ì©í  ì ìì;</p>
+<p> (*) ê° ìºìë ìì¤íì ëë¨¸ì§ ë¶ë¶ë¤ê³¼ ì¼ê´ì±ì ë§ì¶ê¸° ìí´ í´ë¹ ìºìì<br>     ì ì©ëì´ì¼ í  ì¤í¼ë ì´ìë¤ì íë¥¼ ê°ì§;</p>
+<p> (*) ì´ ì¼ê´ì± íë ìºìì ì´ë¯¸ ì¡´ì¬íë ë¼ì¸ì ê°í´ì§ë íë²í ë¡ëì ìí´ìë<br>     ë¹ìì§ì§ ìëë°, íì ì¤í¼ë ì´ìë¤ì´ ì´ ë¡ëì ê²°ê³¼ì ìí¥ì ë¼ì¹  ì ìë¤<br>     í ì§ë¼ë ê·¸ë¬í¨.</p>
+<p>ì´ì , ì²«ë²ì§¸ CPU ìì ëê°ì ì°ê¸° ì¤í¼ë ì´ìì ë§ëëë°, í´ë¹ CPU ì ìºìì<br>ìì²­ë ììë¡ ì¤í¼ë ì´ìì´ ëë¬ë¨ì ë³´ì¥íê¸° ìí´ ë ì¤í¼ë ì´ì ì¬ì´ì ì°ê¸°<br>ë°°ë¦¬ì´ë¥¼ ì¬ì©íë ìí©ì ììí´ ë´ìë¤:</p>
+<pre><code>CPU 1        CPU 2        COMMENT
+===============    ===============    =======================================
+                u == 0, v == 1 and p == &amp;u, q == &amp;u
+v = 2;
+smp_wmb();            v ì ë³ê²½ì´ p ì ë³ê²½ ì ì ë³´ì¼ ê²ì
+                 ë¶ëªí í¨
+&lt;A:modify v=2&gt;            v ë ì´ì  ìºì A ì ëì ì ì¼ë¡ ì¡´ì¬í¨
+p = &amp;v;
+&lt;B:modify p=&amp;v&gt;            p ë ì´ì  ìºì B ì ëì ì ì¼ë¡ ì¡´ì¬í¨
+</code></pre>
+<p>ì¬ê¸°ìì ì°ê¸° ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë CPU 1 ì ìºìê° ì¬ë°ë¥¸ ììë¡ ìë°ì´í¸ ë ê²ì¼ë¡<br>ìì¤íì ë¤ë¥¸ CPU ë¤ì´ ì¸ì§íê² ë§ë­ëë¤.  íì§ë§, ì´ì  ëë²ì§¸ CPU ê° ê·¸ ê°ë¤ì<br>ì½ì¼ë ¤ íë ìí©ì ìê°í´ ë´ìë¤:</p>
+<pre><code>CPU 1        CPU 2        COMMENT
+===============    ===============    =======================================
+...
+        q = p;
+        x = *q;
+</code></pre>
+<p>ìì ëê°ì ì½ê¸° ì¤í¼ë ì´ìì ììë ììë¡ ì¼ì´ëì§ ëª»í  ì ìëë°, ëë²ì§¸ CPU<br>ì í ìºìì ë¤ë¥¸ ìºì ì´ë²¤í¸ê° ë°ìí´ v ë¥¼ ë´ê³  ìë ìºìë¼ì¸ì í´ë¹ ìºììì<br>ìë°ì´í¸ê° ì§ì°ëë ì¬ì´, p ë¥¼ ë´ê³  ìë ìºìë¼ì¸ì ëë²ì§¸ CPU ì ë¤ë¥¸ ìºìì<br>ìë°ì´í¸ ëì´ë²ë ¸ì ì ìê¸° ëë¬¸ìëë¤.</p>
+<pre><code>CPU 1        CPU 2        COMMENT
+===============    ===============    =======================================
+                u == 0, v == 1 and p == &amp;u, q == &amp;u
+v = 2;
+smp_wmb();
+&lt;A:modify v=2&gt;    &lt;C:busy&gt;
+        &lt;C:queue v=2&gt;
+p = &amp;v;        q = p;
+        &lt;D:request p&gt;
+&lt;B:modify p=&amp;v&gt;    &lt;D:commit p=&amp;v&gt;
+        &lt;D:read p&gt;
+        x = *q;
+        &lt;C:read *q&gt;    ìºìì ìë°ì´í¸ ëê¸° ì ì v ë¥¼ ì½ì
+        &lt;C:unbusy&gt;
+        &lt;C:commit v=2&gt;
+</code></pre>
+<p>ê¸°ë³¸ì ì¼ë¡, ëê°ì ìºìë¼ì¸ ëª¨ë CPU 2 ì ìµì¢ì ì¼ë¡ë ìë°ì´í¸ ë  ê²ì´ì§ë§,<br>ë³ëì ê°ì ìì´ë, ìë°ì´í¸ì ììê° CPU 1 ìì ë§ë¤ì´ì§ ììì ëì¼í <br>ê²ì´ë¼ë ë³´ì¥ì´ ììµëë¤.</p>
+<p>ì¬ê¸°ì ê°ìíê¸° ìí´ì , ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë ì½ê¸° ë°°ë¦¬ì´ë¥¼ ë¡ë ì¤í¼ë ì´ìë¤<br>ì¬ì´ì ë£ì´ì¼ í©ëë¤ (v4.15 ë¶í°ë READ_ONCE() ë§¤í¬ë¡ì ìí´ ë¬´ì¡°ê±´ì ì¼ë¡<br>ê·¸ë ê² ë©ëë¤).  ì´ë ê² í¨ì¼ë¡ì¨ ìºìê° ë¤ì ìì²­ì ì²ë¦¬íê¸° ì ì ì¼ê´ì± íë¥¼<br>ì²ë¦¬íëë¡ ê°ì íê² ë©ëë¤.</p>
+<pre><code>CPU 1        CPU 2        COMMENT
+===============    ===============    =======================================
+                u == 0, v == 1 and p == &amp;u, q == &amp;u
+v = 2;
+smp_wmb();
+&lt;A:modify v=2&gt;    &lt;C:busy&gt;
+        &lt;C:queue v=2&gt;
+p = &amp;v;        q = p;
+        &lt;D:request p&gt;
+&lt;B:modify p=&amp;v&gt;    &lt;D:commit p=&amp;v&gt;
+        &lt;D:read p&gt;
+        smp_read_barrier_depends()
+        &lt;C:unbusy&gt;
+        &lt;C:commit v=2&gt;
+        x = *q;
+        &lt;C:read *q&gt;    ìºìì ìë°ì´í¸ ë v ë¥¼ ì½ì
+</code></pre>
+<p>ì´ë° ë¶ë¥ì ë¬¸ì ë DEC Alpha ê³ì´ íë¡ì¸ìë¤ìì ë°ê²¬ë  ì ìëë°, ì´ë¤ì<br>ë°ì´í° ë²ì¤ë¥¼ ì¢ ë ì ì¬ì©í´ ì±ë¥ì ê°ì í  ì ìë, ë¶í ë ìºìë¥¼ ê°ì§ê³  ìê¸°<br>ëë¬¸ìëë¤.  ëë¶ë¶ì CPU ë íëì ì½ê¸° ì¤í¼ë ì´ìì ë©ëª¨ë¦¬ ì¡ì¸ì¤ê° ë¤ë¥¸ ì½ê¸°<br>ì¤í¼ë ì´ìì ìì¡´ì ì´ë¼ë©´ ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë¥¼ ë´í¬ìíµëë¤ë§, ëª¨ëê° ê·¸ë°ê±´<br>ìëê¸° ëë¬¸ì ì´ì ì ìì¡´í´ì  ìë©ëë¤.</p>
+<p>ë¤ë¥¸ CPU ë¤ë ë¶í ë ìºìë¥¼ ê°ì§ê³  ìì ì ìì§ë§, ê·¸ë° CPU ë¤ì íë²í ë©ëª¨ë¦¬<br>ì¡ì¸ì¤ë¥¼ ìí´ìë ì´ ë¶í ë ìºìë¤ ì¬ì´ì ì¡°ì ì í´ì¼ë§ í©ëë¤.  Alpha ë ê°ì¥<br>ì½í ë©ëª¨ë¦¬ ìì ìë§¨í± (semantic) ì ì íí¨ì¼ë¡ì¨ ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° ëªìì ì¼ë¡<br>ì¬ì©ëì§ ììì ëìë ê·¸ë° ì¡°ì ì´ íìíì§ ìê² íì¼ë©°, ì´ë Alpha ê° ë¹ìì<br>ë ëì CPU í´ë½ ìëë¥¼ ê°ì§ ì ìê² íìµëë¤.  íì§ë§, (ë¤ì ë§íê±´ë, v4.15<br>ì´íë¶í°ë) Alpha ìí¤íì³ ì ì© ì½ëì READ_ONCE() ë§¤í¬ë¡ ë´ë¶ììë¥¼ ì ì¸íê³ ë<br>smp_read_barrier_depends() ê° ì¬ì©ëì§ ììì¼ í¨ì ììëìê¸° ë°ëëë¤.</p>
+<h2 id="iºioe-i¼e´i±-VS-DMA"><a href="#iºioe-i¼e´i±-VS-DMA" class="headerlink" title="ìºì ì¼ê´ì± VS DMA"></a>ìºì ì¼ê´ì± VS DMA</h2><p>ëª¨ë  ìì¤íì´ DMA ë¥¼ íë ëë°ì´ì¤ì ëí´ìê¹ì§ ìºì ì¼ê´ì±ì ì ì§íì§ë<br>ììµëë¤.  ê·¸ë° ê²½ì°, DMA ë¥¼ ìëíë ëë°ì´ì¤ë RAM ì¼ë¡ë¶í° ìëª»ë ë°ì´í°ë¥¼<br>ì½ì ì ìëë°, ëí° ìºì ë¼ì¸ì´ CPU ì ìºìì ë¨¸ë¬´ë¥´ê³  ìê³ , ë°ë ê°ì´ ìì§<br>RAM ì ì¨ì§ì§ ììì ì ìê¸° ëë¬¸ìëë¤.  ì´ ë¬¸ì ë¥¼ í´ê²°íê¸° ìí´ì , ì»¤ëì<br>ì ì í ë¶ë¶ìì ê° CPU ìºìì ë¬¸ì ëë ë¹í¸ë¤ì íë¬ì (flush) ìì¼ì¼ë§ í©ëë¤<br>(ê·¸ë¦¬ê³  ê·¸ê²ë¤ì ë¬´í¨í - invalidation - ìí¬ ìë ìê² ì£ ).</p>
+<p>ëí, ëë°ì´ì¤ì ìí´ RAM ì DMA ë¡ ì°ì¬ì§ ê°ì ëë°ì´ì¤ê° ì°ê¸°ë¥¼ ìë£í íì<br>CPU ì ìºììì RAM ì¼ë¡ ì°ì¬ì§ë ëí° ìºì ë¼ì¸ì ìí´ ë®ì´ì¨ì§ ìë ìê³ , CPU<br>ì ìºìì ì¡´ì¬íë ìºì ë¼ì¸ì´ í´ë¹ ìºììì ì­ì ëê³  ë¤ì ê°ì ì½ì´ë¤ì´ê¸°<br>ì ê¹ì§ë RAM ì´ ìë°ì´í¸ ëìë¤ë ì¬ì¤ ìì²´ê° ì¨ê²¨ì ¸ ë²ë¦´ ìë ììµëë¤.  ì´<br>ë¬¸ì ë¥¼ í´ê²°íê¸° ìí´ì , ì»¤ëì ì ì í ë¶ë¶ìì ê° CPU ì ìºì ìì ë¬¸ì ê° ëë<br>ë¹í¸ë¤ì ë¬´í¨í ìì¼ì¼ í©ëë¤.</p>
+<p>ìºì ê´ë¦¬ì ëí ë ë§ì ì ë³´ë¥¼ ìí´ì  Documentation/core-api/cachetlb.rst ë¥¼<br>ì°¸ê³ íì¸ì.</p>
+<h2 id="iºioe-i¼e´i±-VS-MMIO"><a href="#iºioe-i¼e´i±-VS-MMIO" class="headerlink" title="ìºì ì¼ê´ì± VS MMIO"></a>ìºì ì¼ê´ì± VS MMIO</h2><p>Memory mapped I/O ë ì¼ë°ì ì¼ë¡ CPU ì ë©ëª¨ë¦¬ ê³µê° ë´ì í ìëì°ì í¹ì  ë¶ë¶<br>ë´ì ë©ëª¨ë¦¬ ì§ì­ì ì´ë£¨ì´ì§ëë°, ì´ ìëì°ë ì¼ë°ì ì¸, RAM ì¼ë¡ í¥íë<br>ìëì°ìë ë¤ë¥¸ í¹ì±ì ê°ìµëë¤.</p>
+<p>ê·¸ë° í¹ì± ê°ì´ë° íëë, ì¼ë°ì ì¼ë¡ ê·¸ë° ì¡ì¸ì¤ë ìºìë¥¼ ìì í ì°ííê³ <br>ëë°ì´ì¤ ë²ì¤ë¡ ê³§ë°ë¡ í¥íë¤ë ê²ìëë¤.  ì´ ë§ì MMIO ì¡ì¸ì¤ë ë¨¼ì <br>ììëì´ì ìºììì ìë£ë ë©ëª¨ë¦¬ ì¡ì¸ì¤ë¥¼ ì¶ìí  ì ìë¤ë ë»ìëë¤.  ì´ë°<br>ê²½ì°ì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë§ì¼ë¡ë ì¶©ë¶ì¹ ìê³ , ë§ì½ ìºìë ë©ëª¨ë¦¬ ì°ê¸° ì¤í¼ë ì´ìê³¼<br>MMIO ì¡ì¸ì¤ê° ì´ë¤ ë°©ìì¼ë¡ë  ìì¡´ì ì´ë¼ë©´ í´ë¹ ìºìë ë ì¤í¼ë ì´ì ì¬ì´ì<br>ë¹ìì ¸(flush)ì¼ë§ í©ëë¤.</p>
+<p>======================<br>CPU ë¤ì´ ì ì§ë¥´ë ì¼ë¤<br>======================</p>
+<p>íë¡ê·¸ëë¨¸ë CPU ê° ë©ëª¨ë¦¬ ì¤í¼ë ì´ìë¤ì ì íí ìì²­íëë¡ ìíí´ ì¤ ê²ì´ë¼ê³ <br>ìê°íëë°, ìë¥¼ ë¤ì´ ë¤ìê³¼ ê°ì ì½ëë¥¼ CPU ìê² ëê¸´ë¤ë©´:</p>
+<pre><code>a = READ_ONCE(*A);
+WRITE_ONCE(*B, b);
+c = READ_ONCE(*C);
+d = READ_ONCE(*D);
+WRITE_ONCE(*E, e);
+</code></pre>
+<p>CPU ë ë¤ì ì¸ì¤í¸ë­ìì ì²ë¦¬íê¸° ì ì íì¬ì ì¸ì¤í¸ë­ìì ìí ë©ëª¨ë¦¬<br>ì¤í¼ë ì´ìì ìë£í  ê²ì´ë¼ ìê°íê³ , ë°ë¼ì ìì¤í ì¸ë¶ìì ê´ì°°íê¸°ìë ì í´ì§<br>ììëë¡ ì¤í¼ë ì´ìì´ ìíë  ê²ì¼ë¡ ììí©ëë¤:</p>
+<pre><code>LOAD *A, STORE *B, LOAD *C, LOAD *D, STORE *E.
+</code></pre>
+<p>ë¹ì°íì§ë§, ì¤ì ë¡ë í¨ì¬ ìë§ìëë¤.  ë§ì CPU ì ì»´íì¼ë¬ìì ìì ê°ì ì<br>ì±ë¦½íì§ ëª»íëë° ê·¸ ì´ì ë ë¤ìê³¼ ê°ìµëë¤:</p>
+<p> (*) ë¡ë ì¤í¼ë ì´ìë¤ì ì¤íì ê³ì í´ëê°ê¸° ìí´ ê³§ë°ë¡ ìë£ë  íìê° ìë<br>     ê²½ì°ê° ë§ì ë°ë©´, ì¤í ì´ ì¤í¼ë ì´ìë¤ì ì¢ì¢ ë³ë¤ë¥¸ ë¬¸ì  ìì´ ì ìë  ì<br>     ììµëë¤;</p>
+<p> (*) ë¡ë ì¤í¼ë ì´ìë¤ì ìì¸¡ì ì¼ë¡ ìíë  ì ìì¼ë©°, íììë ë¡ëìë¤ê³ <br>     ì¦ëªë ìì¸¡ì  ë¡ëì ê²°ê³¼ë ë²ë ¤ì§ëë¤;</p>
+<p> (*) ë¡ë ì¤í¼ë ì´ìë¤ì ìì¸¡ì ì¼ë¡ ìíë  ì ìì¼ë¯ë¡, ììë ì´ë²¤í¸ì<br>     ìíì¤ì ë¤ë¥¸ ìê°ì ë¡ëê° ì´ë¤ì§ ì ììµëë¤;</p>
+<p> (*) ë©ëª¨ë¦¬ ì¡ì¸ì¤ ììë CPU ë²ì¤ì ìºìë¥¼ ì¢ ë ì ì¬ì©í  ì ìëë¡ ì¬ë°°ì¹<br>     ë  ì ììµëë¤;</p>
+<p> (*) ë¡ëì ì¤í ì´ë ì¸ì í ìì¹ìì ì¡ì¸ì¤ë¤ì ì¼ê´ì ì¼ë¡ ì²ë¦¬í  ì ìë<br>     ë©ëª¨ë¦¬ë I/O íëì¨ì´ (ë©ëª¨ë¦¬ì PCI ëë°ì´ì¤ ë ë¤ ì´ê² ê°ë¥í  ì<br>     ììµëë¤) ì ëí´ ìì²­ëë ê²½ì°, ê°ë³ ì¤í¼ë ì´ìì ìí í¸ëì­ì ì¤ì <br>     ë¹ì©ì ìë¼ê¸° ìí´ ì¡°í©ëì´ ì¤íë  ì ììµëë¤; ê·¸ë¦¬ê³ </p>
+<p> (*) í´ë¹ CPU ì ë°ì´í° ìºìê° ììì ìí¥ì ë¼ì¹  ìë ìê³ , ìºì ì¼ê´ì±<br>     ë©ì»¤ëì¦ì´ - ì¤í ì´ê° ì¤ì ë¡ ìºìì ëë¬íë¤ë©´ - ì´ ë¬¸ì ë¥¼ ìíìí¬ ìë<br>     ìì§ë§ ì´ ì¼ê´ì± ê´ë¦¬ê° ë¤ë¥¸ CPU ë¤ìë ê°ì ììë¡ ì ë¬ëë¤ë ë³´ì¥ì<br>     ììµëë¤.</p>
+<p>ë°ë¼ì, ìì ì½ëì ëí´ ë¤ë¥¸ CPU ê° ë³´ë ê²°ê³¼ë ë¤ìê³¼ ê°ì ì ììµëë¤:</p>
+<pre><code>LOAD *A, ..., LOAD &#123;*C,*D&#125;, STORE *E, STORE *B
+
+(&quot;LOAD &#123;*C,*D&#125;&quot; ë ì¡°í©ë ë¡ëìëë¤)
+</code></pre>
+<p>íì§ë§, CPU ë ì¤ì¤ë¡ë ì¼ê´ì ì¼ ê²ì ë³´ì¥í©ëë¤: CPU _ìì _ ì ì¡ì¸ì¤ë¤ì<br>ìì ìê²ë ë©ëª¨ë¦¬ ë°°ë¦¬ì´ê° ìììë ë¶êµ¬íê³  ì íí ìì ì¸ìì§ ê²ì¼ë¡ ë³´ì¬ì§<br>ê²ìëë¤.  ìë¥¼ ë¤ì´ ë¤ìì ì½ëê° ì£¼ì´ì¡ë¤ë©´:</p>
+<pre><code>U = READ_ONCE(*A);
+WRITE_ONCE(*A, V);
+WRITE_ONCE(*A, W);
+X = READ_ONCE(*A);
+WRITE_ONCE(*A, Y);
+Z = READ_ONCE(*A);
+</code></pre>
+<p>ê·¸ë¦¬ê³  ì¸ë¶ì ìí¥ì ìí ê°ì­ì´ ìë¤ê³  ê°ì íë©´, ìµì¢ ê²°ê³¼ë ë¤ìê³¼ ê°ì´<br>ëíë  ê²ì´ë¼ê³  ììë  ì ììµëë¤:</p>
+<pre><code>U == *A ì ìµì´ ê°
+X == W
+Z == Y
+*A == Y
+</code></pre>
+<p>ìì ì½ëë CPU ê° ë¤ìì ë©ëª¨ë¦¬ ì¡ì¸ì¤ ìíì¤ë¥¼ ë§ë¤ëë¡ í ê²ëë¤:</p>
+<pre><code>U=LOAD *A, STORE *A=V, STORE *A=W, X=LOAD *A, STORE *A=Y, Z=LOAD *A
+</code></pre>
+<p>íì§ë§, ë³ë¤ë¥¸ ê°ìì´ ìê³  íë¡ê·¸ë¨ì ìì¼ì ì´ ì¸ìì´ ì¬ì í ì¼ê´ì ì´ë¼ê³ <br>ë³´ì¸ë¤ë ë³´ì¥ë§ ì§ì¼ì§ë¤ë©´ ì´ ìíì¤ë ì´ë¤ ì¡°í©ì¼ë¡ë  ì¬êµ¬ì±ë  ì ìì¼ë©°, ê°<br>ì¡ì¸ì¤ë¤ì í©ì³ì§ê±°ë ë²ë ¤ì§ ì ììµëë¤.  ì¼ë¶ ìí¤íì³ìì CPU ë ê°ì ìì¹ì<br>ëí ì°ìì ì¸ ë¡ë ì¤í¼ë ì´ìë¤ì ì¬ë°°ì¹ í  ì ìê¸° ëë¬¸ì ìì ìììì<br>READ_ONCE() ì WRITE_ONCE() ë ë°ëì ì¡´ì¬í´ì¼ í¨ì ììëì¸ì.  ê·¸ë° ì¢ë¥ì<br>ìí¤íì³ìì READ_ONCE() ì WRITE_ONCE() ë ì´ ë¬¸ì ë¥¼ ë§ê¸° ìí´ íìí ì¼ì<br>ë­ê° ëë ì§ íê² ëëë°, ìë¥¼ ë¤ì´ Itanium ììë READ_ONCE() ì WRITE_ONCE()<br>ê° ì¬ì©íë volatile ìºì¤íì GCC ê° ê·¸ë° ì¬ë°°ì¹ë¥¼ ë°©ì§íë í¹ì ì¸ì¤í¸ë­ìì¸<br>ld.acq ì stl.rel ì¸ì¤í¸ë­ìì ê°ê° ë§ë¤ì´ ë´ëë¡ í©ëë¤.</p>
+<p>ì»´íì¼ë¬ ì­ì ì´ ìíì¤ì ì¡ì¸ì¤ë¤ì CPU ê° ë³´ê¸°ë ì ì í©ì¹ê±°ë ë²ë¦¬ê±°ë ë¤ë¡<br>ë¯¸ë¤ë²ë¦´ ì ììµëë¤.</p>
+<p>ìë¥¼ ë¤ì´:</p>
+<pre><code>*A = V;
+*A = W;
+</code></pre>
+<p>ë ë¤ìê³¼ ê°ì´ ë³íë  ì ììµëë¤:</p>
+<pre><code>*A = W;
+</code></pre>
+<p>ë°ë¼ì, ì°ê¸° ë°°ë¦¬ì´ë WRITE_ONCE() ê° ìë¤ë©´ *A ë¡ì V ê°ì ì ì¥ì í¨ê³¼ë<br>ì¬ë¼ì§ë¤ê³  ê°ì ë  ì ììµëë¤.  ë¹ì·íê²:</p>
+<pre><code>*A = Y;
+Z = *A;
+</code></pre>
+<p>ë, ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë READ_ONCE() ì WRITE_ONCE() ìì´ë ë¤ìê³¼ ê°ì´ ë³íë  ì<br>ììµëë¤:</p>
+<pre><code>*A = Y;
+Z = Y;
+</code></pre>
+<p>ê·¸ë¦¬ê³  ì´ LOAD ì¤í¼ë ì´ìì CPU ë°ê¹¥ìë ìì ë³´ì´ì§ ììµëë¤.</p>
+<h2 id="e·¸e¦¬e³-ALPHA-e°-ie¤"><a href="#e·¸e¦¬e³-ALPHA-e°-ie¤" class="headerlink" title="ê·¸ë¦¬ê³ , ALPHA ê° ìë¤"></a>ê·¸ë¦¬ê³ , ALPHA ê° ìë¤</h2><p>DEC Alpha CPU ë ê°ì¥ ìíë ë©ëª¨ë¦¬ ììì CPU ì¤ íëìëë¤.  ë¿ë§ ìëë¼,<br>Alpha CPU ì ì¼ë¶ ë²ì ì ë¶í ë ë°ì´í° ìºìë¥¼ ê°ì§ê³  ìì´ì, ìë¯¸ì ì¼ë¡<br>ê´ê³ëì´ ìë ëê°ì ìºì ë¼ì¸ì´ ìë¡ ë¤ë¥¸ ìê°ì ìë°ì´í¸ ëëê² ê°ë¥í©ëë¤.<br>ì´ê² ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ê° ì ë§ íìí´ì§ë ë¶ë¶ì¸ë°, ë°ì´í° ìì¡´ì± ë°°ë¦¬ì´ë<br>ë©ëª¨ë¦¬ ì¼ê´ì± ìì¤íê³¼ í¨ê» ëê°ì ìºìë¥¼ ëê¸°í ìì¼ì, í¬ì¸í° ë³ê²½ê³¼ ìë¡ì´<br>ë°ì´í°ì ë°ê²¬ì ì¬ë°ë¥¸ ììë¡ ì¼ì´ëê² íê¸° ëë¬¸ìëë¤.</p>
+<p>ë¦¬ëì¤ ì»¤ëì ë©ëª¨ë¦¬ ë°°ë¦¬ì´ ëª¨ë¸ì Alpha ì ê¸°ì´í´ì ì ìëììµëë¤ë§, v4.15<br>ë¶í°ë ë¦¬ëì¤ ì»¤ëì´ READ_ONCE() ë´ì smp_read_barrier_depends() ë¥¼ ì¶ê°í´ì<br>Alpha ì ë©ëª¨ë¦¬ ëª¨ë¸ë¡ì ìí¥ë ¥ì´ í¬ê² ì¤ì´ë¤ê¸´ íìµëë¤.</p>
+<p>ìì “ìºì ì¼ê´ì±” ìë¸ì¹ìì ì°¸ê³ íì¸ì.</p>
+<h2 id="e°i-e¨¸i-e²OEi¤i¸"><a href="#e°i-e¨¸i-e²OEi¤i¸" class="headerlink" title="ê°ì ë¨¸ì  ê²ì¤í¸"></a>ê°ì ë¨¸ì  ê²ì¤í¸</h2><p>ê°ì ë¨¸ì ìì ëìíë ê²ì¤í¸ë¤ì ê²ì¤í¸ ìì²´ë SMP ì§ì ìì´ ì»´íì¼ ëìë¤<br>í´ë SMP ìí¥ì ë°ì ì ììµëë¤.  ì´ê±´ UP ì»¤ëì ì¬ì©íë©´ì SMP í¸ì¤í¸ì<br>ê²°ë¶ëì´ ë°ìíë ë¶ìì©ìëë¤.  ì´ ê²½ì°ìë mandatory ë°°ë¦¬ì´ë¥¼ ì¬ì©í´ì ë¬¸ì ë¥¼<br>í´ê²°í  ì ìê² ì§ë§ ê·¸ë° í´ê²°ì ëë¶ë¶ì ê²½ì° ìµì ì í´ê²°ì±ì´ ìëëë¤.</p>
+<p>ì´ ë¬¸ì ë¥¼ ìë²½íê² í´ê²°íê¸° ìí´, ë¡ì° ë ë²¨ì virt_mb() ë±ì ë§¤í¬ë¡ë¥¼ ì¬ì©í  ì<br>ììµëë¤. ì´ê²ë¤ì SMP ê° íì±í ëì´ ìë¤ë©´ smp_mb() ë±ê³¼ ëì¼í í¨ê³¼ë¥¼<br>ê°ìµëë¤ë§, SMP ì SMP ìë ìì¤í ëª¨ëì ëí´ ëì¼í ì½ëë¥¼ ë§ë¤ì´ëëë¤.<br>ìë¥¼ ë¤ì´, ê°ì ë¨¸ì  ê²ì¤í¸ë¤ì (SMP ì¼ ì ìë) í¸ì¤í¸ì ëê¸°íë¥¼ í  ëìë<br>smp_mb() ê° ìëë¼ virt_mb() ë¥¼ ì¬ì©í´ì¼ í©ëë¤.</p>
+<p>ì´ê²ë¤ì smp_mb() ë¥ì ê²ë¤ê³¼ ëª¨ë  ë¶ë¶ìì ëì¼íë©°, í¹í, MMIO ì ìí¥ì<br>ëí´ìë ê°ì¬íì§ ììµëë¤: MMIO ì ìí¥ì ì ì´íë ¤ë©´, mandatory ë°°ë¦¬ì´ë¥¼<br>ì¬ì©íìê¸° ë°ëëë¤.</p>
+<p>=======<br>ì¬ì© ì<br>=======</p>
+<h2 id="ioeii-e²i¼"><a href="#ioeii-e²i¼" class="headerlink" title="ìíì ë²í¼"></a>ìíì ë²í¼</h2><p>ë©ëª¨ë¦¬ ë°°ë¦¬ì´ë ìíì ë²í¼ë¥¼ ìì±ì(producer)ì ìë¹ì(consumer) ì¬ì´ì<br>ëê¸°íì ë½ì ì¬ì©íì§ ìê³  êµ¬ííëë°ì ì¬ì©ë  ì ììµëë¤.  ë ìì¸í ë´ì©ì<br>ìí´ì  ë¤ìì ì°¸ê³ íì¸ì:</p>
+<pre><code>Documentation/core-api/circular-buffers.rst
+</code></pre>
+<p>=========<br>ì°¸ê³  ë¬¸í<br>=========</p>
+<p>Alpha AXP Architecture Reference Manual, Second Edition (Sites &amp; Witek,<br>Digital Press)<br>    Chapter 5.2: Physical Address Space Characteristics<br>    Chapter 5.4: Caches and Write Buffers<br>    Chapter 5.5: Data Sharing<br>    Chapter 5.6: Read/Write Ordering</p>
+<p>AMD64 Architecture Programmer’s Manual Volume 2: System Programming<br>    Chapter 7.1: Memory-Access Ordering<br>    Chapter 7.4: Buffering and Combining Memory Writes</p>
+<p>ARM Architecture Reference Manual (ARMv8, for ARMv8-A architecture profile)<br>    Chapter B2: The AArch64 Application Level Memory Model</p>
+<p>IA-32 Intel Architecture Software Developer’s Manual, Volume 3:<br>System Programming Guide<br>    Chapter 7.1: Locked Atomic Operations<br>    Chapter 7.2: Memory Ordering<br>    Chapter 7.4: Serializing Instructions</p>
+<p>The SPARC Architecture Manual, Version 9<br>    Chapter 8: Memory Models<br>    Appendix D: Formal Specification of the Memory Models<br>    Appendix J: Programming with the Memory Models</p>
+<p>Storage in the PowerPC (Stone and Fitzgerald)</p>
+<p>UltraSPARC Programmer Reference Manual<br>    Chapter 5: Memory Accesses and Cacheability<br>    Chapter 15: Sparc-V9 Memory Models</p>
+<p>UltraSPARC III Cu User’s Manual<br>    Chapter 9: Memory Models</p>
+<p>UltraSPARC IIIi Processor User’s Manual<br>    Chapter 8: Memory Models</p>
+<p>UltraSPARC Architecture 2005<br>    Chapter 9: Memory<br>    Appendix D: Formal Specifications of the Memory Models</p>
+<p>UltraSPARC T1 Supplement to the UltraSPARC Architecture 2005<br>    Chapter 8: Memory Models<br>    Appendix F: Caches and Cache Coherency</p>
+<p>Solaris Internals, Core Kernel Architecture, p63-68:<br>    Chapter 3.3: Hardware Considerations for Locks and<br>            Synchronization</p>
+<p>Unix Systems for Modern Architectures, Symmetric Multiprocessing and Caching<br>for Kernel Programmers:<br>    Chapter 13: Other Memory Models</p>
+<p>Intel Itanium Architecture Software Developer’s Manual: Volume 1:<br>    Section 2.6: Speculation<br>    Section 4.4: Memory Access</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/" title="Kernel-4.18.0-80.el8_memory-barriers" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_memory-barriers/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_zynqmp_dma/" title="Kernel-4.18.0-80.el8_zynqmp_dma"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_3270/" title="Kernel-4.18.0-80.el8_3270"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

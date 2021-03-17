@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_stallwarn | oosTech.com</title>
+  <meta name="description" content="Using RCU’s CPU Stall Detector This document first discusses what sorts of issues RCU’s CPU stalldetector can locate, and then discusses kernel parameters and Kconfigoptions that can be used to fine-t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_stallwarn">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="Using RCU’s CPU Stall Detector This document first discusses what sorts of issues RCU’s CPU stalldetector can locate, and then discusses kernel parameters and Kconfigoptions that can be used to fine-t">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_stallwarn" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_stallwarn
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>Using RCU’s CPU Stall Detector</p>
+<p>This document first discusses what sorts of issues RCU’s CPU stall<br>detector can locate, and then discusses kernel parameters and Kconfig<br>options that can be used to fine-tune the detector’s operation.  Finally,<br>this document explains the stall detector’s “splat” format.</p>
+<p>What Causes RCU CPU Stall Warnings?</p>
+<p>So your kernel printed an RCU CPU stall warning.  The next question is<br>“What caused it?”  The following problems can result in RCU CPU stall<br>warnings:</p>
+<p>o    A CPU looping in an RCU read-side critical section.</p>
+<p>o    A CPU looping with interrupts disabled.</p>
+<p>o    A CPU looping with preemption disabled.</p>
+<p>o    A CPU looping with bottom halves disabled.</p>
+<p>o    For !CONFIG_PREEMPT kernels, a CPU looping anywhere in the kernel<br>    without invoking schedule().  If the looping in the kernel is<br>    really expected and desirable behavior, you might need to add<br>    some calls to cond_resched().</p>
+<p>o    Booting Linux using a console connection that is too slow to<br>    keep up with the boot-time console-message rate.  For example,<br>    a 115Kbaud serial console can be -way- too slow to keep up<br>    with boot-time message rates, and will frequently result in<br>    RCU CPU stall warning messages.  Especially if you have added<br>    debug printk()s.</p>
+<p>o    Anything that prevents RCU’s grace-period kthreads from running.<br>    This can result in the “All QSes seen” console-log message.<br>    This message will include information on when the kthread last<br>    ran and how often it should be expected to run.  It can also<br>    result in the “rcu_.*kthread starved for” console-log message,<br>    which will include additional debugging information.</p>
+<p>o    A CPU-bound real-time task in a CONFIG_PREEMPT kernel, which might<br>    happen to preempt a low-priority task in the middle of an RCU<br>    read-side critical section.   This is especially damaging if<br>    that low-priority task is not permitted to run on any other CPU,<br>    in which case the next RCU grace period can never complete, which<br>    will eventually cause the system to run out of memory and hang.<br>    While the system is in the process of running itself out of<br>    memory, you might see stall-warning messages.</p>
+<p>o    A CPU-bound real-time task in a CONFIG_PREEMPT_RT kernel that<br>    is running at a higher priority than the RCU softirq threads.<br>    This will prevent RCU callbacks from ever being invoked,<br>    and in a CONFIG_PREEMPT_RCU kernel will further prevent<br>    RCU grace periods from ever completing.  Either way, the<br>    system will eventually run out of memory and hang.  In the<br>    CONFIG_PREEMPT_RCU case, you might see stall-warning<br>    messages.</p>
+<p>o    A periodic interrupt whose handler takes longer than the time<br>    interval between successive pairs of interrupts.  This can<br>    prevent RCU’s kthreads and softirq handlers from running.<br>    Note that certain high-overhead debugging options, for example<br>    the function_graph tracer, can result in interrupt handler taking<br>    considerably longer than normal, which can in turn result in<br>    RCU CPU stall warnings.</p>
+<p>o    Testing a workload on a fast system, tuning the stall-warning<br>    timeout down to just barely avoid RCU CPU stall warnings, and then<br>    running the same workload with the same stall-warning timeout on a<br>    slow system.  Note that thermal throttling and on-demand governors<br>    can cause a single system to be sometimes fast and sometimes slow!</p>
+<p>o    A hardware or software issue shuts off the scheduler-clock<br>    interrupt on a CPU that is not in dyntick-idle mode.  This<br>    problem really has happened, and seems to be most likely to<br>    result in RCU CPU stall warnings for CONFIG_NO_HZ_COMMON=n kernels.</p>
+<p>o    A bug in the RCU implementation.</p>
+<p>o    A hardware failure.  This is quite unlikely, but has occurred<br>    at least once in real life.  A CPU failed in a running system,<br>    becoming unresponsive, but not causing an immediate crash.<br>    This resulted in a series of RCU CPU stall warnings, eventually<br>    leading the realization that the CPU had failed.</p>
+<p>The RCU, RCU-sched, and RCU-tasks implementations have CPU stall warning.<br>Note that SRCU does -not- have CPU stall warnings.  Please note that<br>RCU only detects CPU stalls when there is a grace period in progress.<br>No grace period, no CPU stall warnings.</p>
+<p>To diagnose the cause of the stall, inspect the stack traces.<br>The offending function will usually be near the top of the stack.<br>If you have a series of stall warnings from a single extended stall,<br>comparing the stack traces can often help determine where the stall<br>is occurring, which will usually be in the function nearest the top of<br>that portion of the stack which remains the same from trace to trace.<br>If you can reliably trigger the stall, ftrace can be quite helpful.</p>
+<p>RCU bugs can often be debugged with the help of CONFIG_RCU_TRACE<br>and with RCU’s event tracing.  For information on RCU’s event tracing,<br>see include/trace/events/rcu.h.</p>
+<p>Fine-Tuning the RCU CPU Stall Detector</p>
+<p>The rcuupdate.rcu_cpu_stall_suppress module parameter disables RCU’s<br>CPU stall detector, which detects conditions that unduly delay RCU grace<br>periods.  This module parameter enables CPU stall detection by default,<br>but may be overridden via boot-time parameter or at runtime via sysfs.<br>The stall detector’s idea of what constitutes “unduly delayed” is<br>controlled by a set of kernel configuration variables and cpp macros:</p>
+<p>CONFIG_RCU_CPU_STALL_TIMEOUT</p>
+<pre><code>This kernel configuration parameter defines the period of time
+that RCU will wait from the beginning of a grace period until it
+issues an RCU CPU stall warning.  This time period is normally
+21 seconds.
+
+This configuration parameter may be changed at runtime via the
+/sys/module/rcupdate/parameters/rcu_cpu_stall_timeout, however
+this parameter is checked only at the beginning of a cycle.
+So if you are 10 seconds into a 40-second stall, setting this
+sysfs parameter to (say) five will shorten the timeout for the
+-next- stall, or the following warning for the current stall
+(assuming the stall lasts long enough).  It will not affect the
+timing of the next warning for the current stall.
+
+Stall-warning messages may be enabled and disabled completely via
+/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress.
+</code></pre>
+<p>RCU_STALL_DELAY_DELTA</p>
+<pre><code>Although the lockdep facility is extremely useful, it does add
+some overhead.  Therefore, under CONFIG_PROVE_RCU, the
+RCU_STALL_DELAY_DELTA macro allows five extra seconds before
+giving an RCU CPU stall warning message.  (This is a cpp
+macro, not a kernel configuration parameter.)
+</code></pre>
+<p>RCU_STALL_RAT_DELAY</p>
+<pre><code>The CPU stall detector tries to make the offending CPU print its
+own warnings, as this often gives better-quality stack traces.
+However, if the offending CPU does not detect its own stall in
+the number of jiffies specified by RCU_STALL_RAT_DELAY, then
+some other CPU will complain.  This delay is normally set to
+two jiffies.  (This is a cpp macro, not a kernel configuration
+parameter.)
+</code></pre>
+<p>rcupdate.rcu_task_stall_timeout</p>
+<pre><code>This boot/sysfs parameter controls the RCU-tasks stall warning
+interval.  A value of zero or less suppresses RCU-tasks stall
+warnings.  A positive value sets the stall-warning interval
+in jiffies.  An RCU-tasks stall warning starts with the line:
+
+    INFO: rcu_tasks detected stalls on tasks:
+
+And continues with the output of sched_show_task() for each
+task stalling the current RCU-tasks grace period.
+</code></pre>
+<p>Interpreting RCU’s CPU Stall-Detector “Splats”</p>
+<p>For non-RCU-tasks flavors of RCU, when a CPU detects that it is stalling,<br>it will print a message similar to the following:</p>
+<pre><code>INFO: rcu_sched detected stalls on CPUs/tasks:
+2-...: (3 GPs behind) idle=06c/0/0 softirq=1453/1455 fqs=0
+16-...: (0 ticks this GP) idle=81c/0/0 softirq=764/764 fqs=0
+(detected by 32, t=2603 jiffies, g=7075, q=625)
+</code></pre>
+<p>This message indicates that CPU 32 detected that CPUs 2 and 16 were both<br>causing stalls, and that the stall was affecting RCU-sched.  This message<br>will normally be followed by stack dumps for each CPU.  Please note that<br>PREEMPT_RCU builds can be stalled by tasks as well as by CPUs, and that<br>the tasks will be indicated by PID, for example, “P3421”.  It is even<br>possible for a rcu_preempt_state stall to be caused by both CPUs -and-<br>tasks, in which case the offending CPUs and tasks will all be called<br>out in the list.</p>
+<p>CPU 2’s “(3 GPs behind)” indicates that this CPU has not interacted with<br>the RCU core for the past three grace periods.  In contrast, CPU 16’s “(0<br>ticks this GP)” indicates that this CPU has not taken any scheduling-clock<br>interrupts during the current stalled grace period.</p>
+<p>The “idle=” portion of the message prints the dyntick-idle state.<br>The hex number before the first “/“ is the low-order 12 bits of the<br>dynticks counter, which will have an even-numbered value if the CPU<br>is in dyntick-idle mode and an odd-numbered value otherwise.  The hex<br>number between the two “/“s is the value of the nesting, which will be<br>a small non-negative number if in the idle loop (as shown above) and a<br>very large positive number otherwise.</p>
+<p>The “softirq=” portion of the message tracks the number of RCU softirq<br>handlers that the stalled CPU has executed.  The number before the “/“<br>is the number that had executed since boot at the time that this CPU<br>last noted the beginning of a grace period, which might be the current<br>(stalled) grace period, or it might be some earlier grace period (for<br>example, if the CPU might have been in dyntick-idle mode for an extended<br>time period.  The number after the “/“ is the number that have executed<br>since boot until the current time.  If this latter number stays constant<br>across repeated stall-warning messages, it is possible that RCU’s softirq<br>handlers are no longer able to execute on this CPU.  This can happen if<br>the stalled CPU is spinning with interrupts are disabled, or, in -rt<br>kernels, if a high-priority process is starving RCU’s softirq handler.</p>
+<p>The “fps=” shows the number of force-quiescent-state idle/offline<br>detection passes that the grace-period kthread has made across this<br>CPU since the last time that this CPU noted the beginning of a grace<br>period.</p>
+<p>The “detected by” line indicates which CPU detected the stall (in this<br>case, CPU 32), how many jiffies have elapsed since the start of the grace<br>period (in this case 2603), the grace-period sequence number (7075), and<br>an estimate of the total number of RCU callbacks queued across all CPUs<br>(625 in this case).</p>
+<p>In kernels with CONFIG_RCU_FAST_NO_HZ, more information is printed<br>for each CPU:</p>
+<pre><code>0: (64628 ticks this GP) idle=dd5/3fffffffffffffff/0 softirq=82/543 last_accelerate: a345/d342 nonlazy_posted: 25 .D
+</code></pre>
+<p>The “last_accelerate:” prints the low-order 16 bits (in hex) of the<br>jiffies counter when this CPU last invoked rcu_try_advance_all_cbs()<br>from rcu_needs_cpu() or last invoked rcu_accelerate_cbs() from<br>rcu_prepare_for_idle().  The “nonlazy_posted:” prints the number<br>of non-lazy callbacks posted since the last call to rcu_needs_cpu().<br>Finally, an “L” indicates that there are currently no non-lazy callbacks<br>(“.” is printed otherwise, as shown above) and “D” indicates that<br>dyntick-idle processing is enabled (“.” is printed otherwise, for example,<br>if disabled via the “nohz=” kernel boot parameter).</p>
+<p>If the grace period ends just as the stall warning starts printing,<br>there will be a spurious stall-warning message, which will include<br>the following:</p>
+<pre><code>INFO: Stall ended before state dump start
+</code></pre>
+<p>This is rare, but does happen from time to time in real life.  It is also<br>possible for a zero-jiffy stall to be flagged in this case, depending<br>on how the stall warning and the grace-period initialization happen to<br>interact.  Please note that it is not possible to entirely eliminate this<br>sort of false positive without resorting to things like stop_machine(),<br>which is overkill for this sort of problem.</p>
+<p>If all CPUs and tasks have passed through quiescent states, but the<br>grace period has nevertheless failed to end, the stall-warning splat<br>will include something like the following:</p>
+<pre><code>All QSes seen, last rcu_preempt kthread activity 23807 (4297905177-4297881370), jiffies_till_next_fqs=3, root -&gt;qsmask 0x0
+</code></pre>
+<p>The “23807” indicates that it has been more than 23 thousand jiffies<br>since the grace-period kthread ran.  The “jiffies_till_next_fqs”<br>indicates how frequently that kthread should run, giving the number<br>of jiffies between force-quiescent-state scans, in this case three,<br>which is way less than 23807.  Finally, the root rcu_node structure’s<br>-&gt;qsmask field is printed, which will normally be zero.</p>
+<p>If the relevant grace-period kthread has been unable to run prior to<br>the stall warning, as was the case in the “All QSes seen” line above,<br>the following additional line is printed:</p>
+<pre><code>kthread starved for 23807 jiffies! g7075 f0x0 RCU_GP_WAIT_FQS(3) -&gt;state=0x1 -&gt;cpu=5
+</code></pre>
+<p>Starving the grace-period kthreads of CPU time can of course result<br>in RCU CPU stall warnings even when all CPUs and tasks have passed<br>through the required quiescent states.  The “g” number shows the current<br>grace-period sequence number, the “f” precedes the -&gt;gp_flags command<br>to the grace-period kthread, the “RCU_GP_WAIT_FQS” indicates that the<br>kthread is waiting for a short timeout, the “state” precedes value of the<br>task_struct -&gt;state field, and the “cpu” indicates that the grace-period<br>kthread last ran on CPU 5.</p>
+<p>Multiple Warnings From One Stall</p>
+<p>If a stall lasts long enough, multiple stall-warning messages will be<br>printed for it.  The second and subsequent messages are printed at<br>longer intervals, so that the time between (say) the first and second<br>message will be about three times the interval between the beginning<br>of the stall and the first message.</p>
+<p>Stall Warnings for Expedited Grace Periods</p>
+<p>If an expedited grace period detects a stall, it will place a message<br>like the following in dmesg:</p>
+<pre><code>INFO: rcu_sched detected expedited stalls on CPUs/tasks: &#123; 7-... &#125; 21119 jiffies s: 73 root: 0x2/.
+</code></pre>
+<p>This indicates that CPU 7 has failed to respond to a reschedule IPI.<br>The three periods (“.”) following the CPU number indicate that the CPU<br>is online (otherwise the first period would instead have been “O”),<br>that the CPU was online at the beginning of the expedited grace period<br>(otherwise the second period would have instead been “o”), and that<br>the CPU has been online at least once since boot (otherwise, the third<br>period would instead have been “N”).  The number before the “jiffies”<br>indicates that the expedited grace period has been going on for 21,119<br>jiffies.  The number following the “s:” indicates that the expedited<br>grace-period sequence counter is 73.  The fact that this last value is<br>odd indicates that an expedited grace period is in flight.  The number<br>following “root:” is a bitmask that indicates which children of the root<br>rcu_node structure correspond to CPUs and/or tasks that are blocking the<br>current expedited grace period.  If the tree had more than one level,<br>additional hex numbers would be printed for the states of the other<br>rcu_node structures in the tree.</p>
+<p>As with normal grace periods, PREEMPT_RCU builds can be stalled by<br>tasks as well as by CPUs, and that the tasks will be indicated by PID,<br>for example, “P3421”.</p>
+<p>It is entirely possible to see stall warnings from normal and from<br>expedited grace periods at about the same time during the same run.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/" title="Kernel-4.18.0-80.el8_stallwarn" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_stallwarn/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_stable_kernel_rules/" title="Kernel-4.18.0-80.el8_stable_kernel_rules"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_starry,kr122ea0sra/" title="Kernel-4.18.0-80.el8_starry,kr122ea0sra"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

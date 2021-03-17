@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Kernel-4.18.0-80.el8_driver-changes | oosTech.com</title>
+  <meta name="description" content="This file details changes in 2.6 which affect PCMCIA card driver authors:  pcmcia_loop_config() and autoconfiguration (as of 2.6.36) If struct pcmcia_device *p_dev-&gt;config_flags is set accordingly,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kernel-4.18.0-80.el8_driver-changes">
+<meta property="og:url" content="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/index.html">
+<meta property="og:site_name" content="oosTech">
+<meta property="og:description" content="This file details changes in 2.6 which affect PCMCIA card driver authors:  pcmcia_loop_config() and autoconfiguration (as of 2.6.36) If struct pcmcia_device *p_dev-&gt;config_flags is set accordingly,">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-18T16:00:00.000Z">
+<meta property="article:author" content="Sam Lee">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="oosTech" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="" target="_blank">
+          <img src="/images/avatar.png" width="400" height="400">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">oosTech by Sam Lee</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md"></h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="站内搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">站点首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档文档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">文档分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">常用链接</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">共享白板</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告牌</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p> 欢迎来到oosTech ，我是一个Linux 拥趸：D。 目前正在用的Linux 版本是 Red Hat Enterprise Linux release 8.3 </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">文档分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a><span class="category-list-count">1658</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a><span class="category-list-count">3937</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_mpc5200/" class="title">Kernel-3.10.0-957.el7_mpc5200</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_3270/" class="title">Kernel-3.10.0-957.el7_3270</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_4CCs/" class="title">Kernel-3.10.0-957.el7_4CCs</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_53c700/" class="title">Kernel-3.10.0-957.el7_53c700</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Kernel-3-10-0-957-el7-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_3.10.0-957.el7_内核文档</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/Kernel-3.10.0-957.el7_6pack/" class="title">Kernel-3.10.0-957.el7_6pack</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-12T16:00:00.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Kernel-4.18.0-80.el8_driver-changes" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kernel-4.18.0-80.el8_driver-changes
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/" class="article-date">
+	 published: <time datetime="2021-02-18T16:00:00.000Z" itemprop="datePublished">2021-02-19</time>
+	</a>
+</span>
+
+        
+	<a href="/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/" class="article-date">
+	   updated: <time datetime="2021-02-18T16:00:00.000Z" itemprop="dateUpdated">2021-02-19</time>
+	</a>
+
+
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Kernel-4-18-0-80-el8-%E5%86%85%E6%A0%B8%E6%96%87%E6%A1%A3/">Kernel_4.18.0-80.el8_内核文档</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill"></i>
+	    <!--<span id="busuanzi_container_page_pv" style="display:inline;">-->
+			<span id="busuanzi_value_page_pv" style="display:inline;"></span>
+		<!--</span>-->
+	</span>
+
+
+
+        <!--<span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/#comments" class="article-comment-link">评论</a></span> -->
+        
+	
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>This file details changes in 2.6 which affect PCMCIA card driver authors:</p>
+<ul>
+<li><p>pcmcia_loop_config() and autoconfiguration (as of 2.6.36)<br> If struct pcmcia_device *p_dev-&gt;config_flags is set accordingly,<br> pcmcia_loop_config() now sets up certain configuration values<br> automatically, though the driver may still override the settings<br> in the callback function. The following autoconfiguration options<br> are provided at the moment:<br>  CONF_AUTO_CHECK_VCC : check for matching Vcc<br>  CONF_AUTO_SET_VPP   : set Vpp<br>  CONF_AUTO_AUDIO     : auto-enable audio line, if required<br>  CONF_AUTO_SET_IO    : set ioport resources (-&gt;resource[0,1])<br>  CONF_AUTO_SET_IOMEM : set first iomem resource (-&gt;resource[2])</p>
+</li>
+<li><p>pcmcia_request_configuration -&gt; pcmcia_enable_device (as of 2.6.36)<br> pcmcia_request_configuration() got renamed to pcmcia_enable_device(),<br> as it mirrors pcmcia_disable_device(). Configuration settings are now<br> stored in struct pcmcia_device, e.g. in the fields config_flags,<br> config_index, config_base, vpp.</p>
+</li>
+<li><p>pcmcia_request_window changes (as of 2.6.36)<br> Instead of win_req_t, drivers are now requested to fill out<br> struct pcmcia_device *p_dev-&gt;resource[2,3,4,5] for up to four ioport<br> ranges. After a call to pcmcia_request_window(), the regions found there<br> are reserved and may be used immediately – until pcmcia_release_window()<br> is called.</p>
+</li>
+<li><p>pcmcia_request_io changes (as of 2.6.36)<br> Instead of io_req_t, drivers are now requested to fill out<br> struct pcmcia_device *p_dev-&gt;resource[0,1] for up to two ioport<br> ranges. After a call to pcmcia_request_io(), the ports found there<br> are reserved, after calling pcmcia_request_configuration(), they may<br> be used.</p>
+</li>
+<li><p>No dev_info_t, no cs_types.h (as of 2.6.36)<br> dev_info_t and a few other typedefs are removed. No longer use them<br> in PCMCIA device drivers. Also, do not include pcmcia/cs_types.h, as<br> this file is gone.</p>
+</li>
+<li><p>No dev_node_t (as of 2.6.35)<br> There is no more need to fill out a “dev_node_t” structure.</p>
+</li>
+<li><p>New IRQ request rules (as of 2.6.35)<br> Instead of the old pcmcia_request_irq() interface, drivers may now<br> choose between:</p>
+<ul>
+<li>calling request_irq/free_irq directly. Use the IRQ from *p_dev-&gt;irq.</li>
+<li>use pcmcia_request_irq(p_dev, handler_t); the PCMCIA core will<br>clean up automatically on calls to pcmcia_disable_device() or<br>device ejection.</li>
+<li>drivers still not capable of IRQF_SHARED (or not telling us so) may<br>use the deprecated pcmcia_request_exclusive_irq() for the time<br>being; they might receive a shared IRQ nonetheless.</li>
+</ul>
+</li>
+<li><p>no cs_error / CS_CHECK / CONFIG_PCMCIA_DEBUG (as of 2.6.33)<br> Instead of the cs_error() callback or the CS_CHECK() macro, please use<br> Linux-style checking of return values, and – if necessary – debug<br> messages using “dev_dbg()” or “pr_debug()”.</p>
+</li>
+<li><p>New CIS tuple access (as of 2.6.33)<br> Instead of pcmcia_get_{first,next}_tuple(), pcmcia_get_tuple_data() and<br> pcmcia_parse_tuple(), a driver shall use “pcmcia_get_tuple()” if it is<br> only interested in one (raw) tuple, or “pcmcia_loop_tuple()” if it is<br> interested in all tuples of one type. To decode the MAC from CISTPL_FUNCE,<br> a new helper “pcmcia_get_mac_from_cis()” was added.</p>
+</li>
+<li><p>New configuration loop helper (as of 2.6.28)<br> By calling pcmcia_loop_config(), a driver can iterate over all available<br> configuration options. During a driver’s probe() phase, one doesn’t need<br> to use pcmcia_get_{first,next}_tuple, pcmcia_get_tuple_data and<br> pcmcia_parse_tuple directly in most if not all cases.</p>
+</li>
+<li><p>New release helper (as of 2.6.17)<br> Instead of calling pcmcia_release_{configuration,io,irq,win}, all that’s<br> necessary now is calling pcmcia_disable_device. As there is no valid<br> reason left to call pcmcia_release_io and pcmcia_release_irq, the<br> exports for them were removed.</p>
+</li>
+<li><p>Unify detach and REMOVAL event code, as well as attach and INSERTION<br>code (as of 2.6.16)</p>
+<pre><code> void (*remove)          (struct pcmcia_device *dev);
+ int (*probe)            (struct pcmcia_device *dev);
+</code></pre>
+</li>
+<li><p>Move suspend, resume and reset out of event handler (as of 2.6.16)</p>
+<pre><code> int (*suspend)          (struct pcmcia_device *dev);
+ int (*resume)           (struct pcmcia_device *dev);
+</code></pre>
+<p>should be initialized in struct pcmcia_driver, and handle<br>(SUSPEND == RESET_PHYSICAL) and (RESUME == CARD_RESET) events</p>
+</li>
+<li><p>event handler initialization in struct pcmcia_driver (as of 2.6.13)<br> The event handler is notified of all events, and must be initialized<br> as the event() callback in the driver’s struct pcmcia_driver.</p>
+</li>
+<li><p>pcmcia/version.h should not be used (as of 2.6.13)<br> This file will be removed eventually.</p>
+</li>
+<li><p>in-kernel device&lt;-&gt;driver matching (as of 2.6.13)<br> PCMCIA devices and their correct drivers can now be matched in<br> kernelspace. See ‘devicetable.txt’ for details.</p>
+</li>
+<li><p>Device model integration (as of 2.6.11)<br> A struct pcmcia_device is registered with the device model core,<br> and can be used (e.g. for SET_NETDEV_DEV) by using<br> handle_to_dev(client_handle_t * handle).</p>
+</li>
+<li><p>Convert internal I/O port addresses to unsigned int (as of 2.6.11)<br> ioaddr_t should be replaced by unsigned int in PCMCIA card drivers.</p>
+</li>
+<li><p>irq_mask and irq_list parameters (as of 2.6.11)<br> The irq_mask and irq_list parameters should no longer be used in<br> PCMCIA card drivers. Instead, it is the job of the PCMCIA core to<br> determine which IRQ should be used. Therefore, link-&gt;irq.IRQInfo2<br> is ignored.</p>
+</li>
+<li><p>client-&gt;PendingEvents is gone (as of 2.6.11)<br> client-&gt;PendingEvents is no longer available.</p>
+</li>
+<li><p>client-&gt;Attributes are gone (as of 2.6.11)<br> client-&gt;Attributes is unused, therefore it is removed from all<br> PCMCIA card drivers</p>
+</li>
+<li><p>core functions no longer available (as of 2.6.11)<br> The following functions have been removed from the kernel source<br> because they are unused by all in-kernel drivers, and no external<br> driver was reported to rely on them:<br>  pcmcia_get_first_region()<br>  pcmcia_get_next_region()<br>  pcmcia_modify_window()<br>  pcmcia_set_event_mask()<br>  pcmcia_get_first_window()<br>  pcmcia_get_next_window()</p>
+</li>
+<li><p>device list iteration upon module removal (as of 2.6.10)<br> It is no longer necessary to iterate on the driver’s internal<br> client list and call the -&gt;detach() function upon module removal.</p>
+</li>
+<li><p>Resource management. (as of 2.6.8)<br> Although the PCMCIA subsystem will allocate resources for cards,<br> it no longer marks these resources busy. This means that driver<br> authors are now responsible for claiming your resources as per<br> other drivers in Linux. You should use request_region() to mark<br> your IO regions in-use, and request_mem_region() to mark your<br> memory regions in-use. The name argument should be a pointer to<br> your driver name. Eg, for pcnet_cs, name should point to the<br> string “pcnet_cs”.</p>
+</li>
+<li><p>CardServices is gone<br>CardServices() in 2.4 is just a big switch statement to call various<br>services.  In 2.6, all of those entry points are exported and called<br>directly (except for pcmcia_report_error(), just use cs_error() instead).</p>
+</li>
+<li><p>struct pcmcia_driver<br>You need to use struct pcmcia_driver and pcmcia_{un,}register_driver<br>instead of {un,}register_pccard_driver</p>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/" title="Kernel-4.18.0-80.el8_driver-changes" target="_blank" rel="external">http://www.oostech.com/2021/02/19/Kernel-4.18.0-80.el8_driver-changes/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">oosTech by Sam Lee</span><small class="ml-1x"></small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_dra7-atl/" title="Kernel-4.18.0-80.el8_dra7-atl"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/19/Kernel-4.18.0-80.el8_driver-model/" title="Kernel-4.18.0-80.el8_driver-model"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat"></div>
+    
+  </div>
+  </div>
+    <div class="container" align="left">
+    <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+      <img src="/images/wechatp.png" itemprop="contentUrl">
+      <span>欢迎关注公众号</span>
+    </div>
+    </div>
+</nav>
+
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>您能有收获就是我们最大的动力</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码捐赠</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">不管多少都是对分享的肯定</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码捐赠</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://google.com/" target="_blank" title="Google" data-toggle=tooltip data-placement=top><i class="icon icon-google"></i></a></li>
+        
+        <li><a href="https://twitter.com/" target="_blank" title="Twitter" data-toggle=tooltip data-placement=top><i class="icon icon-twitter"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+	<a target="_blank" rel="noopener" href="https://beian.miit.gov.cn" text-align: center >粤ICP备2021024811号</a>
+        </div>
+<!--    
+    <div>
+     <img src="/images/logo.png" width="140" height="140">
+    </div>
+-->
+    </div>
+
+
+        <!-- 不蒜子统计    //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js -->
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <!--<span id="busuanzi_container_site_pv" style="display:inline;">-->本站总访问量<span id="busuanzi_value_site_pv" style="display:inline;></span>次</span>
+        <span class="post-meta-divider">|</span>
+  
+</footer>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
